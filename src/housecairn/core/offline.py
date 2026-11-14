@@ -42,7 +42,7 @@ def cache_key(request: HttpRequest, home_id: object) -> str:
     """
     session_key = request.session.session_key or ""
     # The language too: a page kept in one language is dropped when the person reads the
-    # next one in another (docs/adr/0072).
+    # next one in another (docs/adr/0073).
     value = f"{request.user.pk}:{session_key}:{home_id}:{translation.get_language()}"
     return salted_hmac(_SALT, value, algorithm="sha256").hexdigest()[:32]
 

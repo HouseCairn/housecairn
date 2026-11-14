@@ -220,7 +220,7 @@ def service_worker(request: HttpRequest) -> HttpResponse:
         "precache": [static(name) for name in PRECACHE]
         + [reverse("offline"), *offline_pages.values()],
         "offline": reverse("offline"),
-        # The offline page in each language, for the person's (docs/adr/0072).
+        # The offline page in each language, for the person's (docs/adr/0073).
         "offlinePages": offline_pages,
         "start": reverse("index"),
         "signOut": reverse("account_logout"),

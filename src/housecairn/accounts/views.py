@@ -130,7 +130,7 @@ class ProfileView(LoginRequiredMixin, FormView[forms.ProfileForm]):
         by_provider = user.display_name_source == DisplayNameSource.OIDC
         context["linked"] = provider_names.has_provider(user)
         # The language is set in the display preferences; the profile says which one applies
-        # and leads there (docs/adr/0072).
+        # and leads there (docs/adr/0073).
         chosen = chosen_language(user.pk)
         context["language_name"] = dict(settings.LANGUAGES).get(chosen, "")
         context["by_provider"] = by_provider

@@ -62,7 +62,7 @@ the files of a home (5 GB) and their number (5000). The same quotas apply to eve
 language the instance offers. The person's choice always wins: the language cookie, then
 the browser's `Accept-Language`, matched as Django does (`fr-CA` gives `fr`). A person's own choice, saved in their
 display preferences, goes before the cookie and the browser (ADR 0045), on every page and in
-everything sent to the person ([ADR 0072](0072-one-language-per-person-everywhere.md)).
+everything sent to the person ([ADR 0073](0073-one-language-per-person-everywhere.md)).
 An invitation email sent without the language of the person who invites uses the default.
 
 **Time zone**: an IANA zone (the variable `TIME_ZONE` of ADR 0012, default `UTC`), checked

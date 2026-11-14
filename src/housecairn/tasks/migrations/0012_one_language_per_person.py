@@ -1,4 +1,4 @@
-"""One language per person (docs/adr/0072).
+"""One language per person (docs/adr/0073).
 
 The notification preferences had their own language, for the reminders, the notifications
 on a device and the calendar feeds, apart from the language of the pages. A person who had

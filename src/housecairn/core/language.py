@@ -1,4 +1,4 @@
-"""The language of a person, wherever they read HouseCairn (docs/adr/0072).
+"""The language of a person, wherever they read HouseCairn (docs/adr/0073).
 
 One rule for everything a person reads, online, offline and in what is sent to them:
 
