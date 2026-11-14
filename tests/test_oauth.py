@@ -1,12 +1,14 @@
 """OAuth 2 with PKCE for the mobile app: settings, consent, tokens, rotation, revocation
 (docs/adr/0078)."""
 
+from collections.abc import Iterator
 from datetime import timedelta
 from typing import Any
 
 import pytest
 from django.conf import settings
 from django.core import mail
+from django.core.cache import cache
 from django.core.management import call_command
 from django.db import connection as db
 from django.test import Client, override_settings
@@ -36,6 +38,15 @@ from tests.oauth_support import (
     pkce_pair,
     refresh,
 )
+
+
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits() -> Iterator[None]:
+    """The token endpoint counts as a sign-in (docs/adr/0042): each test starts from zero."""
+    cache.clear()
+    yield
+    cache.clear()
+
 
 pytestmark = pytest.mark.django_db
 

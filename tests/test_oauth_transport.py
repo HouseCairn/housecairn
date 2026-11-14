@@ -1,6 +1,9 @@
 """HTTPS, and plain HTTP only between local addresses (docs/adr/0078)."""
 
+from collections.abc import Iterator
+
 import pytest
+from django.core.cache import cache
 from django.test import Client, RequestFactory, override_settings
 
 from housecairn.accounts.models import User
@@ -8,6 +11,14 @@ from housecairn.apitokens import transport
 from housecairn.core.proxy import ForwardedHeadersMiddleware
 from housecairn.homes.models import Home
 from tests.oauth_support import code_of, consent, exchange
+
+
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits() -> Iterator[None]:
+    """The token endpoint counts as a sign-in (docs/adr/0042): each test starts from zero."""
+    cache.clear()
+    yield
+    cache.clear()
 
 
 def through_proxy(request: object) -> object:

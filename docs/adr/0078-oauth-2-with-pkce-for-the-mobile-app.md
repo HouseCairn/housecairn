@@ -202,6 +202,7 @@ later fails loudly instead of being read as a person.
    | `homes/api.py:213` leave, `:227` audit, `:248` export, `:269` export job | an API token: refused | not a session: refused |
    | `homes/api.py:380` restore | an API token: refused | not a session: refused |
    | `homes/api.py:411` delete, `:425` unlock | an API token: refused | not a session: refused |
+   | `homes/api.py` `_archiving` (archive, unarchive; added by M1, found by the grep of M2) | an API token: refused | not a session: refused |
    | `homes/scoping.py:36` `homes_for_request` | an API token: its homes; else every home of the account | a session: every home; an API token: its homes; a connection: its homes |
    | `homes/sso.py:48` `signed_in_providers` | an API token: its provider | an API token or a connection: its `signed_in_provider`; a session: the session's |
    | `instance/api.py:36` `InstanceAdminOnly` | an API token: refused | not a session: refused |

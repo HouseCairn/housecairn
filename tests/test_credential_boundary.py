@@ -14,6 +14,7 @@ from typing import Any
 
 import pytest
 import yaml
+from django.core.cache import cache
 from django.test import Client
 from django.urls import URLPattern, URLResolver, get_resolver, resolve
 from oauth2_provider.models import AccessToken
@@ -27,6 +28,15 @@ from housecairn.apitokens.models import ApiToken, Scope
 from housecairn.apitokens.permissions import CredentialFitsView
 from housecairn.homes.models import Home
 from tests.oauth_support import connect
+
+
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits() -> Iterator[None]:
+    """The token endpoint counts as a sign-in (docs/adr/0042): each test starts from zero."""
+    cache.clear()
+    yield
+    cache.clear()
+
 
 pytestmark = pytest.mark.django_db
 
@@ -280,6 +290,7 @@ def test_lock_three_alone_never_reads_a_connection_as_a_person(
         ("post", "/api/v1/homes/restore/", {}),
         ("post", f"{home}delete/", {}),
         ("post", f"{home}unlock/", {}),
+        ("post", f"{home}archive/", {}),
         ("post", f"{home}leave/", {}),
         ("get", f"{home}audit/", None),
         ("post", f"{home}export/", {}),
@@ -300,5 +311,6 @@ def test_lock_three_alone_never_reads_a_connection_as_a_person(
     assert not ApiToken.objects.exists()
     alice_home.refresh_from_db()
     assert alice_home.deleted_at is None
+    assert alice_home.archived_at is None
     member.refresh_from_db()
     assert member.role == Role.MEMBER

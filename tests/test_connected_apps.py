@@ -1,9 +1,11 @@
 """Connected apps on the access page: list, edit, revoke, and the nightly clean-up of the
 toolkit's tokens (docs/adr/0078)."""
 
+from collections.abc import Iterator
 from datetime import timedelta
 
 import pytest
+from django.core.cache import cache
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
@@ -18,6 +20,15 @@ from housecairn.core.navigation import with_next
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from tests.oauth_support import connect, consent, refresh
+
+
+@pytest.fixture(autouse=True)
+def _fresh_rate_limits() -> Iterator[None]:
+    """The token endpoint counts as a sign-in (docs/adr/0042): each test starts from zero."""
+    cache.clear()
+    yield
+    cache.clear()
+
 
 pytestmark = pytest.mark.django_db
 
