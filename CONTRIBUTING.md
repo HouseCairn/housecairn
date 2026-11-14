@@ -161,6 +161,7 @@ maintainer merges it ([ADR 0014](docs/adr/0014-continuous-integration-and-supply
 | `Container image (multi-arch build)` | The image builds for `linux/amd64` and `linux/arm64`. |
 | `Documentation` | The documentation site builds without warning in English and French, loads no external resource, has no broken link (external links included) and documents every API operation ([ADR 0016](docs/adr/0016-documentation-site.md)). |
 | `Documentation updated` | A pull request that changes a screen, a setting or the API also changes `docs/` (see below). |
+| `Impact on other repositories` | The description says whether the Home Assistant app, the Home Assistant integration or the mobile app must change, with a link to its issue or pull request (see below). |
 
 Workflows of a pull request from outside the project only start once the
 maintainer approves them.
@@ -187,6 +188,18 @@ the queue; if it is removed from the queue, the timeline says why.
   [Documentation](#documentation)).
 - **Fill in the pull request template**, including what you actually ran to
   verify the change.
+- **Say the impact on the other repositories.** The
+  [Home Assistant app](https://github.com/HouseCairn/home-assistant-addons) is built on the
+  image of this repository, the
+  [Home Assistant integration](https://github.com/HouseCairn/home-assistant-housecairn) calls
+  its API, and the [mobile app](https://github.com/HouseCairn/housecairn-mobile) carries rules
+  of this one. In the template's **Impact on other repositories** section, tick **None**, or
+  **Home Assistant app must change** (an option, a variable, a behaviour behind Ingress),
+  **Home Assistant integration must change** (the API) or **Mobile app must change** (a
+  business rule it carries: recurrence, seasons, task templates, design tokens, data schema),
+  and for a change link the issue or pull request you opened in that repository. The
+  `Impact on other repositories` check fails without the section, without a ticked box, or
+  without the link ([ADR 0075](docs/adr/0075-impact-on-other-repositories.md)).
 - All user-facing text is in English in the code and goes through translation
   functions; no hard-coded strings.
 - **Screens follow the [design guide](docs/developer/design-guide.md).** Before

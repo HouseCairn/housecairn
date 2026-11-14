@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Forms work again behind a proxy that replaces the referrer policy.** Through the Home Assistant app, every form, the first-account screen included, got \"Session expired\": Home Assistant gives its pages `Referrer-Policy: no-referrer`, and the browser then posts forms with `Origin: null`. Each page now states HouseCairn's policy itself ([Reverse proxy](../../../administration/reverse-proxy.md))."
+msgstr "**Les formulaires fonctionnent de nouveau derrière un proxy qui remplace la politique de référent.** Par le module Home Assistant, chaque formulaire, écran du premier compte compris, recevait « Session expirée » : Home Assistant donne à ses pages `Referrer-Policy: no-referrer`, et le navigateur envoie alors les formulaires avec `Origin: null`. Chaque page indique maintenant elle-même la politique de HouseCairn ([Reverse proxy](../../../administration/reverse-proxy.md))."
+

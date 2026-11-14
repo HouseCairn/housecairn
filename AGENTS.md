@@ -21,6 +21,10 @@ Each is explained where it is linked.
 - Pull request titles follow Conventional Commits
   ([Pull requests](CONTRIBUTING.md#pull-requests)); every commit has a
   Signed-off-by line ([Before your pull request can be merged](CONTRIBUTING.md#before-your-pull-request-can-be-merged)).
+- The pull request description has an **Impact on other repositories** section: tick None
+  or the repository that must change (Home Assistant app, Home Assistant integration,
+  mobile app), with a link to its issue or pull request
+  ([Pull requests](CONTRIBUTING.md#pull-requests)).
 - Release notes: one fragment per pull request under
   `docs/release-notes/unreleased/`, never an edit of `docs/release-notes.md`
   ([format](docs/release-notes/unreleased/README.md)).
