@@ -129,7 +129,7 @@ async function keptPage(request) {
 }
 
 // The offline page in the language of the pages kept, else of the browser, else the one of
-// the instance: a person who chose a language reads it offline too (docs/adr/0073).
+// the instance: a person who chose a language reads it offline too (docs/adr/0074).
 async function offlinePage(names) {
   let language = "";
   for (const name of names) {

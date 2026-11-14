@@ -1,4 +1,4 @@
-"""The language a person chose in their display preferences (docs/adr/0042, 0073)."""
+"""The language a person chose in their display preferences (docs/adr/0042, 0074)."""
 
 from collections.abc import Callable
 

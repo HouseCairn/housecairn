@@ -27,7 +27,7 @@ class ApiTokenAuthentication(authentication.BaseAuthentication):
         if token is None:
             raise exceptions.AuthenticationFailed(_("Invalid, expired or revoked token."))
         # The person's own language wins over `Accept-Language`, as on the pages
-        # (docs/adr/0073): the answer and its errors are worded in it.
+        # (docs/adr/0074): the answer and its errors are worded in it.
         activate_for(request._request, token.user)
         return token.user, token
 

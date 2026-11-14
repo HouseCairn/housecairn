@@ -811,7 +811,7 @@ class PreferencesView(LoginRequiredMixin, FormView[Any]):
         before = translation.get_language()
         agenda.update_preferences(self.request.user, **form.cleaned_data)
         # The language chosen applies from this answer on: its message, and the page it
-        # leads to. Automatic goes back to what the request asks for (docs/adr/0073).
+        # leads to. Automatic goes back to what the request asks for (docs/adr/0074).
         chosen = form.cleaned_data.get("language") or ""
         translation.activate(chosen or asked_language(self.request) or instance_default())
         self.request.LANGUAGE_CODE = translation.get_language()

@@ -1,5 +1,5 @@
 """Installable application, offline reading and a change of language, in Chromium
-(docs/adr/0065, 0073).
+(docs/adr/0065, 0074).
 
 Run in CI by `.github/workflows/ui.yml`, against a running instance with two accounts,
 each with a home (the first one has a task due today):
@@ -187,7 +187,7 @@ def offline_reading(browser: Browser, base: str) -> None:
 
 
 def language_change(browser: Browser, base: str) -> None:
-    """A change of language applies at once, online and offline (docs/adr/0073)."""
+    """A change of language applies at once, online and offline (docs/adr/0074)."""
     context: BrowserContext = browser.new_context(
         viewport={"width": 320, "height": 640}, locale="en-US"
     )

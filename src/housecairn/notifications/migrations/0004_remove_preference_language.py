@@ -1,4 +1,4 @@
-"""The language of a person is in their display preferences only (docs/adr/0073)."""
+"""The language of a person is in their display preferences only (docs/adr/0074)."""
 
 from django.db import migrations
 

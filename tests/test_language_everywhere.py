@@ -1,4 +1,4 @@
-"""The language a person chose applies to everything they read (docs/adr/0073).
+"""The language a person chose applies to everything they read (docs/adr/0074).
 
 Each test here failed before the fix it names.
 """

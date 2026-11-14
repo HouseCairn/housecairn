@@ -344,7 +344,7 @@
   max-width: var(--hc-layout-auth-max);
 }
 
-/* Signed out, the language of the pages (docs/adr/0073): one line under the panel, wrapping
+/* Signed out, the language of the pages (docs/adr/0074): one line under the panel, wrapping
    on a narrow screen. */
 .language-switch {
   display: flex;

@@ -185,7 +185,7 @@ NOT_SCREENS: tuple[str, ...] = (
     "homes:current",
     "service-worker",
     "offline",
-    # The language of the signed-out pages: a form's target, not a screen (docs/adr/0073).
+    # The language of the signed-out pages: a form's target, not a screen (docs/adr/0074).
     "set_language",
 )
 

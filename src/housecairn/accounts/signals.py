@@ -24,7 +24,7 @@ def record_first_account(sender: type[User], instance: User, created: bool, **kw
 def note_sign_in(sender: Any, request: HttpRequest | None, user: User, **kwargs: Any) -> None:
     if request is not None:
         # The sign-in request was anonymous until now: its message ("Signed in as...") and
-        # the page it leads to take the person's language (docs/adr/0073).
+        # the page it leads to take the person's language (docs/adr/0074).
         activate_for(request, user)
         secret = services.note_sign_in(request, user)
         if secret:
