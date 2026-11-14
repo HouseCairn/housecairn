@@ -20,6 +20,68 @@ The notes of each version are also published with it on the project's
 ```{release-fragments} upgrade
 ```
 
+## 0.3.2
+
+HouseCairn is still alpha software. This version makes forms work again in the Home Assistant app, where every form got "Session expired": the app takes the fix with its own version 0.3.2, which runs this image. It also counts every planned amount of a task in the budget, applies the language a person chooses everywhere, shows the photo of a report on the task made from it, and offers on Today to receive the reminders on the device. Read the upgrade notes before updating: the notification settings lose their `language` in the API, three migrations run, and no setting is new.
+
+### New
+
+- **Reminders on your phone in one tap.** When the instance sends notifications to devices,
+  Today now offers to receive the reminders on the device you are using: **Turn on** asks the
+  browser for its permission and adds the device with a name of its own (*Chrome on Android*,
+  *iPhone*), **Later** asks again in seven days, **Do not ask again** stops in this browser.
+  The installed application shows it at its first opening; in Safari on an iPhone it says to
+  install the application first. Where the browser blocks notifications,
+  [Notifications](screens/notifications.md) says how to allow them again
+  ([On this device](guides/notifications.md#on-this-device)).
+
+### Fixed
+
+- **Every planned amount of a task is in the budget.** An open task with no date now counts in
+  the plan of the current year, and a project plans the estimates of its tasks beyond its
+  budget lines, nature by nature, never twice: a project with estimated tasks and no line no
+  longer plans zero. **Budget by project** shows what the tasks of each project plan
+  ([A task in a project](guides/budget.md#a-task-in-a-project)).
+
+- **Your language, everywhere.** The language chosen in the
+  [display preferences](screens/display-preferences.md) now applies to reminders,
+  notifications on your devices and calendar feeds (the notification settings no longer have
+  a language of their own; a language chosen there becomes your language if you had none),
+  to the API with a token, to the message of the change and of the sign-in, and to the pages
+  kept for reading offline. It is reached from **Profile** too, and the signed-out pages have
+  a language switch ([Language](guides/language.md)).
+
+- **Forms work again behind a proxy that replaces the referrer policy.** Through the Home
+  Assistant app, every form, the first-account screen included, got "Session expired": Home
+  Assistant gives its pages `Referrer-Policy: no-referrer`, and the browser then posts forms
+  with `Origin: null`. Each page now states HouseCairn's policy itself
+  ([Reverse proxy](administration/reverse-proxy.md)).
+
+- **The photo of a report is now on the task made from it.** The page of the task shows the
+  report it comes from (who reported, when, the text and the photo, which opens full size);
+  the task list and Today mark a task whose report has a photo; the API lists the reports of
+  a task in `reports` ([Task](screens/task.md)).
+
+### Upgrade notes
+
+- **Migrations, and no new setting.** The update runs three migrations:
+  `tasks.0012` copies the language of the notification settings into the display
+  preferences of each person who had chosen no display language, `notifications.0004` then
+  removes the language from the notification settings, and `reports.0002` changes no data
+  (the name under which a task finds its reports). No setting and no environment variable is
+  new ([variables](administration/variables.md)).
+
+- **API change: no `language` in the notification settings.** The `language` field is gone
+  from `GET` and `PATCH /api/v1/me/notification-preferences/` and from
+  `GET /api/v1/me/notifications-export/`; a `PATCH` that still sends it is ignored. The language
+  is read and changed at `/api/v1/me/display-preferences/`.
+
+- **Upgrade: two limits of the migration.** A person whose notification language was never
+  chosen (it stayed at the default, `en`) and who had no display language now gets `en` as an
+  explicit choice: set the display language back to **Automatic** to follow the browser again.
+  Rolling the migration back recreates the column with `en` and does not restore the earlier
+  notification language.
+
 ## 0.3.1
 
 HouseCairn is still alpha software. This version only fixes the demonstration instance: the box listing the public accounts no longer cuts the password, and the public accounts and their place in the demonstration home are protected, with the Django administration site read only. Nothing changes outside the demonstration mode: no migration runs and no setting is new.
