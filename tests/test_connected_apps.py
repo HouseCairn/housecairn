@@ -14,6 +14,7 @@ from housecairn.accounts.models import User
 from housecairn.apitokens import tasks
 from housecairn.apitokens.models import AppConnection, ConnectionAccessToken
 from housecairn.audit.models import AuditEvent
+from housecairn.core.navigation import with_next
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from tests.oauth_support import connect, consent, refresh
@@ -165,3 +166,28 @@ class TestNightlyCleanUp:
         assert refresh(Client(), phone.refresh).status_code == 400
         phone.connection.refresh_from_db()
         assert phone.connection.revoked_at is not None
+
+
+class TestReturnRule:
+    """The links of a connection carry `next`; its forms lead back to the list (docs/adr/0053)."""
+
+    def test_links_and_back(self, alice: User, alice_home: Home) -> None:
+        phone = connect(alice, [alice_home])
+        client = _signed_in(alice)
+        listing = reverse("api-tokens:list")
+        edit = reverse("api-tokens:connection-edit", args=[phone.connection.id])
+        revoke = reverse("api-tokens:connection-revoke", args=[phone.connection.id])
+        page = client.get(listing).content.decode()
+        assert f'href="{with_next(edit, listing)}"' in page
+        assert f'href="{with_next(revoke, listing)}"' in page
+        # With `next`: the back link, the form and Cancel lead there.
+        assert f'href="{listing}"' in client.get(f"{edit}?next={listing}").content.decode()
+        saved = client.post(edit, {"name": "Phone", "homes": [str(alice_home.id)], "next": listing})
+        assert saved["Location"] == listing
+        assert f'href="{listing}"' in client.get(f"{revoke}?next={listing}").content.decode()
+        # Without `next`: the list.
+        assert f'href="{listing}"' in client.get(edit).content.decode()
+        assert (
+            client.post(edit, {"name": "P", "homes": [str(alice_home.id)]})["Location"] == listing
+        )
+        assert client.post(revoke)["Location"] == listing
