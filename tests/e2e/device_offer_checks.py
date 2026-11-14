@@ -333,6 +333,51 @@ def main() -> None:
         check(not case.visible("data-offer-done"), "and does not say it worked")
         case.close()
 
+        # 5b. The server refuses and the browser already had a subscription (a device that
+        # works, or one of another account): it is not ours to give back.
+        known = {
+            "endpoint": ENDPOINT + "-other",
+            **dict(zip(("p256dh", "auth"), subscription_keys(), strict=True)),
+        }
+        case = Case(browser, base, cookies, sub=known)
+        case.capture(status=500)
+        case.open()
+        check(case.offer_shown(), "a subscribed browser the server does not know is offered")
+        case.page.click("[data-offer-enable]")
+        case.page.wait_for_selector("[data-offer-failed]:not([hidden])", timeout=10000)
+        check(
+            "unsubscribe" not in case.state()["calls"],
+            "on Today, a refusal does not give back a subscription that was already there",
+        )
+        check(case.state()["sub"] is not None, "on Today, the earlier subscription is kept")
+        case.close()
+
+        case = Case(browser, base, cookies, sub=known)
+        case.capture(status=500)
+        case.open("/me/notifications/")
+        case.page.fill("#webpush-name", "My phone")
+        case.page.click("form[data-webpush] button[type=submit]")
+        case.page.wait_for_selector("[data-webpush-failed]:not([hidden])", timeout=10000)
+        check(
+            "unsubscribe" not in case.state()["calls"],
+            "in Notifications, a refusal does not give back a subscription that was already there",
+        )
+        check(case.state()["sub"] is not None, "in Notifications, the earlier subscription is kept")
+        case.close()
+
+        # 5c. The same refusal without an earlier subscription gives back the one just made.
+        case = Case(browser, base, cookies)
+        case.capture(status=500)
+        case.open("/me/notifications/")
+        case.page.fill("#webpush-name", "My phone")
+        case.page.click("form[data-webpush] button[type=submit]")
+        case.page.wait_for_selector("[data-webpush-failed]:not([hidden])", timeout=10000)
+        check(
+            case.state()["calls"] == ["request", "subscribe", "unsubscribe"],
+            "in Notifications, a refusal gives back the subscription this tap created",
+        )
+        case.close()
+
         # 6. Permission already refused: no offer; Notifications says how to unblock.
         case = Case(browser, base, cookies, permission="denied")
         case.open()
