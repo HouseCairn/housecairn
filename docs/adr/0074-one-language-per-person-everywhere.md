@@ -70,7 +70,7 @@ shown: the display preferences decide.
 
 - The `language` field disappears from `GET` and `PATCH /api/v1/me/notification-preferences/`
   and from the export of the notification settings; a client that sends it is ignored. The
-  language is read and changed at `/api/v1/me/preferences/`.
+  language is read and changed at `/api/v1/me/display-preferences/` (`/me/preferences/` is the web page, not the API).
 - A person who had chosen a language for the notifications only now has it on the pages too.
   The migration cannot tell a deliberate choice from the language of the request that first
   saved those preferences; both were the person's language when they saved.
