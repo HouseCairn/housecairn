@@ -3,6 +3,7 @@
 import datetime
 from collections.abc import Callable
 from typing import Any
+from urllib.parse import quote
 
 import pytest
 from django.db import connection
@@ -84,7 +85,8 @@ class TestTaskPage:
         page = reverse("reports:detail", kwargs={"home_id": alice_home.id, "report_id": report.id})
         assert f'src="{thumbnail}"' in body
         assert f'href="{full}"' in body
-        assert page in body
+        next_url = quote(detail(alice_home, task), safe="")
+        assert f'href="{page}?next={next_url}"' in body
 
     def test_several_reports_are_all_there_the_most_recent_first(
         self, client: Client, alice: User, reader: User, alice_home: Home, task: Task
