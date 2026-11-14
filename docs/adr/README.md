@@ -73,3 +73,4 @@ later record supersedes it.
 | [0072](0072-device-offered-by-default.md) | The device is offered by default: one offer, one tap | 2026-11-14 |
 | [0073](0073-every-planned-amount-of-a-task-is-planned.md) | Every amount planned on a task is in Planned, once | 2026-11-14 |
 | [0074](0074-one-language-per-person-everywhere.md) | One language per person, everywhere they read HouseCairn | 2026-11-14 |
+| [0076](0076-sync-api-for-the-mobile-app.md) | A sync API for the mobile app: the operations of its protocol, per home | 2026-11-14 |
