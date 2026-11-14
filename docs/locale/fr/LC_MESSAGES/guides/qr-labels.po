@@ -54,8 +54,8 @@ msgstr "Tout membre du logement a **Signaler un problème**, sur la page d'une p
 msgid "A report is not a task: it has no date and no owner, and may stay open as long as nobody decides. A person who may write opens it on the **Reports** screen, or from the line on **Today**, and chooses:"
 msgstr "Un signalement n'est pas une tâche : il n'a ni date ni responsable, et peut rester ouvert tant que personne ne décide. Une personne qui peut écrire l'ouvre sur l'écran **Signalements**, ou depuis la ligne d'**Aujourd'hui**, et choisit :"
 
-msgid "**Make it a task**: a task with the same title, place and no date, linked to the report;"
-msgstr "**En faire une tâche** : une tâche avec le même titre, le même lieu et sans date, liée au signalement ;"
+msgid "**Make it a task**: a task with the same title, place and no date, linked to the report. The page of the task then shows the report it comes from (who reported, when, the text and the photo as a thumbnail that opens it full size), and the task list and Today mark such a task with a **Photo** label when the report has one;"
+msgstr "**En faire une tâche** : une tâche avec le même titre, le même lieu et sans date, liée au signalement. La page de la tâche montre alors le signalement dont elle vient (qui l'a signalé, quand, le texte et la photo en vignette qui s'ouvre en grand), et la liste des tâches et Aujourd'hui marquent une telle tâche d'une étiquette **Photo** quand le signalement en a une ;"
 
 msgid "**Mark as resolved** or **Close without action**;"
 msgstr "**Marquer comme résolu** ou **Classer sans suite** ;"

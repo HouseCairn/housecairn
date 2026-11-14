@@ -69,6 +69,9 @@ msgstr "Les requêtes qui modifient quelque chose envoient du JSON, avec la port
 msgid "The answer, `201`, is the task, with its `id`. A change is a `PATCH` of the fields that change, at the address of the task, `.../tasks/<id>/`; `PUT` is not offered."
 msgstr "La réponse, `201`, est la tâche, avec son `id`. Une modification est un `PATCH` des champs qui changent, à l'adresse de la tâche, `.../tasks/<id>/` ; `PUT` n'est pas proposé."
 
+msgid "A task made from a report lists it in `reports`: for each, `id`, `created_at`, `has_photo` and `photo_url`, the protected address of the photo, fetched with the same token. A token of a read-only member sees the reports that member made and no others."
+msgstr "Une tâche faite à partir d'un signalement le liste dans `reports` : pour chacun, `id`, `created_at`, `has_photo` et `photo_url`, l'adresse protégée de la photo, à récupérer avec le même jeton. Le jeton d'un membre en lecture seule voit les signalements que ce membre a faits, et aucun autre."
+
 msgid "Common tasks come ready from the [library of task templates](../screens/task-templates.md): list it, then add some of its templates to a home, in the language of the request:"
 msgstr "Des tâches courantes sont prêtes dans la [bibliothèque de modèles de tâches](../screens/task-templates.md) : listez-la, puis ajoutez certains de ses modèles à un logement, dans la langue de la requête :"
 

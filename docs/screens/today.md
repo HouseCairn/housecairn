@@ -17,8 +17,8 @@ The page is made of sections, in this order:
 - **In season**: the tasks of the current season that are due beyond the horizon or
   have no date.
 
-Each row shows the task, its room and item, and its state. **Done**, on the right
-of the row, closes it in one tap, for every task. The page does not reload nor move: the
+Each row shows the task, its room and item, and its state; a task made from a report
+that has a photo also carries a **Photo** label. **Done**, on the right of the row, closes it in one tap, for every task. The page does not reload nor move: the
 row shows the task as done, and a banner at the bottom of the screen, above the bar, offers
 **Undo**, which puts the row back as it was. The banner stays until the next action or
 page, and a screen reader announces it. A row opens the [task](task.md).

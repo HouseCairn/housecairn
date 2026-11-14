@@ -993,6 +993,10 @@ msgstr "Ajouter une ligne"
 msgid "Add lines"
 msgstr "Ajouter des lignes"
 
+msgctxt "reported problem"
+msgid "Photo"
+msgstr "Photo"
+
 #, python-format
 msgid "every day"
 msgid_plural "every %(count)s days"
@@ -1143,6 +1147,18 @@ msgstr "Ignorer cette fois"
 
 msgid "Edit the task"
 msgstr "Modifier la tâche"
+
+msgctxt "task page"
+msgid "Reported problem"
+msgstr "Problème signalé"
+
+#, python-format
+msgid "Reported on %(day)s by %(person)s"
+msgstr "Signalé le %(day)s par %(person)s"
+
+#, python-format
+msgid "Photo of the problem: %(title)s"
+msgstr "Photo du problème : %(title)s"
 
 msgid "When"
 msgstr "Quand"

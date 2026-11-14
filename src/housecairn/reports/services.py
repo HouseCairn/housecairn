@@ -37,7 +37,7 @@ from housecairn.rooms.models import Item, Room
 from housecairn.rooms.services import _read_upload
 from housecairn.stock.models import Article
 from housecairn.tasks import services as task_services
-from housecairn.tasks.models import Task
+from housecairn.tasks.models import Occurrence, Task
 
 AnyUser = User | AnonymousUser
 
@@ -89,6 +89,41 @@ def visible_reports(actor: AnyUser, home: Home) -> models.QuerySet[Report]:
     if not actor.is_authenticated:
         return reports.none()
     return reports.filter(reporter=actor)
+
+
+def reports_of_task(home: Home, actor: AnyUser) -> Any:
+    """What a task page, the API and the lists read to find the reports a task was made from.
+
+    The reports the person may see (`visible_reports`: a reader sees their own), the most
+    recent first, in `task.visible_reports`: one query for any number of tasks.
+    """
+    return models.Prefetch(
+        "reports",
+        queryset=visible_reports(actor, home)
+        .select_related(None)
+        .select_related("reporter")
+        .order_by("-created_at", "-id"),
+        to_attr="visible_reports",
+    )
+
+
+def mark_photo_reports(home: Home, actor: AnyUser, occurrences: Iterable[Occurrence]) -> None:
+    """Tell each occurrence's task whether a report with a photo it comes from is visible.
+
+    Sets `task.has_report_photo` for the lists (one query for the whole page).
+    """
+    rows = list(occurrences)
+    tasks = {row.task_id: row.task for row in rows}
+    if not tasks:
+        return
+    found = set(
+        visible_reports(actor, home)
+        .filter(task_id__in=tasks)
+        .exclude(photo="")
+        .values_list("task_id", flat=True)
+    )
+    for task_id, task in tasks.items():
+        task.has_report_photo = task_id in found  # type: ignore[attr-defined]
 
 
 def open_reports(home: Home) -> models.QuerySet[Report]:

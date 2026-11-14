@@ -81,6 +81,10 @@ curl -fsS -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: applicatio
 The answer, `201`, is the task, with its `id`. A change is a `PATCH` of the fields that
 change, at the address of the task, `.../tasks/<id>/`; `PUT` is not offered.
 
+A task made from a report lists it in `reports`: for each, `id`, `created_at`, `has_photo`
+and `photo_url`, the protected address of the photo, fetched with the same token. A token
+of a read-only member sees the reports that member made and no others.
+
 Common tasks come ready from the [library of task templates](../screens/task-templates.md):
 list it, then add some of its templates to a home, in the language of the request:
 
