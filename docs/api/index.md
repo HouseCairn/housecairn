@@ -46,6 +46,14 @@ web interface: every request only sees the homes of its user
   on all of them, and another person's token is a `404`. Creating and revoking go to the
   audit log of the instance, by name, never with the value
   ([ADR 0007](../adr/0007-authentication-and-api-tokens.md)).
+- **Archiving a home** ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)):
+  a home carries a read only `archived_at`, `null` when it is not archived.
+  `POST /api/v1/homes/<home id>/archive/` and `.../unarchive/` set and clear it, for the
+  owners of the home signed in (a member who is not an owner gets a `403`, so does an API
+  token). `GET /api/v1/homes/` **keeps listing archived homes**, with the field, so an
+  integration sees the homes it saw; the screens hide them, [Today and My home](../screens/my-home.md),
+  the calendar and the combined budget of the API leave them out, and an archived home
+  sends no reminder.
 - **Rooms, items and photos** of a home: `/api/v1/homes/<home id>/rooms/`,
   `.../items/`, `.../photos/` and `.../search/?q=`, with the same rules as the
   screens ([ADR 0029](../adr/0029-rooms-items-and-room-memory.md),

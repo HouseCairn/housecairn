@@ -56,6 +56,10 @@ class Home(BaseModel):
     required_provider = models.CharField(
         _("required sign-in provider"), max_length=100, blank=True, default=""
     )
+    # When an owner archived the home (docs/adr/0079); empty: not archived. An archived home
+    # is listed apart, sends no reminder and has an empty calendar feed, but stays readable,
+    # editable and exportable when opened.
+    archived_at = models.DateTimeField(_("archived at"), null=True, blank=True, editable=False)
 
     class Meta:
         verbose_name = _("home")
@@ -63,6 +67,10 @@ class Home(BaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def is_archived(self) -> bool:
+        return self.archived_at is not None
 
 
 class Membership(BaseModel):

@@ -55,6 +55,12 @@ msgstr "Exigence de connexion retirée"
 msgid "Home exported"
 msgstr "Logement exporté"
 
+msgid "Home archived"
+msgstr "Logement archivé"
+
+msgid "Home brought back from the archive"
+msgstr "Logement sorti des archives"
+
 msgid "Home restored from an archive"
 msgstr "Logement restauré depuis une archive"
 

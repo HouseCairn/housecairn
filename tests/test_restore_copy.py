@@ -444,11 +444,21 @@ class TestFormats:
             == "v2"
         )
 
-    def test_a_version_3_archive_is_copied(
+    def test_a_version_3_archive_is_copied_with_no_archiving(
         self, original: Home, archive: bytes, alice: User
     ) -> None:
-        assert export_data(archive)["manifest"]["version"] == 3
-        result = copy(alice, archive)
+        from tests.test_restore_security import entries, rebuild
+
+        assert export_data(archive)["manifest"]["version"] == exports.FORMAT_VERSION == 4
+        files = entries(archive)
+        manifest = json.loads(files["manifest.json"])
+        manifest["version"] = 3
+        files["manifest.json"] = json.dumps(manifest).encode()
+        document = json.loads(files["data/homes.json"])
+        document["home"].pop("archived_at")  # format 3 has no such field
+        files["data/homes.json"] = json.dumps(document).encode()
+        result = copy(alice, rebuild(files))
+        assert result.home.archived_at is None
         assert (
             AuditEvent.objects.get(action="home.copied", home_id=result.home.id).detail["format"]
             == "v3"

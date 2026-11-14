@@ -65,7 +65,7 @@ class HomeListView(WebHomeScopedMixin, ListView[Home]):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         providers = sso.signed_in_providers(self.request)
-        context["rows"] = [
+        rows = [
             {
                 "home": home,
                 "locked": not services.is_open(home, providers),
@@ -73,6 +73,9 @@ class HomeListView(WebHomeScopedMixin, ListView[Home]):
             }
             for home in context["homes"]
         ]
+        # Archived homes are listed apart, below the others (docs/adr/0079).
+        context["rows"] = [row for row in rows if not row["home"].is_archived]
+        context["archived_rows"] = [row for row in rows if row["home"].is_archived]
         return context
 
 
@@ -654,6 +657,63 @@ class MemberRemoveView(ConfirmedActionView):
             return redirect("homes:list")
         messages.success(self.request, _("Member removed."))
         return None
+
+
+class ArchiveView(ConfirmedActionView):
+    """Archive the home, after a confirmation. Owners only (docs/adr/0079)."""
+
+    def confirmation(self, home: Home) -> dict[str, Any]:
+        if not services.is_owner(self.request.user, home):
+            raise PermissionDenied
+        return {
+            "title": _("Archive this home?"),
+            "text": _(
+                "%(home)s will be listed apart, hidden from Today and from the home selector, "
+                "send no reminder, and its calendar feeds will be empty. Nothing is deleted: "
+                "you can open it, change it and bring it back whenever you want."
+            )
+            % {"home": home.name},
+            "action": reverse("homes:archive", args=[home.id]),
+            "button": _("Archive"),
+            "button_class": "button-secondary",
+            "back": reverse("homes:detail", args=[home.id]),
+            "back_label": home.name,
+        }
+
+    def act(self, home: Home) -> HttpResponse | None:
+        services.archive_home(self.request.user, home)
+        messages.success(self.request, _("Home archived."))
+        return redirect(
+            navigation.back_url(self.request, reverse("homes:detail", kwargs={"home_id": home.id}))
+        )
+
+
+class UnarchiveView(ConfirmedActionView):
+    """Bring an archived home back, after a confirmation. Owners only (docs/adr/0079)."""
+
+    def confirmation(self, home: Home) -> dict[str, Any]:
+        if not services.is_owner(self.request.user, home):
+            raise PermissionDenied
+        return {
+            "title": _("Bring this home back?"),
+            "text": _(
+                "%(home)s will be listed again, shown on Today and in the home selector, and "
+                "its reminders will resume."
+            )
+            % {"home": home.name},
+            "action": reverse("homes:unarchive", args=[home.id]),
+            "button": _("Bring back"),
+            "button_class": "button-secondary",
+            "back": reverse("homes:detail", args=[home.id]),
+            "back_label": home.name,
+        }
+
+    def act(self, home: Home) -> HttpResponse | None:
+        services.unarchive_home(self.request.user, home)
+        messages.success(self.request, _("Home brought back."))
+        return redirect(
+            navigation.back_url(self.request, reverse("homes:detail", kwargs={"home_id": home.id}))
+        )
 
 
 class LeaveView(ConfirmedActionView):

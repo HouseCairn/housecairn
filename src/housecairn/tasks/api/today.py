@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from housecairn.accounts.api import PersonOnlyToChange
-from housecairn.homes.scoping import open_homes_for_request
+from housecairn.homes.scoping import active_homes_for_request
 from housecairn.rooms.api import (
     HomeResourceMixin,
     _uuid_param,
@@ -112,7 +112,7 @@ class MyHomeView(APIView):
         responses=DigestSerializer(many=True),
     )
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        homes = list(open_homes_for_request(request).order_by("name"))
+        homes = list(active_homes_for_request(request).order_by("name"))
         wanted = _uuid_param(request, "home")
         if wanted is not None:
             homes = [h for h in homes if h.id == wanted]

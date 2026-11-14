@@ -45,8 +45,8 @@ msgstr "Contenu"
 msgid "`manifest.json`"
 msgstr "`manifest.json`"
 
-msgid "`format` (`\"housecairn-export\"`), `version` (`3`), `application_version`, `exported_at`, `home` (its id), `apps` (the documents below) and `entries`: the SHA-256 digest and the size of every other file of the archive."
-msgstr "`format` (`\"housecairn-export\"`), `version` (`3`), `application_version`, `exported_at`, `home` (son identifiant), `apps` (les documents ci-dessous) et `entries` : l'empreinte SHA-256 et la taille de chacun des autres fichiers de l'archive."
+msgid "`format` (`\"housecairn-export\"`), `version` (`4`), `application_version`, `exported_at`, `home` (its id), `apps` (the documents below) and `entries`: the SHA-256 digest and the size of every other file of the archive."
+msgstr "`format` (`\"housecairn-export\"`), `version` (`4`), `application_version`, `exported_at`, `home` (son identifiant), `apps` (les documents ci-dessous) et `entries` : l'empreinte SHA-256 et la taille de chacun des autres fichiers de l'archive."
 
 msgid "`data/<app>.json`"
 msgstr "`data/<app>.json`"
@@ -67,8 +67,8 @@ msgstr "`README.txt`"
 msgid "A reminder of the format."
 msgstr "Un rappel du format."
 
-msgid "Its [JSON Schema](../_static/schemas/housecairn-export-v3.schema.json) is published with this documentation (the one of [version 2](../_static/schemas/housecairn-export-v2.schema.json) stays). The rules that hold for every section:"
-msgstr "Son [schéma JSON](../_static/schemas/housecairn-export-v3.schema.json) est publié avec cette documentation (celui de la [version 2](../_static/schemas/housecairn-export-v2.schema.json) reste publié). Les règles valables pour toutes les sections :"
+msgid "Its [JSON Schema](../_static/schemas/housecairn-export-v4.schema.json) is published with this documentation (the ones of [version 3](../_static/schemas/housecairn-export-v3.schema.json) and [version 2](../_static/schemas/housecairn-export-v2.schema.json) stay). The rules that hold for every section:"
+msgstr "Son [schéma JSON](../_static/schemas/housecairn-export-v4.schema.json) est publié avec cette documentation (ceux de la [version 3](../_static/schemas/housecairn-export-v3.schema.json) et de la [version 2](../_static/schemas/housecairn-export-v2.schema.json) restent publiés). Les règles valables pour toutes les sections :"
 
 msgid "**Every field of the table**, by its name in the code: an object of `rooms` has `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ..., `created_at` and `updated_at`. A field added by a later version is in the archive without a change of format; a field removed or renamed raises the version."
 msgstr "**Tous les champs de la table**, sous leur nom dans le code : un objet de `rooms` a `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ..., `created_at` et `updated_at`. Un champ ajouté par une version ultérieure figure dans l'archive sans changement de format ; un champ supprimé ou renommé fait monter la version."
@@ -97,8 +97,8 @@ msgstr "Sections"
 msgid "`homes`"
 msgstr "`homes`"
 
-msgid "`home` (id, name, currency, hemisphere, sign-in requirement, dates), `people`, `members` (person and role) and `pending_invitations` (address, role, dates; never the link)."
-msgstr "`home` (identifiant, nom, devise, hémisphère, exigence de connexion, dates), `people`, `members` (personne et rôle) et `pending_invitations` (adresse, rôle, dates ; jamais le lien)."
+msgid "`home` (id, name, currency, hemisphere, sign-in requirement, `archived_at`, dates), `people`, `members` (person and role) and `pending_invitations` (address, role, dates; never the link)."
+msgstr "`home` (identifiant, nom, devise, hémisphère, exigence de connexion, `archived_at`, dates), `people`, `members` (personne et rôle) et `pending_invitations` (adresse, rôle, dates ; jamais le lien)."
 
 msgid "`events`"
 msgstr "`events`"
@@ -153,6 +153,9 @@ msgstr "L'archive ne contient jamais de secret : aucun jeton d'API (pas même so
 
 msgid "Version 1 archives (a single `export.json`) cannot be restored: export the home again. Version 2 archives are restored: the only difference is that the provider of the maintenance contract of an item was a text (`contract_provider`) and is, in version 3, the id of a contractor (`contract_contractor`). The restore links the item to the contractor of the archive of that name (case and extra spaces ignored) and, when the archive has none, adds one, with the trade Other ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md))."
 msgstr "Les archives de version 1 (un seul `export.json`) ne peuvent pas être restaurées : exportez de nouveau le logement. Les archives de version 2 sont restaurées : la seule différence est que le prestataire du contrat d'entretien d'un élément était un texte (`contract_provider`) et est, en version 3, l'identifiant d'un intervenant (`contract_contractor`). La restauration relie l'élément à l'intervenant de l'archive de ce nom (casse et espaces superflus ignorés) et, si l'archive n'en a pas, en ajoute un, avec le métier Autre ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md))."
+
+msgid "Version 3 archives are restored too: the only difference is that version 4 adds `archived_at` to the `home` of `data/homes.json`, the date and time an owner archived the home or `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). A version 3 or 2 archive restores a home that is not archived; a version 4 archive of an archived home restores it archived, as a copy too."
+msgstr "Les archives de version 3 sont restaurées aussi : la seule différence est que la version 4 ajoute `archived_at` au `home` de `data/homes.json`, la date et l'heure à laquelle un propriétaire a archivé le logement, ou `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). Une archive de version 3 ou 2 restaure un logement non archivé ; une archive de version 4 d'un logement archivé le restaure archivé, y compris comme copie."
 
 msgid "Tables for a spreadsheet"
 msgstr "Tableaux pour un tableur"

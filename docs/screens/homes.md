@@ -7,6 +7,10 @@ home from the archive of **Export all data** (see
 through a provider you did not use in this session is marked, for example
 "Company SSO required".
 
+A home that an owner [archived](home.md) is listed apart, under **Archived**, below the
+others: it is hidden from Today and from the home selector, and sends no reminder. Open it
+to change it or to bring it back.
+
 The page **Restore a home** asks for the archive and how to restore it. **Restore**
 brings the home back with its identifiers, and is refused while that home is on the
 instance. **Restore as a copy** makes a new home next to it, with new identifiers and

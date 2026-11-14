@@ -24,7 +24,7 @@ from housecairn.apitokens.permissions import CredentialFitsView
 from housecairn.calendar import feeds, services
 from housecairn.calendar.models import Feed
 from housecairn.core.links import external_url
-from housecairn.homes.scoping import open_homes_for_request, site_url
+from housecairn.homes.scoping import active_homes_for_request, site_url
 from housecairn.tasks.models import Priority, Status
 
 
@@ -98,7 +98,7 @@ class CalendarView(APIView):
             filters = services.filters_from(params, strict=True)
         except ValueError as exc:
             raise exceptions.ValidationError({str(exc): ["Not a valid value."]}) from None
-        homes = list(open_homes_for_request(request).order_by("name"))
+        homes = list(active_homes_for_request(request).order_by("name"))
         if params.get("home"):
             homes = [h for h in homes if str(h.id) == params["home"].lower()]
             if not homes:

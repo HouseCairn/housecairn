@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError, CommandParser
 
 from housecairn.homes import schema
 
-PUBLISHED = Path("docs/_static/schemas/housecairn-export-v3.schema.json")
+PUBLISHED = Path("docs/_static/schemas/housecairn-export-v4.schema.json")
 
 
 def render() -> str:

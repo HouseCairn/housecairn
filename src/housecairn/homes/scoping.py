@@ -47,6 +47,15 @@ def open_homes_for_request(request: HttpRequest | Request) -> models.QuerySet[Ho
     return services.open_homes(homes_for_request(request), sso.signed_in_providers(request))
 
 
+def active_homes_for_request(request: HttpRequest | Request) -> models.QuerySet[Home]:
+    """Homes this request may open and that are not archived: what the lists cover.
+
+    Today, the home selector, the calendar and the budget of all homes read this; a home
+    opened by its address does not (an archived home stays readable and editable).
+    """
+    return services.active_homes(open_homes_for_request(request))
+
+
 class HomeScopedMixin:
     """For web and API views alike: `get_homes()`, and `get_home()` from the URL.
 
