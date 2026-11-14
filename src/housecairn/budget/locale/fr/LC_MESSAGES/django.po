@@ -277,6 +277,10 @@ msgstr "Prévu, engagé et payé, projet par projet"
 msgid "Still to pay"
 msgstr "Reste à payer"
 
+#, python-format
+msgid "Planned by its tasks: %(amount)s"
+msgstr "Prévu par ses tâches : %(amount)s"
+
 msgid "Total"
 msgstr "Total"
 

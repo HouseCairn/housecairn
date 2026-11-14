@@ -297,7 +297,7 @@ class TestTheScreensTheFilesAndTheApi:
         home = {"home_id": alice_home.id}
         projects = signed_in.get(reverse("budget:projects", kwargs=home)).content.decode()
         assert "€250.05" in projects
-        assert 'data-label="Planned by its tasks">€250.05' in projects
+        assert "Planned by its tasks: €250.05" in projects
         rooms = signed_in.get(reverse("budget:rooms", kwargs=home)).content.decode()
         assert "€280.08" in rooms  # 250.05 of the project and 30.03 of the tap
         room = signed_in.get(reverse("rooms:detail", kwargs={**home, "room_id": owner_room.id}))
