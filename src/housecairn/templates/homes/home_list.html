@@ -19,8 +19,26 @@
         </li>
       {% endfor %}
     </ul>
-  {% else %}
+  {% elif not archived_rows %}
     <p class="empty">{% translate "You are not a member of any home yet." %}</p>
+  {% endif %}
+  {% if archived_rows %}
+    <h2>{% translate "Archived" %}</h2>
+    <p class="small">{% translate "Hidden from Today and the home selector, with no reminder. Open one to change it or bring it back." %}</p>
+    <ul class="card-list">
+      {% for row in archived_rows %}
+        <li>
+          <a class="row" href="{% url_with_next 'homes:detail' home_id=row.home.id %}">
+            <span class="row-body">
+              <span class="row-title">{{ row.home.name }}</span>
+              <span class="row-text">{{ row.home.currency }}</span>
+            </span>
+            {% if row.locked %}<span class="pill pill-warning">{% blocktranslate with provider=row.provider.name %}{{ provider }} required{% endblocktranslate %}</span>{% endif %}
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
   {% endif %}
   <a class="button button-secondary button-block" href="{% url_with_next 'homes:create' %}">{% translate "Add a home" %}</a>
   <a class="button button-secondary button-block" href="{% url_with_next 'homes:restore' %}">{% translate "Restore a home" %}</a>

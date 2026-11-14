@@ -1,0 +1,2156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.housecairn.app/_static/schemas/housecairn-export-v4.schema.json",
+  "title": "HouseCairn export of a home, format 4",
+  "description": "`manifest` describes manifest.json; `documents` describes data/<app>.json, one per app the manifest lists. See Administration > Export and deletion.",
+  "$defs": {
+    "manifest": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "const": "housecairn-export"
+        },
+        "version": {
+          "const": 4
+        },
+        "application_version": {
+          "type": "string"
+        },
+        "exported_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "home": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "apps": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "homes",
+              "events",
+              "rooms",
+              "tasks",
+              "stock",
+              "projects",
+              "calendar",
+              "labels",
+              "reports"
+            ]
+          }
+        },
+        "entries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "sha256",
+              "size"
+            ]
+          }
+        }
+      },
+      "required": [
+        "format",
+        "version",
+        "application_version",
+        "exported_at",
+        "home",
+        "apps",
+        "entries"
+      ]
+    },
+    "documents": {
+      "homes": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "homes"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "members": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "user": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    },
+                    "role": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "member",
+                        "owner",
+                        "read_only"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "id",
+                    "role",
+                    "updated_at",
+                    "user"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "Kept for the owners; not restored: memberships are made again from the people the restore matches."
+              },
+              "pending_invitations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "email": {
+                      "type": "string",
+                      "maxLength": 254
+                    },
+                    "role": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "member",
+                        "owner",
+                        "read_only"
+                      ]
+                    },
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "sent_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "delivered_by_email": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "delivered_by_email",
+                    "email",
+                    "expires_at",
+                    "id",
+                    "role",
+                    "sent_at",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "Kept for the owners; not restored: an invitation is a link sent by e-mail, which only its secret opens."
+              }
+            },
+            "additionalProperties": false
+          },
+          "home": {
+            "type": "object"
+          },
+          "people": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "email",
+                "name"
+              ]
+            }
+          }
+        },
+        "required": [
+          "app",
+          "sections",
+          "home",
+          "people"
+        ]
+      },
+      "events": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "events"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "maxLength": 64
+                    },
+                    "payload": {},
+                    "received_by": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "id",
+                    "kind",
+                    "payload",
+                    "received_by",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "rooms": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "rooms"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "rooms": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "kind": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "attic",
+                        "bathroom",
+                        "bedroom",
+                        "cellar",
+                        "garage",
+                        "hallway",
+                        "kitchen",
+                        "living",
+                        "office",
+                        "other",
+                        "outdoor",
+                        "utility"
+                      ]
+                    },
+                    "position": {
+                      "type": "integer"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "paint_colour": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "paint_brand": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "paint_reference": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "paint_batch": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "paint_article": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "floor_covering": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "wall_covering": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "memory_notes": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "floor_covering",
+                    "id",
+                    "kind",
+                    "memory_notes",
+                    "name",
+                    "notes",
+                    "paint_article",
+                    "paint_batch",
+                    "paint_brand",
+                    "paint_colour",
+                    "paint_reference",
+                    "position",
+                    "updated_at",
+                    "wall_covering"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "room": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "kind": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "equipment",
+                        "surface"
+                      ]
+                    },
+                    "brand": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "model": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "serial_number": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "installed_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "warranty_ends_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "contract_contractor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "contract_number": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "contract_url": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "links": {},
+                    "notes": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "brand",
+                    "contract_contractor",
+                    "contract_number",
+                    "contract_url",
+                    "created_at",
+                    "id",
+                    "installed_on",
+                    "kind",
+                    "links",
+                    "model",
+                    "name",
+                    "notes",
+                    "room",
+                    "serial_number",
+                    "updated_at",
+                    "warranty_ends_on"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "photos": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "room": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "item": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "category": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "after",
+                        "before",
+                        "behind_walls",
+                        "general",
+                        "other"
+                      ]
+                    },
+                    "caption": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "image": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^files/[a-z_]+/[0-9a-f-]{36}(\\.[a-z0-9]+)?$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "maxLength": 32
+                    },
+                    "size_bytes": {
+                      "type": "integer"
+                    },
+                    "width": {
+                      "type": "integer"
+                    },
+                    "height": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "caption",
+                    "category",
+                    "content_type",
+                    "created_at",
+                    "height",
+                    "id",
+                    "image",
+                    "item",
+                    "room",
+                    "size_bytes",
+                    "updated_at",
+                    "width"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "tasks": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "tasks"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "contractors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "trade": {
+                      "type": "string",
+                      "maxLength": 20,
+                      "enum": [
+                        "",
+                        "carpenter",
+                        "chimney_sweep",
+                        "electrician",
+                        "gardener",
+                        "heating_engineer",
+                        "locksmith",
+                        "mason",
+                        "other",
+                        "painter",
+                        "plumber",
+                        "roofer"
+                      ]
+                    },
+                    "trade_other": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "phone": {
+                      "type": "string",
+                      "maxLength": 40
+                    },
+                    "email": {
+                      "type": "string",
+                      "maxLength": 254
+                    },
+                    "address": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "address",
+                    "created_at",
+                    "email",
+                    "id",
+                    "name",
+                    "note",
+                    "phone",
+                    "trade",
+                    "trade_other",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "room": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "item": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "priority": {
+                      "type": "string",
+                      "maxLength": 8,
+                      "enum": [
+                        "high",
+                        "low",
+                        "normal"
+                      ]
+                    },
+                    "estimated_minutes": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "labour_budget": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "material_budget": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "procedure": {
+                      "type": "string"
+                    },
+                    "assignee": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    },
+                    "contractor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "repeat_mode": {
+                      "type": "string",
+                      "maxLength": 12,
+                      "enum": [
+                        "after_last",
+                        "fixed",
+                        "once"
+                      ]
+                    },
+                    "repeat_unit": {
+                      "type": "string",
+                      "maxLength": 8,
+                      "enum": [
+                        "day",
+                        "month",
+                        "week",
+                        "year"
+                      ]
+                    },
+                    "repeat_interval": {
+                      "type": "integer"
+                    },
+                    "season": {
+                      "type": "string",
+                      "maxLength": 10,
+                      "enum": [
+                        "",
+                        "autumn",
+                        "custom",
+                        "spring",
+                        "summer",
+                        "winter"
+                      ]
+                    },
+                    "season_start_month": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "season_end_month": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "hide_days_before": {
+                      "type": "integer"
+                    },
+                    "series_start": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    }
+                  },
+                  "required": [
+                    "assignee",
+                    "contractor",
+                    "created_at",
+                    "estimated_minutes",
+                    "hide_days_before",
+                    "id",
+                    "item",
+                    "labour_budget",
+                    "material_budget",
+                    "notes",
+                    "priority",
+                    "procedure",
+                    "repeat_interval",
+                    "repeat_mode",
+                    "repeat_unit",
+                    "room",
+                    "season",
+                    "season_end_month",
+                    "season_start_month",
+                    "series_start",
+                    "title",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "task_materials": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "task": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "article": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    }
+                  },
+                  "required": [
+                    "article",
+                    "created_at",
+                    "id",
+                    "quantity",
+                    "task",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "occurrences": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "task": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "due_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "visible_from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 10,
+                      "enum": [
+                        "done",
+                        "planned",
+                        "postponed",
+                        "skipped"
+                      ]
+                    },
+                    "status_before": {
+                      "type": "string",
+                      "maxLength": 10
+                    },
+                    "postponed_from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "completed_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "completed_by": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    },
+                    "actual_cost": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "completion_note": {
+                      "type": "string"
+                    },
+                    "follows": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "actual_cost",
+                    "completed_by",
+                    "completed_on",
+                    "completion_note",
+                    "created_at",
+                    "due_on",
+                    "follows",
+                    "id",
+                    "postponed_from",
+                    "status",
+                    "status_before",
+                    "task",
+                    "updated_at",
+                    "visible_from"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "stock_draws": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "occurrence": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "article": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "wanted": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "drawn": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    }
+                  },
+                  "required": [
+                    "article",
+                    "created_at",
+                    "drawn",
+                    "id",
+                    "occurrence",
+                    "updated_at",
+                    "wanted"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "task": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "occurrence": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "file": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^files/[a-z_]+/[0-9a-f-]{36}(\\.[a-z0-9]+)?$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "maxLength": 100
+                    },
+                    "is_image": {
+                      "type": "boolean"
+                    },
+                    "size_bytes": {
+                      "type": "integer"
+                    },
+                    "width": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "height": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "content_type",
+                    "created_at",
+                    "file",
+                    "height",
+                    "id",
+                    "is_image",
+                    "name",
+                    "occurrence",
+                    "size_bytes",
+                    "task",
+                    "updated_at",
+                    "width"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "stock": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "stock"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "stock_items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "manufacturer_reference": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "dimensions": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "storage_location": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "unit": {
+                      "type": "string",
+                      "maxLength": 24,
+                      "enum": [
+                        "",
+                        "box",
+                        "kilogram",
+                        "litre",
+                        "metre",
+                        "other",
+                        "piece",
+                        "roll"
+                      ]
+                    },
+                    "unit_other": {
+                      "type": "string",
+                      "maxLength": 24
+                    },
+                    "threshold": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "unit_price": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^files/[a-z_]+/[0-9a-f-]{36}(\\.[a-z0-9]+)?$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "label_content_type": {
+                      "type": "string",
+                      "maxLength": 32
+                    },
+                    "compatible_items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    },
+                    "rooms": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  "required": [
+                    "compatible_items",
+                    "created_at",
+                    "dimensions",
+                    "id",
+                    "label",
+                    "label_content_type",
+                    "manufacturer_reference",
+                    "name",
+                    "notes",
+                    "rooms",
+                    "storage_location",
+                    "threshold",
+                    "unit",
+                    "unit_other",
+                    "unit_price",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "stock_suppliers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "article": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "reference": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "url": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "last_price": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    }
+                  },
+                  "required": [
+                    "article",
+                    "created_at",
+                    "id",
+                    "last_price",
+                    "name",
+                    "reference",
+                    "updated_at",
+                    "url"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "stock_movements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "article": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "entry",
+                        "exit",
+                        "inventory"
+                      ]
+                    },
+                    "quantity": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "delta": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "occurred_on": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "occurrence": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "article",
+                    "created_at",
+                    "delta",
+                    "id",
+                    "kind",
+                    "note",
+                    "occurred_on",
+                    "occurrence",
+                    "quantity",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "projects": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "projects"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "projects": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "goal": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 12,
+                      "enum": [
+                        "abandoned",
+                        "done",
+                        "idea",
+                        "in_progress",
+                        "planned"
+                      ]
+                    },
+                    "priority": {
+                      "type": "string",
+                      "maxLength": 8,
+                      "enum": [
+                        "high",
+                        "low",
+                        "normal"
+                      ]
+                    },
+                    "estimated_minutes": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "season": {
+                      "type": "string",
+                      "maxLength": 10,
+                      "enum": [
+                        "",
+                        "autumn",
+                        "custom",
+                        "spring",
+                        "summer",
+                        "winter"
+                      ]
+                    },
+                    "season_start_month": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "season_end_month": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "rooms": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "estimated_minutes",
+                    "goal",
+                    "id",
+                    "priority",
+                    "rooms",
+                    "season",
+                    "season_end_month",
+                    "season_start_month",
+                    "status",
+                    "title",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "project_budget_lines": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "project": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "label": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "nature": {
+                      "type": "string",
+                      "maxLength": 10,
+                      "enum": [
+                        "labour",
+                        "material",
+                        "other",
+                        "rental"
+                      ]
+                    },
+                    "planned": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "paid": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "id",
+                    "label",
+                    "nature",
+                    "paid",
+                    "planned",
+                    "project",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "project_quotes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "project": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "contractor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "issued_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "valid_until": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 10,
+                      "enum": [
+                        "accepted",
+                        "received",
+                        "rejected",
+                        "requested"
+                      ]
+                    },
+                    "budget_line": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "paperless_id": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "paperless_url": {
+                      "type": "string",
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "budget_line",
+                    "contractor",
+                    "created_at",
+                    "id",
+                    "issued_on",
+                    "note",
+                    "paperless_id",
+                    "paperless_url",
+                    "project",
+                    "status",
+                    "updated_at",
+                    "valid_until"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "project_files": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "project": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "quote": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "file": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^files/[a-z_]+/[0-9a-f-]{36}(\\.[a-z0-9]+)?$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "content_type": {
+                      "type": "string",
+                      "maxLength": 100
+                    },
+                    "is_image": {
+                      "type": "boolean"
+                    },
+                    "size_bytes": {
+                      "type": "integer"
+                    },
+                    "width": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "height": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "content_type",
+                    "created_at",
+                    "file",
+                    "height",
+                    "id",
+                    "is_image",
+                    "name",
+                    "project",
+                    "quote",
+                    "size_bytes",
+                    "updated_at",
+                    "width"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "project_links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "project": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "url": {
+                      "type": "string",
+                      "maxLength": 500
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "image": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "id",
+                    "image",
+                    "project",
+                    "title",
+                    "updated_at",
+                    "url"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "project_tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "project": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "task": {
+                      "type": "string",
+                      "format": "uuid"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "id",
+                    "project",
+                    "task",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "project_envelopes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "year": {
+                      "type": "integer"
+                    },
+                    "amount": {
+                      "type": "string",
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    }
+                  },
+                  "required": [
+                    "amount",
+                    "created_at",
+                    "id",
+                    "updated_at",
+                    "year"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "calendar": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "calendar"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "calendar_feeds": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "user": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    },
+                    "regenerated_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "created_at",
+                    "id",
+                    "regenerated_at",
+                    "updated_at",
+                    "user"
+                  ],
+                  "additionalProperties": false
+                },
+                "description": "Kept for the owners; not restored: the address of a feed is a secret that is not kept."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "labels": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "labels"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "code": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "maxLength": 32
+                    },
+                    "kind": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "article",
+                        "item",
+                        "room"
+                      ]
+                    },
+                    "room": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "item": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "article": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "revoked_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "article",
+                    "code",
+                    "created_at",
+                    "id",
+                    "item",
+                    "kind",
+                    "revoked_at",
+                    "room",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      },
+      "reports": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "const": "reports"
+          },
+          "sections": {
+            "type": "object",
+            "properties": {
+              "reports": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updated_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "title": {
+                      "type": "string",
+                      "maxLength": 200
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "no_action",
+                        "open",
+                        "resolved",
+                        "task"
+                      ]
+                    },
+                    "reporter": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    },
+                    "room": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "item": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "article": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "place": {
+                      "type": "string",
+                      "maxLength": 250
+                    },
+                    "task": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid"
+                    },
+                    "closed_at": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    },
+                    "closed_by": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "uuid",
+                      "description": "a person of `people`"
+                    },
+                    "photo": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^files/[a-z_]+/[0-9a-f-]{36}(\\.[a-z0-9]+)?$"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "photo_content_type": {
+                      "type": "string",
+                      "maxLength": 32
+                    },
+                    "photo_size_bytes": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "article",
+                    "closed_at",
+                    "closed_by",
+                    "created_at",
+                    "id",
+                    "item",
+                    "photo",
+                    "photo_content_type",
+                    "photo_size_bytes",
+                    "place",
+                    "reporter",
+                    "room",
+                    "status",
+                    "task",
+                    "title",
+                    "updated_at"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "app",
+          "sections"
+        ]
+      }
+    }
+  }
+}

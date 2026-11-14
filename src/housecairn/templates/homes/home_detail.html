@@ -3,8 +3,11 @@
 {% block head_title %}{{ home.name }}{% endblock head_title %}
 {% block content %}
   {% url 'homes:list' as parent %}{% back_link parent %}
-  <h1>{{ home.name }}</h1>
+  <h1>{{ home.name }}{% if home.is_archived %} <span class="pill">{% translate "Archived" %}</span>{% endif %}</h1>
   {% tab_bar "home" %}
+  {% if home.is_archived %}
+    <div class="alert alert-info" role="status">{% translate "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. You can still open it and change it." %}</div>
+  {% endif %}
   <section class="card">
     <dl class="facts">
       <div><dt>{% translate "Your role" %}</dt><dd>{{ role.label }}</dd></div>
@@ -55,6 +58,11 @@
     </ul>
   {% endif %}
   {% if role == "owner" %}
+    {% if home.is_archived %}
+      <a class="button button-secondary button-block" href="{% url_with_next 'homes:unarchive' home_id=home.id %}">{% translate "Bring this home back" %}</a>
+    {% else %}
+      <a class="button button-secondary button-block" href="{% url_with_next 'homes:archive' home_id=home.id %}">{% translate "Archive this home" %}</a>
+    {% endif %}
     <a class="button button-danger button-block" href="{% url_with_next 'homes:delete' home_id=home.id %}">{% translate "Delete this home" %}</a>
   {% endif %}
 {% endblock content %}

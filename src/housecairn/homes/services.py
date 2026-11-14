@@ -91,6 +91,15 @@ def open_homes(homes: models.QuerySet[Home], providers: frozenset[str]) -> model
     return homes.filter(models.Q(required_provider="") | models.Q(required_provider__in=providers))
 
 
+def active_homes(homes: models.QuerySet[Home]) -> models.QuerySet[Home]:
+    """Of `homes`, those not archived: what the lists, Today and the reminders cover (ADR 0079).
+
+    Reading, changing or exporting a home opened by its address does not go through here:
+    an archived home stays readable and editable.
+    """
+    return homes.filter(archived_at__isnull=True)
+
+
 def is_open(home: Home, providers: frozenset[str]) -> bool:
     return not home.required_provider or home.required_provider in providers
 
@@ -212,6 +221,39 @@ def lift_all_unavailable_requirements(*, declared: Iterable[str]) -> int:
         .exclude(required_provider__in=list(declared))
         .update(required_provider="", updated_at=timezone.now())
     )
+
+
+# ---------- archiving ----------
+
+
+@transaction.atomic
+def archive_home(actor: AnyUser, home: Home) -> Home:
+    """An owner archives the home: listed apart, no reminder, an empty calendar feed.
+
+    Nothing is deleted and nothing becomes read only (docs/adr/0079). Archiving a home that
+    is archived already changes nothing and records nothing.
+    """
+    _require_owner(actor, home)
+    if home.archived_at is None:
+        home.archived_at = timezone.now()
+        home.save(update_fields=["archived_at", "updated_at"])
+        audit.record(
+            "home.archived", actor=actor if isinstance(actor, User) else None, home_id=home.id
+        )
+    return home
+
+
+@transaction.atomic
+def unarchive_home(actor: AnyUser, home: Home) -> Home:
+    """An owner brings the home back: it is listed again and its reminders resume."""
+    _require_owner(actor, home)
+    if home.archived_at is not None:
+        home.archived_at = None
+        home.save(update_fields=["archived_at", "updated_at"])
+        audit.record(
+            "home.unarchived", actor=actor if isinstance(actor, User) else None, home_id=home.id
+        )
+    return home
 
 
 # ---------- deletion ----------

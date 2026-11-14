@@ -38,8 +38,8 @@ def report_created(report_id: str) -> int:
     if not services.is_enabled():
         return 0
     report = Report.objects.select_related("home").filter(pk=report_id).first()
-    if report is None:
-        return 0
+    if report is None or report.home.archived_at is not None:
+        return 0  # an archived home sends no alert (docs/adr/0079)
     people = (
         Membership.objects.filter(home=report.home, role__in=WRITE_ROLES, user__is_active=True)
         .exclude(user_id=report.reporter_id)

@@ -24,13 +24,13 @@ The archive is a zip:
 
 | Part | Content |
 | --- | --- |
-| `manifest.json` | `format` (`"housecairn-export"`), `version` (`3`), `application_version`, `exported_at`, `home` (its id), `apps` (the documents below) and `entries`: the SHA-256 digest and the size of every other file of the archive. |
+| `manifest.json` | `format` (`"housecairn-export"`), `version` (`4`), `application_version`, `exported_at`, `home` (its id), `apps` (the documents below) and `entries`: the SHA-256 digest and the size of every other file of the archive. |
 | `data/<app>.json` | The data of one part of the application: `{"app": ..., "sections": {<section>: [objects]}}`. |
 | `files/<folder>/<id>.<extension>` | The files: `photos/`, `attachments/` (files of tasks), `stock/` (labels of stock items), `projects/` (photos, link pictures, quotes) and `reports/`. |
 | `README.txt` | A reminder of the format. |
 
-Its [JSON Schema](../_static/schemas/housecairn-export-v3.schema.json) is
-published with this documentation (the one of [version 2](../_static/schemas/housecairn-export-v2.schema.json) stays). The rules that hold for every section:
+Its [JSON Schema](../_static/schemas/housecairn-export-v4.schema.json) is
+published with this documentation (the ones of [version 3](../_static/schemas/housecairn-export-v3.schema.json) and [version 2](../_static/schemas/housecairn-export-v2.schema.json) stay). The rules that hold for every section:
 
 - **Every field of the table**, by its name in the code: an object of
   `rooms` has `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ...,
@@ -55,7 +55,7 @@ published with this documentation (the one of [version 2](../_static/schemas/hou
 
 | Document | Sections |
 | --- | --- |
-| `homes` | `home` (id, name, currency, hemisphere, sign-in requirement, dates), `people`, `members` (person and role) and `pending_invitations` (address, role, dates; never the link). |
+| `homes` | `home` (id, name, currency, hemisphere, sign-in requirement, `archived_at`, dates), `people`, `members` (person and role) and `pending_invitations` (address, role, dates; never the link). |
 | `events` | `events` received, without the token they came with. |
 | `rooms` | `rooms` (with the room memory), `items`, `photos`. |
 | `stock` | `stock_items`, `stock_suppliers`, `stock_movements`. The quantity in stock is the sum of the movements. |
@@ -78,6 +78,12 @@ version 3, the id of a contractor (`contract_contractor`). The restore links the
 contractor of the archive of that name (case and extra spaces ignored) and, when the archive
 has none, adds one, with the trade Other
 ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md)).
+
+Version 3 archives are restored too: the only difference is that version 4 adds
+`archived_at` to the `home` of `data/homes.json`, the date and time an owner archived the home
+or `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). A
+version 3 or 2 archive restores a home that is not archived; a version 4 archive of an
+archived home restores it archived, as a copy too.
 
 ## Tables for a spreadsheet
 

@@ -52,7 +52,7 @@ from housecairn.homes import exports, quotas, services
 from housecairn.homes.exports import FileSpec, Section
 from housecairn.homes.models import Home, Membership, Role
 
-SUPPORTED_VERSIONS = frozenset({2, 3})
+SUPPORTED_VERSIONS = frozenset({2, 3, 4})
 DOCUMENT_MAX_BYTES = 64 * 1024 * 1024
 MAX_ENTRIES = 200_000
 _UUID = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
@@ -643,13 +643,17 @@ def _people(
     return found, matched, unattributed
 
 
-def _home_values(document: dict[str, Any]) -> tuple[uuid.UUID, dict[str, Any]]:
+def _home_values(document: dict[str, Any], version: int) -> tuple[uuid.UUID, dict[str, Any]]:
     raw = document.get("home")
     if not isinstance(raw, dict):
         raise _refuse(_("The manifest of the archive is incomplete."))
     fields = {f.name: f for f in Home._meta.concrete_fields}
     values: dict[str, Any] = {}
-    for name in ("name", "currency", "hemisphere", "required_provider", "created_at", "updated_at"):
+    names = ["name", "currency", "hemisphere", "required_provider", "created_at", "updated_at"]
+    if version >= 4:
+        # Format 4 adds the archiving of the home (docs/adr/0079); older archives have none.
+        names.append("archived_at")
+    for name in names:
         try:
             values[name] = _parse(fields[name], raw.get(name))
             _validate(fields[name], values[name])
@@ -785,7 +789,7 @@ def restore_home(
 
     archive = read_archive(source)
     homes_doc = archive.documents["homes"]
-    home_id, home_values = _home_values(homes_doc)
+    home_id, home_values = _home_values(homes_doc, archive.manifest["version"])
     if home_id != _manifest_home(archive):
         raise _refuse(_("The manifest of the archive is incomplete."))
     if as_copy:

@@ -33,6 +33,8 @@ HELP_PAGES: dict[str, str] = {
     "homes:restore": "administration/data/",
     "homes:import": "screens/home-import/",
     "homes:delete": "screens/home/",
+    "homes:archive": "screens/home/",
+    "homes:unarchive": "screens/home/",
     "account_delete": "screens/account/",
     "profile": "screens/profile/",
     "instance:overview": "screens/instance/",

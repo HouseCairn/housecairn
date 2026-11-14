@@ -20,6 +20,21 @@ Under **Settings**, two rows lead to the [QR labels](qr-labels.md) and to the
 [reports](reports.md) of the home; the second shows how many reports wait when you
 may write.
 
+## Archive a home
+
+Owners see **Archive this home** above **Delete this home**. A page asks for a confirmation
+first. An archived home is not deleted and not locked: it is **listed apart** on
+[My homes](homes.md), under **Archived**; it leaves [Today](today.md), the
+[calendar](../guides/calendar.md) and the home selector; it **sends no reminder** and no
+alert of a new report; and its [calendar feeds](../guides/calendar.md) keep their address
+but hold no event. Opening it from the list shows its page, marked **Archived**, and every
+page of the home still opens and can be changed as before.
+
+On an archived home, owners see **Bring this home back** instead: after a confirmation the
+home is listed again and its reminders resume. Only owners archive or bring back a home,
+as only they delete it. Both actions are recorded in the [audit log](audit.md). After
+either, you go back to where you came from.
+
 ## Tables for a spreadsheet
 
 Every member sees the list **Tables for a spreadsheet**: the rooms, items,

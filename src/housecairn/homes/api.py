@@ -80,10 +80,19 @@ class HomeSerializer(serializers.ModelSerializer[Home]):
             "role",
             "required_provider",
             "locked",
+            "archived_at",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "role", "locked", "created_at", "updated_at"]
+        read_only_fields = ["id", "role", "locked", "archived_at", "created_at", "updated_at"]
+        extra_kwargs = {
+            "archived_at": {
+                "help_text": (
+                    "When an owner archived the home; null when it is not archived. Changed "
+                    "by `archive/` and `unarchive/` only."
+                )
+            }
+        }
 
     @extend_schema_field(serializers.ChoiceField(choices=Role.choices, allow_null=True))
     def get_role(self, home: Home) -> str | None:
@@ -151,7 +160,8 @@ class HomeViewSet(
 
     The list includes homes locked behind a sign-in provider (`locked`); reading
     or changing one answers 403 with `code: sso_required` until the session
-    signs in through it.
+    signs in through it. It also includes archived homes (`archived_at` is set): the
+    screens hide them, the API does not, so an integration keeps seeing its homes.
     """
 
     serializer_class = HomeSerializer
@@ -204,6 +214,33 @@ class HomeViewSet(
                     )
         except DjangoValidationError as exc:
             raise _validation(exc) from exc
+        return Response(self.get_serializer(home).data)
+
+    @extend_schema(request=None, responses={200: HomeSerializer})
+    @action(detail=True, methods=["post"])
+    def archive(self, request: Request, home_id: str) -> Response:
+        """Archive the home: hidden from the screens' lists and Today, no reminder, an empty
+        calendar feed. Nothing is deleted. Owners only, signed in: an API token cannot."""
+        return self._archiving(request, archive=True)
+
+    @extend_schema(request=None, responses={200: HomeSerializer})
+    @action(detail=True, methods=["post"])
+    def unarchive(self, request: Request, home_id: str) -> Response:
+        """Bring an archived home back. Owners only, signed in: an API token cannot."""
+        return self._archiving(request, archive=False)
+
+    def _archiving(self, request: Request, *, archive: bool) -> Response:
+        if isinstance(request.auth, ApiToken):
+            # A leaked integration token must not silence the reminders of a home.
+            raise exceptions.PermissionDenied(
+                "API tokens cannot archive or bring back a home; sign in instead."
+            )
+        home = self.get_home()
+        change = services.archive_home if archive else services.unarchive_home
+        try:
+            home = change(request.user, home)
+        except PermissionDenied as exc:
+            raise exceptions.PermissionDenied() from exc
         return Response(self.get_serializer(home).data)
 
     @extend_schema(request=None, responses={204: None})
