@@ -161,10 +161,10 @@ class TaskSerializer(serializers.ModelSerializer[Task]):
 
     @extend_schema_field(LinkedReportSerializer(many=True))
     def get_reports(self, task: Task) -> list[dict[str, Any]]:
-        found = getattr(task, "visible_reports", None)
+        # Always prefetched by `get_queryset` (`reports_of_task`, filtered by what the person
+        # may see); there is deliberately no unfiltered fallback.
+        found: list[Any] = task.visible_reports  # type: ignore[attr-defined]
         request = self.context["request"]
-        if found is None:  # a task serialized without the list's prefetch
-            found = list(report_services.visible_reports(request.user, task.home).filter(task=task))
         rows = [
             {
                 "id": report.id,
