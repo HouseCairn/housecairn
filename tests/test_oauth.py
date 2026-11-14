@@ -2,6 +2,7 @@
 (docs/adr/0078)."""
 
 from datetime import timedelta
+from typing import Any
 
 import pytest
 from django.conf import settings
@@ -466,3 +467,44 @@ class TestScoping:
         call_command("check")
         AppConnection.objects.get().user.delete()
         assert not AppConnection.objects.exists()
+
+
+class TestUnits:
+    """What the HTTP answers alone cannot tell apart."""
+
+    def _request(self, token: str) -> object:
+        from rest_framework.request import Request
+        from rest_framework.test import APIRequestFactory
+
+        from housecairn.apitokens.sync import SyncInfoView
+
+        raw = APIRequestFactory().get(INFO, HTTP_AUTHORIZATION=f"Bearer {token}")
+        return Request(raw, parser_context={"view": SyncInfoView()})
+
+    def test_an_expired_hca_token_is_refused_never_passed_on(
+        self, alice: User, alice_home: Home
+    ) -> None:
+        """Never "not mine": the next class must not decide for an `hca_` token."""
+        from rest_framework.exceptions import AuthenticationFailed
+
+        from housecairn.apitokens.authentication import ConnectionAuthentication
+
+        phone = connect(alice, [alice_home])
+        AccessToken.objects.update(expires=timezone.now() - timedelta(seconds=1))
+        with pytest.raises(AuthenticationFailed):
+            ConnectionAuthentication().authenticate(self._request(phone.access))  # type: ignore[arg-type]
+        with pytest.raises(AuthenticationFailed):
+            ConnectionAuthentication().authenticate(self._request("hca_unknown"))  # type: ignore[arg-type]
+        assert ConnectionAuthentication().authenticate(self._request("hc_other")) is None  # type: ignore[arg-type]
+
+    def test_a_connection_needs_the_scope_sync(self, alice: User, alice_home: Home) -> None:
+        from housecairn.apitokens.authentication import ConnectionAuthentication
+        from housecairn.apitokens.permissions import TokenScopePermission
+        from housecairn.apitokens.sync import SyncInfoView
+
+        phone = connect(alice, [alice_home], scope="sync homes.create", may_create_homes=True)
+        request: Any = self._request(phone.access)
+        request.user, request.auth = ConnectionAuthentication().authenticate(request)  # type: ignore[misc]
+        assert TokenScopePermission().has_permission(request, SyncInfoView())
+        request.auth.scope = "homes.create"
+        assert not TokenScopePermission().has_permission(request, SyncInfoView())

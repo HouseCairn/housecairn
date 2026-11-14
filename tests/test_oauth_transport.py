@@ -36,13 +36,13 @@ class TestRule:
     @pytest.mark.parametrize(
         ("peer", "host"),
         [
-            ("192.168.1.30", "192.168.1.20:8000"),
-            ("10.0.0.5", "10.0.0.2"),
+            ("172.16.1.30", "172.16.1.20:8000"),
+            ("172.31.0.5", "172.31.0.2"),
             ("127.0.0.1", "127.0.0.1:8000"),
             ("100.64.1.2", "100.100.1.1:8000"),  # shared address space: a household VPN
             ("fd00::5", "[fd00::1]:8000"),
             ("fe80::1", "[fe80::2]"),
-            ("::ffff:192.168.1.30", "192.168.1.20"),  # judged by the IPv4 address it carries
+            ("::ffff:172.16.1.30", "172.16.1.20"),  # judged by the IPv4 address it carries
         ],
     )
     def test_local_peer_and_local_literal_pass(self, peer: str, host: str) -> None:
@@ -51,12 +51,12 @@ class TestRule:
     @pytest.mark.parametrize(
         ("peer", "host"),
         [
-            ("9.9.9.9", "192.168.1.20"),  # a public peer with a private Host
-            ("8.8.8.8", "192.168.1.20"),
-            ("192.168.1.30", "house.local"),  # a name, multicast DNS included
-            ("192.168.1.30", "house.home.arpa"),
-            ("192.168.1.30", "example.com"),
-            ("192.168.1.30", "8.8.8.8"),  # a public literal
+            ("9.9.9.9", "172.16.1.20"),  # a public peer with a private Host
+            ("8.8.8.8", "172.16.1.20"),
+            ("172.16.1.30", "house.local"),  # a name, multicast DNS included
+            ("172.16.1.30", "house.home.arpa"),
+            ("172.16.1.30", "example.com"),
+            ("172.16.1.30", "8.8.8.8"),  # a public literal
             ("2001:4860:4860::8888", "[fd00::1]"),
         ],
     )
@@ -86,10 +86,10 @@ class TestRule:
 
     def test_the_client_a_trusted_proxy_reports_is_the_peer(self) -> None:
         # The proxy is local, the client it reports is not: plain HTTP is refused.
-        with override_settings(HOUSECAIRN_FORWARDED_ALLOW_IPS=["192.168.1.1"]):
-            request = make("192.168.1.1", "192.168.1.20", HTTP_X_FORWARDED_FOR="8.8.8.8")
+        with override_settings(HOUSECAIRN_FORWARDED_ALLOW_IPS=["172.16.1.1"]):
+            request = make("172.16.1.1", "172.16.1.20", HTTP_X_FORWARDED_FOR="8.8.8.8")
             assert transport.refusal(request) is not None  # type: ignore[arg-type]
-            request = make("192.168.1.1", "192.168.1.20", HTTP_X_FORWARDED_FOR="192.168.1.30")
+            request = make("172.16.1.1", "172.16.1.20", HTTP_X_FORWARDED_FOR="172.16.1.30")
             assert transport.refusal(request) is None  # type: ignore[arg-type]
 
     def test_https_needs_neither(self) -> None:
@@ -114,7 +114,7 @@ class TestEndpoints:
         assert Client().get("/api/v1/sync/info").json()["code"] == "insecure_transport"
 
     def test_plain_http_on_the_local_network(self, alice: User, alice_home: Home) -> None:
-        local = {"REMOTE_ADDR": "192.168.1.30", "HTTP_HOST": "192.168.1.20:8000"}
+        local = {"REMOTE_ADDR": "172.16.1.30", "HTTP_HOST": "172.16.1.20:8000"}
         if True:
             client = Client()
             client.force_login(alice)
@@ -132,7 +132,7 @@ class TestEndpoints:
             assert info.status_code == 200
 
     def test_the_consent_page_warns_on_plain_http(self, alice: User, alice_home: Home) -> None:
-        local = {"REMOTE_ADDR": "192.168.1.30", "HTTP_HOST": "192.168.1.20"}
+        local = {"REMOTE_ADDR": "172.16.1.30", "HTTP_HOST": "172.16.1.20"}
         if True:
             client = Client()
             client.force_login(alice)
@@ -145,6 +145,25 @@ class TestEndpoints:
 
     def test_a_public_peer_with_a_private_host_is_refused(self) -> None:
         if True:
-            answer = Client().post("/o/token/", {}, REMOTE_ADDR="9.9.9.9", HTTP_HOST="192.168.1.20")
+            answer = Client().post("/o/token/", {}, REMOTE_ADDR="9.9.9.9", HTTP_HOST="172.16.1.20")
             assert answer.status_code == 403
             assert answer.json()["code"] == "insecure_transport"
+
+
+class TestOauthlibAddress:
+    """oauthlib's own HTTPS check sees `https` only for a request the rule accepted."""
+
+    def _address(self, peer: str, host: str) -> str:
+        from housecairn.apitokens.oauth import TransportRuleCore
+
+        return TransportRuleCore()._get_escaped_full_path(make(peer, host))  # type: ignore[no-any-return]
+
+    def test_local_plain_http_is_given_as_https(self) -> None:
+        assert self._address("172.16.1.30", "172.16.1.20:8000").startswith("https://")
+
+    @pytest.mark.parametrize(
+        ("peer", "host"),
+        [("8.8.8.8", "172.16.1.20"), ("172.16.1.30", "house.local")],
+    )
+    def test_refused_plain_http_stays_http(self, peer: str, host: str) -> None:
+        assert self._address(peer, host).startswith("http://")

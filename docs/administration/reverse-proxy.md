@@ -71,7 +71,7 @@ HTTPS. Plain HTTP is accepted only when both of these hold:
   `X-Forwarded-For` (or the peer itself without a trusted proxy), is not a public address:
   loopback, private networks, unique local IPv6, link-local, the shared space `100.64.0.0/10`
   of a household VPN, documentation ranges;
-- **the address the phone uses is a local IP address**, such as `http://192.168.1.20:8000`,
+- **the address the phone uses is a local IP address**, such as `http://192.0.2.20:8000`,
   never a name: `.local` and `.home.arpa` names are refused on plain HTTP, since anyone on the
   network can answer for them. A household that wants a name uses HTTPS.
 
