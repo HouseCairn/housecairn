@@ -51,13 +51,42 @@ def cents(amount: Decimal) -> Decimal:
 
 @dataclass(frozen=True)
 class ProjectRow:
-    """A project as the budget counts it. An abandoned project plans nothing any more."""
+    """A project as the budget counts it. An abandoned project plans nothing any more.
+
+    `amounts` and `by_nature` are its budget lines, and the estimates of its tasks where no
+    line covers them (`project_plan`); `tasks_planned` is what its tasks plan in all.
+    """
 
     project: Project
     amounts: Amounts
     year: int
     rooms: tuple[Room, ...]
     by_nature: dict[str, Amounts]
+    tasks_planned: Decimal = ZERO
+
+
+# The natures a task plans in: its material budget and stock items, its labour budget.
+TASK_NATURES = (BudgetNature.MATERIAL, BudgetNature.LABOUR)
+
+
+def project_plan(
+    by_nature: dict[str, Amounts], from_tasks: dict[str, Decimal]
+) -> dict[str, Amounts]:
+    """The lines of a project, with what its tasks plan beyond them (docs/adr/0073).
+
+    Nature by nature, the lines cover the estimates of the tasks: materials against
+    materials, labour against labour. What the tasks plan above the lines of their nature is
+    added to the planned amount, never committed nor paid; what the lines already hold is not
+    added again. So a project plans the more of its lines and its tasks, nature by nature, and
+    no amount is counted twice.
+    """
+    result = dict(by_nature)
+    for nature in TASK_NATURES:
+        lines = result.get(nature, Amounts())
+        beyond = max(from_tasks.get(nature, ZERO) - lines.planned, ZERO)
+        if beyond:
+            result[nature] = lines + Amounts(beyond)
+    return result
 
 
 @dataclass(frozen=True)
@@ -141,6 +170,21 @@ class TaskRow:
         first = datetime.date(self.today.year, 1, 1)
         return first if day and day < first else day
 
+    def _open_in(
+        self,
+        day: datetime.date | None,
+        window: Callable[[datetime.date | None], bool],
+        year: int | None,
+    ) -> bool:
+        """Whether an open occurrence is in the period. Read for a year, one with no date is
+        to be done now: it counts in the current year, the way a late one does, and in no
+        other, so that it is planned once (docs/adr/0073)."""
+        if year is None:
+            return window(day)
+        if day is None:
+            return year == self.today.year
+        return window(self.counted_on(day))
+
     def projected(self, year: int) -> int:
         """How many times the repetition will still bring the task due in `year`.
 
@@ -177,14 +221,11 @@ class TaskRow:
         """The occurrences done in the window, and the open ones due in it (if asked).
 
         With a `year` the times the repetition will still bring in that year are added to the
-        plan (none paid yet). The window and the year are the same period.
+        plan (none paid yet), and an open occurrence with no date is counted in the current
+        year (docs/adr/0073). The window and the year are the same period.
         """
         done = [(day, cost) for day, cost in self.done if window(day)]
-        coming = (
-            [day for day in self.open if window(self.counted_on(day) if year is not None else day)]
-            if open_too
-            else []
-        )
+        coming = [day for day in self.open if self._open_in(day, window, year)] if open_too else []
         projected = self.projected(year) if year is not None and open_too else 0
         count = len(done) + len(coming) + projected
         return TaskFigures(
@@ -356,22 +397,41 @@ def load(home: Home, today: datetime.date | None = None) -> Ledger:
     by_project: dict[UUID, list[Any]] = defaultdict(list)
     for line in lines:
         by_project[line.project_id].append(line)
+    # What the tasks of each project plan, by nature: their estimate each time they are done
+    # or open, whatever the date, since the whole project is counted in one year.
+    task_of = {task.id: task for task in tasks}
+    from_tasks: dict[UUID, dict[str, Decimal]] = defaultdict(dict)
+    for task_id, project_id in in_project.items():
+        task = task_of.get(task_id)
+        if task is None:
+            continue
+        times = len(occurrences.get(task_id, ()))
+        stock = stock_plan(stock_lines.get(task_id, ())).amount
+        wanted = from_tasks[project_id]
+        for nature, each in (
+            (BudgetNature.MATERIAL, (task.material_budget or ZERO) + stock),
+            (BudgetNature.LABOUR, task.labour_budget or ZERO),
+        ):
+            wanted[nature] = wanted.get(nature, ZERO) + each * times
     rows = []
     for project in projects:
         abandoned = project.status == ProjectStatus.ABANDONED
-        total = Amounts()
         by_nature: dict[str, Amounts] = {}
         for line in by_project[project.id]:
             planned = ZERO if abandoned else line.planned
             amounts = Amounts(planned, committed[line.id], line.paid)
             by_nature[line.nature] = by_nature.get(line.nature, Amounts()) + amounts
-            total += amounts
+        tasks_plan = {} if abandoned else from_tasks.get(project.id, {})
+        by_nature = project_plan(by_nature, tasks_plan)
+        total = _sum(by_nature.values())
         days = [*quote_days[project.id], *task_days[project.id]]
         year = min(days).year if days else timezone.localtime(project.created_at).year
         rooms_of = tuple(sorted(project.rooms.all(), key=lambda r: (r.position, r.name, r.id)))
-        rows.append(ProjectRow(project, total, year, rooms_of, by_nature))
+        rows.append(
+            ProjectRow(project, total, year, rooms_of, by_nature, sum(tasks_plan.values(), ZERO))
+        )
 
-    # Maintenance: the tasks that are in no project (a project holds its own money).
+    # Maintenance: the tasks that are in no project (a project counts its own tasks).
     maintenance = []
     for task in tasks:
         if task.id in in_project:
@@ -512,7 +572,12 @@ def by_project(ledger: Ledger) -> Report:
             row.project.id,
             row.project.title,
             row.amounts,
-            {"year": row.year, "status": row.project.status, "to_pay": row.amounts.to_pay},
+            {
+                "year": row.year,
+                "status": row.project.status,
+                "to_pay": row.amounts.to_pay,
+                "tasks_planned": row.tasks_planned,
+            },
         )
         for row in ledger.projects
     ]

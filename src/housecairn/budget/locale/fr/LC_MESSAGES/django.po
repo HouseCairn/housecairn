@@ -55,6 +55,9 @@ msgstr "Compté en"
 msgid "To pay"
 msgstr "À payer"
 
+msgid "Planned by its tasks"
+msgstr "Prévu par ses tâches"
+
 msgid "Task"
 msgstr "Tâche"
 
@@ -265,11 +268,18 @@ msgstr "Budget par projet"
 msgid "Each project is counted in one year, the year it starts. An abandoned project plans nothing any more: what was paid on it shows as spent without a plan."
 msgstr "Chaque projet est compté dans une seule année, celle où il commence. Un projet abandonné ne prévoit plus rien : ce qui a été payé dessus apparaît comme dépensé sans prévu."
 
+msgid "Planned is the budget lines of the project, and what its tasks plan beyond the lines of the same nature, materials or labour: an estimate a line already holds is not counted twice."
+msgstr "Le prévu, ce sont les lignes de budget du projet, et ce que ses tâches prévoient au-delà des lignes de même nature, matériel ou main-d'œuvre : une estimation qu'une ligne couvre déjà n'est pas comptée deux fois."
+
 msgid "Planned, committed and paid, project by project"
 msgstr "Prévu, engagé et payé, projet par projet"
 
 msgid "Still to pay"
 msgstr "Reste à payer"
+
+#, python-format
+msgid "Planned by its tasks: %(amount)s"
+msgstr "Prévu par ses tâches : %(amount)s"
 
 msgid "Total"
 msgstr "Total"
@@ -310,8 +320,8 @@ msgid "Budget of the upkeep"
 msgstr "Budget de l'entretien"
 
 #, python-format
-msgid "The tasks that are in no project, with the occurrences of %(year)s: those done, the one open, and those the repetition will still bring before the end of the year. The money of a task of a project is in the budget lines of the project."
-msgstr "Les tâches qui ne sont dans aucun projet, avec les occurrences de %(year)s : celles qui sont faites, celle qui est ouverte et celles que la répétition amènera encore avant la fin de l'année. L'argent d'une tâche de projet est dans les lignes de budget du projet."
+msgid "The tasks that are in no project, with the occurrences of %(year)s: those done, the one open, and those the repetition will still bring before the end of the year. An open task with no date counts in the current year. A task of a project counts in its project."
+msgstr "Les tâches qui ne sont dans aucun projet, avec les occurrences de %(year)s : celles qui sont faites, celle qui est ouverte et celles que la répétition amènera encore avant la fin de l'année. Une tâche ouverte sans date compte dans l'année en cours. Une tâche de projet compte dans son projet."
 
 msgid "Estimate, cost a year and what was paid, task by task"
 msgstr "Estimation, coût par an et ce qui a été payé, tâche par tâche"
