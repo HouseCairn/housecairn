@@ -7,6 +7,7 @@ from typing import Any
 from allauth.account import views as allauth_views
 from allauth.account.adapter import get_adapter
 from allauth.core import ratelimit
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as django_login
 from django.contrib.auth import logout
@@ -23,6 +24,7 @@ from django.views.generic import FormView, View
 from housecairn.accounts import forms, provider_names, services, setup
 from housecairn.accounts.adapters import MailDeliveryError
 from housecairn.accounts.models import DisplayNameSource, User
+from housecairn.core.language import chosen_language
 from housecairn.homes.scoping import allow
 
 
@@ -127,6 +129,10 @@ class ProfileView(LoginRequiredMixin, FormView[forms.ProfileForm]):
         user: User = self.request.user  # type: ignore[assignment]
         by_provider = user.display_name_source == DisplayNameSource.OIDC
         context["linked"] = provider_names.has_provider(user)
+        # The language is set in the display preferences; the profile says which one applies
+        # and leads there (docs/adr/0072).
+        chosen = chosen_language(user.pk)
+        context["language_name"] = dict(settings.LANGUAGES).get(chosen, "")
         context["by_provider"] = by_provider
         context["taken_from"] = (
             provider_label(user.display_name_provider)

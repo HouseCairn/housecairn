@@ -1,4 +1,5 @@
-"""Installable application and offline reading, in Chromium (docs/adr/0065).
+"""Installable application, offline reading and a change of language, in Chromium
+(docs/adr/0065, 0072).
 
 Run in CI by `.github/workflows/ui.yml`, against a running instance with two accounts,
 each with a home (the first one has a task due today):
@@ -185,6 +186,48 @@ def offline_reading(browser: Browser, base: str) -> None:
     context.close()
 
 
+def language_change(browser: Browser, base: str) -> None:
+    """A change of language applies at once, online and offline (docs/adr/0072)."""
+    context: BrowserContext = browser.new_context(
+        viewport={"width": 320, "height": 640}, locale="en-US"
+    )
+    page = context.new_page()
+    sign_in(page, base, SECOND)
+    today = page.url
+    controlled(page)
+    page.goto(today)
+    wait_for_page_caches(page, 1)
+    check(page.get_attribute("html", "lang") == "en", "the browser's language at first")
+
+    page.goto(f"{base}/me/preferences/")
+    page.select_option("select[name=language]", "fr")
+    page.click("main form button[type=submit]")
+    page.wait_for_load_state()
+    check(page.get_attribute("html", "lang") == "fr", "the page after Save is in French")
+    check("Préférences enregistrées." in page.content(), "and so is its message")
+    # The page after the change purges the pages kept in English; Today is kept again.
+    wait_for_page_caches(page, 0)
+    page.goto(today)
+    wait_for_page_caches(page, 1)
+
+    context.set_offline(True)
+    page.goto(today)
+    check(page.locator("#offline-banner").is_visible(), "offline, Today comes from the cache")
+    check(page.get_attribute("html", "lang") == "fr", "offline, the kept page is in French")
+    page.goto(f"{base}/more/security/", wait_until="load")
+    found = heading(page, "Hors ligne")
+    check(found == "Hors ligne", f"the offline page is in French ({found})")
+    context.set_offline(False)
+
+    # Back to Automatic, for the next run against the same accounts.
+    page.goto(f"{base}/me/preferences/")
+    page.select_option("select[name=language]", "")
+    page.click("main form button[type=submit]")
+    page.wait_for_load_state()
+    check(page.get_attribute("html", "lang") == "en", "Automatic gives the browser's again")
+    context.close()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--base", required=True, help="address of the running instance")
@@ -192,6 +235,7 @@ def main() -> None:
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch()
         offline_reading(browser, args.base.rstrip("/"))
+        language_change(browser, args.base.rstrip("/"))
         browser.close()
 
 

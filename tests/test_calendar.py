@@ -27,6 +27,7 @@ from housecairn.homes.models import Home, Membership, Role
 from housecairn.notifications.models import Preference
 from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Room
+from housecairn.tasks import agenda
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import Occurrence, Priority, Task
 from tests.htmlscan import inline_code_problems
@@ -674,7 +675,8 @@ class TestIcs:
     def test_the_document_follows_the_time_zone_and_language_of_the_person(
         self, anonymous: Client, alice: User, alice_home: Home, feed: Any
     ) -> None:
-        Preference.objects.create(user=alice, time_zone="Pacific/Auckland", language="fr")
+        Preference.objects.create(user=alice, time_zone="Pacific/Auckland")
+        agenda.update_preferences(alice, language="fr")
         make_task(alice, alice_home, "Boiler", 0)
         body = get_feed(anonymous, feed[1]).content
         assert str(Calendar.from_ical(body)["X-WR-TIMEZONE"]) == "Pacific/Auckland"

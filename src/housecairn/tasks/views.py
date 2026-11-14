@@ -7,6 +7,7 @@ from typing import Any, cast
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from uuid import UUID
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
@@ -17,6 +18,7 @@ from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import Resolver404, reverse
+from django.utils import translation
 from django.utils.html import escape
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
@@ -24,13 +26,15 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from housecairn.accounts import names
-from housecairn.core import navigation
+from housecairn.core import navigation, offline
 from housecairn.core.form_errors import banner_messages
+from housecairn.core.language import instance_default
 from housecairn.core.prefix import in_application, resolve_url
 from housecairn.core.redirects import has_safe_shape
 from housecairn.homes import current
 from housecairn.homes.models import Home
 from housecairn.homes.scoping import open_homes_for_request
+from housecairn.instance.middleware import asked_language
 from housecairn.rooms import conf
 from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Item, Room
@@ -804,9 +808,37 @@ class PreferencesView(LoginRequiredMixin, FormView[Any]):
         return context
 
     def form_valid(self, form: forms.PreferencesForm) -> HttpResponse:
+        before = translation.get_language()
         agenda.update_preferences(self.request.user, **form.cleaned_data)
+        # The language chosen applies from this answer on: its message, and the page it
+        # leads to. Automatic goes back to what the request asks for (docs/adr/0072).
+        chosen = form.cleaned_data.get("language") or ""
+        translation.activate(chosen or asked_language(self.request) or instance_default())
+        self.request.LANGUAGE_CODE = translation.get_language()
         messages.success(self.request, _("Preferences saved."))
-        return redirect(self._next())
+        response = redirect(self._next())
+        if not chosen:
+            # Automatic: the browser decides again, not a language chosen earlier.
+            response.delete_cookie(
+                settings.LANGUAGE_COOKIE_NAME,
+                path=settings.LANGUAGE_COOKIE_PATH,
+                samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+            )
+        else:
+            # Kept after signing out: the sign-in page speaks the same language.
+            response.set_cookie(
+                settings.LANGUAGE_COOKIE_NAME,
+                chosen,
+                max_age=settings.LANGUAGE_COOKIE_AGE,
+                path=settings.LANGUAGE_COOKIE_PATH,
+                secure=settings.LANGUAGE_COOKIE_SECURE,
+                httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+                samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+            )
+        if translation.get_language() != before:
+            # The pages kept for reading offline are in the former language.
+            offline.purge_on_next_page(self.request)
+        return response
 
 
 # ---------- attachments ----------

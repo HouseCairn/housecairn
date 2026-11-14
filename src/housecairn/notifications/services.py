@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from housecairn.accounts.models import User
+from housecairn.core.language import language_of
 from housecairn.demo import mode
 from housecairn.instance.config import get_setting
 from housecairn.notifications import outbound
@@ -30,7 +31,7 @@ logger = logging.getLogger("housecairn.notifications")
 AnyUser = User | AnonymousUser
 
 PREFERENCE_FIELDS = frozenset(
-    {"days_before", "send_at", "quiet_start", "quiet_end", "digest", "language", "time_zone"}
+    {"days_before", "send_at", "quiet_start", "quiet_end", "digest", "time_zone"}
 )
 CHANNEL_FIELDS = frozenset({"name", "enabled"})
 TESTS_PER_MINUTE = 5
@@ -221,7 +222,7 @@ def start_test(actor: AnyUser, channel: Channel) -> Channel:
     async_task(
         "housecairn.notifications.tasks.send_test",
         str(channel.pk),
-        preferences_of(user).language,
+        language_of(user),
         timeout=TEST_TASK_SECONDS,
         # A task stopped at its timeout is not given again: the deadline ends the test.
         ack_failure=True,
@@ -263,13 +264,7 @@ def send_test(channel_id: str, language: str) -> None:
 def preferences_of(user: User) -> Preference:
     """The person's preferences; the defaults, not saved, if they never changed any."""
     found: Preference | None = Preference.objects.filter(user=user).first()
-    return found or Preference(user=user, language=_language())
-
-
-def _language() -> str:
-    current = (translation.get_language() or "").split("-")[0]
-    codes = {code for code, _name in Preference._meta.get_field("language").choices or ()}
-    return current if current in codes else str(Preference._meta.get_field("language").default)
+    return found or Preference(user=user)
 
 
 def update_preferences(actor: AnyUser, **changes: Any) -> Preference:

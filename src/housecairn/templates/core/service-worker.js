@@ -125,7 +125,27 @@ async function keptPage(request) {
       return fromTheCache(found);
     }
   }
-  const page = await caches.match(CONFIG.offline, { cacheName: STATIC });
+  return offlinePage(names);
+}
+
+// The offline page in the language of the pages kept, else of the browser, else the one of
+// the instance: a person who chose a language reads it offline too (docs/adr/0072).
+async function offlinePage(names) {
+  let language = "";
+  for (const name of names) {
+    const cache = await caches.open(name);
+    const kept = await cache.keys();
+    const page = kept.length ? await cache.match(kept[0], { ignoreVary: true }) : undefined;
+    language = (page && page.headers.get("Content-Language")) || "";
+    if (language) {
+      break;
+    }
+  }
+  const browser = (self.navigator.language || "").split("-")[0].toLowerCase();
+  const url = CONFIG.offlinePages[language] || CONFIG.offlinePages[browser] || CONFIG.offline;
+  const page =
+    (await caches.match(url, { cacheName: STATIC })) ||
+    (await caches.match(CONFIG.offline, { cacheName: STATIC }));
   return page || Response.error();
 }
 

@@ -85,9 +85,6 @@ class Preference(models.Model):
         default=False,
         help_text=_("One message a day for every task to remind, instead of one per task."),
     )
-    language = models.CharField(
-        _("language"), max_length=8, choices=settings.LANGUAGES, default=settings.LANGUAGE_CODE
-    )
     time_zone = models.CharField(
         _("time zone"),
         max_length=64,

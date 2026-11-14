@@ -4,6 +4,7 @@ from functools import cache
 from importlib import metadata
 from pathlib import Path
 from typing import Any, cast
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -15,6 +16,7 @@ from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from django.urls import get_script_prefix, reverse
+from django.utils import translation
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_safe
@@ -22,6 +24,7 @@ from django.views.defaults import bad_request as default_bad_request
 from django.views.generic import TemplateView
 
 from housecairn.core import more, offline, services
+from housecairn.core.language import shipped
 from housecairn.core.prefix import STATIC_PATH
 from housecairn.instance.config import instance_name
 
@@ -207,11 +210,18 @@ def service_worker(request: HttpRequest) -> HttpResponse:
     `no-cache`: the browser asks again at each visit, and a new version is installed at once.
     """
     scope = get_script_prefix()
+    offline_pages = {
+        code: f"{reverse('offline')}?{urlencode({'lang': code})}"
+        for code, _name in settings.LANGUAGES
+    }
     config = {
         "scope": scope,
         "version": _static_version() if settings.DEBUG else _cached_static_version(),
-        "precache": [static(name) for name in PRECACHE] + [reverse("offline")],
+        "precache": [static(name) for name in PRECACHE]
+        + [reverse("offline"), *offline_pages.values()],
         "offline": reverse("offline"),
+        # The offline page in each language, for the person's (docs/adr/0072).
+        "offlinePages": offline_pages,
         "start": reverse("index"),
         "signOut": reverse("account_logout"),
         "static": scope + STATIC_PATH,
@@ -235,4 +245,7 @@ def offline_page(request: HttpRequest) -> HttpResponse:
     rendered without the request, so with nothing of the person who installed it (no
     navigation, no home, no form token).
     """
-    return HttpResponse(render_to_string("core/offline.html", {"start_url": reverse("index")}))
+    asked = request.GET.get("lang")
+    with translation.override(asked if shipped(asked) else translation.get_language()):
+        body = render_to_string("core/offline.html", {"start_url": reverse("index")})
+    return HttpResponse(body)

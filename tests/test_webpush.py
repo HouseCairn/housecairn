@@ -32,6 +32,7 @@ from housecairn.homes.models import Home, Role
 from housecairn.instance import crypto
 from housecairn.notifications import alerts, devices, reminders, services, webpush
 from housecairn.notifications.models import Device, Preference, PushKey
+from housecairn.tasks import agenda
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import Occurrence
 
@@ -407,7 +408,8 @@ class TestSending:
 
         add_device(alice, push)
         add_member(alice_home, bob, Role.MEMBER)
-        Preference.objects.create(user=alice, language="fr", time_zone="UTC", digest=False)
+        Preference.objects.create(user=alice, time_zone="UTC", digest=False)
+        agenda.update_preferences(alice, language="fr")
         due = task_services.today() + datetime.timedelta(days=1)
         task_services.create_task(alice, alice_home, title="Change the filter", due_on=due)
         now = datetime.datetime.combine(due, datetime.time(9), tzinfo=datetime.UTC)
@@ -428,7 +430,8 @@ class TestSending:
         self, alice: User, push: FakePushService
     ) -> None:
         device = add_device(alice, push)
-        Preference.objects.create(user=alice, language="fr", time_zone="UTC")
+        Preference.objects.create(user=alice, time_zone="UTC")
+        agenda.update_preferences(alice, language="fr")
         with override_settings(HOUSECAIRN_WEBPUSH_DISCREET=False):
             devices.send_all(
                 [device], kind="reminder", title="Rappel", body="Filtre, Maison", path="/t/"

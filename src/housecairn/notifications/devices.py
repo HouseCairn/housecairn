@@ -28,6 +28,7 @@ from django.utils.translation import gettext_lazy
 
 from housecairn.accounts.models import User
 from housecairn.core import netguard
+from housecairn.core.language import language_of
 from housecairn.demo import mode as demo_mode
 from housecairn.instance import crypto
 from housecairn.instance.config import get_setting
@@ -324,7 +325,7 @@ def send_all(devices: list[Device], *, kind: str, title: str, body: str, path: s
     `body` come already worded by the caller in the language of the person."""
     results: list[bool] = []
     for device in devices:
-        with translation.override(services.preferences_of(device.user).language):
+        with translation.override(language_of(device.user)):
             shown_title, shown_body = message_for(kind, title, body)
         results.append(send(device, title=shown_title, body=shown_body, path=path))
     return results
@@ -369,7 +370,7 @@ def send_test(device_id: str) -> bool:
     device = Device.objects.select_related("user").filter(pk=device_id).first()
     if device is None:
         return False
-    with translation.override(services.preferences_of(device.user).language):
+    with translation.override(language_of(device.user)):
         title, body = message_for(
             "test", _("HouseCairn test"), _("This device receives the reminders of your tasks.")
         )

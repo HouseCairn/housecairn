@@ -193,8 +193,12 @@ class TestServiceWorker:
         assert config["header"] == offline.HEADER
         assert reverse("offline") in config["precache"]
         assert all(
-            entry.startswith("/static/") for entry in config["precache"] if entry != "/offline/"
+            entry.startswith("/static/")
+            for entry in config["precache"]
+            if not entry.startswith("/offline/")
         )
+        assert config["offlinePages"] == {"en": "/offline/?lang=en", "fr": "/offline/?lang=fr"}
+        assert set(config["offlinePages"].values()) <= set(config["precache"])
         assert re.fullmatch(r"[0-9a-f]{16}", config["version"])
 
     def test_only_get(self, client: Client) -> None:

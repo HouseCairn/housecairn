@@ -81,8 +81,8 @@ msgstr "Où et quand partent vos rappels"
 msgid "Display preferences"
 msgstr "Préférences d'affichage"
 
-msgid "How the Today screen is laid out for you"
-msgstr "La disposition de l'écran Aujourd'hui pour vous"
+msgid "Language, and how the Today screen is laid out for you"
+msgstr "La langue, et la disposition de l'écran Aujourd'hui pour vous"
 
 msgid "Calendar in another application"
 msgstr "Calendrier dans une autre application"
@@ -512,6 +512,12 @@ msgstr "Tous les logements"
 
 msgid "Change of home"
 msgstr "Changer de logement"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Change"
+msgstr "Changer"
 
 msgid "Main navigation"
 msgstr "Navigation principale"

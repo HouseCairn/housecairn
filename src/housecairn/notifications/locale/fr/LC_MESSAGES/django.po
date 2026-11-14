@@ -185,9 +185,6 @@ msgstr "résumé quotidien"
 msgid "One message a day for every task to remind, instead of one per task."
 msgstr "Un seul message par jour pour toutes les tâches à rappeler, au lieu d'un par tâche."
 
-msgid "language"
-msgstr "langue"
-
 msgid "time zone"
 msgstr "fuseau horaire"
 

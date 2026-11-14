@@ -20,6 +20,7 @@ from rest_framework.test import APIClient
 from housecairn.accounts.models import User
 from housecairn.notifications import outbound, services, tasks, views
 from housecairn.notifications.models import Channel, SendState
+from housecairn.tasks import agenda
 
 pytestmark = pytest.mark.django_db
 
@@ -155,7 +156,7 @@ class TestTheRequestDoesNotWait:
     def test_the_message_is_in_the_language_of_the_person(
         self, alice: User, channel: Channel, queued: Queued, delivered: list[tuple[str, str]]
     ) -> None:
-        services.update_preferences(alice, language="fr")
+        agenda.update_preferences(alice, language="fr")
         services.start_test(alice, channel)
         run_worker(queued)
         assert delivered[0][0] == "Test HouseCairn"

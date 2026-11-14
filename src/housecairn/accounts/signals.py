@@ -11,6 +11,7 @@ from django.http import HttpRequest
 
 from housecairn.accounts import services
 from housecairn.accounts.models import User
+from housecairn.core.language import activate_for
 
 
 @receiver(post_save, sender=User, dispatch_uid="housecairn.accounts.record_first_account")
@@ -22,6 +23,9 @@ def record_first_account(sender: type[User], instance: User, created: bool, **kw
 @receiver(user_logged_in, dispatch_uid="housecairn.accounts.note_sign_in")
 def note_sign_in(sender: Any, request: HttpRequest | None, user: User, **kwargs: Any) -> None:
     if request is not None:
+        # The sign-in request was anonymous until now: its message ("Signed in as...") and
+        # the page it leads to take the person's language (docs/adr/0072).
+        activate_for(request, user)
         secret = services.note_sign_in(request, user)
         if secret:
             # The middleware sets the cookie on the response of this request.
