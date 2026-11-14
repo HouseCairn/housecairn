@@ -1,0 +1,20 @@
+name: Idea or request
+description: Suggest something new for Housecairn.
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: wish
+    attributes:
+      label: What would you like?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why do you need it?
+      description: What are you trying to do?
+  - type: textarea
+    id: today
+    attributes:
+      label: How do you do it today? (optional)

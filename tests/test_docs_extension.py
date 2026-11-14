@@ -77,7 +77,7 @@ def test_interface_strings_exist_in_every_language() -> None:
 def test_issue_link_opens_the_bug_form_about_the_page() -> None:
     url = ext.issue_url("screens/sign-in", "fr")
     assert url.startswith("https://github.com/HouseCairn/housecairn/issues/new?")
-    assert "template=bug_report.yml" in url
+    assert "template=bug.yml" in url
     assert "title=bug%3A%20documentation%20page%20screens%2Fsign-in%20%28fr%29" in url
 
 

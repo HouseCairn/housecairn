@@ -355,7 +355,7 @@ def insert_release_fragments(app: Sphinx, doctree: nodes.document, docname: str)
 def issue_url(pagename: str, language: str) -> str:
     """New issue about a page: the bug form, its title naming the page."""
     title = f"bug: documentation page {pagename} ({language})"
-    query = urlencode({"template": "bug_report.yml", "title": title}, quote_via=quote)
+    query = urlencode({"template": "bug.yml", "title": title}, quote_via=quote)
     return f"{REPOSITORY}/issues/new?{query}"
 
 
