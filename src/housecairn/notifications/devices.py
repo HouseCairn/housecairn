@@ -70,6 +70,25 @@ def is_discreet() -> bool:
     return bool(get_setting("webpush_discreet"))
 
 
+def offer_for(user: AnyUser | None) -> dict[str, str] | None:
+    """What the offer to receive reminders on this device needs, or None when it is not made.
+
+    Made only when notifications and Web Push are on, a person is signed in and the
+    instance is not a demonstration (nothing is sent there). What depends on the browser
+    (support, permission, a device already added, a postponed offer) is decided by the
+    script; it is given the hashes of the person's devices to recognise this browser.
+    """
+    if not isinstance(user, User) or not user.is_authenticated:
+        return None
+    if not is_enabled() or demo_mode.is_on():
+        return None
+    return {
+        "key": public_key(),
+        "person": str(user.pk),
+        "known": " ".join(devices_of(user).values_list("endpoint_hash", flat=True)),
+    }
+
+
 def _person(actor: AnyUser) -> User:
     if not isinstance(actor, User) or not actor.is_authenticated:
         raise PermissionDenied

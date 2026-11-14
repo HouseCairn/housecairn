@@ -296,6 +296,43 @@ msgstr "Indiquez le début et la fin des heures calmes, ou aucun des deux."
 msgid "Choose a time zone such as Europe/Paris."
 msgstr "Choisissez un fuseau horaire comme Europe/Paris."
 
+#, python-format
+msgid "%(browser)s on %(system)s"
+msgstr "%(browser)s sur %(system)s"
+
+msgid "This device"
+msgstr "Cet appareil"
+
+msgid "Receive the reminders on this device?"
+msgstr "Recevoir les rappels sur cet appareil ?"
+
+msgid "Your reminders will appear as notifications here, even when the application is closed."
+msgstr "Vos rappels s'afficheront ici sous forme de notifications, même quand l'application est fermée."
+
+msgid "Turn on"
+msgstr "Activer"
+
+msgid "Later"
+msgstr "Plus tard"
+
+msgid "Do not ask again"
+msgstr "Ne plus demander"
+
+msgid "On an iPhone or an iPad, install the application first: in Safari, select Share, then Add to Home Screen, and open it from the home screen. The offer comes back there."
+msgstr "Sur un iPhone ou un iPad, installez d'abord l'application : dans Safari, touchez Partager, puis Sur l'écran d'accueil, et ouvrez-la depuis l'écran d'accueil. La proposition reviendra là."
+
+msgid "This device now receives your reminders."
+msgstr "Cet appareil reçoit maintenant vos rappels."
+
+msgid "Rename it in Notifications"
+msgstr "Le renommer dans Notifications"
+
+msgid "Notifications were not turned on: the browser did not give its permission. Nothing was saved."
+msgstr "Les notifications n'ont pas été activées : le navigateur n'a pas donné son autorisation. Rien n'a été enregistré."
+
+msgid "This device could not be added. Nothing was saved; try again later."
+msgstr "Cet appareil n'a pas pu être ajouté. Rien n'a été enregistré ; réessayez plus tard."
+
 msgid "The result appears here in a few seconds."
 msgstr "Le résultat s'affiche ici dans quelques secondes."
 
@@ -364,6 +401,9 @@ msgstr "Nom de cet appareil"
 
 msgid "My phone"
 msgstr "Mon téléphone"
+
+msgid "Notifications are blocked for this site in this browser, so it cannot receive reminders. To turn them back on, allow notifications for this site in the browser settings (the icon next to the address, or the site settings), then reload this page."
+msgstr "Les notifications sont bloquées pour ce site dans ce navigateur : il ne peut donc pas recevoir de rappels. Pour les rétablir, autorisez les notifications de ce site dans les réglages du navigateur (l'icône à côté de l'adresse, ou les réglages du site), puis rechargez cette page."
 
 msgid "This browser cannot receive notifications. On an iPhone or an iPad, install the application first, then open it from the home screen."
 msgstr "Ce navigateur ne peut pas recevoir de notifications. Sur un iPhone ou un iPad, installez d'abord l'application, puis ouvrez-la depuis l'écran d'accueil."

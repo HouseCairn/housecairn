@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Reminders on your phone in one tap.** When the instance sends notifications to devices, Today now offers to receive the reminders on the device you are using: **Turn on** asks the browser for its permission and adds the device with a name of its own (*Chrome on Android*, *iPhone*), **Later** asks again in seven days, **Do not ask again** stops in this browser. The installed application shows it at its first opening; in Safari on an iPhone it says to install the application first. Where the browser blocks notifications, [Notifications](../../../screens/notifications.md) says how to allow them again ([On this device](../../../guides/notifications.md#on-this-device))."
+msgstr "**Les rappels sur votre téléphone en un toucher.** Quand l'instance envoie des notifications vers les appareils, Aujourd'hui propose maintenant de recevoir les rappels sur l'appareil que vous utilisez : **Activer** demande l'autorisation au navigateur et ajoute l'appareil sous un nom qui lui est propre (*Chrome sur Android*, *iPhone*), **Plus tard** redemande dans sept jours, **Ne plus demander** s'arrête dans ce navigateur. L'application installée la montre à sa première ouverture ; dans Safari sur un iPhone, elle dit d'installer d'abord l'application. Là où le navigateur bloque les notifications, [Notifications](../../../screens/notifications.md) dit comment les autoriser de nouveau ([Sur cet appareil](../../../guides/notifications.md#on-this-device))."
+

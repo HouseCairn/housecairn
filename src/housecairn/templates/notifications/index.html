@@ -67,6 +67,7 @@
         <label for="webpush-name">{% translate "Name of this device" %}</label>
         <input type="text" id="webpush-name" name="name" maxlength="60" required placeholder="{% translate "My phone" %}">
       </p>
+      <p class="small" data-webpush-blocked hidden>{% translate "Notifications are blocked for this site in this browser, so it cannot receive reminders. To turn them back on, allow notifications for this site in the browser settings (the icon next to the address, or the site settings), then reload this page." %}</p>
       <p class="small" data-webpush-unsupported hidden>{% translate "This browser cannot receive notifications. On an iPhone or an iPad, install the application first, then open it from the home screen." %}</p>
       <p class="small" data-webpush-denied hidden>{% translate "Notifications are blocked for this site in the browser: allow them in its settings, then try again." %}</p>
       <p class="small" data-webpush-failed hidden>{% translate "This device could not be added. Try again later." %}</p>

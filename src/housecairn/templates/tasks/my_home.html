@@ -3,6 +3,7 @@
 {% block head_title %}{% translate "Today" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Today" %}</h1>
+  {% load notifications_extras %}{% device_banner %}
   {% tab_bar "today" %}
   {% for digest in digests %}
     <section class="digest" aria-labelledby="digest-{{ forloop.counter }}">

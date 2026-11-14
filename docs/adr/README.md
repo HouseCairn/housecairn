@@ -70,3 +70,4 @@ later record supersedes it.
 | [0069](0069-restore-as-a-copy-with-new-identifiers.md) | Restore as a copy, with new identifiers | 2026-11-12 |
 | [0070](0070-slow-network-calls-in-the-background.md) | Reading a link's page and testing a channel run in the background worker | 2026-11-12 |
 | [0071](0071-demonstration-instance.md) | A demonstration instance: public accounts, nothing sent, reset every night | 2026-11-12 |
+| [0072](0072-device-offered-by-default.md) | The device is offered by default: one offer, one tap | 2026-11-14 |

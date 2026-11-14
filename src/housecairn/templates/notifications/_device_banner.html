@@ -1,0 +1,31 @@
+{% load i18n static %}{# The offer to receive the reminders on this device (docs/adr/0072). Hidden until static/js/webpush.js has checked the browser; the permission is asked on the tap of Turn on, never on load. #}
+{% if offer %}
+  {% blocktranslate asvar name_pattern with browser="{browser}" system="{system}" %}{{ browser }} on {{ system }}{% endblocktranslate %}
+  {% translate "This device" as name_fallback %}
+  <section class="alert alert-info device-offer" aria-labelledby="device-offer-title" data-webpush-offer data-key="{{ offer.key }}" data-endpoint="{% url 'api-v1:push-device-list' %}" data-person="{{ offer.person }}" data-known="{{ offer.known }}" data-name-pattern="{{ name_pattern }}" data-name-fallback="{{ name_fallback }}" hidden>
+    <div class="device-offer-body">
+      <h2 id="device-offer-title" class="device-offer-title">{% translate "Receive the reminders on this device?" %}</h2>
+      <div data-offer-ask hidden>
+        <p>{% translate "Your reminders will appear as notifications here, even when the application is closed." %}</p>
+        <div class="button-row">
+          <button type="button" class="button-small" data-offer-enable>{% translate "Turn on" %}</button>
+          <button type="button" class="button-secondary button-small" data-offer-later>{% translate "Later" %}</button>
+          <button type="button" class="link-button" data-offer-never>{% translate "Do not ask again" %}</button>
+        </div>
+      </div>
+      <div data-offer-install hidden>
+        <p>{% translate "On an iPhone or an iPad, install the application first: in Safari, select Share, then Add to Home Screen, and open it from the home screen. The offer comes back there." %}</p>
+        <div class="button-row">
+          <button type="button" class="button-secondary button-small" data-offer-later>{% translate "Later" %}</button>
+          <button type="button" class="link-button" data-offer-never>{% translate "Do not ask again" %}</button>
+        </div>
+      </div>
+      <div role="status">
+        <p data-offer-done hidden>{% translate "This device now receives your reminders." %} <a href="{% url 'notifications:index' %}">{% translate "Rename it in Notifications" %}</a></p>
+        <p data-offer-denied hidden>{% translate "Notifications were not turned on: the browser did not give its permission. Nothing was saved." %}</p>
+        <p data-offer-failed hidden>{% translate "This device could not be added. Nothing was saved; try again later." %}</p>
+      </div>
+    </div>
+  </section>
+  <script src="{% static 'js/webpush.js' %}" defer></script>
+{% endif %}
