@@ -96,7 +96,8 @@ class TestSettings:
         for path in [*(settings.REPO_DIR / "src").rglob("*.py"), settings.REPO_DIR / "Dockerfile"]:
             for line in path.read_text().splitlines():
                 if "OAUTHLIB_INSECURE_TRANSPORT" in line:
-                    assert "environ" not in line and "ENV " not in line, (path, line)
+                    assert "environ" not in line, (path, line)
+                    assert "ENV " not in line, (path, line)
 
     def test_deploy_check_has_no_error_of_the_toolkit(self) -> None:
         from django.core.checks import Error, run_checks
@@ -142,7 +143,8 @@ class TestConsent:
         assert "&lt;b&gt;Evil&lt;/b&gt;" in html
         shown = page.context["device_name"]
         assert len(shown) == 60
-        assert "\u202e" not in shown and "\u0007" not in shown
+        assert "\u202e" not in shown
+        assert "\u0007" not in shown
         assert alice_home.name in html
         assert 'name="may_create_homes"' not in html
         assert "not encrypted" not in html

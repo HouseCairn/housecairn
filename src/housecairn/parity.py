@@ -227,7 +227,7 @@ EXEMPT: dict[str, str] = {
     # docs/adr/0078: a connection is made in the browser and managed by a person signed in;
     # a token never manages a credential, and the sync API is the connection's own API.
     "api-tokens:connection-edit": "a connected phone is changed by a person signed in, on the web",
-    "api-tokens:connection-revoke": "a connected phone is revoked by a person signed in, on the web",
+    "api-tokens:connection-revoke": "a connected phone is revoked by a person signed in on the web",
     "oauth2_provider:authorize": "the OAuth consent page of the mobile app, in the browser",
     "oauth2_provider:token": "the OAuth token endpoint the mobile app calls",
     "oauth2_provider:revoke-token": "the OAuth revocation endpoint the mobile app calls",
