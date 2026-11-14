@@ -1146,14 +1146,14 @@ class TestWebAndApi:
     def test_preferences_on_the_web(self, client: Client, alice: User) -> None:
         signed_in(client, alice)
         url = reverse("notifications:preferences")
-        fields = {"days_before": 2, "send_at": "07:30", "language": "fr", "time_zone": ""}
+        fields = {"days_before": 2, "send_at": "07:30", "time_zone": ""}
         half = client.post(url, {**fields, "quiet_start": "22:00"})
         assert half.status_code == 422
         assert not services.Preference.objects.exists()
         saved = client.post(url, {**fields, "quiet_start": "22:00", "quiet_end": "07:00"})
         assert saved.status_code == 302
         prefs = services.preferences_of(alice)
-        assert (prefs.days_before, str(prefs.quiet_end), prefs.language) == (2, "07:00:00", "fr")
+        assert (prefs.days_before, str(prefs.quiet_end)) == (2, "07:00:00")
 
     def test_the_settings_screen_locks_a_variable(
         self, client: Client, make_user: Callable[..., User]

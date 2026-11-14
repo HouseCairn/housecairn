@@ -59,8 +59,9 @@ on this device**. The address of the device and its keys are kept encrypted and 
 - **Quiet hours from** and **until**: nothing is sent in between; what was due goes out at
   their end. They may run past midnight (22:00 to 07:00). Give both or neither.
 - **Daily summary**: one message a day for every task to remind, instead of one per task.
-- **Language** of the messages, and **Time zone** of the times above (empty: the time zone
-  of the instance).
+- **Time zone** of the times above (empty: the time zone of the instance).
+
+The messages are in the language of your [display preferences](display-preferences.md).
 
 **Download my notification settings** gives your channels (name, kind of service, never
 the address) and these preferences as a JSON file. The same is in the

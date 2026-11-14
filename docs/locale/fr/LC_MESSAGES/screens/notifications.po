@@ -72,8 +72,11 @@ msgstr "**Heures calmes de** et **jusqu'à** : rien n'est envoyé entre les deux
 msgid "**Daily summary**: one message a day for every task to remind, instead of one per task."
 msgstr "**Résumé quotidien** : un seul message par jour pour toutes les tâches à rappeler, au lieu d'un par tâche."
 
-msgid "**Language** of the messages, and **Time zone** of the times above (empty: the time zone of the instance)."
-msgstr "**Langue** des messages, et **Fuseau horaire** des heures ci-dessus (vide : le fuseau horaire de l'instance)."
+msgid "**Time zone** of the times above (empty: the time zone of the instance)."
+msgstr "**Fuseau horaire** des heures ci-dessus (vide : le fuseau horaire de l'instance)."
+
+msgid "The messages are in the language of your [display preferences](display-preferences.md)."
+msgstr "Les messages sont dans la langue de vos [préférences d'affichage](display-preferences.md)."
 
 msgid "**Download my notification settings** gives your channels (name, kind of service, never the address) and these preferences as a JSON file. The same is in the [API](../api/index.md)."
 msgstr "**Télécharger mes réglages de notification** donne vos canaux (nom, type de service, jamais l'adresse) et ces préférences dans un fichier JSON. Le même contenu est dans l'[API](../api/index.md)."

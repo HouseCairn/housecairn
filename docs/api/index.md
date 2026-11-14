@@ -190,7 +190,8 @@ web interface: every request only sees the homes of its user
   `private` (refused: private network), and is `failed` if the test has not ended 30
   seconds after it started ([ADR 0070](../adr/0070-slow-network-calls-in-the-background.md)). `GET` and `PATCH
   /api/v1/me/notification-preferences/` the reminders (`days_before`, `send_at`,
-  `quiet_start`, `quiet_end`, `digest`, `language`, `time_zone`), and `GET
+  `quiet_start`, `quiet_end`, `digest`, `time_zone`; the language is not one of them, it is read
+  and changed with the display preferences at `/api/v1/me/display-preferences/`), and `GET
   /api/v1/me/notifications-export/` both, without any address. A token with the `write`
   scope reads them (any other token gets a 403); adding, renaming, deleting and testing a
   channel and changing the reminders are for the person signed in, and a token gets a 403

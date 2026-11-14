@@ -36,6 +36,7 @@ from django.utils.translation import gettext as _
 
 from housecairn.accounts.models import User
 from housecairn.core import dates
+from housecairn.core.language import language_of
 from housecairn.core.links import external_url
 from housecairn.homes.models import WRITE_ROLES, Membership
 from housecairn.instance.config import get_setting, instance_zone
@@ -144,12 +145,12 @@ def _line(occurrence: Occurrence) -> str:
 def reminder_message(occurrence: Occurrence, prefs: Preference) -> tuple[str, str]:
     """Plain text: `outbound.send` lets Apprise escape it for each channel. The title of a
     message is fixed, since some services render it as markup of their own."""
-    with translation.override(prefs.language):
+    with translation.override(language_of(prefs.user)):
         return _("HouseCairn reminder"), _line(occurrence)
 
 
 def digest_message(rows: list[Occurrence], prefs: Preference) -> tuple[str, str]:
-    with translation.override(prefs.language):
+    with translation.override(language_of(prefs.user)):
         lines = [_line(o) for o in rows[:DIGEST_LIMIT]]
         if len(rows) > DIGEST_LIMIT:
             lines.append(_("And %(n)d more.") % {"n": len(rows) - DIGEST_LIMIT})

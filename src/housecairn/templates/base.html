@@ -45,6 +45,7 @@
         </ul>
       {% endif %}
       {% block content %}{% endblock content %}
+      {% if not user.is_authenticated %}{% include "shell/language_switch.html" %}{% endif %}
     </main>
     {% if user.is_authenticated %}
       {# The undo banner of the actions in place, near the finger and announced (docs/developer/design-guide.md, "Actions in place"). Always there, empty, so that a screen reader hears what HTMX puts in it. #}

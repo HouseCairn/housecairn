@@ -103,7 +103,7 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
         Entry(
             _("Display preferences"),
             reverse("display-preferences"),
-            _("How the Today screen is laid out for you"),
+            _("Language, and how the Today screen is laid out for you"),
             ("display-preferences",),
         ),
         Entry(

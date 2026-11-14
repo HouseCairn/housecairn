@@ -22,10 +22,10 @@ from icalendar import Calendar, Event
 from housecairn.calendar import services
 from housecairn.calendar.feeds import feed_homes
 from housecairn.calendar.models import Feed
+from housecairn.core.language import language_of
 from housecairn.core.links import external_url
 from housecairn.homes.models import Home
 from housecairn.instance.config import instance_name
-from housecairn.notifications import services as notification_services
 from housecairn.rooms.models import Room
 from housecairn.tasks.models import Occurrence, Status, Task
 
@@ -97,7 +97,7 @@ def render(feed: Feed, base_url: str, *, now: datetime.datetime | None = None) -
     user = feed.user
     zone = services.zone_of(user)
     today = services.today_of(user, now)
-    language = notification_services.preferences_of(user).language
+    language = language_of(user)
     homes: list[Any] = [feed.home] if feed.home else list(feed_homes(user))
     with translation.override(language):
         result = services.entries(
@@ -155,7 +155,7 @@ def _fingerprint(feed: Feed, base_url: str, now: datetime.datetime | None) -> st
         settings.HOUSECAIRN_URL_PREFIX,
         ",".join(ids),
         str(services.zone_of(user)),
-        notification_services.preferences_of(user).language,
+        language_of(user),
         services.today_of(user, now).isoformat(),
         instance_name(),
         _stamp(Task, homes),

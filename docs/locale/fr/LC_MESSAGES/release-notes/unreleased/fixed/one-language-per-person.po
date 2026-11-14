@@ -1,0 +1,28 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Your language, everywhere.** The language chosen in the [display preferences](../../../screens/display-preferences.md) now applies to reminders, notifications on your devices and calendar feeds (the notification settings no longer have a language of their own; a language chosen there becomes your language if you had none), to the API with a token, to the message of the change and of the sign-in, and to the pages kept for reading offline. It is reached from **Profile** too, and the signed-out pages have a language switch ([Language](../../../guides/language.md))."
+msgstr "**Votre langue, partout.** La langue choisie dans les [préférences d'affichage](../../../screens/display-preferences.md) s'applique désormais aux rappels, aux notifications sur vos appareils et aux flux d'agenda (les réglages de notification n'ont plus de langue à eux ; une langue choisie là devient votre langue si vous n'en aviez pas), à l'API avec un jeton, au message du changement et de la connexion, et aux pages gardées pour la lecture hors ligne. Elle est aussi accessible depuis **Profil**, et les pages hors connexion ont un sélecteur de langue ([Langue](../../../guides/language.md))."
+
+msgid "**API change: no `language` in the notification settings.** The `language` field is gone from `GET` and `PATCH /api/v1/me/notification-preferences/` and from `GET /api/v1/me/notifications-export/`; a `PATCH` that still sends it is ignored. The language is read and changed at `/api/v1/me/display-preferences/`."
+msgstr "**Changement d'API : plus de `language` dans les réglages de notification.** Le champ `language` n'existe plus dans `GET` et `PATCH /api/v1/me/notification-preferences/` ni dans `GET /api/v1/me/notifications-export/` ; un `PATCH` qui l'envoie encore est ignoré. La langue se lit et se change à `/api/v1/me/display-preferences/`."
+
+msgid "**Upgrade: two limits of the migration.** A person whose notification language was never chosen (it stayed at the default, `en`) and who had no display language now gets `en` as an explicit choice: set the display language back to **Automatic** to follow the browser again. Rolling the migration back recreates the column with `en` and does not restore the earlier notification language."
+msgstr "**Mise à jour : deux limites de la migration.** Une personne dont la langue de notification n'avait jamais été choisie (restée au défaut, `en`) et qui n'avait pas de langue d'affichage reçoit désormais `en` comme choix explicite : repassez la langue d'affichage sur **Automatique** pour suivre de nouveau le navigateur. Le retour arrière recrée la colonne avec `en` et ne restaure pas l'ancienne langue de notification."

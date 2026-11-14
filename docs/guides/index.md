@@ -17,4 +17,5 @@ amounts
 dates
 notifications
 calendar
+language
 ```

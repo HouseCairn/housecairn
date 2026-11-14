@@ -45,8 +45,8 @@ msgstr "Pour chaque tâche des logements du flux, de 30 jours en arrière à un 
 msgid "An event keeps its identity when the task moves on: the forecast of a repeating task becomes the real occurrence when the previous one is done, and a postponed task keeps the identity of the date it was first due, so your calendar application updates the event instead of showing a new one. One case makes a new event: a task that repeats a set time after the last one, done on a day other than its due date, gets a next date that was not the forecast one."
 msgstr "Un événement garde son identité quand la tâche avance : la prévision d'une tâche récurrente devient l'occurrence réelle quand la précédente est faite, et une tâche reportée garde l'identité de la date à laquelle elle était d'abord due ; votre application de calendrier met donc l'événement à jour au lieu d'en afficher un nouveau. Un cas crée un nouvel événement : une tâche qui se répète un certain temps après la dernière fois, faite un autre jour que son échéance, a une prochaine date qui n'était pas celle de la prévision."
 
-msgid "It follows the time zone and language you chose in [Notifications](../screens/notifications.md) (the time zone of the instance when empty)."
-msgstr "Il suit le fuseau horaire et la langue choisis dans [Notifications](../screens/notifications.md) (le fuseau de l'instance quand il est vide)."
+msgid "It follows the time zone you chose in [Notifications](../screens/notifications.md) (the time zone of the instance when empty) and the language of your [display preferences](../screens/display-preferences.md)."
+msgstr "Il suit le fuseau horaire choisi dans [Notifications](../screens/notifications.md) (le fuseau de l'instance quand il est vide) et la langue de vos [préférences d'affichage](../screens/display-preferences.md)."
 
 msgid "Subscribe"
 msgstr "S'abonner"
