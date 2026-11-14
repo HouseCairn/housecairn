@@ -20,7 +20,7 @@ from rest_framework.views import APIView
 from housecairn.accounts.models import User
 from housecairn.apitokens import services
 from housecairn.apitokens.models import ApiToken, Scope
-from housecairn.apitokens.permissions import SessionOnly
+from housecairn.apitokens.permissions import CredentialFitsView, SessionOnly
 from housecairn.homes import sso
 from housecairn.homes.models import Home
 
@@ -93,7 +93,7 @@ def _own_token(request: Request, token_id: Any) -> ApiToken:
 
 
 class TokenListView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly]
+    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
 
     @extend_schema(auth=SESSION_AUTH, responses=TokenSerializer(many=True))
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -136,7 +136,7 @@ class TokenListView(APIView):
 
 
 class TokenDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly]
+    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
 
     @extend_schema(
         auth=SESSION_AUTH,

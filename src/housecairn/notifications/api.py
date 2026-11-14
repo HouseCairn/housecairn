@@ -19,8 +19,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from housecairn.accounts.api import PersonOnlyToChange
-from housecairn.apitokens.models import ApiToken, Scope
-from housecairn.apitokens.permissions import TokenScopePermission
+from housecairn.apitokens.credentials import Credential, api_token_of, credential_of
+from housecairn.apitokens.models import Scope
+from housecairn.apitokens.permissions import CredentialFitsView, TokenScopePermission
 from housecairn.notifications import devices, services
 from housecairn.notifications.models import Channel, Device, Preference
 
@@ -29,12 +30,19 @@ class WriteTokenOnly(permissions.BasePermission):
     message = "This token does not have the scope this request needs."
 
     def has_permission(self, request: Request, view: Any) -> bool:
-        token = request.auth
-        return not isinstance(token, ApiToken) or token.has_scope(Scope.WRITE)
+        if credential_of(request) is Credential.SESSION:
+            return True
+        token = api_token_of(request)
+        return token is not None and token.has_scope(Scope.WRITE)
 
 
 # The default checks as well: a token also needs `read` to read.
-PERMISSIONS = [permissions.IsAuthenticated, TokenScopePermission, WriteTokenOnly]
+PERMISSIONS = [
+    permissions.IsAuthenticated,
+    TokenScopePermission,
+    WriteTokenOnly,
+    CredentialFitsView,
+]
 
 
 def _invalid(exc: DjangoValidationError) -> exceptions.ValidationError:

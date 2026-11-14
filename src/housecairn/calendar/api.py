@@ -18,7 +18,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from housecairn.apitokens.models import ApiToken, Scope
+from housecairn.apitokens.credentials import Credential, api_token_of, credential_of
+from housecairn.apitokens.models import Scope
+from housecairn.apitokens.permissions import CredentialFitsView
 from housecairn.calendar import feeds, services
 from housecairn.calendar.models import Feed
 from housecairn.core.links import external_url
@@ -30,7 +32,7 @@ class SessionOnly(permissions.BasePermission):
     message = "A feed is managed by a person signed in, not by an API token."
 
     def has_permission(self, request: Request, view: Any) -> bool:
-        return not isinstance(request.auth, ApiToken)
+        return credential_of(request) is Credential.SESSION
 
 
 class EntrySerializer(serializers.Serializer[Any]):
@@ -103,7 +105,10 @@ class CalendarView(APIView):
                 raise exceptions.NotFound
         result = services.entries(request.user, homes, bounds["from"], bounds["to"], filters)  # type: ignore[arg-type]
         entries = result.entries
-        if isinstance(request.auth, ApiToken) and not request.auth.has_scope(Scope.WRITE):
+        token = api_token_of(request)
+        if credential_of(request) is not Credential.SESSION and not (
+            token is not None and token.has_scope(Scope.WRITE)
+        ):
             # The role of the person would allow it, the token does not: nothing to complete.
             entries = [dataclasses.replace(e, can_write=False) for e in entries]
         payload = {
@@ -151,7 +156,7 @@ def _feed_of(request: Request, feed_id: Any) -> Feed:
 
 
 class FeedListView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly]
+    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
 
     @extend_schema(responses=FeedSerializer(many=True))
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -173,7 +178,7 @@ class FeedListView(APIView):
 
 
 class FeedDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly]
+    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
 
     @extend_schema(responses=FeedSerializer)
     def get(self, request: Request, feed_id: Any, *args: Any, **kwargs: Any) -> Response:
@@ -188,7 +193,7 @@ class FeedDetailView(APIView):
 class FeedRegenerateView(APIView):
     """Give a feed a new address; the old one stops working at once."""
 
-    permission_classes = [permissions.IsAuthenticated, SessionOnly]
+    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
 
     @extend_schema(request=None, responses=FeedSerializer)
     def post(self, request: Request, feed_id: Any, *args: Any, **kwargs: Any) -> Response:

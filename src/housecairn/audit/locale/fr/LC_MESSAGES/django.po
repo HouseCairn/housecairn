@@ -269,6 +269,18 @@ msgstr "Jeton d'API créé : %(title)s"
 msgid "API token revoked: %(title)s"
 msgstr "Jeton d'API révoqué : %(title)s"
 
+#, python-format
+msgid "Phone connected: %(title)s"
+msgstr "Téléphone connecté : %(title)s"
+
+#, python-format
+msgid "Connected phone changed: %(title)s"
+msgstr "Téléphone connecté modifié : %(title)s"
+
+#, python-format
+msgid "Connected phone revoked: %(title)s"
+msgstr "Téléphone connecté révoqué : %(title)s"
+
 msgid "Account created"
 msgstr "Compte créé"
 

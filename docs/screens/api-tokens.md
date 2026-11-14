@@ -45,3 +45,34 @@ channels (see the [API](../api/index.md)).
 
 **Audit log.** Creating and revoking a token are noted in the audit log of the instance, with
 the name of the token and who did it, never its value.
+
+## Connected apps
+
+The same page lists, under **Connected apps**, each phone you connected with the HouseCairn
+mobile app: its name, its homes, whether it may create homes, when it was connected and when it
+was last used. A phone is not an API token: it signs in in the phone's browser, on this
+server's own page, and it opens only the sync API of the app, never the rest of the API.
+
+**Connecting a phone.** In the app, you type this server's address; the app opens the
+**Connect the HouseCairn mobile app** page in the phone's browser, where you sign in as usual
+if needed (passkey, second factor or sign-in provider included). The page shows the server's
+address, says that the phone will see and change everything in the homes you choose, as you
+can, and lists your homes with the same rules as the token form: a home that requires a sign-in
+provider can be ticked only after signing in through it. **May create homes** is shown, and
+ticked, only when the app asked for it, to send its own homes to the server. Under **Name given
+by the app**, the page shows the name the phone sent: a label chosen by whoever started the
+sign-in, never the identity of the app. **Connect** sends you back to the app; **Cancel** tells
+the app you refused. On plain HTTP, which only a local address allows, the page says that the
+connection is not encrypted. Every new connection sends you an email ("A phone was connected to
+your account") and is noted in the audit log.
+
+**Edit** changes the name you see in the list, the homes and the right to create homes.
+**Revoke** opens a confirmation page: the phone loses its access with its next request, and its
+homes stay on it, marked as disconnected. Revoking cannot be undone: you connect the phone
+again. The app's own **Disconnect** revokes it too. A phone not used for 90 days is
+disconnected; deleting your account deletes its connections.
+
+**When a phone is disconnected by itself.** The app renews its access every hour with a key that
+changes at each use. If the same key comes back twice, one of the two is not your phone: the
+connection is revoked at once, and the phone signs in again in the browser. The same happens if
+the phone lost the answer of a renewal.

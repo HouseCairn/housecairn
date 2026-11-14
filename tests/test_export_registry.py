@@ -35,6 +35,8 @@ LEFT_OUT = {
     # Which homes a token of a person may reach. The token is the person's and is revoked
     # once no home is left; the archive never carries a secret.
     "apitokens.ApiToken_homes": "the homes an API token reaches",
+    # The same for a connected phone (docs/adr/0078): the connection is the person's.
+    "apitokens.AppConnection_homes": "the homes a connected phone reaches",
     # That a reminder about an occurrence went to a person, so that it goes once: a record
     # of sending, with no content of the home.
     "notifications.Delivery": "the reminders already sent",
@@ -56,6 +58,10 @@ NOT_OF_A_HOME = {
     "accounts.KnownDevice": "the browsers an account signed in from",
     "accounts.SetupCode": "the digest of the one-time code of the first-account screen",
     "apitokens.ApiToken": "the API tokens of a person",
+    "apitokens.AppConnection": "the phones a person connected (docs/adr/0078)",
+    "apitokens.ConnectionGrant": "the authorization code of a connected phone",
+    "apitokens.ConnectionAccessToken": "the access tokens of a connected phone",
+    "apitokens.ConnectionRefreshToken": "the refresh tokens of a connected phone",
     "instance.InstanceInvitation": "invitations to the instance",
     "instance.OidcProvider": "single sign-on providers of the instance",
     "instance.SettingValue": "settings of the instance",

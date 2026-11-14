@@ -62,6 +62,8 @@ urlpatterns = [
     path("me/notifications/", include("housecairn.notifications.urls")),
     # API tokens of the person: list, creation (secret shown once), revocation.
     path("me/tokens/", include("housecairn.apitokens.urls")),
+    # OAuth 2 with PKCE for the mobile app: consent, token, revocation (docs/adr/0078).
+    path("o/", include("housecairn.apitokens.oauth_views")),
     # Calendar (week, month, year) and its secret feeds (docs/adr/0052).
     path("calendar/", include("housecairn.calendar.urls")),
     # Stock items, suppliers and movements of a home (docs/adr/0038); /stock/ is the entry.

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n navigation %}
+{% block head_title %}{% translate "Revoke the connected app" %}{% endblock head_title %}
+{% block content %}
+  {% url 'api-tokens:list' as parent %}{% back_link parent %}
+  <h1>{% blocktranslate with name=connection.name|default:_("Mobile app") %}Revoke {{ name }}?{% endblocktranslate %}</h1>
+  <form method="post" class="card">
+    {% csrf_token %}
+    {% next_field %}
+    <p>{% translate "The phone loses its access with its next request; its homes stay on it, and it says it was disconnected. This cannot be undone: you would connect it again." %}</p>
+    <div class="button-row">
+      <button type="submit" class="button-danger">{% translate "Revoke" %}</button>
+      <a class="button button-secondary" href="{{ cancel_url }}">{% translate "Cancel" %}</a>
+    </div>
+  </form>
+{% endblock content %}

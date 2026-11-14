@@ -46,6 +46,7 @@ dependencies = [
   # Reads the library of task templates (docs/adr/0049); already installed by
   # drf-spectacular and apprise, now a direct dependency.
   "pyyaml>=6",
+  "django-oauth-toolkit>=3.4,<3.5",
 ]
 
 [project.optional-dependencies]
@@ -128,6 +129,8 @@ module = [
   "csp.*",
   "drf_spectacular.*",
   "drf_spectacular_sidecar.*",
+  "oauth2_provider.*",
+  "oauthlib.*",
   # Documentation group only (docs/adr/0016): not installed by `uv sync`.
   "playwright.*",
 ]

@@ -68,6 +68,7 @@ time zone and the name of the instance included.
 | Notifications on the device | `HOUSECAIRN_WEBPUSH_ENABLED` | Notifications | `false` | At once |
 | Discreet notifications on the device | `HOUSECAIRN_WEBPUSH_DISCREET` | Notifications | `true` | At once |
 | Preview of inspiration links | `HOUSECAIRN_LINK_PREVIEW_ENABLED` | Projects | `false` | At once |
+| Mobile app | `HOUSECAIRN_MOBILE_APP_ENABLED` | Mobile app | `true` | At once |
 % settings-table:end
 
 The start-up checks (`manage.py check`, which `migrate` runs too) read the variables and the
@@ -200,3 +201,16 @@ the interface (see [Single sign-on](oidc.md)).
 - **Name of the instance**: in the app bar, the title of the pages and the emails, at most 64
   characters on one line. Empty, the product name is shown. See
   [ADR 0042](../adr/0042-rate-limits-quotas-language-and-instance-name.md).
+
+## Mobile app
+
+**Mobile app** (`HOUSECAIRN_MOBILE_APP_ENABLED`, on by default) lets people connect the
+HouseCairn mobile app to their account: the app opens this server's sign-in page in the
+phone's browser, and the person chooses the homes the phone sees
+([Connected apps](../screens/api-tokens.md#connected-apps)). Nothing happens until a person
+connects a phone. Off: the consent page says the instance does not allow the mobile app,
+`GET /api/v1/sync/info` answers `"oauth": null`, and every request of a connected phone is
+refused (`mobile_app_disabled`). The connected phones stay listed and are not revoked: they work
+again when the setting is turned back on. The phone reaches the server over HTTPS, or over plain
+HTTP only between local addresses ([reverse proxy](reverse-proxy.md#the-mobile-app)). See
+[ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md).

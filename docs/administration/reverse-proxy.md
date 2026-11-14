@@ -46,6 +46,11 @@ redirected to HTTPS again (the browser reports too many redirects), and every
 client is counted under the proxy's address. `*` trusts any peer; use it only if
 nothing but the proxy can reach the container's port.
 
+A trusted proxy that sends no `X-Forwarded-For` leaves its own address as the client's: every
+client is then counted under the proxy's address, and the mobile app's rule of plain HTTP
+([below](#the-mobile-app)) judges the proxy, not the phone. Make the proxy set the header, as
+Caddy, Traefik and the nginx example below do.
+
 HouseCairn reads the site's name from the `Host` header, never from
 `X-Forwarded-Host`: the proxy must pass `Host` through. Caddy and Traefik do
 by default; nginx needs `proxy_set_header Host $host`.
@@ -54,6 +59,27 @@ A proxy may replace HouseCairn's `Referrer-Policy: same-origin` header, as Home
 Assistant does with `no-referrer`. Each page also states the policy in its
 `<head>`, which the browser follows over the header: forms keep sending their
 origin, which the CSRF check needs ([ADR 0076](../adr/0076-referrer-policy-in-the-page.md)).
+
+## The mobile app
+
+The HouseCairn mobile app signs in through `/o/` (its consent page, its token and revocation
+endpoints) and syncs through `/api/v1/sync/`
+([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). These routes answer over
+HTTPS. Plain HTTP is accepted only when both of these hold:
+
+- **the client is on a local network**: its address, as the trusted proxy reports it in
+  `X-Forwarded-For` (or the peer itself without a trusted proxy), is not a public address:
+  loopback, private networks, unique local IPv6, link-local, the shared space `100.64.0.0/10`
+  of a household VPN, documentation ranges;
+- **the address the phone uses is a local IP address**, such as `http://192.168.1.20:8000`,
+  never a name: `.local` and `.home.arpa` names are refused on plain HTTP, since anyone on the
+  network can answer for them. A household that wants a name uses HTTPS.
+
+Any other plain HTTP request gets 403 with the code `insecure_transport`. A client cannot claim
+HTTPS: `X-Forwarded-Proto` counts only from a trusted proxy, with
+`HOUSECAIRN_BEHIND_TLS_PROXY=true`. Behind a proxy, pass the original scheme and `Host`, or the
+phone is refused. The instance setting **Mobile app** turns the app off
+([Settings](settings.md#mobile-app)).
 
 ## Caddy on the host
 

@@ -33,6 +33,8 @@ msgstr "**Mot de passe** : le changer, ou en définir un si vous vous connectez 
 msgid "**Email addresses**, when the instance sends email: add or verify the addresses of your account."
 msgstr "**Adresses e-mail**, quand l'instance envoie des e-mails : ajouter ou vérifier les adresses de votre compte."
 
+msgid "The phones you connected with the HouseCairn mobile app are listed, and revoked, under [Connected apps](api-tokens.md#connected-apps); each new connection sends you an email."
+msgstr "Les téléphones que vous avez connectés avec l'application mobile HouseCairn sont listés, et révoqués, sous [Applications connectées](api-tokens.md#connected-apps) ; chaque nouvelle connexion vous envoie un courriel."
+
 msgid "**Delete my account** is at the bottom of the page. It opens a confirmation page, described under [Delete my account](account.md#delete-my-account)."
 msgstr "**Supprimer mon compte** est en bas de la page. Il ouvre une page de confirmation, décrite sous [Supprimer mon compte](account.md#delete-my-account)."
-

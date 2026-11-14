@@ -359,6 +359,12 @@ msgstr "Votre compte vient d'être utilisé pour se connecter depuis un navigate
 msgid "New sign-in to your account"
 msgstr "Nouvelle connexion à votre compte"
 
+msgid "A phone was connected to your account with the HouseCairn mobile app. If it was not you, revoke it in Connected apps, on the page of your API tokens, and change your password."
+msgstr "Un téléphone a été connecté à votre compte avec l'application mobile HouseCairn. Si ce n'était pas vous, révoquez-le dans Applications connectées, sur la page de vos jetons d'API, et changez votre mot de passe."
+
+msgid "A phone was connected to your account"
+msgstr "Un téléphone a été connecté à votre compte"
+
 msgid "Sign in"
 msgstr "Se connecter"
 
