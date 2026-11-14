@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import prefetch_related_objects
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
@@ -35,6 +36,7 @@ from housecairn.homes import current
 from housecairn.homes.models import Home
 from housecairn.homes.scoping import open_homes_for_request
 from housecairn.instance.middleware import asked_language
+from housecairn.reports import services as report_services
 from housecairn.rooms import conf
 from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Item, Room
@@ -129,6 +131,8 @@ class TaskListView(HomeTasksMixin, TemplateView):
             )
             rows = rows.filter(task__room=room) if room else rows.none()
         page = Paginator(rows, PAGE_SIZE).get_page(self.request.GET.get("page"))
+        if status == "open":
+            report_services.mark_photo_reports(self.home, self.request.user, page.object_list)
         hidden = 0
         if status == "open" and not show_hidden:
             hidden = (
@@ -368,9 +372,17 @@ class TaskDetailView(HomeTasksMixin, TemplateView):
         )
         attachments = list(task.attachments.all())
         place = task.item or task.room
+        prefetch_related_objects(
+            [task], report_services.reports_of_task(self.home, self.request.user)
+        )
+        reports: list[Any] = task.visible_reports  # type: ignore[attr-defined]
+        reporters = report_services.reporter_labels(reports)
+        for report in reports:
+            report.reporter_label = reporters[report.id]
         return super().get_context_data(
             **self.page(
                 task=task,
+                reports=reports,
                 place=place,
                 place_is_item=task.item is not None,
                 place_photos=list(
@@ -547,6 +559,7 @@ class OccurrenceActionView(HomeTasksMixin, View):
             .select_related("task", "task__room", "task__item", "task__assignee")
             .get(pk=occurrence.pk)
         )
+        report_services.mark_photo_reports(self.home, self.request.user, [current])
         prefs = agenda.preferences_of(self.request.user)  # type: ignore[arg-type]
         return TemplateResponse(
             self.request,
@@ -668,9 +681,13 @@ class TodayView(HomeTasksMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         day = services.today()
         prefs = agenda.preferences_of(self.request.user)  # type: ignore[arg-type]
+        sections = agenda.today_sections(self.home, prefs, day=day)
+        report_services.mark_photo_reports(
+            self.home, self.request.user, [row for section in sections for row in section.rows]
+        )
         return super().get_context_data(
             **self.page(
-                sections=agenda.today_sections(self.home, prefs, day=day),
+                sections=sections,
                 prefs=prefs,
                 show_person=prefs.today_group != "person",
                 today=day,

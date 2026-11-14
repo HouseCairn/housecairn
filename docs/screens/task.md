@@ -24,6 +24,15 @@ item (both link to their page) and the person it is assigned to. Its buttons:
 When a task done once has been closed, the card shows its outcome and **Undo**
 reopens it.
 
+**Reported problem** appears when the task was made from a report ([Make it a
+task](report.md)). For each report, the most recent first, it gives the date and who
+reported, the text of the report, which opens the [report](report.md), and its photo as a
+thumbnail that opens the photo full size. A report without a photo has the same block
+without the thumbnail. The photo is served by the same protected address as on the report:
+a member of the home sees it, nobody else does. Members who may write see every report the
+task was made from; a read-only member sees their own only. The section is absent for a
+task that does not come from a report.
+
 **When** gives the rule of repetition, the date, the masking delay and the next
 three dates, were each occurrence done on time. **How to do it** shows the
 procedure written in Markdown: the text is shown as written (HTML is not

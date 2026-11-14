@@ -14,11 +14,13 @@ from rest_framework import exceptions, mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from housecairn.accounts.models import User
 from housecairn.accounts.names import person_name
 from housecairn.core.pagination import DefaultCursorPagination
 from housecairn.homes.models import Home
+from housecairn.reports import services as report_services
 from housecairn.rooms.api import (
     HomeResourceMixin,
     _uuid_param,
@@ -36,6 +38,19 @@ from housecairn.tasks.models import (
     Task,
     TaskMaterial,
 )
+
+
+class LinkedReportSerializer(serializers.Serializer[Any]):
+    """A report a task was made from (docs/adr/0047)."""
+
+    id = serializers.UUIDField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True, help_text="When it was reported.")
+    has_photo = serializers.BooleanField(read_only=True)
+    photo_url = serializers.URLField(
+        read_only=True,
+        allow_null=True,
+        help_text="Address of the photo, served by the report's protected endpoint, or null.",
+    )
 
 
 class TaskSerializer(serializers.ModelSerializer[Task]):
@@ -97,11 +112,17 @@ class TaskSerializer(serializers.ModelSerializer[Task]):
         help_text="The occurrence to do now; null when the task is done for good.",
     )
 
+    reports = serializers.SerializerMethodField(
+        help_text="The reports the task was made from that the caller may see, the most "
+        "recent first. Read-only; the photo is sent by the endpoint of the report."
+    )
+
     class Meta:
         model = Task
         fields = [
             "id",
             "title",
+            "reports",
             "room",
             "item",
             "priority",
@@ -137,6 +158,31 @@ class TaskSerializer(serializers.ModelSerializer[Task]):
             self.fields["item"].queryset = Item.objects.filter(home=home)  # type: ignore[attr-defined]
             self.fields["assignee"].queryset = services.members_for_forms(home)  # type: ignore[attr-defined]
             self.fields["contractor"].queryset = Contractor.objects.filter(home=home)  # type: ignore[attr-defined]
+
+    @extend_schema_field(LinkedReportSerializer(many=True))
+    def get_reports(self, task: Task) -> list[dict[str, Any]]:
+        # Always prefetched by `get_queryset` (`reports_of_task`, filtered by what the person
+        # may see); there is deliberately no unfiltered fallback.
+        found: list[Any] = task.visible_reports  # type: ignore[attr-defined]
+        request = self.context["request"]
+        rows = [
+            {
+                "id": report.id,
+                "created_at": report.created_at,
+                "has_photo": report.has_photo,
+                "photo_url": str(
+                    reverse(
+                        "api-v1:home-report-photo",
+                        kwargs={"home_id": report.home_id, "report_id": report.id},
+                        request=request,
+                    )
+                )
+                if report.has_photo
+                else None,
+            }
+            for report in found
+        ]
+        return list(LinkedReportSerializer(rows, many=True).data)
 
     def get_assignee_name(self, task: Task) -> str:
         return person_name(task.assignee)
@@ -207,13 +253,14 @@ class TaskViewSet(
                 open_due_on=models.Subquery(open_rows.values("due_on")[:1]),
             )
             .prefetch_related(
+                report_services.reports_of_task(self.get_home(), self.request.user),
                 models.Prefetch(
                     "materials",
                     queryset=TaskMaterial.objects.filter(
                         article__deleted_at__isnull=True
                     ).select_related("article"),
                     to_attr="material_lines",
-                )
+                ),
             )
         )
         params = self.request.query_params

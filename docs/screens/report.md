@@ -3,7 +3,8 @@
 One report, at `/h/<home id>/reports/<report id>/`: its state (**Open**, **Made into a
 task**, **Resolved** or **Closed without action**), what is wrong, where (a link to the
 room, item or stock item when it still exists), who reported it and when, the task made
-from it (a link, kept even after the task is done) and the photo, which opens full size.
+from it (a link, kept even after the task is done, whose page shows this report and its
+photo in turn) and the photo, which opens full size.
 
 The person who reported sees their own report and no other. Members who may write see
 every report and have the buttons:

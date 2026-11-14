@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**The photo of a report is now on the task made from it.** The page of the task shows the report it comes from (who reported, when, the text and the photo, which opens full size); the task list and Today mark a task whose report has a photo; the API lists the reports of a task in `reports` ([Task](../../../screens/task.md))."
+msgstr "**La photo d'un signalement est maintenant sur la tâche qui en est faite.** La page de la tâche montre le signalement dont elle vient (qui l'a signalé, quand, le texte et la photo, qui s'ouvre en grand) ; la liste des tâches et Aujourd'hui marquent une tâche dont le signalement a une photo ; l'API liste les signalements d'une tâche dans `reports` ([Tâche](../../../screens/task.md))."
+

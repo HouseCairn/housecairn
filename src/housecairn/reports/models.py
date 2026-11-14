@@ -60,8 +60,9 @@ class Report(HomeOwnedModel):
         Article, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     place = models.CharField(_("where"), max_length=250, blank=True)
+    # `reports` lets a task find the reports it was made from (its page, the list, the API).
     task = models.ForeignKey(
-        Task, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+        Task, null=True, blank=True, on_delete=models.SET_NULL, related_name="reports"
     )
     closed_at = models.DateTimeField(null=True, blank=True)
     closed_by = models.ForeignKey(

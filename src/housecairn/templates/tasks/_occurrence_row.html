@@ -7,7 +7,7 @@
       <span class="row-text">
         {% if occurrence.task.room %}{{ occurrence.task.room.name }}{% if occurrence.task.item %} · {{ occurrence.task.item.name }}{% endif %}{% elif occurrence.task.item %}{{ occurrence.task.item.name }}{% endif %}{% if show_person and occurrence.task.assignee %}{% if occurrence.task.room or occurrence.task.item %} · {% endif %}{{ occurrence.task.assignee|person }}{% endif %}
       </span>
-      {% if occurrence.is_open %}{% include "tasks/_due.html" %}{% else %}<span class="pill {% if occurrence.status == 'done' %}pill-success{% else %}pill-ghost{% endif %}">{{ occurrence.get_status_display }}</span>{% endif %}
+      {% if occurrence.is_open %}{% include "tasks/_due.html" %}{% if occurrence.task.has_report_photo %} <span class="pill pill-ghost">{% translate "Photo" context "reported problem" %}</span>{% endif %}{% else %}<span class="pill {% if occurrence.status == 'done' %}pill-success{% else %}pill-ghost{% endif %}">{{ occurrence.get_status_display }}</span>{% endif %}
     </span>
   </a>
   {% if can_write and occurrence.is_open %}

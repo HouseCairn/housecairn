@@ -45,6 +45,19 @@
     {% endif %}
   </section>
 
+  {% if reports %}
+    <h2>{% translate "Reported problem" context "task page" %}</h2>
+    {% for report in reports %}
+        <section class="card">
+          <p class="small">{% blocktranslate with day=report.created_at|day person=report.reporter_label %}Reported on {{ day }} by {{ person }}{% endblocktranslate %}</p>
+          <p><a href="{% url_with_next 'reports:detail' home_id=home.id report_id=report.id %}">{{ report.title }}</a></p>
+          {% if report.has_photo %}
+            <p><a href="{% url 'reports:photo' home_id=home.id report_id=report.id %}"><img class="report-photo" src="{% url 'reports:photo-thumbnail' home_id=home.id report_id=report.id %}" alt="{% blocktranslate with title=report.title %}Photo of the problem: {{ title }}{% endblocktranslate %}" loading="lazy" decoding="async"></a></p>
+          {% endif %}
+        </section>
+    {% endfor %}
+  {% endif %}
+
   <h2>{% translate "When" %}</h2>
   <section class="card">
     <dl class="facts">

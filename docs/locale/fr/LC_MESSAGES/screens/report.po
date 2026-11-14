@@ -21,8 +21,8 @@ msgstr ""
 msgid "Report"
 msgstr "Signalement"
 
-msgid "One report, at `/h/<home id>/reports/<report id>/`: its state (**Open**, **Made into a task**, **Resolved** or **Closed without action**), what is wrong, where (a link to the room, item or stock item when it still exists), who reported it and when, the task made from it (a link, kept even after the task is done) and the photo, which opens full size."
-msgstr "Un signalement, sur `/h/<id du logement>/reports/<id du signalement>/` : son état (**Ouvert**, **Transformé en tâche**, **Résolu** ou **Classé sans suite**), ce qui ne va pas, où (un lien vers la pièce, l'élément ou l'article quand il existe encore), qui l'a signalé et quand, la tâche qui en a été faite (un lien, conservé même une fois la tâche terminée) et la photo, qui s'ouvre en grand."
+msgid "One report, at `/h/<home id>/reports/<report id>/`: its state (**Open**, **Made into a task**, **Resolved** or **Closed without action**), what is wrong, where (a link to the room, item or stock item when it still exists), who reported it and when, the task made from it (a link, kept even after the task is done, whose page shows this report and its photo in turn) and the photo, which opens full size."
+msgstr "Un signalement, sur `/h/<id du logement>/reports/<id du signalement>/` : son état (**Ouvert**, **Transformé en tâche**, **Résolu** ou **Classé sans suite**), ce qui ne va pas, où (un lien vers la pièce, l'élément ou l'article quand il existe encore), qui l'a signalé et quand, la tâche qui en a été faite (un lien, conservé même une fois la tâche terminée, dont la page montre à son tour ce signalement et sa photo) et la photo, qui s'ouvre en grand."
 
 msgid "The person who reported sees their own report and no other. Members who may write see every report and have the buttons:"
 msgstr "La personne qui a signalé voit son propre signalement et aucun autre. Les membres qui peuvent écrire voient tous les signalements et ont les boutons :"

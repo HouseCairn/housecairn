@@ -45,7 +45,10 @@ A report is not a task: it has no date and no owner, and may stay open as long a
 decides. A person who may write opens it on the **Reports** screen, or from the line on
 **Today**, and chooses:
 
-- **Make it a task**: a task with the same title, place and no date, linked to the report;
+- **Make it a task**: a task with the same title, place and no date, linked to the report.
+  The page of the task then shows the report it comes from (who reported, when, the text
+  and the photo as a thumbnail that opens it full size), and the task list and Today mark
+  such a task with a **Photo** label when the report has one;
 - **Mark as resolved** or **Close without action**;
 - **Reopen**, if a closed report comes back.
 
