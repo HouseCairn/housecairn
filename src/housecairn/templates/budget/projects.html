@@ -6,11 +6,12 @@
   {% include "budget/_nav.html" %}
   {% include "budget/_year.html" %}
   <p class="small">{% translate "Each project is counted in one year, the year it starts. An abandoned project plans nothing any more: what was paid on it shows as spent without a plan." %}</p>
+  <p class="small">{% translate "Planned is the budget lines of the project, and what its tasks plan beyond the lines of the same nature, materials or labour: an estimate a line already holds is not counted twice." %}</p>
   {% if report.lines %}
     <table class="table-stack">
       <caption class="visually-hidden">{% translate "Planned, committed and paid, project by project" %}</caption>
       <thead>
-        <tr><th scope="col">{% translate "Project" %}</th><th scope="col">{% translate "Counted in" %}</th>{% include "budget/_head_amounts.html" %}<th scope="col">{% translate "Still to pay" %}</th></tr>
+        <tr><th scope="col">{% translate "Project" %}</th><th scope="col">{% translate "Counted in" %}</th>{% include "budget/_head_amounts.html" %}<th scope="col">{% translate "Still to pay" %}</th><th scope="col">{% translate "Planned by its tasks" %}</th></tr>
       </thead>
       <tbody>
         {% for line in report.lines %}
@@ -19,11 +20,12 @@
             <td data-label="{% translate 'Counted in' %}">{{ line.extra.year|unlocalize }}</td>
             {% include "budget/_row_amounts.html" with amounts=line.amounts %}
             <td data-label="{% translate 'Still to pay' %}">{{ line.extra.to_pay|money:home.currency }}</td>
+            <td data-label="{% translate 'Planned by its tasks' %}">{{ line.extra.tasks_planned|money:home.currency }}</td>
           </tr>
         {% endfor %}
       </tbody>
       <tfoot>
-        <tr><th scope="row">{% translate "Total" %}</th><td></td>{% include "budget/_row_amounts.html" with amounts=report.total %}<td data-label="{% translate 'Still to pay' %}">{{ report.total.to_pay|money:home.currency }}</td></tr>
+        <tr><th scope="row">{% translate "Total" %}</th><td></td>{% include "budget/_row_amounts.html" with amounts=report.total %}<td data-label="{% translate 'Still to pay' %}">{{ report.total.to_pay|money:home.currency }}</td><td></td></tr>
       </tfoot>
     </table>
   {% else %}

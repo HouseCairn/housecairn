@@ -92,6 +92,7 @@ jobs:
           tests/test_csv_import.py
           tests/test_task_templates.py tests/test_api_guide.py
           tests/test_token_sso.py
+          tests/test_budget_task_plans.py
 
   tests-postgresql:
     name: Tests (PostgreSQL)

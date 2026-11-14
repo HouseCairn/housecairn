@@ -5,7 +5,7 @@
   <h1>{% translate "Budget of the upkeep" %}</h1>
   {% include "budget/_nav.html" %}
   {% include "budget/_year.html" %}
-  <p class="small">{% blocktranslate with year=year|unlocalize %}The tasks that are in no project, with the occurrences of {{ year }}: those done, the one open, and those the repetition will still bring before the end of the year. The money of a task of a project is in the budget lines of the project.{% endblocktranslate %}</p>
+  <p class="small">{% blocktranslate with year=year|unlocalize %}The tasks that are in no project, with the occurrences of {{ year }}: those done, the one open, and those the repetition will still bring before the end of the year. An open task with no date counts in the current year. A task of a project counts in its project.{% endblocktranslate %}</p>
   {% if report.lines %}
     <table class="table-stack">
       <caption class="visually-hidden">{% translate "Estimate, cost a year and what was paid, task by task" %}</caption>
