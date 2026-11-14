@@ -1,0 +1,19 @@
+name: Question
+description: Ask a question about Housecairn.
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please look in the [documentation](https://docs.housecairn.app/) first. The answer may already be there.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What did you already try? (optional)

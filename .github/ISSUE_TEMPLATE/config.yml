@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Report a security vulnerability
-    url: https://github.com/HouseCairn/housecairn/security/advisories/new
-    about: Report vulnerabilities privately. Do not open a public issue.
+  - name: Documentation
+    url: https://docs.housecairn.app/
+    about: Read the documentation first. Most answers are there.
+  - name: Report a security problem
+    url: https://github.com/HouseCairn/housecairn/blob/main/SECURITY.md
+    about: Report it privately, as the security policy explains. Please do not open a public issue.
