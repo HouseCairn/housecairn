@@ -1,4 +1,4 @@
-# 0076. A sync API for the mobile app: the operations of its protocol, in clear, per home
+# 0077. A sync API for the mobile app: the operations of its protocol, in clear, per home
 
 - Status: proposed. The server mode of the mobile app, its sign-in and the archiving of homes
   are the maintainer's decisions of 2026-11-14; the shape of the API below is what this record
@@ -8,8 +8,8 @@
   deterministic ids, how long a deletion stays visible) and
   [ADR 0004](0004-versioned-rest-api.md) (a feed ordered by a change sequence, besides the
   lists ordered by creation).
-- Related: [ADR 0077](0077-oauth-2-with-pkce-for-the-mobile-app.md) (how the phone signs in),
-  [ADR 0078](0078-lots-of-the-server-mode-of-the-mobile-app.md) (the lots that build it).
+- Related: [ADR 0078](0078-oauth-2-with-pkce-for-the-mobile-app.md) (how the phone signs in),
+  [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md) (the lots that build it).
 
 ## Context
 
@@ -73,7 +73,7 @@ with the same rules, in one transaction per request, and gives them back in one 
 ### Routes
 
 All under `/api/v1/sync/`, JSON, answers carry `HC-Sync: 1`. They need an access token of a
-connected app ([ADR 0077](0077-oauth-2-with-pkce-for-the-mobile-app.md)), except `info`
+connected app ([ADR 0078](0078-oauth-2-with-pkce-for-the-mobile-app.md)), except `info`
 without a token; an API token is refused with 403, so Home Assistant and the scripts of today
 never write through them.
 
@@ -130,7 +130,7 @@ server, the members are its accounts, read only on the phone.
    for a year still learns of it, then a nightly task purges both, which settles the purge
    [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) left open. A cursor older than the
    oldest change kept answers 410, and the phone starts again from the snapshot. The duration
-   is the maintainer's to confirm (question in [ADR 0078](0078-lots-of-the-server-mode-of-the-mobile-app.md)).
+   is the maintainer's to confirm (question in [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md)).
 5. **Conflicts per field.** The server keeps a clock per field of every row of a home (the
    clock and the device of the last write, as `field_clock` on the phone). A `put` writes a
    field only if its `(clock, device)` is greater than the stored one, which is mobile ADR 0003
@@ -158,12 +158,12 @@ server, the members are its accounts, read only on the phone.
    batches; the server keeps, per connection, the number, the digest of the body and the answer of
    each batch for 30 days, and answers a repeated batch with the first answer, without applying
    it again. The same number with another body is 409.
-8. **A credential per phone, which can make a home.** [ADR 0077](0077-oauth-2-with-pkce-for-the-mobile-app.md).
+8. **A credential per phone, which can make a home.** [ADR 0078](0078-oauth-2-with-pkce-for-the-mobile-app.md).
    `POST /sync/homes/` creates a home with the phone's id when the connection has the right, makes
    the account its owner, and binds the home to the connection. The resources keep refusing home
    creation and restore to every token.
 9. **Fields the web lacks.** `homes.Home.archived_at` comes to the web (lot "Archiving of
-   homes", [ADR 0078](0078-lots-of-the-server-mode-of-the-mobile-app.md)): an archived home is
+   homes", [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md)): an archived home is
    hidden from the lists and the today page, sends no reminder, and its calendar feeds stay
    empty; it keeps syncing. The members of a home are in `GET /sync/homes/` and in the
    snapshot (the accounts with their display name and role, never their address), so that the

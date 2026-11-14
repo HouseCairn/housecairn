@@ -1,4 +1,4 @@
-# 0077. The mobile app signs in with OAuth 2 and PKCE: one connection per phone, revocable
+# 0078. The mobile app signs in with OAuth 2 and PKCE: one connection per phone, revocable
 
 - Status: proposed. OAuth 2 with PKCE in the browser, revocation per phone, homes chosen at
   sign-in with a right to create homes, HTTPS with plain HTTP only on a local address, and the
@@ -9,8 +9,8 @@
   not now", which this record replaces, and [ADR 0001](0001-record-architecture-decisions-and-dependencies.md),
   whose table of runtime dependencies gains django-oauth-toolkit and jwcrypto in the lot that
   adds them.
-- Related: [ADR 0076](0076-sync-api-for-the-mobile-app.md) (the sync API the connection opens),
-  [ADR 0078](0078-lots-of-the-server-mode-of-the-mobile-app.md) (lots).
+- Related: [ADR 0077](0077-sync-api-for-the-mobile-app.md) (the sync API the connection opens),
+  [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md) (lots).
 
 ## Context
 
@@ -95,7 +95,7 @@ the same transaction, and no token resolves to no connection.
 
 Two scopes, unrelated to those of API tokens:
 
-- `sync`: the routes of `/api/v1/sync/` ([ADR 0076](0076-sync-api-for-the-mobile-app.md)) and
+- `sync`: the routes of `/api/v1/sync/` ([ADR 0077](0077-sync-api-for-the-mobile-app.md)) and
   nothing else. Every other route of the API refuses an access token of a connection with 403,
   token management included (`SessionOnly` refuses it as it refuses API tokens).
 - `homes.create`: `POST /api/v1/sync/homes/`. The app asks for it only when the person chose to
