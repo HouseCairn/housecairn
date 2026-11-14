@@ -3,7 +3,7 @@
 On the `merge_group` event, GitHub gives the workflow a temporary branch of
 the merge queue, `refs/heads/gh-readonly-queue/<base>/pr-<number>-<sha>`, and
 no pull request. The `Signed-off-by`, `Conventional Commits title`,
-`Documentation updated` and `Home Assistant impact` checks verify a property of
+`Documentation updated` and `Impact on other repositories` checks verify a property of
 the pull request (its commits, its title, its diff and labels, its
 description), so on the queue they check the same
 pull request again, read from the API at that moment (docs/adr/0040). Each

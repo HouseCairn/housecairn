@@ -1,38 +1,40 @@
-"""Fail a pull request whose description does not say what it means for Home Assistant.
+"""Fail a pull request whose description does not say what it means for the other repositories.
 
-The Home Assistant app (HouseCairn/home-assistant-addons) is a layer over the image
-of this repository, and the Home Assistant integration (HouseCairn/home-assistant-
-housecairn) a client of its API (docs/adr/0075). A change here may need a change
-there: an option or a variable of the app, a behaviour behind Home Assistant's
-Ingress, an API the integration calls. The pull request template has a section
-"Home Assistant impact" with three boxes; this check fails when:
+Three repositories follow this one (docs/adr/0075): the Home Assistant app
+(HouseCairn/home-assistant-addons), a layer over the image of this repository; the Home
+Assistant integration (HouseCairn/home-assistant-housecairn), a client of its API; and the
+mobile app (HouseCairn/housecairn-mobile), which carries rules of this one (recurrence,
+seasons, task templates, design tokens, data schema). A change here may need a change
+there. The pull request template has a section "Impact on other repositories" with four
+boxes; this check fails when:
 
 - the section is missing, or no box is ticked;
 - "None" is ticked together with another box;
-- "The app must change" is ticked without a link to an issue or a pull request of
-  HouseCairn/home-assistant-addons in the section, or "The integration must change"
-  without one of HouseCairn/home-assistant-housecairn.
+- a repository's box is ticked without a link, in the section, to an issue or a pull
+  request of that repository.
 
 A link is `https://github.com/HouseCairn/<repository>/issues/<n>` or `/pull/<n>`, or
 `HouseCairn/<repository>#<n>`. Pull requests opened by Dependabot (`PR_AUTHOR`) are
 exempt: they use no template.
 
-Usage: PR_BODY=<description> PR_AUTHOR=<login> python scripts/check_ha_impact.py
+Usage: PR_BODY=<description> PR_AUTHOR=<login> python scripts/check_other_repositories.py
 """
 
 import os
 import re
 import sys
 
-HEADING = "Home Assistant impact"
+HEADING = "Impact on other repositories"
 EXEMPT_AUTHOR = "dependabot[bot]"
-APP_REPOSITORY = "HouseCairn/home-assistant-addons"
-INTEGRATION_REPOSITORY = "HouseCairn/home-assistant-housecairn"
-# The labels of the three boxes, as the template writes them; matched at the start
-# of the box's text, without regard to case.
+# The labels of the boxes, as the template writes them; matched at the start of the
+# box's text, without regard to case.
 NONE = "none"
-APP = "the app must change"
-INTEGRATION = "the integration must change"
+# (label, repository) of the boxes that announce a change in another repository.
+TARGETS = (
+    ("home assistant app must change", "HouseCairn/home-assistant-addons"),
+    ("home assistant integration must change", "HouseCairn/home-assistant-housecairn"),
+    ("mobile app must change", "HouseCairn/housecairn-mobile"),
+)
 
 _SECTION = re.compile(
     rf"^##[ \t]+{re.escape(HEADING)}[ \t]*$(?P<body>.*?)(?=^##?[ \t]|^---[ \t]*$|\Z)",
@@ -73,29 +75,23 @@ def problems(body: str, author: str = "") -> list[str]:
         ]
     boxes = ticked(text)
     none = any(box.startswith(NONE) for box in boxes)
-    app = any(box.startswith(APP) for box in boxes)
-    integration = any(box.startswith(INTEGRATION) for box in boxes)
-    if not (none or app or integration):
+    changed = [(label, repo) for label, repo in TARGETS if any(b.startswith(label) for b in boxes)]
+    if not (none or changed):
         return [
-            f'Tick one box of "{HEADING}": None, The app must change, or The integration '
-            "must change."
+            f'Tick one box of "{HEADING}": None, or the repository that must change '
+            "(Home Assistant app, Home Assistant integration, mobile app)."
         ]
     found = []
-    if none and (app or integration):
+    if none and changed:
         found.append(
             f'"{HEADING}": "None" is ticked together with a change; tick only what is true.'
         )
-    if app and not link(APP_REPOSITORY).search(text):
-        found.append(
-            f'"{HEADING}": the app must change, but the section has no link to an issue or a '
-            f"pull request of {APP_REPOSITORY} (https://github.com/{APP_REPOSITORY}/issues/<n>)."
-        )
-    if integration and not link(INTEGRATION_REPOSITORY).search(text):
-        found.append(
-            f'"{HEADING}": the integration must change, but the section has no link to an issue or '
-            f"a pull request of {INTEGRATION_REPOSITORY} "
-            f"(https://github.com/{INTEGRATION_REPOSITORY}/issues/<n>)."
-        )
+    for label, repository in changed:
+        if not link(repository).search(text):
+            found.append(
+                f'"{HEADING}": the {label}, but the section has no link to an issue or a '
+                f"pull request of {repository} (https://github.com/{repository}/issues/<n>)."
+            )
     return found
 
 
