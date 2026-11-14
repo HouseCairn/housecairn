@@ -163,7 +163,7 @@ class PreferenceSerializer(serializers.ModelSerializer[Preference]):
 
 
 class PreferencesView(PersonOnlyToChange, APIView):
-    """When the caller wants reminders: delay, time, quiet hours, summary, language."""
+    """When the caller wants reminders: delay, time, quiet hours, summary."""
 
     permission_classes = PERMISSIONS
 
