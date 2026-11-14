@@ -16,10 +16,116 @@ import yaml
 from scripts import (
     check_docs_updated,
     check_external_urls,
+    check_ha_impact,
     check_pr_title,
     check_signoff,
     merge_queue,
 )
+
+# Home Assistant impact of a pull request (scripts/check_ha_impact.py, docs/adr/0075)
+
+_TEMPLATE_PATH = Path(__file__).resolve().parents[1] / ".github" / "pull_request_template.md"
+_TEMPLATE = _TEMPLATE_PATH.read_text(encoding="utf-8")
+_APP_LINK = "https://github.com/HouseCairn/home-assistant-addons/issues/12"
+_INTEGRATION_LINK = "HouseCairn/home-assistant-housecairn#7"
+
+
+def _body(*ticks: str, extra: str = "") -> str:
+    body = _TEMPLATE
+    for label in ticks:
+        body = body.replace(f"- [ ] {label}", f"- [x] {label}")
+    return body.replace("## AI assistance", f"{extra}\n\n## AI assistance")
+
+
+def test_the_template_untouched_fails() -> None:
+    found = check_ha_impact.problems(_TEMPLATE)
+    assert len(found) == 1
+    assert "Tick one box" in found[0]
+
+
+def test_a_description_without_the_section_fails() -> None:
+    found = check_ha_impact.problems("## Summary\n\nFixes a typo.\n")
+    assert len(found) == 1
+    assert 'no "## Home Assistant impact" section' in found[0]
+    assert check_ha_impact.problems("") != []
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        _body("None"),
+        _body("The app must change", extra=f"App: {_APP_LINK}"),
+        _body("The app must change", extra="HouseCairn/home-assistant-addons#12"),
+        _body("The integration must change", extra=_INTEGRATION_LINK),
+        _body(
+            "The app must change",
+            "The integration must change",
+            extra=f"{_APP_LINK}\nhttps://github.com/HouseCairn/home-assistant-housecairn/pull/3",
+        ),
+        "## Home Assistant impact\r\n\r\n- [X] None\r\n",
+    ],
+)
+def test_a_ticked_section_with_its_links_passes(body: str) -> None:
+    assert check_ha_impact.problems(body) == []
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        # A change without a link, or with a link to another repository.
+        (_body("The app must change"), "no link to an issue or a pull request of HouseCairn/"),
+        (
+            _body(
+                "The app must change", extra="https://github.com/HouseCairn/housecairn/issues/12"
+            ),
+            "HouseCairn/home-assistant-addons",
+        ),
+        (
+            _body("The integration must change", extra=_APP_LINK),
+            "HouseCairn/home-assistant-housecairn",
+        ),
+        (
+            _body(
+                "The app must change",
+                extra="https://github.com/HouseCairn/home-assistant-addons-fork/issues/1",
+            ),
+            "HouseCairn/home-assistant-addons",
+        ),
+        (_body("None", "The app must change", extra=_APP_LINK), '"None" is ticked together'),
+        # The example link of the template's comment does not count.
+        (
+            _TEMPLATE.replace("- [ ] The app must change", "- [x] The app must change"),
+            "no link to an issue or a pull request of HouseCairn/home-assistant-addons",
+        ),
+        # A link outside the section does not count either.
+        (
+            _body("The app must change").replace("## Summary\n", f"## Summary\n\n{_APP_LINK}\n"),
+            "no link to an issue or a pull request of HouseCairn/home-assistant-addons",
+        ),
+    ],
+)
+def test_a_change_needs_a_link_to_its_repository(body: str, expected: str) -> None:
+    found = check_ha_impact.problems(body)
+    assert any(expected in line for line in found), found
+
+
+def test_dependabot_is_exempt_and_no_one_else() -> None:
+    assert check_ha_impact.problems("Bumps django.", "dependabot[bot]") == []
+    assert check_ha_impact.problems("Bumps django.", "dependabot") != []
+    assert check_ha_impact.problems("Bumps django.", "github-actions[bot]") != []
+
+
+def test_main_reads_the_environment(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("PR_BODY", _body("None"))
+    monkeypatch.setenv("PR_AUTHOR", "alice")
+    assert check_ha_impact.main() == 0
+    assert "Home Assistant impact: none." in capsys.readouterr().out
+    monkeypatch.setenv("PR_BODY", "## Summary\n")
+    assert check_ha_impact.main() == 1
+    assert "Home Assistant impact" in capsys.readouterr().err
+
 
 # Pull request titles
 
@@ -312,6 +418,7 @@ def test_queued_pull_request_is_read_from_the_api() -> None:
     assert pull == {
         "number": 104,
         "title": "feat: add yearly recurrence",
+        "body": "",
         "author": "alice",
         "base_sha": "b" * 40,
         "head_sha": "h" * 40,
@@ -351,6 +458,7 @@ _REQUIRED_CHECK_WORKFLOWS = (
     "dependency-review.yml",
     "docs-updated.yml",
     "docs.yml",
+    "ha-impact.yml",
     "image.yml",
     "pr-title.yml",
     "zizmor.yml",

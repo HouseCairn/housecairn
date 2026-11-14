@@ -161,6 +161,7 @@ maintainer merges it ([ADR 0014](docs/adr/0014-continuous-integration-and-supply
 | `Container image (multi-arch build)` | The image builds for `linux/amd64` and `linux/arm64`. |
 | `Documentation` | The documentation site builds without warning in English and French, loads no external resource, has no broken link (external links included) and documents every API operation ([ADR 0016](docs/adr/0016-documentation-site.md)). |
 | `Documentation updated` | A pull request that changes a screen, a setting or the API also changes `docs/` (see below). |
+| `Home Assistant impact` | The description says whether the Home Assistant app or integration must change, with a link to its issue or pull request (see below). |
 
 Workflows of a pull request from outside the project only start once the
 maintainer approves them.
@@ -187,6 +188,14 @@ the queue; if it is removed from the queue, the timeline says why.
   [Documentation](#documentation)).
 - **Fill in the pull request template**, including what you actually ran to
   verify the change.
+- **Say the Home Assistant impact.** The [Home Assistant app](https://github.com/HouseCairn/home-assistant-addons)
+  is built on the image of this repository and the
+  [integration](https://github.com/HouseCairn/home-assistant-housecairn) calls its API. In
+  the template's **Home Assistant impact** section, tick **None**, **The app must change**
+  (an option, a variable, a behaviour behind Ingress) or **The integration must change**
+  (the API), and for a change link the issue or pull request you opened in that
+  repository. The `Home Assistant impact` check fails without the section, without a
+  ticked box, or without the link ([ADR 0075](docs/adr/0075-home-assistant-impact-of-each-pull-request.md)).
 - All user-facing text is in English in the code and goes through translation
   functions; no hard-coded strings.
 - **Screens follow the [design guide](docs/developer/design-guide.md).** Before

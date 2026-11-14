@@ -1,0 +1,54 @@
+# Every pull request says what it means for the Home Assistant app and the
+# Home Assistant integration (docs/adr/0075): the "Home Assistant impact"
+# section of the template, with a link to an issue or a pull request of the
+# repository concerned when one must change. The job name is a status check.
+# The description only reaches the script through the environment.
+#
+# On a merge queue entry the check runs again on the queued pull request, its
+# description read from the API at that moment (scripts/merge_queue.py,
+# docs/adr/0040).
+name: Home Assistant impact
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  merge_group:
+    types: [checks_requested]
+
+permissions: {}
+
+concurrency:
+  # A merge queue entry has no pull request number: its own branch is its group.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ha-impact:
+    name: Home Assistant impact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read # check out the repository
+      pull-requests: read # merge queue: read the queued pull request
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the description
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: python3 scripts/check_ha_impact.py
+      - name: Check the description of the queued pull request
+        if: github.event_name == 'merge_group'
+        env:
+          MERGE_GROUP_HEAD_REF: ${{ github.event.merge_group.head_ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/merge_queue.py >"$RUNNER_TEMP/pull.json"
+          echo "Queued pull request #$(jq -r .number "$RUNNER_TEMP/pull.json")"
+          PR_BODY=$(jq -r .body "$RUNNER_TEMP/pull.json") \
+            PR_AUTHOR=$(jq -r .author "$RUNNER_TEMP/pull.json") \
+            python3 scripts/check_ha_impact.py

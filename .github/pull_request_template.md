@@ -14,6 +14,14 @@
 
 <!-- The pages you updated under `docs/`, or why none is concerned (then ask the maintainer for the `no-docs-needed` label). -->
 
+## Home Assistant impact
+
+<!-- Does the Home Assistant app (an option, a variable, a behaviour behind Ingress) or the Home Assistant integration (the API it calls) have to change with this? Tick what is true. For a change, link its issue or pull request, for example https://github.com/HouseCairn/home-assistant-addons/issues/123. The "Home Assistant impact" check reads this section. -->
+
+- [ ] None
+- [ ] The app must change (HouseCairn/home-assistant-addons):
+- [ ] The integration must change (HouseCairn/home-assistant-housecairn):
+
 ## AI assistance (tool and model)
 
 <!-- "None", or the tool and model used, and for what. -->
