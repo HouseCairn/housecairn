@@ -38,7 +38,9 @@ device cannot be added silently: it can be **offered at once and accepted in one
   posts the subscription to the same API as the form of Notifications (0066: session, form
   token, same validation, same limit of five devices), and says so on the banner with a link
   to rename the device in Notifications. A refusal of the browser or of the server says so in
-  words, saves nothing and, if the browser had subscribed, gives the subscription back.
+  words and saves nothing. It gives the subscription back only if this tap created it: a
+  subscription that the browser already had (a device that works, or one of another account)
+  is kept, whatever the server answered (400, 403, 500).
 - **A name made from the browser**: "iPhone", "iPad", "Chrome on Android", "Firefox on
   Windows", "Safari on macOS" (the browser and the system read from the user agent; the pattern
   "browser on system" and the fallback "This device" are translated, the names of products are
@@ -54,8 +56,11 @@ device cannot be added silently: it can be **offered at once and accepted in one
   or silenced like the other. Opened from the home screen, it is the normal offer.
 - **Permission already refused**: no offer. **Notifications** says, on the device section,
   how to turn it back on in the settings of the browser (a page cannot ask again).
-- **Unchanged**: the form of Notifications, the discreet content (0066, the default), the
-  settings, the limits and the API. No new dependency, no style in the page (design guide).
+- **The form of Notifications shares `enroll`** with the offer: same permission-first tap,
+  same refusal rules (including keeping an earlier subscription), and the same line, shown
+  when the browser blocks the site. It still takes a name typed by the person.
+- **Unchanged**: the discreet content (0066, the default), the settings, the limits and the
+  API. No new dependency, no style in the page (design guide).
 
 ## Consequences
 
