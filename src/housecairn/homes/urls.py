@@ -32,6 +32,8 @@ urlpatterns = [
         name="export-csv",
     ),
     path("<uuid:home_id>/import/", views.HomeImportView.as_view(), name="import"),
+    path("<uuid:home_id>/archive/", views.ArchiveView.as_view(), name="archive"),
+    path("<uuid:home_id>/unarchive/", views.UnarchiveView.as_view(), name="unarchive"),
     path("<uuid:home_id>/delete/", views.HomeDeleteView.as_view(), name="delete"),
     path("<uuid:home_id>/audit/", views.HomeAuditView.as_view(), name="audit"),
     path("<uuid:home_id>/household/invite/", views.InviteView.as_view(), name="invite"),

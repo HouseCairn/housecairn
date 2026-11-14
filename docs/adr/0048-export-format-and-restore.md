@@ -5,7 +5,9 @@
 - Amended by: [0058](0058-contract-provider-is-a-contractor.md) (format 3: the provider of a
   contract is a contractor; version 2 archives are still restored),
   [0060](0060-secret-key-apart-from-the-backups.md) (the backup of the instance leaves the
-  secret key out)
+  secret key out),
+  [0079](0079-lots-of-the-server-mode-of-the-mobile-app.md) (format 4: the archiving date of
+  the home; versions 2 and 3 are still restored)
 
 ## Context
 

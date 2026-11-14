@@ -27,6 +27,13 @@ whose last choice adds one in place, and the sheet of the item links to the cont
 
     python tests/e2e/browser_checks.py item-contract --base http://localhost:8001
 
+`home-archive` (local only) archives a home and brings it back at 375 and 1280 px, in English and
+in French, with and without script (docs/adr/0079): the confirmation pages, the **Archived** mark on
+the home and the list, no sideways scroll, touch targets. Needs the account `demo@example.com`,
+owner of one home.
+
+    python tests/e2e/browser_checks.py home-archive --base http://localhost:8001
+
 `task-form` and `task-lines` (local only) measure the task form at 320, 360, 375 and 1280 px,
 in French, with and without script: the repetition, the duration and the contractor, then the
 room, item and stock item added in place and the lines of the materials.
@@ -726,6 +733,95 @@ def item_contract(browser: Browser, base: str) -> None:
                 context.close()
 
 
+HOME_ARCHIVE_WIDTHS = (375, 1280)
+# Per language: the link to archive, the title of its confirmation, its button, the mark, the link
+# to bring the home back, the button of that confirmation.
+HOME_ARCHIVE_TEXTS = {
+    "en-GB": (
+        "Archive this home",
+        "Archive this home?",
+        "Archive",
+        "Archived",
+        "Bring this home back",
+        "Bring back",
+    ),
+    "fr-FR": (
+        "Archiver ce logement",
+        "Archiver ce logement ?",
+        "Archiver",
+        "Archivé",
+        "Remettre ce logement en service",
+        "Remettre en service",
+    ),
+}
+
+
+def home_archive(browser: Browser, base: str) -> None:
+    """Archive a home and bring it back, from the home's page. Local only (docs/adr/0079).
+
+    At 375 and 1280 px, in English and in French, with and without script: the confirmation
+    pages and the page of the home fit the width, the buttons are touch targets, the home is
+    marked **Archived** and listed apart, then marked no more once brought back.
+    Prints the measures.
+    """
+    for width in HOME_ARCHIVE_WIDTHS:
+        for locale, (
+            archive,
+            title,
+            button,
+            mark,
+            bring,
+            back_button,
+        ) in HOME_ARCHIVE_TEXTS.items():
+            for script in (True, False):
+                label = f"{width} px, {locale}{'' if script else ', no script'}"
+                context = browser.new_context(
+                    viewport={"width": width, "height": 900},
+                    locale=locale,
+                    java_script_enabled=script,
+                )
+                page = context.new_page()
+                sign_in(page, base)
+                page.goto(f"{base}/h/")
+                page.locator("main a.row[href*='/h/']").first.click()
+                page.wait_for_selector("h1")
+                check(mark not in page.inner_text("h1"), f"{label}: not marked at the start")
+                page.click(f"main a:has-text('{archive}')")
+                page.wait_for_selector("h1")
+                check(
+                    page.inner_text("h1") == title,
+                    f"{label}: the confirmation: {page.inner_text('h1')}",
+                )
+                submit = page.locator(f"main form button[type=submit]:has-text('{button}')")
+                _fits(page, submit, width, f"{label}: the Archive button")
+                check(
+                    (submit.bounding_box() or {"height": 0})["height"] >= 44,
+                    f"{label}: the button is a touch target",
+                )
+                submit.click()
+                page.wait_for_selector("h1 .pill")
+                check(mark in page.inner_text("h1"), f"{label}: the home is marked {mark}")
+                _fits(page, page.locator("h1"), width, f"{label}: the title of the home")
+                scroll = page.evaluate("document.documentElement.scrollWidth")
+                check(scroll <= width, f"{label}: the page does not scroll ({scroll} px)")
+                page.goto(f"{base}/h/")
+                check(
+                    page.locator("main h2", has_text=mark).count() == 1,
+                    f"{label}: listed apart, under {mark}",
+                )
+                scroll = page.evaluate("document.documentElement.scrollWidth")
+                check(scroll <= width, f"{label}: the list does not scroll ({scroll} px)")
+                page.locator("main a.row[href*='/h/']").first.click()
+                page.click(f"main a:has-text('{bring}')")
+                page.wait_for_selector("h1")
+                submit = page.locator(f"main form button[type=submit]:has-text('{back_button}')")
+                _fits(page, submit, width, f"{label}: the Bring back button")
+                submit.click()
+                page.wait_for_selector("h1")
+                check(mark not in page.inner_text("h1"), f"{label}: brought back, no mark")
+                context.close()
+
+
 BACKGROUND_WIDTHS = (320, 360, 375, 1280)
 # Words of the screens, per language: the link being read, a link that could not be read, the
 # test being sent, the test that failed (docs/adr/0070).
@@ -1074,6 +1170,7 @@ def main() -> None:
             "task-form",
             "task-lines",
             "item-contract",
+            "home-archive",
             "form-errors",
             "instance-tabs",
             "background-calls",
@@ -1096,6 +1193,8 @@ def main() -> None:
             new_records_and_materials(browser, base)
         elif args.mode == "item-contract":
             item_contract(browser, base)
+        elif args.mode == "home-archive":
+            home_archive(browser, base)
         elif args.mode == "form-errors":
             form_errors(browser, base)
         elif args.mode == "instance-tabs":

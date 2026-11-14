@@ -32,6 +32,10 @@ the date it was first due, so your calendar application updates the event instea
 new one. One case makes a new event: a task that repeats a set time after the last one, done on
 a day other than its due date, gets a next date that was not the forecast one.
 
+The feed of a home that an owner [archived](../screens/home.md) keeps its address and stays
+valid, but holds no event; the combined feed leaves archived homes out. The events come back
+when the home is brought back.
+
 It follows the time zone you chose in [Notifications](../screens/notifications.md) (the time
 zone of the instance when empty) and the language of your
 [display preferences](../screens/display-preferences.md).

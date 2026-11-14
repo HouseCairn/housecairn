@@ -209,6 +209,9 @@ msgstr "Où se trouve le logement, pour les saisons : le printemps commence en m
 msgid "required sign-in provider"
 msgstr "fournisseur de connexion exigé"
 
+msgid "archived at"
+msgstr "archivé le"
+
 msgid "home"
 msgstr "logement"
 
@@ -530,6 +533,32 @@ msgstr "Vous avez quitté %(home)s."
 msgid "Member removed."
 msgstr "Membre retiré."
 
+msgid "Archive this home?"
+msgstr "Archiver ce logement ?"
+
+#, python-format
+msgid "%(home)s will be listed apart, hidden from Today and from the home selector, send no reminder, and its calendar feeds will be empty. Nothing is deleted: you can open it, change it and bring it back whenever you want."
+msgstr "%(home)s sera listé à part, masqué d'Aujourd'hui et du sélecteur de logement, n'enverra aucun rappel et ses flux de calendrier seront vides. Rien n'est supprimé : vous pouvez l'ouvrir, le modifier et le remettre en service quand vous voulez."
+
+msgid "Archive"
+msgstr "Archiver"
+
+msgid "Home archived."
+msgstr "Logement archivé."
+
+msgid "Bring this home back?"
+msgstr "Remettre ce logement en service ?"
+
+#, python-format
+msgid "%(home)s will be listed again, shown on Today and in the home selector, and its reminders will resume."
+msgstr "%(home)s sera de nouveau listé, affiché dans Aujourd'hui et dans le sélecteur de logement, et ses rappels reprendront."
+
+msgid "Bring back"
+msgstr "Remettre en service"
+
+msgid "Home brought back."
+msgstr "Logement remis en service."
+
 msgid "Sign-in requirement removed."
 msgstr "Exigence de connexion retirée."
 
@@ -626,6 +655,12 @@ msgstr "L'archive n'a pas pu être créée. Réessayez plus tard ; l'administrat
 msgid "The archive is being made. Reload this page in a moment."
 msgstr "L'archive est en préparation. Rechargez cette page dans un moment."
 
+msgid "Archived"
+msgstr "Archivé"
+
+msgid "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. You can still open it and change it."
+msgstr "Ce logement est archivé. Il est masqué d'Aujourd'hui et du sélecteur de logement, n'envoie aucun rappel et ses flux de calendrier sont vides. Vous pouvez toujours l'ouvrir et le modifier."
+
 msgid "Your role"
 msgstr "Votre rôle"
 
@@ -668,6 +703,12 @@ msgstr "Importer des tableaux"
 msgid "Rooms, items, tasks, stock and contractors, from CSV files"
 msgstr "Pièces, éléments, tâches, stock et intervenants, depuis des fichiers CSV"
 
+msgid "Bring this home back"
+msgstr "Remettre ce logement en service"
+
+msgid "Archive this home"
+msgstr "Archiver ce logement"
+
 msgid "Edit the home"
 msgstr "Modifier le logement"
 
@@ -692,6 +733,9 @@ msgstr "%(provider)s exigé"
 
 msgid "You are not a member of any home yet."
 msgstr "Vous n'êtes membre d'aucun logement pour l'instant."
+
+msgid "Hidden from Today and the home selector, with no reminder. Open one to change it or bring it back."
+msgstr "Masqués d'Aujourd'hui et du sélecteur de logement, sans rappel. Ouvrez-en un pour le modifier ou le remettre en service."
 
 msgid "Restore a home"
 msgstr "Restaurer un logement"

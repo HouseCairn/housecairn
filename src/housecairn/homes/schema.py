@@ -1,7 +1,7 @@
 """The JSON Schema of the archive of a home, built from the registry (docs/adr/0048).
 
 `manage.py export_schema` writes it; the documentation publishes the result as
-`docs/_static/schemas/housecairn-export-v3.schema.json`, and `tests/test_export_schema.py`
+`docs/_static/schemas/housecairn-export-v4.schema.json`, and `tests/test_export_schema.py`
 fails when the published file and the registry no longer agree, or when a real archive
 does not validate.
 """
@@ -109,7 +109,7 @@ def schema() -> dict[str, Any]:
         documents[app] = body
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
-        "$id": "https://docs.housecairn.app/_static/schemas/housecairn-export-v3.schema.json",
+        "$id": "https://docs.housecairn.app/_static/schemas/housecairn-export-v4.schema.json",
         "title": f"HouseCairn export of a home, format {exports.FORMAT_VERSION}",
         "description": (
             "`manifest` describes manifest.json; `documents` describes data/<app>.json, one per "

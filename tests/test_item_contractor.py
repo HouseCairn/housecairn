@@ -396,12 +396,12 @@ class TestTheArchive:
         services.update_item(alice, owner_item, contract_contractor=acme)
         return owner_item
 
-    def test_the_archive_is_in_version_3_and_names_the_contractor(
+    def test_the_archive_is_in_version_4_and_names_the_contractor(
         self, media_root: Path, alice_home: Home, linked: Item, acme: Contractor
     ) -> None:
         data = archive_bytes(alice_home)
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
-            assert json.loads(archive.read("manifest.json"))["version"] == 3
+            assert json.loads(archive.read("manifest.json"))["version"] == 4
             item = json.loads(archive.read("data/rooms.json"))["sections"]["items"][0]
         assert item["contract_contractor"] == str(acme.id)
         assert "contract_provider" not in item
@@ -480,14 +480,14 @@ class TestTheArchive:
         assert Contractor.objects.count() == 0
         assert Item.objects.get(pk=owner_item.pk).contract_contractor is None
 
-    def test_a_version_4_archive_is_refused(
+    def test_a_version_5_archive_is_refused(
         self, media_root: Path, alice: User, alice_home: Home
     ) -> None:
         files = entries(archive_bytes(alice_home))
         manifest = json.loads(files["manifest.json"])
-        manifest["version"] = 4
+        manifest["version"] = 5
         files["manifest.json"] = json.dumps(manifest).encode()
-        with pytest.raises(restore.ArchiveRefusedError, match="version 4"):
+        with pytest.raises(restore.ArchiveRefusedError, match="version 5"):
             restore.restore_bytes(alice, rebuild(files))
 
 

@@ -88,6 +88,16 @@ def _event(entry: services.Entry, base_url: str, uid: str) -> Event:
     return event
 
 
+def _covered(feed: Feed) -> list[Any]:
+    """The homes a feed carries events of: its own, or all of the person's, never an archived one.
+
+    The address of a feed stays valid when its home is archived, but the document is empty
+    (docs/adr/0079): the calendar application keeps the subscription and shows nothing.
+    """
+    homes: list[Any] = [feed.home] if feed.home else list(feed_homes(feed.user))
+    return [home for home in homes if home.archived_at is None]
+
+
 def render(feed: Feed, base_url: str, *, now: datetime.datetime | None = None) -> bytes:
     """The calendar of a feed, in the language and the time zone of its person.
 
@@ -98,7 +108,7 @@ def render(feed: Feed, base_url: str, *, now: datetime.datetime | None = None) -
     zone = services.zone_of(user)
     today = services.today_of(user, now)
     language = language_of(user)
-    homes: list[Any] = [feed.home] if feed.home else list(feed_homes(user))
+    homes = _covered(feed)
     with translation.override(language):
         result = services.entries(
             user,
@@ -146,7 +156,7 @@ def _fingerprint(feed: Feed, base_url: str, now: datetime.datetime | None) -> st
     invalidates the document at once; nothing in `tasks` is touched.
     """
     user = feed.user
-    homes: list[Any] = [feed.home] if feed.home else list(feed_homes(user))
+    homes = _covered(feed)
     ids = sorted(str(h.pk) for h in homes)
     parts = [
         str(feed.pk),

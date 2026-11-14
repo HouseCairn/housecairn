@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from housecairn.budget import csvfile, services
-from housecairn.homes.scoping import open_homes_for_request
+from housecairn.homes.scoping import active_homes_for_request
 from housecairn.projects.api import MONEY_SCHEMA
 from housecairn.projects.models import ENVELOPE_YEARS
 from housecairn.rooms.api import HomeResourceMixin
@@ -310,7 +310,7 @@ class CombinedView(APIView):
 
     @extend_schema(parameters=[YEAR], responses=CombinedSerializer(many=True))
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        homes = list(open_homes_for_request(request).order_by("name"))
+        homes = list(active_homes_for_request(request).order_by("name"))
         year = _year(request, task_services.today().year)
         rows = [
             {

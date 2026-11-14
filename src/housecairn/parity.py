@@ -30,6 +30,8 @@ PARITY: dict[str, tuple[str, ...]] = {
     "homes:restore": ("api-v1:home-restore",),
     "homes:import": ("api-v1:home-import",),
     "homes:delete": ("api-v1:home-delete-home",),
+    "homes:archive": ("api-v1:home-archive",),
+    "homes:unarchive": ("api-v1:home-unarchive",),
     "account_delete": ("api-v1:account-delete",),
     "profile": ("api-v1:me",),
     "instance:overview": ("api-v1:instance-invitation-list", "api-v1:instance-audit-list"),

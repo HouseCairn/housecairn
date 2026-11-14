@@ -249,6 +249,8 @@ def dispatch(now: datetime.datetime | None = None) -> int:
     rows = (
         Occurrence.objects.filter(
             home_id__in=writers,
+            # An archived home sends no reminder (docs/adr/0079).
+            home__archived_at__isnull=True,
             status__in=OPEN_STATUSES,
             due_on__isnull=False,
             due_on__lte=horizon,

@@ -171,5 +171,9 @@ msgstr "**Heures calmes** : rien n'est envoyé entre les deux heures ; ce qui é
 msgid "**Daily summary**: one message a day with every task to remind, instead of one each. Turned on before the time of reminders, the first one comes at that time."
 msgstr "**Résumé quotidien** : un seul message par jour avec toutes les tâches à rappeler, au lieu d'un par tâche. Activé avant l'heure des rappels, le premier arrive à cette heure-là."
 
+msgid "A home that an owner [archived](../screens/home.md) sends no reminder and no alert of a new report; they resume when it is brought back."
+msgstr "Un logement qu'un propriétaire a [archivé](../screens/home.md) n'envoie aucun rappel ni alerte de nouveau signalement ; ils reprennent quand il est remis en service."
+
 msgid "Each reminder is sent once, even if the worker runs twice at the same time. When a service fails, the reminder is not sent again; the next follow-up is."
 msgstr "Chaque rappel n'est envoyé qu'une fois, même si la tâche de fond tourne deux fois en même temps. Quand un service échoue, le rappel n'est pas renvoyé ; la relance suivante l'est."
+

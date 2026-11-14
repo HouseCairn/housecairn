@@ -159,5 +159,8 @@ and has a channel on. A reader of the home receives nothing.
 - **Daily summary**: one message a day with every task to remind, instead of one each.
   Turned on before the time of reminders, the first one comes at that time.
 
+A home that an owner [archived](../screens/home.md) sends no reminder and no alert of a new
+report; they resume when it is brought back.
+
 Each reminder is sent once, even if the worker runs twice at the same time. When a service
 fails, the reminder is not sent again; the next follow-up is.

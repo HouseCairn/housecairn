@@ -37,7 +37,7 @@ from housecairn.homes import services
 from housecairn.homes.models import Home, Invitation, Membership
 
 FORMAT = "housecairn-export"
-FORMAT_VERSION = 3
+FORMAT_VERSION = 4
 MANIFEST = "manifest.json"
 README_NAME = "README.txt"
 DATA_FOLDER = "data"
@@ -295,6 +295,7 @@ def _home(home: Home) -> dict[str, Any]:
         "currency": home.currency,
         "hemisphere": home.hemisphere,
         "required_provider": home.required_provider,
+        "archived_at": home.archived_at.isoformat() if home.archived_at else None,
         "created_at": home.created_at.isoformat(),
         "updated_at": home.updated_at.isoformat(),
     }

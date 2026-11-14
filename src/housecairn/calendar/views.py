@@ -251,7 +251,11 @@ class FeedsView(LoginRequiredMixin, TemplateView):
         user: User = self.request.user  # type: ignore[assignment]
         existing = {f.home_id: f for f in feeds.feeds_of(user)}
         rows = [(None, existing.get(None))] + [
-            (home, existing.get(home.id)) for home in feeds.feed_homes(user)
+            (home, existing.get(home.id))
+            for home in feeds.feed_homes(user)
+            # An archived home offers no new feed; one that has a feed keeps its line, to
+            # regenerate or revoke it (ADR 0079).
+            if home.archived_at is None or home.id in existing
         ]
         return super().get_context_data(rows=rows, **kwargs)
 

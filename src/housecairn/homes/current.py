@@ -6,7 +6,8 @@ that Rooms, Projects, Budget and Today open on it without a page that asks which
 (docs/developer/design-guide.md, "Current home").
 
 A value kept in a session is a preference, never a permission. It is read back only
-among the homes the person may open now (`open_homes_for_request`), at every request:
+among the homes the person may open now and that are not archived
+(`active_homes_for_request`, docs/adr/0079), at every request:
 a forged id, a home left or deleted, a home locked behind a sign-in provider is never
 returned, and the next home of the person (by name) takes its place. Every page of a home
 still takes its home from its address and checks it (`HomeScopedMixin`); this module only
@@ -68,9 +69,9 @@ def for_request(request: HttpRequest) -> Current:
         found = Current()
         setattr(request, _CACHE, found)
         return found
-    from housecairn.homes.scoping import open_homes_for_request
+    from housecairn.homes.scoping import active_homes_for_request
 
-    homes = list(open_homes_for_request(request).order_by("name", "id"))
+    homes = list(active_homes_for_request(request).order_by("name", "id"))
     stored = session.get(HOME_KEY)
     home = next((h for h in homes if str(h.pk) == stored), None)
     if stored is not None and home is None:

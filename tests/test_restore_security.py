@@ -212,7 +212,7 @@ def test_a_file_missing_from_the_manifest_is_refused(exported: bytes, alice: Use
     refused(alice, rebuild(files, rehash=False), "not those of its manifest")
 
 
-@pytest.mark.parametrize("version", [1, 4, "2", None])
+@pytest.mark.parametrize("version", [1, 5, "2", None])
 def test_an_unknown_version_is_refused(exported: bytes, alice: User, version: Any) -> None:
     files = entries(exported)
     manifest = json.loads(files["manifest.json"])

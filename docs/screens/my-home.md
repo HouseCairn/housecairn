@@ -36,6 +36,7 @@ page of a home you opened; before either, the first of your homes by name.
   room, a task).
 - **All homes** is offered on Today only: Today and the calendar then show all your
   homes together, and the other sections stay on the current home.
-- The selector only lists the homes you belong to. A home you leave, or that is
+- The selector only lists the homes you belong to that are not [archived](home.md): an
+  archived home is listed on **My homes** only. A home you leave, or that is
   deleted, is replaced by another of your homes, or, with none left, by the page that
   offers to add one. With one home, there is no selector.

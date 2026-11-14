@@ -19,6 +19,8 @@ LABELS: dict[str, Promise] = {
     "sso.required": _("Sign-in through %(provider)s required"),
     "sso.lifted": _("Sign-in requirement removed"),
     "home.exported": _("Home exported"),
+    "home.archived": _("Home archived"),
+    "home.unarchived": _("Home brought back from the archive"),
     "home.restored": _("Home restored from an archive"),
     "home.copied": _("Home restored as a copy of an archive"),
     "home.imported": _("Tables imported from CSV files"),

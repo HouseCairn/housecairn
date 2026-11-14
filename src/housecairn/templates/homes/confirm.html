@@ -10,7 +10,7 @@
       {% csrf_token %}
       {% next_field %}
       <div class="button-row">
-        <button type="submit" class="button-danger">{{ button }}</button>
+        <button type="submit" class="{{ button_class|default:'button-danger' }}">{{ button }}</button>
         <a class="button button-secondary" href="{{ cancel }}">{% translate "Cancel" %}</a>
       </div>
     </form>

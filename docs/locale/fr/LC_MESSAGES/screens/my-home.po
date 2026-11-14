@@ -57,8 +57,8 @@ msgstr "Choisir un logement ouvre le même écran dans ce logement (la liste des
 msgid "**All homes** is offered on Today only: Today and the calendar then show all your homes together, and the other sections stay on the current home."
 msgstr "**Tous les logements** n'est proposé que dans Aujourd'hui : Aujourd'hui et le calendrier montrent alors tous vos logements ensemble, et les autres sections restent sur le logement courant."
 
-msgid "The selector only lists the homes you belong to. A home you leave, or that is deleted, is replaced by another of your homes, or, with none left, by the page that offers to add one. With one home, there is no selector."
-msgstr "Le sélecteur ne liste que les logements dont vous êtes membre. Un logement que vous quittez, ou qui est supprimé, est remplacé par un autre de vos logements, ou, s'il n'en reste aucun, par la page qui propose d'en ajouter un. Avec un seul logement, il n'y a pas de sélecteur."
+msgid "The selector only lists the homes you belong to that are not [archived](home.md): an archived home is listed on **My homes** only. A home you leave, or that is deleted, is replaced by another of your homes, or, with none left, by the page that offers to add one. With one home, there is no selector."
+msgstr "Le sélecteur ne liste que les logements dont vous êtes membre et qui ne sont pas [archivés](home.md) : un logement archivé n'est listé que dans **Mes logements**. Un logement que vous quittez, ou qui est supprimé, est remplacé par un autre de vos logements, ou, s'il n'en reste aucun, par la page qui propose d'en ajouter un. Avec un seul logement, il n'y a pas de sélecteur."
 
 #~ msgid "My home"
 #~ msgstr "Mon accueil"
