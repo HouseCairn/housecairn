@@ -927,3 +927,23 @@ input.setting-locked {
 .offline-banner[hidden] {
   display: none;
 }
+
+/* The offer to receive the reminders on this device (templates/notifications/_device_banner.html,
+   docs/adr/0072): hidden until static/js/webpush.js has checked the browser. */
+.device-offer[hidden] {
+  display: none;
+}
+
+.device-offer-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.device-offer-title {
+  margin: 0 0 var(--hc-space-2);
+  font-size: var(--hc-font-size-base);
+}
+
+.device-offer-body p {
+  margin: 0 0 var(--hc-space-2);
+}

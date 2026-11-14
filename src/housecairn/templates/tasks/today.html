@@ -3,6 +3,7 @@
 {% block head_title %}{% translate "Today" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Today" %}</h1>
+  {% load notifications_extras %}{% device_banner %}
   {% load reports_extras %}{% open_reports_line home %}
   {% tab_bar "today" %}
   {% for section in sections %}

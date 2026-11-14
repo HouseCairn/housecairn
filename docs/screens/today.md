@@ -32,6 +32,14 @@ page, and a screen reader announces it. A row opens the [task](task.md).
   they do here. When reports are open, a line next to it says how many, with **See
   the reports**; the line is shown to the members who may write, never to read-only
   members (see [Reports](reports.md)).
+- When the instance sends [notifications to devices](../guides/notifications.md#on-this-device)
+  and this browser is not one of yours yet, a banner under the title asks **Receive the
+  reminders on this device?**. **Turn on** asks the browser for its permission and adds the
+  device with a name of its own, in one tap; **Later** hides the banner for seven days; **Do
+  not ask again** hides it in this browser. Nothing is asked until you tap. In Safari on an
+  iPhone or an iPad the banner says to install the application first. It is not shown where
+  the browser blocks notifications, on a demonstration instance, or where nothing can be
+  received.
 - A task hidden until a few days before its date does not appear until then.
 - Each section shows at most 200 rows; the task list holds the rest.
 

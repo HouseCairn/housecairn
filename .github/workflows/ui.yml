@@ -2,7 +2,8 @@
 # with Chromium's virtual authenticator, the one-click single sign-on button, the summary of
 # the errors of a refused form, the tabs of the instance administration and the choice of several
 # rooms or items by search and chips (docs/adr/0063); the
-# installable application and offline reading (docs/adr/0065).
+# installable application and offline reading (docs/adr/0065); the offer to receive the
+# reminders on this device, with a simulated browser push (docs/adr/0072).
 # No screenshots until the dedicated lot before the public release (docs/adr/0017).
 # Not a required check. Playwright comes from the
 # `docs` dependency group (locked in uv.lock, docs/adr/0016): it is not a dependency
@@ -139,6 +140,26 @@ jobs:
           for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:8005/healthz && break; sleep 1; done
           curl -fsS http://127.0.0.1:8005/healthz >/dev/null || { cat "$RUNNER_TEMP/demo-server.log"; exit 1; }
           uv run python tests/e2e/browser_checks.py demo-accounts --base http://localhost:8005
+      - name: The offer to receive the reminders on this device, with a simulated browser push (docs/adr/0072)
+        env:
+          HOUSECAIRN_NOTIFICATIONS_ENABLED: "true"
+          HOUSECAIRN_WEBPUSH_ENABLED: "true"
+          DEBUG: "true"
+          HOUSECAIRN_DATA_DIR: ${{ runner.temp }}/offer-data
+        run: |
+          mkdir -p "$HOUSECAIRN_DATA_DIR"
+          uv run python manage.py migrate --noinput
+          uv run python manage.py shell -c "
+          from housecairn.accounts.models import User
+          from housecairn.homes import services
+          user = User.objects.create_user(email='offer@example.com', password='correct-horse-battery-staple')
+          services.create_home(user, name='Main house')
+          "
+          nohup uv run python manage.py runserver 127.0.0.1:8006 --noreload > "$RUNNER_TEMP/offer-server.log" 2>&1 &
+          # The last try decides: a server that never answers fails here, with its log.
+          for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:8006/healthz && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8006/healthz >/dev/null || { cat "$RUNNER_TEMP/offer-server.log"; exit 1; }
+          uv run python tests/e2e/device_offer_checks.py --base http://localhost:8006
 
   offline:
     # The installable application and offline reading (docs/adr/0065): the manifest, the

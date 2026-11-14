@@ -104,15 +104,28 @@ with no other application: HouseCairn sends them through the push service of you
 (**Instance administration, Settings, Notifications**, or
 `HOUSECAIRN_WEBPUSH_ENABLED=true`), on top of notifications themselves.
 
-1. Open [Notifications](../screens/notifications.md) on the device, give it a name (*My
-   phone*) and select **Receive on this device**.
-2. The browser asks whether the site may show notifications: allow it. It asks only then,
-   never on its own.
+When Web Push is on, HouseCairn offers it to you: a banner at the top of
+[Today](../screens/today.md), **Receive the reminders on this device?**, shown in the browser
+and when you open the installed application.
+
+1. Select **Turn on**. The browser asks whether the site may show notifications: allow it. It
+   asks only then, never on its own.
+2. The device is added with a name made from the browser (*Chrome on Android*, *Firefox on
+   Windows*, *iPhone*), and the banner says so. Rename it in
+   [Notifications](../screens/notifications.md) if you like.
 3. Open the device in the list and **Send a test notification**.
 
+**Later** hides the banner for seven days; **Do not ask again** hides it in this browser for
+good (another browser is still offered the device). The banner does not come back in a
+browser that is already one of your devices, nor where notifications are blocked. If you
+refused the permission, the browser does not ask a second time: allow notifications for the
+site in the browser settings (the icon next to the address, or the site settings). The
+[Notifications](../screens/notifications.md) screen says so, and still lets you give a name
+and select **Receive on this device** yourself.
+
 On an iPhone or an iPad (iOS 16.4 or later), install the application first: in Safari,
-**Share**, then **Add to Home Screen**, then open it from the home screen. Android and
-computers need no installation.
+**Share**, then **Add to Home Screen**, then open it from the home screen. In Safari, before
+that, the banner says so and has no **Turn on**. Android and computers need no installation.
 
 Who carries the message depends on the browser: Google for Chrome, Edge, Brave, Opera and
 Samsung Internet, Mozilla for Firefox, Apple for Safari, Microsoft for the former Edge.

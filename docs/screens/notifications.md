@@ -42,8 +42,11 @@ The link at the top of a channel leads back to **Notifications**.
 
 Shown when the instance has [notifications on the device](../guides/notifications.md#on-this-device)
 on. The list shows the name of each device and the push service that carries its messages
-(Google, Mozilla, Apple or Microsoft). **Receive on this device** takes a name, then asks the
-browser for its permission, and only then. Opening a device lets you rename it, **Send a
+(Google, Mozilla, Apple or Microsoft). [Today](today.md) offers to add the browser you are
+using, with a name of its own; **Receive on this device** does the same with a name you give,
+and asks the browser for its permission, and only then. When the browser blocks the
+notifications of the site, a line says how to allow them again in the settings of the
+browser. Opening a device lets you rename it, **Send a
 test notification** (sent by the background worker, five a minute), or **Stop notifications
 on this device**. The address of the device and its keys are kept encrypted and never shown.
 
