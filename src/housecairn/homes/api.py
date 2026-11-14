@@ -629,7 +629,7 @@ class AcceptInvitationView(APIView):
     expired secrets all answer 404.
     """
 
-    permission_classes = [permissions.IsAuthenticated, NoTokenForHousehold, CredentialFitsView]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, NoTokenForHousehold]
 
     @extend_schema(
         request=inline_serializer("InvitationAccept", {"token": serializers.CharField()}),

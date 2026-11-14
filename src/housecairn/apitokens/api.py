@@ -93,7 +93,7 @@ def _own_token(request: Request, token_id: Any) -> ApiToken:
 
 
 class TokenListView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, SessionOnly]
 
     @extend_schema(auth=SESSION_AUTH, responses=TokenSerializer(many=True))
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -136,7 +136,7 @@ class TokenListView(APIView):
 
 
 class TokenDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, SessionOnly]
 
     @extend_schema(
         auth=SESSION_AUTH,

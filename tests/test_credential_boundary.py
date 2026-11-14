@@ -224,3 +224,81 @@ class TestCredentialOf:
         connect(alice, [alice_home])
         with pytest.raises(UnknownCredentialError):
             credential_of(self._request(AccessToken.objects.get()))
+
+
+# ---------- each lock alone (docs/adr/0078): any one of them refuses the connection ----------
+
+
+def _without_lock_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("housecairn.apitokens.authentication.check_view", lambda view: None)
+
+
+def _without_lock_two(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(CredentialFitsView, "has_permission", lambda self, request, view: True)
+
+
+@pytest.mark.parametrize("remove", [_without_lock_one, _without_lock_two], ids=["lock-2", "lock-1"])
+def test_one_lock_alone_refuses_every_route(
+    alice: User,
+    alice_home: Home,
+    routes: list[tuple[str, str, Any]],
+    remove: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With the other lock taken out, each of the first two still refuses every route."""
+    phone = connect(alice, [alice_home], scope="sync homes.create", may_create_homes=True)
+    remove(monkeypatch)
+    client = Client()
+    for path, method, _view in routes:
+        if is_sync(path):
+            continue
+        answer = call(client, method, path, HTTP_AUTHORIZATION=f"Bearer {phone.access}")
+        assert answer.status_code == 403, (method, path, answer.status_code)
+        if method != "head":
+            assert body_of(answer)["code"] == "connection_outside_sync", (method, path)
+
+
+def test_lock_three_alone_never_reads_a_connection_as_a_person(
+    alice: User, alice_home: Home, bob: User, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With both other locks out, the tests of a person still refuse what only a person does."""
+    alice.is_staff = alice.is_superuser = True
+    alice.save(update_fields=["is_staff", "is_superuser"])
+    from housecairn.homes import services as home_services
+    from housecairn.homes.models import Membership, Role
+
+    shared = home_services.create_home(alice, name="Shared")
+    member = Membership.objects.create(home=shared, user=bob, role=Role.MEMBER)
+    phone = connect(alice, [alice_home, shared], scope="sync homes.create", may_create_homes=True)
+    _without_lock_one(monkeypatch)
+    _without_lock_two(monkeypatch)
+    client = Client()
+    bearer = {"HTTP_AUTHORIZATION": f"Bearer {phone.access}"}
+    home = f"/api/v1/homes/{alice_home.id}/"
+    refused = [
+        ("post", "/api/v1/homes/", {"name": "New"}),
+        ("post", "/api/v1/homes/restore/", {}),
+        ("post", f"{home}delete/", {}),
+        ("post", f"{home}unlock/", {}),
+        ("post", f"{home}leave/", {}),
+        ("get", f"{home}audit/", None),
+        ("post", f"{home}export/", {}),
+        ("get", "/api/v1/me/tokens/", None),
+        ("post", "/api/v1/me/tokens/", {"name": "t", "scopes": ["write"]}),
+        ("post", "/api/v1/account/delete/", {}),
+        ("get", "/api/v1/instance/settings/", None),
+        ("patch", f"/api/v1/homes/{shared.id}/members/{member.id}/", {"role": Role.OWNER}),
+        ("post", f"/api/v1/homes/{shared.id}/members/{member.id}/make-owner/", {}),
+    ]
+    for method, path, data in refused:
+        kwargs: dict[str, Any] = {"secure": True, **bearer}
+        if data is not None:
+            kwargs.update(data=data, content_type="application/json")
+        answer = getattr(client, method)(path, **kwargs)
+        assert answer.status_code in (403, 404), (method, path, answer.status_code)
+    assert Home.objects.filter(name="New").count() == 0
+    assert not ApiToken.objects.exists()
+    alice_home.refresh_from_db()
+    assert alice_home.deleted_at is None
+    member.refresh_from_db()
+    assert member.role == Role.MEMBER

@@ -38,10 +38,10 @@ class WriteTokenOnly(permissions.BasePermission):
 
 # The default checks as well: a token also needs `read` to read.
 PERMISSIONS = [
+    CredentialFitsView,
     permissions.IsAuthenticated,
     TokenScopePermission,
     WriteTokenOnly,
-    CredentialFitsView,
 ]
 
 

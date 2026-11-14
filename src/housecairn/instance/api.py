@@ -56,7 +56,7 @@ class InstanceInvitationViewSet(
     """Pending invitations to the instance. They are sent by email, never returned."""
 
     serializer_class = InstanceInvitationSerializer
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
     queryset = InstanceInvitation.objects.none()
     lookup_field = "id"
     lookup_url_kwarg = "invitation_id"
@@ -115,7 +115,7 @@ class InstanceAuditView(mixins.ListModelMixin, viewsets.GenericViewSet[AuditEven
     """Audit log of the instance: administration, invitations, accounts. No home content."""
 
     serializer_class = AuditEventSerializer
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
     queryset = AuditEvent.objects.none()
 
     def get_queryset(self) -> Any:
@@ -125,7 +125,7 @@ class InstanceAuditView(mixins.ListModelMixin, viewsets.GenericViewSet[AuditEven
 class UnlockHomesView(APIView):
     """Clear the sign-in rule of every home whose provider the instance no longer offers."""
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(
         request=None,
@@ -148,7 +148,7 @@ class InstanceUsageView(APIView):
     A home is its identifier and its numbers only: no name, member or file.
     """
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(
         responses={
@@ -304,7 +304,7 @@ class InstanceSettingsView(APIView):
     that a variable sets is `locked` and refuses writes. Secrets are write-only.
     """
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(responses={200: SettingsListSerializer})
     def get(self, request: Request) -> Response:
@@ -333,7 +333,7 @@ class InstanceSettingsView(APIView):
 class InstanceSettingResetView(APIView):
     """Restore the default of one setting: the stored value is removed."""
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(request=None, responses={204: None})
     def delete(self, request: Request, key: str) -> Response:
@@ -421,7 +421,7 @@ class InstanceProvidersView(APIView):
     Creating one needs a recent sign-in. The client secret is write-only.
     """
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(
         operation_id="instance_providers_list",
@@ -451,7 +451,7 @@ class InstanceProvidersView(APIView):
 class InstanceProviderView(APIView):
     """One provider: read, change (PATCH), delete. One set by variables answers 409 to writes."""
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     def _find(self, slug: str) -> OidcProvider | None:
         if slug in providers.environment_slugs():
@@ -500,7 +500,7 @@ class InstanceProviderView(APIView):
 class InstanceProviderCheckView(APIView):
     """The test button: read an issuer's OpenID configuration and check it; saves nothing."""
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(
         request=inline_serializer("ProviderCheckRequest", {"issuer": serializers.CharField()}),
@@ -522,7 +522,7 @@ class InstanceProviderCheckView(APIView):
 class InstanceEmailTestView(APIView):
     """Connect to the mail server with the settings in force, to check them; sends nothing."""
 
-    permission_classes = [InstanceAdminOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, InstanceAdminOnly]
 
     @extend_schema(
         request=None,

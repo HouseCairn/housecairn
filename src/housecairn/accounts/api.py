@@ -114,7 +114,7 @@ class MeView(PersonOnlyToChange, APIView):
 
 
 class AccountDeleteView(APIView):
-    permission_classes = [SignedInPerson, CredentialFitsView]
+    permission_classes = [CredentialFitsView, SignedInPerson]
 
     @extend_schema(
         request=inline_serializer(

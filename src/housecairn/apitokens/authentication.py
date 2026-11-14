@@ -39,6 +39,12 @@ def connection_outside_sync() -> CodedPermissionDenied:
     )
 
 
+def check_view(view: Any) -> None:
+    """The first lock: a connection is refused on a view without `sync_api = True`."""
+    if not getattr(view, "sync_api", False):
+        raise connection_outside_sync()
+
+
 def _bearer(request: Request) -> str | None:
     header = authentication.get_authorization_header(request).split()
     if len(header) != 2 or header[0].lower() != b"bearer":
@@ -77,9 +83,7 @@ class ConnectionAuthentication(OAuth2Authentication):  # type: ignore[misc]
             raise CodedPermissionDenied(
                 _("This instance does not allow the mobile app."), "mobile_app_disabled"
             )
-        view = (request.parser_context or {}).get("view")
-        if not getattr(view, "sync_api", False):
-            raise connection_outside_sync()
+        check_view((request.parser_context or {}).get("view"))
         access_token.housecairn_connection = link.connection
         connections.touch(link.connection)
         # The person's own language, as for API tokens (docs/adr/0074).

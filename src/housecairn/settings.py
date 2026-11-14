@@ -467,10 +467,11 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
+        # First: a connection opens the sync API only, and only a connection opens it, with
+        # its own code before any other check answers (docs/adr/0078).
+        "housecairn.apitokens.permissions.CredentialFitsView",
         "rest_framework.permissions.IsAuthenticated",
         "housecairn.apitokens.permissions.TokenScopePermission",
-        # A connection opens the sync API only, and only a connection opens it (docs/adr/0078).
-        "housecairn.apitokens.permissions.CredentialFitsView",
     ],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
@@ -490,10 +491,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     # An `events` token posts events and reads nothing, the schema included.
     "SERVE_PERMISSIONS": [
+        # First, as in DEFAULT_PERMISSION_CLASSES (docs/adr/0078).
+        "housecairn.apitokens.permissions.CredentialFitsView",
         "rest_framework.permissions.IsAuthenticated",
         "housecairn.apitokens.permissions.TokenScopePermission",
-        # A connection opens the sync API only, and only a connection opens it (docs/adr/0078).
-        "housecairn.apitokens.permissions.CredentialFitsView",
     ],
     "COMPONENT_SPLIT_REQUEST": True,
     # The same three kinds appear in the label, in its creation and in the answer to a scan.

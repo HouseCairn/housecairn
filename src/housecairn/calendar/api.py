@@ -156,7 +156,7 @@ def _feed_of(request: Request, feed_id: Any) -> Feed:
 
 
 class FeedListView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, SessionOnly]
 
     @extend_schema(responses=FeedSerializer(many=True))
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -178,7 +178,7 @@ class FeedListView(APIView):
 
 
 class FeedDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, SessionOnly]
 
     @extend_schema(responses=FeedSerializer)
     def get(self, request: Request, feed_id: Any, *args: Any, **kwargs: Any) -> Response:
@@ -193,7 +193,7 @@ class FeedDetailView(APIView):
 class FeedRegenerateView(APIView):
     """Give a feed a new address; the old one stops working at once."""
 
-    permission_classes = [permissions.IsAuthenticated, SessionOnly, CredentialFitsView]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, SessionOnly]
 
     @extend_schema(request=None, responses=FeedSerializer)
     def post(self, request: Request, feed_id: Any, *args: Any, **kwargs: Any) -> Response:
