@@ -36,6 +36,9 @@ msgstr "Dès que vous modifiez le nom vous-même, il est à vous : aucun fournis
 msgid "Without a display name you are shown by your full name if you have one, and otherwise by the part of your email address before the `@`. Your whole address is never used to name you on those screens; it appears only where the address is the subject (your account, an invitation, the sheet of a member)."
 msgstr "Sans nom d'affichage, vous êtes affiché par votre nom complet si vous en avez un, et sinon par la partie de votre adresse e-mail avant le `@`. Votre adresse entière ne sert jamais à vous nommer sur ces écrans ; elle n'apparaît que là où l'adresse est le sujet (votre compte, une invitation, la fiche d'un membre)."
 
+msgid "**Language** says the language your pages and messages are in, or **Automatic**, and **Change the language** opens the [display preferences](display-preferences.md), where it is set; **Save** there brings you back here."
+msgstr "**Langue** indique la langue de vos pages et de vos messages, ou **Automatique**, et **Changer de langue** ouvre les [préférences d'affichage](display-preferences.md), où elle se règle ; **Enregistrer** vous y ramène ici."
+
 msgid "The same field is in the [API](../api/index.md): `GET` and `PATCH /api/v1/me/`, with `display_name_source` (`oidc` or `manual`; `oidc` is **Use the provider's name**) and `display_name_provider`, the identifier of the provider the name was taken from."
 msgstr "Le même champ est dans l'[API](../api/index.md) : `GET` et `PATCH /api/v1/me/`, avec `display_name_source` (`oidc` ou `manual` ; `oidc` correspond à **Reprendre le nom du fournisseur**) et `display_name_provider`, l'identifiant du fournisseur dont le nom a été repris."
 

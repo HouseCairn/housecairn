@@ -16,7 +16,7 @@ from housecairn.core import dates
 from housecairn.homes.models import Home
 from housecairn.notifications import reminders
 from housecairn.notifications.models import Preference
-from housecairn.tasks import services
+from housecairn.tasks import agenda, services
 from housecairn.tasks.models import Occurrence, Task
 
 pytest_plugins = ("tests.tasks_fixtures",)
@@ -204,7 +204,8 @@ class TestReminders:
             alice, alice_home, title="Bleed the radiators", due_on=datetime.date(2027, 2, 8)
         )
         occurrence = Occurrence.objects.get(task=task)
-        prefs = Preference(user=alice, language=language)
+        agenda.update_preferences(alice, language=language)
+        prefs = Preference(user=alice)
         _title, body = reminders.reminder_message(occurrence, prefs)
         assert shown in body
         assert NUMERIC_DATE.findall(body) == []

@@ -7,6 +7,7 @@ from rest_framework.request import Request
 from housecairn.accounts.models import User
 from housecairn.apitokens import services
 from housecairn.apitokens.models import ApiToken
+from housecairn.core.language import activate_for
 
 
 class ApiTokenAuthentication(authentication.BaseAuthentication):
@@ -25,6 +26,9 @@ class ApiTokenAuthentication(authentication.BaseAuthentication):
         token = services.authenticate(raw)
         if token is None:
             raise exceptions.AuthenticationFailed(_("Invalid, expired or revoked token."))
+        # The person's own language wins over `Accept-Language`, as on the pages
+        # (docs/adr/0074): the answer and its errors are worded in it.
+        activate_for(request._request, token.user)
         return token.user, token
 
     def authenticate_header(self, request: Request) -> str:

@@ -1,0 +1,68 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "HouseCairn speaks English and French. Each person chooses their own language; the other members of a home keep theirs."
+msgstr "HouseCairn parle anglais et français. Chaque personne choisit sa langue ; les autres membres d'un logement gardent la leur."
+
+msgid "Choose your language"
+msgstr "Choisir sa langue"
+
+msgid "Open **More**, then **Display preferences** (also reached from **Profile**, **Change the language**), and pick **Language**:"
+msgstr "Ouvrez **Plus**, puis **Préférences d'affichage** (aussi depuis **Profil**, **Changer de langue**), et choisissez **Langue** :"
+
+msgid "**Automatic**: the language of your browser, if HouseCairn ships it, else the default language of the instance, set by its administrator."
+msgstr "**Automatique** : la langue de votre navigateur, si HouseCairn la livre, sinon la langue par défaut de l'instance, réglée par son administrateur."
+
+msgid "**English** or **Français**: that language, whatever your browser says, on every device you sign in from."
+msgstr "**English** ou **Français** : cette langue, quoi que dise votre navigateur, sur tous les appareils où vous vous connectez."
+
+msgid "**Save** applies it at once: the message that confirms it, and every page after, are in the new language."
+msgstr "**Enregistrer** l'applique tout de suite : le message qui le confirme, et chaque page ensuite, sont dans la nouvelle langue."
+
+msgid "Where it applies"
+msgstr "Où elle s'applique"
+
+msgid "Everything you read follows the same choice:"
+msgstr "Tout ce que vous lisez suit le même choix :"
+
+msgid "every screen, the administration site, the help links (they open the documentation in your language) and the dates, numbers and amounts;"
+msgstr "chaque écran, le site d'administration, les liens d'aide (ils ouvrent la documentation dans votre langue) et les dates, nombres et montants ;"
+
+msgid "the pages kept for reading offline: after a change, the pages kept in the former language are dropped, and the offline page is in your language;"
+msgstr "les pages gardées pour la lecture hors ligne : après un changement, les pages gardées dans l'ancienne langue sont supprimées, et la page hors ligne est dans votre langue ;"
+
+msgid "what HouseCairn sends you: reminders, the daily summary, notifications on your devices, the test message of a channel and your calendar feeds;"
+msgstr "ce que HouseCairn vous envoie : rappels, résumé quotidien, notifications sur vos appareils, message de test d'un canal et vos flux d'agenda ;"
+
+msgid "the API, with a token as with the session: your choice wins over the `Accept-Language` of the call."
+msgstr "l'API, avec un jeton comme avec la session : votre choix l'emporte sur l'`Accept-Language` de l'appel."
+
+msgid "With **Automatic**, what is sent to you has no browser to ask: it is in the default language of the instance."
+msgstr "En **Automatique**, ce qui vous est envoyé n'a pas de navigateur à interroger : il est dans la langue par défaut de l'instance."
+
+msgid "Before signing in"
+msgstr "Avant la connexion"
+
+msgid "The sign-in and sign-up pages end with **Language** and **Change**: the choice is kept in a cookie of your browser until you sign in, then your own choice applies. A language chosen in your display preferences is also written to that cookie, so the sign-in page speaks it after you sign out."
+msgstr "Les pages de connexion et d'inscription se terminent par **Langue** et **Changer** : le choix est gardé dans un cookie de votre navigateur jusqu'à la connexion, puis votre propre choix s'applique. Une langue choisie dans vos préférences d'affichage est aussi écrite dans ce cookie : la page de connexion la parle après la déconnexion."
+

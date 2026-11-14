@@ -28,6 +28,10 @@ part of your email address before the `@`. Your whole address is never used to n
 those screens; it appears only where the address is the subject (your account, an
 invitation, the sheet of a member).
 
+**Language** says the language your pages and messages are in, or **Automatic**, and
+**Change the language** opens the [display preferences](display-preferences.md), where it is
+set; **Save** there brings you back here.
+
 The same field is in the [API](../api/index.md): `GET` and `PATCH /api/v1/me/`, with
 `display_name_source` (`oidc` or `manual`; `oidc` is **Use the provider's name**) and
 `display_name_provider`, the identifier of the provider the name was taken from.

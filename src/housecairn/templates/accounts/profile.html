@@ -23,4 +23,10 @@
       <button type="submit" name="use_provider" value="1" class="button-secondary button-block">{% translate "Use the provider's name" %}</button>
     </form>
   {% endif %}
+  <section class="card" aria-labelledby="profile-language">
+    <h2 id="profile-language">{% translate "Language" %}</h2>
+    <p class="small">{% if language_name %}{% blocktranslate with language=language_name %}Your pages, reminders and notifications are in {{ language }}.{% endblocktranslate %}{% else %}{% translate "Automatic: the language of your browser, then the default language of the instance." %}{% endif %}</p>
+    {% url 'profile' as here %}
+    <a class="button-secondary button-block" href="{% url 'display-preferences' %}?next={{ here|urlencode }}">{% translate "Change the language" %}</a>
+  </section>
 {% endblock content %}

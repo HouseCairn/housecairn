@@ -194,6 +194,8 @@ class TestWebAcceptance:
                 assert "cannot create an account" in page.text
                 assert "Create the account and join" not in page.text
                 text = page.text.replace(address, "X").replace(quote(raw, safe=""), "T")
+                # The form token is masked anew on each page (the language form has one).
+                text = re.sub(r'name="csrfmiddlewaretoken" value="[^"]*"', "CSRF", text)
                 pages.append(re.sub(r'"X-CSRFToken": "[^"]*"', "CSRF", text))
         assert len(set(pages)) == 1
         assert not User.objects.filter(email="nobody@example.com").exists()

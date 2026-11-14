@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
+from housecairn.core.language import language_of
 from housecairn.core.links import external_url
 from housecairn.homes.models import WRITE_ROLES, Membership
 from housecairn.instance.config import get_setting
@@ -63,7 +64,7 @@ def report_created(report_id: str) -> int:
         pref = prefs.get(user_id) or Preference(user=person)
         if reminders.is_quiet(pref, now.astimezone(reminders.zone_of(pref))):
             continue
-        with translation.override(pref.language):
+        with translation.override(language_of(person)):
             title = _("HouseCairn: problem reported")
             body = _("%(title)s, %(home)s") % {
                 "title": reminders.one_line(report.title),

@@ -20,6 +20,7 @@ from housecairn.homes.models import Home, Membership, Role
 from housecairn.instance import config
 from housecairn.notifications import outbound, reminders, services, tasks, webpush
 from housecairn.notifications.models import MAX_CHANNELS, MAX_DEVICES, Delivery, Preference
+from housecairn.tasks import agenda
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import Occurrence, Task
 
@@ -559,7 +560,8 @@ class TestMessage:
         due: datetime.date,
         outbox: list[tuple[str, str]],
     ) -> None:
-        reachable(alice, days_before=0, language="fr")
+        reachable(alice, days_before=0)
+        agenda.update_preferences(alice, language="fr")
         make_task()
         reminders.dispatch(at(due, 8))
         ((title, _body),) = outbox

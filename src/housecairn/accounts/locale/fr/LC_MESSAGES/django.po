@@ -224,6 +224,19 @@ msgstr "Vous avez saisi votre nom d'affichage : les fournisseurs de connexion ne
 msgid "Use the provider's name"
 msgstr "Reprendre le nom du fournisseur"
 
+msgid "Language"
+msgstr "Langue"
+
+#, python-format
+msgid "Your pages, reminders and notifications are in %(language)s."
+msgstr "Vos pages, rappels et notifications sont en %(language)s."
+
+msgid "Automatic: the language of your browser, then the default language of the instance."
+msgstr "Automatique : la langue de votre navigateur, puis la langue par défaut de l'instance."
+
+msgid "Change the language"
+msgstr "Changer de langue"
+
 msgid "First account"
 msgstr "Premier compte"
 

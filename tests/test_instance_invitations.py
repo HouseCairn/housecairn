@@ -99,7 +99,9 @@ class TestRules:
             response = client.get(link(raw))
             assert response.status_code == 404
             assert "does not work" in response.text
-            pages.add(re.sub(r'"X-CSRFToken": "[^"]*"', "", response.text))
+            # The form token is masked anew on each page (the language form has one).
+            text = re.sub(r'name="csrfmiddlewaretoken" value="[^"]*"', "", response.text)
+            pages.add(re.sub(r'"X-CSRFToken": "[^"]*"', "", text))
             assert client.post(link(raw), {"password1": PASSWORD}).status_code == 404
         assert len(pages) == 1
         assert not User.objects.filter(email__in=["a@example.com", "b@example.com"]).exists()

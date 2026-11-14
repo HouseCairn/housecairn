@@ -4,6 +4,7 @@ from allauth.account.decorators import secure_admin_login
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
+from django.views.i18n import set_language
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerSplitView
 
 from housecairn.accounts import views as account_views
@@ -32,6 +33,8 @@ urlpatterns = [
     # The service worker at the root, so that its scope is the application (docs/adr/0065).
     path("service-worker.js", core_views.service_worker, name="service-worker"),
     path("offline/", core_views.offline_page, name="offline"),
+    # Signed out, the language of the pages (docs/adr/0074).
+    path("language/", set_language, name="set_language"),
     path("more/", core_views.MoreView.as_view(), name="more"),
     path("more/security/", core_views.SecurityView.as_view(), name="more-security"),
     path("about/", core_views.AboutView.as_view(), name="about"),
