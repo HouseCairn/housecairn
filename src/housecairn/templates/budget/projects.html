@@ -6,6 +6,7 @@
   {% include "budget/_nav.html" %}
   {% include "budget/_year.html" %}
   <p class="small">{% translate "Each project is counted in one year, the year it starts. An abandoned project plans nothing any more: what was paid on it shows as spent without a plan." %}</p>
+  <p class="small">{% translate "Planned is the budget lines of the project, and what its tasks plan beyond the lines of the same nature, materials or labour: an estimate a line already holds is not counted twice." %}</p>
   {% if report.lines %}
     <table class="table-stack">
       <caption class="visually-hidden">{% translate "Planned, committed and paid, project by project" %}</caption>
@@ -15,7 +16,7 @@
       <tbody>
         {% for line in report.lines %}
           <tr>
-            <th scope="row"><a href="{% url_with_next 'projects:detail' home_id=home.id project_id=line.id %}">{{ line.label }}</a></th>
+            <th scope="row"><a href="{% url_with_next 'projects:detail' home_id=home.id project_id=line.id %}">{{ line.label }}</a>{% if line.extra.tasks_planned %}<br><span class="small">{% blocktranslate with amount=line.extra.tasks_planned|money:home.currency %}Planned by its tasks: {{ amount }}{% endblocktranslate %}</span>{% endif %}</th>
             <td data-label="{% translate 'Counted in' %}">{{ line.extra.year|unlocalize }}</td>
             {% include "budget/_row_amounts.html" with amounts=line.amounts %}
             <td data-label="{% translate 'Still to pay' %}">{{ line.extra.to_pay|money:home.currency }}</td>

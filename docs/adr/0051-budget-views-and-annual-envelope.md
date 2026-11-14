@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-11-09
+- Extended by: [0073](0073-every-planned-amount-of-a-task-is-planned.md) (an open task with
+  no date counts in the current year; a project plans its tasks beyond its lines)
 
 ## Context
 

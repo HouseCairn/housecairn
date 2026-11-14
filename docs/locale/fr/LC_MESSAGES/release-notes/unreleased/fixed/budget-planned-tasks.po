@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Every planned amount of a task is in the budget.** An open task with no date now counts in the plan of the current year, and a project plans the estimates of its tasks beyond its budget lines, nature by nature, never twice: a project with estimated tasks and no line no longer plans zero. **Budget by project** shows what the tasks of each project plan ([A task in a project](../../../guides/budget.md#a-task-in-a-project))."
+msgstr "**Tout montant prévu sur une tâche est dans le budget.** Une tâche ouverte sans date compte désormais dans le prévu de l'année en cours, et un projet prévoit les estimations de ses tâches au-delà de ses lignes de budget, nature par nature, jamais deux fois : un projet aux tâches estimées sans ligne ne prévoit plus zéro. **Budget par projet** montre ce que prévoient les tâches de chaque projet ([Une tâche dans un projet](../../../guides/budget.md#a-task-in-a-project))."
+
