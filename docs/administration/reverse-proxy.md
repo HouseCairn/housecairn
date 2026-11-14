@@ -50,6 +50,11 @@ HouseCairn reads the site's name from the `Host` header, never from
 `X-Forwarded-Host`: the proxy must pass `Host` through. Caddy and Traefik do
 by default; nginx needs `proxy_set_header Host $host`.
 
+A proxy may replace HouseCairn's `Referrer-Policy: same-origin` header, as Home
+Assistant does with `no-referrer`. Each page also states the policy in its
+`<head>`, which the browser follows over the header: forms keep sending their
+origin, which the CSRF check needs ([ADR 0075](../adr/0075-referrer-policy-in-the-page.md)).
+
 ## Caddy on the host
 
 Caddy obtains the certificate and sets `X-Forwarded-Proto` and
