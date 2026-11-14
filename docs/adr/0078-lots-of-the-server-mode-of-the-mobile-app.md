@@ -60,6 +60,29 @@ finished against the release.
   `housecairn-mobile`); its record 0010 says "a Housecairn API token" and becomes "a sign-in
   in the browser" when this record is accepted.
 
+## Open questions
+
+For the maintainer, each with the option these records assume until answered.
+
+1. **How long does a deletion stay visible to the phones?** Assumed: 400 days, then the row and
+   its tombstone are purged and an older cursor starts again from the snapshot (ADR 0076).
+   Other options: forever (the tables only grow), or 90 days (a phone left in a drawer for a
+   season starts again from the snapshot).
+2. **Is the mobile app's client on by default on every instance?** Assumed: yes, with an
+   instance setting to turn it off; it does nothing until a person consents. Other option: off
+   until an administrator turns it on, as for the integrations.
+3. **Who may archive a home?** Assumed: its owners, as for deleting it (M1). Other option: any
+   member who may write, as for the other fields of a home.
+4. **Refresh tokens: hashed with no grace period, or a grace period with tokens in clear?**
+   Assumed: hashed, rotated, a reuse revokes the connection, so a phone that loses the answer
+   of a refresh signs in again (ADR 0077). Other option: a grace period of two minutes, which
+   django-oauth-toolkit allows only with tokens stored in clear.
+5. **Does the Home Assistant app serve HTTPS on its port?** Assumed: yes, as an option with the
+   certificate Home Assistant keeps in `/ssl`, so that the phone reaches it in HTTPS on the
+   household's network and from outside. Other option: the port stays plain HTTP, the phone uses
+   it on the local network only, and access from outside goes through a reverse proxy the person
+   sets up.
+
 ## Consequences
 
 - The server mode reaches the phones only after six web lots and a release: before the beta of
