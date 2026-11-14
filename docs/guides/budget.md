@@ -25,8 +25,21 @@ with no unit price counts for nothing, and the screen says how many: "2 stock it
 price are not counted". It is a plan, like the rest of the estimate: what was really spent
 is the cost typed when the task is done, and in your accounts.
 
-The money of a task that is in a project is the project's: its lines hold it, and the task
-is left out of the upkeep so that nothing is counted twice.
+### A task in a project
+
+A task that is in a project counts in the project, never in the upkeep, so that it is in
+one place only. The project plans its budget lines, and what its tasks plan beyond them,
+nature by nature: the material budget and the stock items of its tasks are materials, their
+labour budget is labour. Each time a task is done or open counts once, whatever its date. A
+line of a nature covers the tasks of that nature: what they plan above it is added, what it
+already holds is not added again. A rental or other line covers no task.
+
+For example, a project "Redo the bathroom" with no line and two tasks estimated at 200 and 66
+plans 266. Add a labour line of 500 for a 300 task: the project plans 500, not 800. With a
+labour line of 100 and a labour task of 250, it plans 250, the 100 of the line and 150 more
+from the task. A quote accepted on the line stays committed on it. **Budget by project**
+shows, for each project, **Planned by its tasks**: what its tasks plan in all. An abandoned
+project plans nothing, from its lines or its tasks.
 
 ## Planned, committed, paid, used, gap
 
@@ -48,7 +61,7 @@ upkeep in the same room, "Wash the walls", estimated at 50 and done for 80, adds
 - **By room**: projects (shared evenly between the rooms they name, in whole cents) and the
   upkeep of the room's tasks.
 - **By project**: each project once, in **the year it starts**, whole, even if the work runs
-  into the next year. A year is chosen by the earliest date of its tasks and accepted quotes;
+  into the next year, with its budget lines and what its tasks plan beyond them. A year is chosen by the earliest date of its tasks and accepted quotes;
   with none, the year it was created. An abandoned project plans nothing any more; what was
   paid on it shows as spent without a plan.
 - **By task**: the tasks that are in no project. The **cost a year** follows the repetition:
@@ -61,7 +74,8 @@ the occurrence that is open, and the times its repetition will still bring befor
 December. A task every month at 25, read in February after a first time in January, plans 12
 times 25 for the year, not only the two rows that exist. A year that is over counts only what
 happened: an occurrence still open that fell due in it counts in the current year, as the
-calendar shows it late. A year to come counts the whole repetition, however far it is, and a
+calendar shows it late. An open task with no date is still to do: it counts in the current
+year, once, and in no other year. A year to come counts the whole repetition, however far it is, and a
 task that counts from the last time is followed from its open date, as the calendar does.
 The plan of a year can differ by one time from the cost a year, since a weekly task falls 52
 or 53 times in a year and a daily one 365 or 366. Nothing is written: these times are worked

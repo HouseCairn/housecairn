@@ -56,7 +56,14 @@ def rooms(report: services.Report) -> tuple[list[str], list[list[Any]]]:
 
 
 def projects(report: services.Report) -> tuple[list[str], list[list[Any]]]:
-    head = [_("Project"), _("Status"), _("Counted in"), *_amount_heads(), _("To pay")]
+    head = [
+        _("Project"),
+        _("Status"),
+        _("Counted in"),
+        *_amount_heads(),
+        _("To pay"),
+        _("Planned by its tasks"),
+    ]
     rows = [
         [
             line.label,
@@ -64,6 +71,7 @@ def projects(report: services.Report) -> tuple[list[str], list[list[Any]]]:
             line.extra["year"],
             *_amounts(line.amounts),
             line.extra["to_pay"],
+            line.extra["tasks_planned"],
         ]
         for line in report.lines
     ]

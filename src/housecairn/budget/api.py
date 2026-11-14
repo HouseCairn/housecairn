@@ -77,6 +77,11 @@ class RoomLineSerializer(LineSerializer):
 class ProjectLineSerializer(LineSerializer):
     counted_in = serializers.IntegerField(source="extra.year", read_only=True)
     status = serializers.CharField(source="extra.status", read_only=True)
+    tasks_planned = MoneyOut(
+        source="extra.tasks_planned",
+        help_text="What the tasks of the project plan in all, each time done or open. "
+        "Planned counts it beyond the budget lines of the same nature, never twice.",
+    )
 
 
 class TaskLineSerializer(LineSerializer):
