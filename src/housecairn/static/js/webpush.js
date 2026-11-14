@@ -38,6 +38,9 @@
       return "denied";
     }
     const registration = await navigator.serviceWorker.ready;
+    /* A subscription that exists before the tap is not ours to give back if the server
+       refuses: it may be the device that already receives the reminders. */
+    const existing = await registration.pushManager.getSubscription();
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: key(config.key),
@@ -55,10 +58,12 @@
       }),
     });
     if (!response.ok) {
-      try {
-        await subscription.unsubscribe();
-      } catch (error) {
-        // The browser keeps a subscription the server does not know: harmless.
+      if (!existing) {
+        try {
+          await subscription.unsubscribe();
+        } catch (error) {
+          // The browser keeps a subscription the server does not know: harmless.
+        }
       }
       return "failed";
     }
