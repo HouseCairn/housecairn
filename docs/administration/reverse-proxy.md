@@ -53,7 +53,7 @@ by default; nginx needs `proxy_set_header Host $host`.
 A proxy may replace HouseCairn's `Referrer-Policy: same-origin` header, as Home
 Assistant does with `no-referrer`. Each page also states the policy in its
 `<head>`, which the browser follows over the header: forms keep sending their
-origin, which the CSRF check needs ([ADR 0075](../adr/0075-referrer-policy-in-the-page.md)).
+origin, which the CSRF check needs ([ADR 0076](../adr/0076-referrer-policy-in-the-page.md)).
 
 ## Caddy on the host
 

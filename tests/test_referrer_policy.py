@@ -1,4 +1,4 @@
-"""Every page states HouseCairn's referrer policy itself (docs/adr/0075).
+"""Every page states HouseCairn's referrer policy itself (docs/adr/0076).
 
 A reverse proxy may replace the `Referrer-Policy` header: Home Assistant gives every response
 of its server `no-referrer`, the ingress ones included. Under that policy a browser posts each

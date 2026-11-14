@@ -1,4 +1,4 @@
-# 0075. The referrer policy is also in the page
+# 0076. The referrer policy is also in the page
 
 - Status: accepted
 - Date: 2026-11-14

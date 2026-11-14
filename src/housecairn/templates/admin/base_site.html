@@ -2,6 +2,6 @@
 {% comment %}
   Django's own administration template, with HouseCairn's referrer policy in the page, as in
   base.html: a proxy that replaces the Referrer-Policy header (Home Assistant: no-referrer)
-  would make every form of the administration post Origin: null (docs/adr/0075).
+  would make every form of the administration post Origin: null (docs/adr/0076).
 {% endcomment %}
 {% block extrahead %}{{ block.super }}<meta name="referrer" content="same-origin">{% endblock extrahead %}

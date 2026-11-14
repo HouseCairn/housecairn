@@ -75,8 +75,8 @@ msgstr "Si la valeur est fausse, HouseCairn ignore les en-têtes du proxy : chaq
 msgid "HouseCairn reads the site's name from the `Host` header, never from `X-Forwarded-Host`: the proxy must pass `Host` through. Caddy and Traefik do by default; nginx needs `proxy_set_header Host $host`."
 msgstr "HouseCairn lit le nom du site dans l'en-tête `Host`, jamais dans `X-Forwarded-Host` : le proxy doit transmettre `Host`. Caddy et Traefik le font par défaut ; nginx a besoin de `proxy_set_header Host $host`."
 
-msgid "A proxy may replace HouseCairn's `Referrer-Policy: same-origin` header, as Home Assistant does with `no-referrer`. Each page also states the policy in its `<head>`, which the browser follows over the header: forms keep sending their origin, which the CSRF check needs ([ADR 0075](../adr/0075-referrer-policy-in-the-page.md))."
-msgstr "Un proxy peut remplacer l'en-tête `Referrer-Policy: same-origin` de HouseCairn, comme Home Assistant le fait avec `no-referrer`. Chaque page indique aussi la politique dans son `<head>`, que le navigateur suit plutôt que l'en-tête : les formulaires continuent d'envoyer leur origine, dont le contrôle CSRF a besoin ([ADR 0075](../adr/0075-referrer-policy-in-the-page.md))."
+msgid "A proxy may replace HouseCairn's `Referrer-Policy: same-origin` header, as Home Assistant does with `no-referrer`. Each page also states the policy in its `<head>`, which the browser follows over the header: forms keep sending their origin, which the CSRF check needs ([ADR 0076](../adr/0076-referrer-policy-in-the-page.md))."
+msgstr "Un proxy peut remplacer l'en-tête `Referrer-Policy: same-origin` de HouseCairn, comme Home Assistant le fait avec `no-referrer`. Chaque page indique aussi la politique dans son `<head>`, que le navigateur suit plutôt que l'en-tête : les formulaires continuent d'envoyer leur origine, dont le contrôle CSRF a besoin ([ADR 0076](../adr/0076-referrer-policy-in-the-page.md))."
 
 msgid "Caddy on the host"
 msgstr "Caddy sur l'hôte"
