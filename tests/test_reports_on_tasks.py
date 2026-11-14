@@ -171,6 +171,16 @@ class TestPhotoAccess:
         assert "/media/" not in body
         assert str(report.photo.name) not in body
 
+    def test_a_report_of_another_home_is_not_served_under_the_home_of_the_asker(
+        self, client: Client, bob: User, bob_home: Home, task: Task
+    ) -> None:
+        report = Report.objects.get()
+        for name in ("photo", "photo-thumbnail"):
+            address = reverse(
+                f"reports:{name}", kwargs={"home_id": bob_home.id, "report_id": report.id}
+            )
+            assert signed(client, bob).get(address).status_code == 404
+
     def test_a_person_of_another_home_gets_a_404_on_the_task_too(
         self, client: Client, bob: User, alice_home: Home, task: Task
     ) -> None:
