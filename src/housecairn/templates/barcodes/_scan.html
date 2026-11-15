@@ -1,0 +1,10 @@
+{% load i18n static %}{# The strings and the library of the Scan button (static/js/barcode-scan.js, docs/adr/0083). #}
+<span id="barcode-scan-labels" hidden
+  data-scan="{% translate 'Scan' %}"
+  data-scan-label="{% translate 'Scan the barcode with the camera' %}"
+  data-aim="{% translate 'Hold the barcode in front of the camera.' %}"
+  data-close="{% translate 'Close' %}"
+  data-no-camera="{% translate 'No camera could be used. Type the digits under the bars.' %}"
+  data-zxing-src="{% static 'vendor/zxing/zxing-library.min.js' %}"
+  data-zxing-integrity="sha384-0ASr5PEWAMtTnWsn0PzKmioHVDA4+QqFiJr94io/0DCrGP6E1gRAmbO6O8y5WZW9"></span>
+<script src="{% static 'js/barcode-scan.js' %}" defer></script>
