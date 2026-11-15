@@ -3,6 +3,9 @@
 // one, otherwise by the vendored ZXing library, loaded from the instance on the first scan.
 (function () {
   "use strict";
+  // The library is next to this script, under static/vendor/: its address comes from this
+  // script's own, never from the page.
+  var here = document.currentScript ? document.currentScript.src : "";
   var labels = document.getElementById("barcode-scan-labels");
   var fields = document.querySelectorAll("input[data-barcode-field]");
   if (!labels || !fields.length) {
@@ -70,7 +73,7 @@
     }
     zxing = new Promise(function (resolve, reject) {
       var script = document.createElement("script");
-      script.src = labels.getAttribute("data-zxing-src");
+      script.src = new URL("../vendor/zxing/zxing-library.min.js", here).href;
       script.integrity = labels.getAttribute("data-zxing-integrity");
       script.onload = function () {
         resolve(window.ZXing);

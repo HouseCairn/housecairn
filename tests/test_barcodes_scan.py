@@ -27,9 +27,13 @@ LICENSE_HEADS = {
 def _allowed_licenses() -> set[str]:
     """The licences of the dependency review (docs/adr/0014): the same list for vendored files."""
     workflow = (ROOT / ".github/workflows/dependency-review.yml").read_text(encoding="utf-8")
-    block = re.search(r"allow-licenses: >-\n((?:\s+[^\n]+\n)+?)\s+#", workflow)
-    assert block is not None
-    return {name.strip() for name in block.group(1).replace("\n", " ").split(",") if name.strip()}
+    lines = workflow.split("allow-licenses: >-\n", 1)[1].splitlines()
+    block = []
+    for line in lines:
+        if not line.strip() or line.strip().startswith("#") or ":" in line:
+            break
+        block.append(line)
+    return {name.strip() for name in " ".join(block).split(",") if name.strip()}
 
 
 def test_vendored_zxing_matches_its_recorded_hash() -> None:
@@ -51,7 +55,9 @@ def test_the_script_loads_the_library_it_was_given_with_its_integrity() -> None:
     integrity = re.search(r"sha384-[A-Za-z0-9+/=]+", snippet)
     assert integrity is not None
     assert integrity.group(0) in readme
-    assert "vendor/zxing/zxing-library.min.js" in snippet
+    script = (ROOT / "src/housecairn/static/js/barcode-scan.js").read_text(encoding="utf-8")
+    assert "vendor/zxing/zxing-library.min.js" in script
+    assert "data-zxing-src" not in snippet
 
 
 @pytest.mark.django_db

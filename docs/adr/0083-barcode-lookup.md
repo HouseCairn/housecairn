@@ -89,7 +89,9 @@ commercial one. The sources were read on 2026-11-15:
   vendored ZXing library (`static/vendor/zxing/`, `@zxing/library` 0.23.0, Apache-2.0, loaded
   only when the button is pressed, from the instance, never from a CDN). The licence of every
   vendored file is checked by a test against the list of licences of the dependency review
-  (ADR 0014). Typing the code by hand always works, without camera and without script.
+  (ADR 0014). Typing the code by hand always works, without camera and without script. The
+  `Permissions-Policy` header allows the camera to the instance's own pages (`camera=(self)`,
+  it was `camera=()`), and no other origin; the microphone stays off.
 - **Licences of the data.** The About page names the sources and their licences (ODbL for the
   data, CC BY-SA 3.0 for the photos). HouseCairn does not ship the catalogue: an administrator
   downloads it, so `NOTICE` gains nothing; the ODbL's share-alike applies to whoever publishes a

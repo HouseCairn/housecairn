@@ -123,8 +123,8 @@ msgstr "nginx"
 msgid "`$proxy_add_x_forwarded_for` keeps what the client sent and appends the address nginx saw: HouseCairn reads the list from the right and stops at the first address that is not a trusted proxy, so the client's own entries do not count."
 msgstr "`$proxy_add_x_forwarded_for` garde ce que le client a envoyé et ajoute l'adresse vue par nginx : HouseCairn lit la liste depuis la droite et s'arrête à la première adresse qui n'est pas un proxy de confiance, si bien que les entrées écrites par le client ne comptent pas."
 
-msgid "HouseCairn sets its own security headers (Content Security Policy, HSTS, `X-Frame-Options`, and a `Permissions-Policy` that switches off camera, microphone, location, payment and USB); the proxy does not need to add them."
-msgstr "HouseCairn pose ses propres en-têtes de sécurité (Content Security Policy, HSTS, `X-Frame-Options`, et une `Permissions-Policy` qui désactive la caméra, le microphone, la localisation, le paiement et l'USB) ; le proxy n'a pas besoin d'en ajouter."
+msgid "HouseCairn sets its own security headers (Content Security Policy, HSTS, `X-Frame-Options`, and a `Permissions-Policy` that switches off microphone, location, payment and USB, and allows the camera to the pages of the instance only, for the Scan button of a barcode field); the proxy does not need to add them."
+msgstr "HouseCairn pose ses propres en-têtes de sécurité (Content Security Policy, HSTS, `X-Frame-Options`, et une `Permissions-Policy` qui désactive le microphone, la localisation, le paiement et l'USB, et n'autorise la caméra qu'aux pages de l'instance, pour le bouton Scanner d'un champ de code-barres) ; le proxy n'a pas besoin de les ajouter."
 
 msgid "Logs and the calendar feed address"
 msgstr "Journaux et adresse du flux de calendrier"
