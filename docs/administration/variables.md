@@ -44,6 +44,7 @@ changed in the interface; a variable that is set locks its field there. The full
 | `HOUSECAIRN_WEBPUSH_DISCREET` | `true` | A notification on the device says only what kind of message it is, with a link: no title of a task, no name of a home. Also in the interface. |
 | `HOUSECAIRN_LINK_PREVIEW_ENABLED` | `false` | Read the title and the picture of a page when a link is added to a project. Off, nothing is read. The server only calls public addresses. Also in the interface. See [Projects](../guides/projects.md). |
 | `HOUSECAIRN_BARCODE_LOOKUP_ONLINE` | `false` | Ask Open Products Facts, then Open Food Facts, what a scanned barcode is. Only the code is sent. Also in the interface. See [Barcodes](barcodes.md). |
+| `HOUSECAIRN_MOBILE_APP_ENABLED` | `true` | Let people connect the HouseCairn mobile app to their account. Off, no phone can connect or sync. Also in the interface. See [Mobile app](settings.md#mobile-app). |
 | `HOUSECAIRN_DOCS_URL` | `https://docs.housecairn.app` | Address of this documentation, used by the help link of each screen. |
 | `HOUSECAIRN_WEB_WORKERS` | `2` | Web server processes. |
 | `HOUSECAIRN_TASK_WORKERS` | `2` | Task worker processes. |

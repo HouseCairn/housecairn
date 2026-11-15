@@ -73,6 +73,9 @@ services:
       - HOUSECAIRN_LINK_PREVIEW_ENABLED=${HOUSECAIRN_LINK_PREVIEW_ENABLED:-}
       # Barcodes (docs/administration/barcodes.md): the online lookup.
       - HOUSECAIRN_BARCODE_LOOKUP_ONLINE=${HOUSECAIRN_BARCODE_LOOKUP_ONLINE:-}
+      # The mobile app (docs/administration/settings.md#mobile-app): on while empty, and
+      # free in the interface; `true` written here would lock it there.
+      - HOUSECAIRN_MOBILE_APP_ENABLED=${HOUSECAIRN_MOBILE_APP_ENABLED:-}
       # Single sign-on through any OpenID Connect provider: off while
       # OIDC_SERVER_URL is empty (docs/administration/oidc.md).
       - OIDC_SERVER_URL=${OIDC_SERVER_URL:-}

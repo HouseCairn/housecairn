@@ -324,6 +324,12 @@ msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 msgid "Ask Open Products Facts, then Open Food Facts, what a scanned barcode is. Only the code is sent. Also in the interface. See [Barcodes](barcodes.md)."
 msgstr "Demander à Open Products Facts, puis à Open Food Facts, ce qu'est un code-barres scanné. Seul le code est envoyé. Aussi dans l'interface. Voir [Codes-barres](barcodes.md)."
 
+msgid "`HOUSECAIRN_MOBILE_APP_ENABLED`"
+msgstr "`HOUSECAIRN_MOBILE_APP_ENABLED`"
+
+msgid "Let people connect the HouseCairn mobile app to their account. Off, no phone can connect or sync. Also in the interface. See [Mobile app](settings.md#mobile-app)."
+msgstr "Permettre de relier l'application mobile HouseCairn à son compte. Désactivé, aucun téléphone ne peut se connecter ni se synchroniser. Aussi dans l'interface. Voir [Application mobile](settings.md#mobile-app)."
+
 msgid "`HOUSECAIRN_DOCS_URL`"
 msgstr "`HOUSECAIRN_DOCS_URL`"
 
@@ -413,3 +419,4 @@ msgstr "Un serveur PostgreSQL existant convient aussi : pointez `DATABASE_URL` v
 
 #~ msgid "Set it only to manage the key yourself."
 #~ msgstr "À définir seulement pour gérer la clé vous-même."
+

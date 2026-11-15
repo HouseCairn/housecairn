@@ -7,7 +7,11 @@ a published port, an `env_file`, a fixed network range, a project name. The
 `docker compose config` on it.
 """
 
+import json
+import os
 import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -265,3 +269,61 @@ def test_new_variables_do_not_change_behaviour_when_empty(coolify: dict[str, Any
     )
     assert environment["HOUSECAIRN_DEMO"] == "${HOUSECAIRN_DEMO:-}"
     assert environment["HOUSECAIRN_WEBPUSH_ENABLED"] == "${HOUSECAIRN_WEBPUSH_ENABLED:-}"
+    # On by default, and empty reads as the default: `true` here would lock the field.
+    assert environment["HOUSECAIRN_MOBILE_APP_ENABLED"] == "${HOUSECAIRN_MOBILE_APP_ENABLED:-}"
+
+
+# Prints every Django setting as JSON, HOUSECAIRN_ENV_LOCKED (the locked fields) included.
+_DUMP_SETTINGS = """
+import json, sys
+import django
+django.setup()
+from django.conf import settings
+from django.utils.encoding import force_str
+wrapped = settings._wrapped
+def shown(value):
+    return force_str(value) if hasattr(value, "_proxy____cast") else repr(value)
+values = {name: shown(getattr(wrapped, name)) for name in dir(wrapped) if name.isupper()}
+json.dump(values, sys.stdout, sort_keys=True)
+"""
+
+
+def _django_settings(environ: dict[str, str], data_dir: Path) -> dict[str, str]:
+    environ = {
+        **environ,
+        "DJANGO_SETTINGS_MODULE": "housecairn.settings",
+        "ALLOWED_HOSTS": "example.com",
+        "SECRET_KEY": "test-only-" + "x" * 50,
+        "HOUSECAIRN_DATA_DIR": str(data_dir),
+    }
+    run = subprocess.run(  # noqa: S603 - this interpreter, a fixed script
+        [sys.executable, "-c", _DUMP_SETTINGS],
+        env=environ,
+        cwd=REPO / "src",
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert run.returncode == 0, run.stderr[-2000:]
+    values = json.loads(run.stdout)
+    assert isinstance(values, dict)
+    return values
+
+
+def test_an_empty_variable_is_an_absent_one(coolify: dict[str, Any], tmp_path: Path) -> None:
+    """Every `${NAME:-}` of the Coolify file, empty, gives the Django settings of no variable.
+
+    Coolify sends each of them, empty while nobody fills it in: an empty value must neither
+    change a default nor lock a field of the interface (HOUSECAIRN_ENV_LOCKED).
+    """
+    environment = _environment(_service(coolify))
+    empty = sorted(name for name, value in environment.items() if value == f"${{{name}:-}}")
+    assert "HOUSECAIRN_MOBILE_APP_ENABLED" in empty
+    assert len(empty) > 40
+    base = {name: value for name, value in os.environ.items() if name not in environment}
+    absent = _django_settings(base, tmp_path)
+    blank = _django_settings({**base, **dict.fromkeys(empty, "")}, tmp_path)
+    assert "HOUSECAIRN_ENV_LOCKED" in absent
+    assert {
+        name for name in absent.keys() | blank.keys() if absent.get(name) != blank.get(name)
+    } == set()
