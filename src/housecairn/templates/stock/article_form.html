@@ -19,7 +19,7 @@
     <button type="submit" class="button-block">{% if article %}{% translate "Save" %}{% else %}{% translate "Add the stock item" %}{% endif %}</button>
     {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
-  {% include "barcodes/_scan.html" %}
+  {% include "barcodes/_scan.html" with target="article" %}
   {% if article %}
     <a class="button button-danger button-block" href="{% url_with_next 'stock:delete' home_id=home.id article_id=article.id %}">{% translate "Delete the stock item" %}</a>
   {% endif %}

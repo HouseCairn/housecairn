@@ -18,6 +18,11 @@ class Migration(migrations.Migration):
             name='ean',
             field=housecairn.barcodes.fields.EanField(),
         ),
+        migrations.AddField(
+            model_name='photo',
+            name='attribution',
+            field=models.JSONField(blank=True, default=dict, editable=False),
+        ),
         migrations.AddIndex(
             model_name='item',
             index=models.Index(fields=['home', 'ean'], name='item_home_ean'),

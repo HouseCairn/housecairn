@@ -324,9 +324,13 @@ def update_article(
     rooms: Iterable[Room] | None = None,
     label: UploadedFile | None = None,
     clear_label: bool = False,
+    label_attribution: dict[str, str] | None = None,
     **changes: Any,
 ) -> Article:
-    """Change the article; `label` replaces the photo, `clear_label` removes it."""
+    """Change the article; `label` replaces the photo, `clear_label` removes it.
+
+    `label_attribution` credits a label photo that came from an open database (ADR 0083).
+    """
     _require_write(actor, article.home)
     before = changelog.read(Article, article.pk)
     _apply(article, ARTICLE_FIELDS, changes)
@@ -338,8 +342,10 @@ def update_article(
     previous = ""
     if processed is not None:
         previous = _write_label(article, processed)
+        article.label_attribution = dict(label_attribution or {})
     elif clear_label:
         previous = _forget_label(article)
+        article.label_attribution = {}
     try:
         article.save()
         changelog.record_save(Article, article.pk, before)

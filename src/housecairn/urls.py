@@ -68,6 +68,7 @@ urlpatterns = [
     path("calendar/", include("housecairn.calendar.urls")),
     # Stock items, suppliers and movements of a home (docs/adr/0038); /stock/ is the entry.
     path("h/<uuid:home_id>/", include("housecairn.stock.urls")),
+    path("h/<uuid:home_id>/", include("housecairn.barcodes.urls")),
     path("stock/", stock_views.EntryView.as_view(), name="stock"),
     # QR labels of a home (docs/adr/0047). A sticker opens /l/<code>/, which carries
     # no home: signed in or not, the answer never says whether the code exists.

@@ -7,6 +7,7 @@
       </a>
       <span class="photo-category">{{ photo.get_category_display }}</span>
       {% if photo.caption %}<span class="photo-caption">{{ photo.caption }}</span>{% endif %}
+      {% if photo.attribution %}<span class="photo-caption small photo-attribution">{% include "barcodes/_attribution.html" with source=photo.attribution.source source_url=photo.attribution.source_url license=photo.attribution.license author=photo.attribution.author %}</span>{% endif %}
       {% if can_write %}
         <form method="post" action="{% url 'rooms:photo-delete' home_id=home.id photo_id=photo.id %}">
           {% csrf_token %}

@@ -292,6 +292,7 @@ def test_a_new_photo_records_its_file_reference_and_not_its_thumbnail(
         "item_id": None,
         "category": "before",
         "caption": "Window",
+        "attribution": {},
         "image": {
             "file": str(photo.pk),
             "size": photo.size_bytes,

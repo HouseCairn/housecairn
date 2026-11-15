@@ -5,6 +5,8 @@
   data-aim="{% translate 'Hold the barcode in front of the camera.' %}"
   data-close="{% translate 'Close' %}"
   data-no-camera="{% translate 'No camera could be used. Type the digits under the bars.' %}"
+  data-lookup-url="{% url 'barcodes:lookup' home_id=home.id %}"
+  data-target="{{ target }}"
   data-zxing-src="{% static 'vendor/zxing/zxing-library.min.js' %}"
   data-zxing-integrity="sha384-0ASr5PEWAMtTnWsn0PzKmioHVDA4+QqFiJr94io/0DCrGP6E1gRAmbO6O8y5WZW9"></span>
 <script src="{% static 'js/barcode-scan.js' %}" defer></script>

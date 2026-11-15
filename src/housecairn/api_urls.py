@@ -6,6 +6,7 @@ from rest_framework.routers import SimpleRouter
 from housecairn.accounts.api import AccountDeleteView, MeView
 from housecairn.apitokens.api import TokenDetailView, TokenListView
 from housecairn.apitokens.sync import SyncInfoView
+from housecairn.barcodes import api as barcodes_api
 from housecairn.budget import api as budget_api
 from housecairn.events.api import EventCreateView
 from housecairn.homes.api import AcceptInvitationView, HomeViewSet, InvitationViewSet, MemberViewSet
@@ -103,6 +104,21 @@ urlpatterns = [
     ),
     path("labels/resolve/<str:code>/", labels_api.LabelResolveView.as_view(), name="label-resolve"),
     path("homes/<uuid:home_id>/today/", tasks_api.TodayView.as_view(), name="home-today"),
+    path(
+        "homes/<uuid:home_id>/barcodes/lookup/",
+        barcodes_api.LookupView.as_view(),
+        name="home-barcode-lookup",
+    ),
+    path(
+        "homes/<uuid:home_id>/barcodes/<str:code>/",
+        barcodes_api.StateView.as_view(),
+        name="home-barcode",
+    ),
+    path(
+        "homes/<uuid:home_id>/barcodes/<str:code>/photo/",
+        barcodes_api.PhotoView.as_view(),
+        name="home-barcode-photo",
+    ),
     path(
         "homes/<uuid:home_id>/envelope/", projects_api.EnvelopeView.as_view(), name="home-envelope"
     ),

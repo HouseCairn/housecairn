@@ -5,12 +5,62 @@
   "use strict";
   var labels = document.getElementById("barcode-scan-labels");
   var fields = document.querySelectorAll("input[data-barcode-field]");
-  if (!labels || !fields.length || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+  if (!labels || !fields.length) {
     return;
   }
   var text = function (name) {
     return labels.getAttribute("data-" + name) || "";
   };
+
+  // What the code is: asked once it is typed or scanned, shown under the field. The answer
+  // only offers values; "Use these values" fills the fields that are still empty.
+  function lookUp(field, box) {
+    var code = digits(field.value);
+    if (!window.htmx || code.length < 8 || code.length > 14) {
+      box.textContent = "";
+      return;
+    }
+    window.htmx.ajax("POST", labels.getAttribute("data-lookup-url"), {
+      target: box,
+      swap: "innerHTML",
+      values: { ean: code, target: labels.getAttribute("data-target") },
+    });
+  }
+
+  document.addEventListener("click", function (event) {
+    var button = event.target.closest ? event.target.closest("[data-barcode-fill]") : null;
+    if (!button) {
+      return;
+    }
+    var form = button.closest("form");
+    var card = button.closest(".barcode-found");
+    if (!form || !card) {
+      return;
+    }
+    card.querySelectorAll("[data-fill-field]").forEach(function (entry) {
+      var input = form.elements.namedItem(entry.getAttribute("data-fill-field"));
+      if (!input || typeof input.value !== "string" || input.value.trim() !== "") {
+        return;
+      }
+      input.value = entry.getAttribute("data-fill-value");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    button.disabled = true;
+  });
+
+  Array.prototype.forEach.call(fields, function (field) {
+    var box = document.createElement("div");
+    box.className = "barcode-lookup-box";
+    field.insertAdjacentElement("afterend", box);
+    field.addEventListener("change", function () {
+      lookUp(field, box);
+    });
+  });
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    return;
+  }
   var FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e", "itf"];
   var zxing = null;
 

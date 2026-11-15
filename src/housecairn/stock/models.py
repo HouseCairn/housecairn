@@ -125,6 +125,8 @@ class Article(HomeOwnedModel):
         storage=stock_storage, upload_to=label_path, max_length=200, editable=False, blank=True
     )
     label_content_type = models.CharField(max_length=32, editable=False, blank=True)
+    # Who to credit when the label photo came from an open database (docs/adr/0083).
+    label_attribution = models.JSONField(default=dict, blank=True, editable=False)
 
     class Meta:
         verbose_name = _("stock item")

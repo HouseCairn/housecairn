@@ -383,11 +383,13 @@ def add_photo(
     item: Item | None = None,
     caption: str = "",
     category: str = PhotoCategory.GENERAL,
+    attribution: dict[str, str] | None = None,
 ) -> Photo:
     """Attach a photo to a room or an item (exactly one of the two).
 
     The upload is decoded and written again (`images.process`); the name sent with
-    it is dropped and the stored names come from identifiers.
+    it is dropped and the stored names come from identifiers. `attribution` credits a photo
+    that came from an open database (docs/adr/0083).
     """
     if (room is None) == (item is None):
         raise ValueError("A photo belongs to a room or to an item, not both, not neither.")
@@ -406,6 +408,7 @@ def add_photo(
         item=item,
         caption=without_control_characters(caption),
         category=category,
+        attribution=dict(attribution or {}),
         content_type=processed.content_type,
         size_bytes=len(processed.data),
         width=processed.width,

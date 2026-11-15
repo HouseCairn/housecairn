@@ -307,6 +307,9 @@ class Photo(HomeOwnedModel):
     size_bytes = models.PositiveIntegerField(editable=False)
     width = models.PositiveIntegerField(editable=False)
     height = models.PositiveIntegerField(editable=False)
+    # Who to credit for a photo that came from an open database by its barcode (docs/adr/0083):
+    # source, source_url, license, license_url, author. Empty for a photo taken by a member.
+    attribution = models.JSONField(default=dict, blank=True, editable=False)
 
     class Meta:
         verbose_name = _("photo")

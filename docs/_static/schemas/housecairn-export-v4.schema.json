@@ -608,9 +608,11 @@
                     },
                     "height": {
                       "type": "integer"
-                    }
+                    },
+                    "attribution": {}
                   },
                   "required": [
+                    "attribution",
                     "caption",
                     "category",
                     "content_type",
@@ -1271,6 +1273,7 @@
                       "type": "string",
                       "maxLength": 32
                     },
+                    "label_attribution": {},
                     "compatible_items": {
                       "type": "array",
                       "items": {
@@ -1293,6 +1296,7 @@
                     "ean",
                     "id",
                     "label",
+                    "label_attribution",
                     "label_content_type",
                     "manufacturer_reference",
                     "name",

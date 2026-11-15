@@ -20,6 +20,7 @@
     </dl>
     {% if article.label %}
       <p><img class="stock-label" src="{% url 'stock:label' home_id=home.id article_id=article.id %}" alt="{% blocktranslate with name=article.name %}Label of {{ name }}{% endblocktranslate %}" loading="lazy" decoding="async"></p>
+      {% if article.label_attribution %}<p class="small photo-attribution">{% include "barcodes/_attribution.html" with source=article.label_attribution.source source_url=article.label_attribution.source_url license=article.label_attribution.license author=article.label_attribution.author %}</p>{% endif %}
     {% endif %}
     {% if can_write %}
       <div class="button-row">
