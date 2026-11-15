@@ -17,7 +17,9 @@ def entity_of(model: type[models.Model]) -> str:
     return model._meta.label_lower
 
 
-def link_row_id(home_id: uuid.UUID, through: type[models.Model], owner: Any, other: Any) -> uuid.UUID:
+def link_row_id(
+    home_id: uuid.UUID, through: type[models.Model], owner: Any, other: Any
+) -> uuid.UUID:
     """The id of the row of a link table that links `owner` to `other` in a home."""
     name = f"{entity_of(through)}:{uuid.UUID(str(owner))}:{uuid.UUID(str(other))}"
     return uuid.uuid5(uuid.UUID(str(home_id)), name)

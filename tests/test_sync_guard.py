@@ -100,7 +100,9 @@ class _WriteSpy:
     """Notes whether a statement wrote a table (INSERT, UPDATE or DELETE)."""
 
     def __init__(self, table: str) -> None:
-        self.pattern = re.compile(rf'\s*(?:INSERT (?:OR IGNORE )?INTO|UPDATE|DELETE FROM) "{re.escape(table)}"')
+        self.pattern = re.compile(
+            rf'\s*(?:INSERT (?:OR IGNORE )?INTO|UPDATE|DELETE FROM) "{re.escape(table)}"'
+        )
         self.wrote = False
 
     def __call__(self, execute: Callable[..., object], sql: str, *args: object) -> object:

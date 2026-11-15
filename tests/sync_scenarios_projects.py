@@ -73,9 +73,7 @@ def _quote_save(home: Home) -> None:
 def _quote_queryset_update(home: Home) -> None:
     project = _project(home)
     line = BudgetLine.objects.create(home=home, project=project, label="Tiles")
-    Quote.objects.create(
-        home=home, project=project, status=QuoteStatus.ACCEPTED, budget_line=line
-    )
+    Quote.objects.create(home=home, project=project, status=QuoteStatus.ACCEPTED, budget_line=line)
     # Deleting the line sends its accepted quotes back to Received, by a queryset update.
     services.delete_line(_owner(home), line)
 

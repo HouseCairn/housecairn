@@ -95,7 +95,7 @@ def _forget_what_goes_with(doomed: "models.QuerySet[Any]") -> int:
     behind, and their files on the disk. The files go once the purge is committed.
     """
     collector = Collector(using=router.db_for_write(doomed.model))
-    collector.collect(doomed)
+    collector.collect(list(doomed))
     rows: dict[str, set[uuid.UUID]] = {}
     files: list[models.fields.files.FieldFile] = []
     batches: list[tuple[type[models.Model], Iterable[models.Model]]] = list(collector.data.items())
@@ -110,7 +110,7 @@ def _forget_what_goes_with(doomed: "models.QuerySet[Any]") -> int:
     removed = 0
     for entity, ids in rows.items():
         removed += RowClocks.objects.filter(entity=entity, row_id__in=ids).delete()[0]
-    names = [(f.storage, f.name) for f in files if f]
+    names: list[tuple[Any, str]] = [(f.storage, f.name) for f in files if f.name]
     transaction.on_commit(lambda: _erase(names))
     return removed
 
@@ -127,7 +127,10 @@ def _row_id(model: type[models.Model], instance: models.Model) -> uuid.UUID | No
     if home_id is None:
         return None
     return link_row_id(
-        home_id, model, getattr(instance, owner_field.attname), getattr(instance, other_field.attname)
+        home_id,
+        model,
+        getattr(instance, owner_field.attname),
+        getattr(instance, other_field.attname),
     )
 
 

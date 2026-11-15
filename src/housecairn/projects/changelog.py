@@ -63,8 +63,7 @@ def to_json(field: models.Field[Any, Any], value: Any) -> Any:
 def values_of(instance: models.Model) -> Values:
     """The carried fields of a row as it is in memory, by column name."""
     return {
-        f.attname: to_json(f, getattr(instance, f.attname))
-        for f in carried_fields(type(instance))
+        f.attname: to_json(f, getattr(instance, f.attname)) for f in carried_fields(type(instance))
     }
 
 
@@ -86,9 +85,7 @@ def stored(instance: models.Model) -> Stored | None:
     return {f.attname: to_json(f, row[f.attname]) for f in fields}, row["updated_at"]
 
 
-def saved(
-    instance: models.Model, before: Stored | None = None
-) -> None:
+def saved(instance: models.Model, before: Stored | None = None) -> None:
     """Record the write of a row: every carried field when `before` is None (a new row), the
     fields whose value changed otherwise."""
     after = values_of(instance)
@@ -110,7 +107,9 @@ def saved(
 
 def deleted(instance: models.Model) -> None:
     """Record the deletion of a row: soft, or a hard one that leaves this tombstone."""
-    changes.record_change(_home_id(instance), entity_of(type(instance)), instance.pk, changes.DELETE)
+    changes.record_change(
+        _home_id(instance), entity_of(type(instance)), instance.pk, changes.DELETE
+    )
 
 
 def soft_delete(queryset: "models.QuerySet[Any]") -> int:
@@ -137,7 +136,7 @@ def update(queryset: "models.QuerySet[Any]", **values: Any) -> int:
     """`queryset.update(**values)`, each row recording the fields whose value changed."""
     model = queryset.model
     fields = {name: model._meta.get_field(name) for name in values}
-    attnames = {name: field.attname for name, field in fields.items()}  # type: ignore[union-attr]
+    attnames = {name: field.attname for name, field in fields.items()}
     rows = list(queryset.values("pk", "home_id", "updated_at", *attnames.values()))
     count: int = queryset.update(**values)
     entity = entity_of(model)
@@ -150,7 +149,12 @@ def update(queryset: "models.QuerySet[Any]", **values: Any) -> int:
                 written[attnames[name]] = to_json(field, new)
         if written:
             changes.record_change(
-                row["home_id"], entity, row["pk"], changes.PUT, written, updated_at=row["updated_at"]
+                row["home_id"],
+                entity,
+                row["pk"],
+                changes.PUT,
+                written,
+                updated_at=row["updated_at"],
             )
     return count
 
@@ -175,7 +179,9 @@ def links_changed(
     home_id = _home_id(owner)
     entity = entity_of(through)
     for other in sorted(old - now):
-        changes.record_change(home_id, entity, link_row_id(home_id, through, owner.pk, other), changes.DELETE)
+        changes.record_change(
+            home_id, entity, link_row_id(home_id, through, owner.pk, other), changes.DELETE
+        )
     for other in sorted(now - old):
         row_id = link_row_id(home_id, through, owner.pk, other)
         if RowClocks.objects.filter(
