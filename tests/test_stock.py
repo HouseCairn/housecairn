@@ -641,7 +641,13 @@ class TestLedgerRules:
         monkeypatch.setattr(services, "quantity_of", spy_sum)
         entry(alice, article, "3")
         services.record_movement(alice, article, kind="exit", quantity=Decimal("1"))
-        assert order == ["lock Article", "sum", "lock Article", "sum"]
+        # The change log locks the row of the home as well, once a movement is written.
+        assert [step for step in order if step != "lock Home"] == [
+            "lock Article",
+            "sum",
+            "lock Article",
+            "sum",
+        ]
 
     @pytest.mark.django_db(transaction=True)
     def test_two_exits_at_once_cannot_both_take_the_last_unit(

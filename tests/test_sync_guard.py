@@ -39,14 +39,14 @@ COVERED_APPS: tuple[str, ...] = (
     "homes",
     "rooms",
     "projects",
+    "stock",
+    "reports",
 )
 
 # The apps whose rows are synced and the lot that covers each; none may be missing, so that a
 # new app of rows of a home cannot slip by. Remove an app from here when it joins COVERED_APPS.
 WAITING_FOR_ITS_LOT = {
     "tasks": "M3c",
-    "stock": "M3d",
-    "reports": "M3d",
 }
 
 # Tables that hang off a home and are not rows of the protocol: said once, with the reason.

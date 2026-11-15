@@ -9,7 +9,8 @@ class ReportsConfig(AppConfig):
 
     def ready(self) -> None:
         from housecairn.homes import files
-        from housecairn.reports import exports
+        from housecairn.reports import cascades, exports
 
         exports.register()
         files.register_media_folder("reports")
+        cascades.connect()
