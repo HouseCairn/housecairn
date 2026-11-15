@@ -82,6 +82,28 @@ def test_parser_and_problems(tmp_path: Path) -> None:
     ]
 
 
+def test_shipped_documentation_catalogs_have_no_fuzzy_entry() -> None:
+    """Sphinx ignores a fuzzy entry silently: a release note would stay in English."""
+    assert len(translations.docs_catalogs()) > 50
+    assert translations.fuzzy_in_docs() == []
+
+
+def test_a_fuzzy_documentation_entry_fails_the_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    path = tmp_path / "note.po"
+    path.write_text(
+        '#, fuzzy\nmsgid ""\nmsgstr ""\n\n#, fuzzy\nmsgid "A note"\nmsgstr "Une note"\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(translations, "docs_catalogs", lambda: [path])
+    monkeypatch.setattr(translations, "po_files", lambda: iter([]))
+    monkeypatch.setattr(translations, "inconsistent", lambda _language: [])
+    with pytest.raises(CommandError, match=r"docs: .*fuzzy: 'A note'") as raised:
+        call_command("check_translations")
+    assert "''" not in str(raised.value)  # the header is not reported
+
+
 def test_missing_catalog_is_reported(tmp_path: Path) -> None:
     assert translations.untranslated(tmp_path / "none.po") == ["none.po: catalog is missing"]
 

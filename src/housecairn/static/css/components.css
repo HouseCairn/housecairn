@@ -773,6 +773,46 @@ td {
   height: 4.5rem;
 }
 
+/* The links of the About screen (core/about_links.py): a wrapped row of icons with their
+   label, 44 px tall at least; a store without an address is the same tile, muted, no link. */
+.about-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hc-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hc-space-2);
+  min-width: var(--hc-layout-touch-target);
+  min-height: var(--hc-layout-touch-target);
+  padding: var(--hc-space-2) var(--hc-space-3);
+  border: 1px solid var(--hc-color-border);
+  border-radius: var(--hc-radius-md);
+  font-size: var(--hc-font-size-sm);
+  font-weight: var(--hc-font-weight-bold);
+  text-decoration: none;
+}
+
+a.about-link {
+  color: var(--hc-color-primary);
+}
+
+a.about-link:hover {
+  color: var(--hc-color-primary-hover);
+  background: var(--hc-color-surface-muted);
+}
+
+.about-link-soon {
+  color: var(--hc-color-text-muted);
+  background: var(--hc-color-surface-muted);
+  border-style: dashed;
+}
+
 /* A setting that an environment variable fixes: shown as it is, not editable. Only the
    locked fields of the settings screen: other disabled fields keep the browser's look. */
 input.setting-locked {

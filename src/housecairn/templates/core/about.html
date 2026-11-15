@@ -11,4 +11,18 @@
     <p class="small">{% translate "Free software under the AGPL-3.0 licence." %} <a href="{{ source_url }}">{% translate "Source code and security reports on GitHub." %}</a></p>
     <p class="small">{% translate "Developed with an AI agent, under human review." %}</p>
   </section>
+  <section class="card" aria-labelledby="about-links-title">
+    <h2 id="about-links-title">{% translate "Links" %}</h2>
+    <ul class="about-links">
+      {% for link in about_links %}
+        <li>
+          {% if link.available %}
+            <a class="about-link" href="{{ link.url }}" rel="noopener noreferrer">{% include "components/icon.html" with name=link.icon %}<span>{{ link.label }}</span></a>
+          {% else %}
+            <span class="about-link about-link-soon">{% include "components/icon.html" with name=link.icon %}<span>{{ link.label }}</span><span class="pill pill-ghost">{% translate "Coming soon" %}</span></span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
 {% endblock content %}
