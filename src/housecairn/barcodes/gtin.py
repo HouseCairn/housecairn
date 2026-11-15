@@ -50,6 +50,14 @@ def variants(code: str) -> set[str]:
     return found
 
 
+def as_published(code: str) -> str:
+    """The code as the open databases publish it: 8 digits for an EAN-8, else 13 or 14."""
+    digits = code.lstrip("0")
+    if len(digits) <= 8:
+        return digits.rjust(8, "0")
+    return digits.rjust(13, "0")
+
+
 def as_number(code: str) -> int:
     """The code as the integer the local catalogue is keyed by."""
     return int(code)
