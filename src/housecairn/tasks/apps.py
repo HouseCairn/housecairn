@@ -9,7 +9,8 @@ class TasksConfig(AppConfig):
 
     def ready(self) -> None:
         from housecairn.homes import files
-        from housecairn.tasks import exports
+        from housecairn.tasks import exports, syncing
 
         exports.register()
+        syncing.register()
         files.register_media_folder("attachments")

@@ -240,3 +240,14 @@ msgstr "**Tables de liaison.** Une ligne d'une table de liaison n'a pas d'identi
 msgid "**Restore.** A restore records the rows it inserts itself (`sync.rows.record_created`), the rows of the projects included; the rows of a link table have no row of their own there. The projects section of the export therefore gives `on_written`, which a restore, as a copy or not, calls with the rows of the section once they and their links are written, in its transaction: the application records the links under their new ids."
 msgstr "**Restauration.** Une restauration enregistre elle-même les lignes qu'elle insère (`sync.rows.record_created`), celles des projets comprises ; les lignes d'une table de liaison n'ont pas de ligne propre à cet endroit. La section des projets de l'export donne donc `on_written`, qu'une restauration, en copie ou non, appelle avec les lignes de la section une fois celles-ci et leurs liaisons écrites, dans sa transaction : l'application enregistre les liaisons sous leurs nouveaux identifiants."
 
+msgid "contractor, task, task material, occurrence, material draw, attachment"
+msgstr "intervenant, tâche, matériel d'une tâche, occurrence, tirage de matériel, pièce jointe"
+
+msgid "**Tasks.** Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. An attachment sends its file as `file`, a reference with its size, type and dimensions, as a photo does. Deleting an account takes it off the tasks it is assigned and the occurrences it closed, with a change for each, where the database would empty them without one."
+msgstr "**Tâches.** Annuler une clôture supprime l'occurrence qui suivait avec une pierre tombale au lieu de l'effacer, et la détache de l'occurrence qu'elle suivait, pour que la clôture puisse être refaite. Une pièce jointe envoie son fichier sous `file`, une référence avec sa taille, son type et ses dimensions, comme une photo. Supprimer un compte le retire des tâches qui lui sont attribuées et des occurrences qu'il a clôturées, avec un changement pour chacune, là où la base les viderait sans aucun."
+
+msgid "`tasks`"
+msgstr "`tasks`"
+
+msgid "M3c"
+msgstr "M3c"

@@ -175,6 +175,7 @@ scenario writes without recording, fails. Covered today: `homes` (the home itsel
 | Application | Lot | Rows |
 | --- | --- | --- |
 | `projects` | M3e | project, budget line, quote, file, link, task of a project, annual envelope, rooms of a project |
+| `tasks` | M3c | contractor, task, task material, occurrence, material draw, attachment |
 
 **Projects.** The services of `housecairn.projects` call `housecairn.projects.changelog`, which
 compares the row with what the database held before the write and records the fields whose
@@ -194,3 +195,9 @@ of the projects included; the rows of a link table have no row of their own ther
 section of the export therefore gives `on_written`, which a restore, as a copy or not, calls with
 the rows of the section once they and their links are written, in its transaction: the
 application records the links under their new ids.
+
+**Tasks.** Taking back a closing deletes the occurrence that followed with a tombstone instead
+of erasing it, and lets go of the occurrence it followed, so that the closing can be made again.
+An attachment sends its file as `file`, a reference with its size, type and dimensions, as a
+photo does. Deleting an account takes it off the tasks it is assigned and the occurrences it
+closed, with a change for each, where the database would empty them without one.

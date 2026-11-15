@@ -30,8 +30,10 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Membership
 from housecairn.instance.config import instance_zone
 from housecairn.rooms import images
+from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Item, Room
 from housecairn.rooms.services import _read_upload
+from housecairn.sync import rows as changelog
 from housecairn.tasks import durations, files, materials, recurrence
 from housecairn.tasks.models import (
     MAX_ATTACHMENTS_PER_TASK,
@@ -253,6 +255,7 @@ def create_contractor(actor: AnyUser, home: Home, **fields: Any) -> Contractor:
     _apply_contractor(contractor, fields)
     contractor.full_clean()
     contractor.save()
+    changelog.record_created([contractor])
     audit.record_object("contractor.created", actor=actor, home_id=home.id, title=contractor.name)
     return contractor
 
@@ -260,9 +263,11 @@ def create_contractor(actor: AnyUser, home: Home, **fields: Any) -> Contractor:
 @transaction.atomic
 def update_contractor(actor: AnyUser, contractor: Contractor, **changes: Any) -> Contractor:
     _require_write(actor, contractor.home)
+    before = changelog.before(contractor)
     _apply_contractor(contractor, changes)
     contractor.full_clean()
     contractor.save()
+    changelog.record_saved(contractor, before)
     audit.record_object(
         "contractor.updated",
         actor=actor,
@@ -276,10 +281,10 @@ def update_contractor(actor: AnyUser, contractor: Contractor, **changes: Any) ->
 @transaction.atomic
 def delete_contractor(actor: AnyUser, contractor: Contractor) -> None:
     _require_write(actor, contractor.home)
-    Task.objects.filter(contractor=contractor).update(contractor=None)
+    changelog.update_queryset(Task.objects.filter(contractor=contractor), contractor=None)
     # The contract of an item loses its provider and keeps its number and its link.
-    Item.all_objects.filter(contract_contractor=contractor).update(contract_contractor=None)
-    contractor.soft_delete()
+    room_services.clear_contract_contractor(contractor)
+    changelog.soft_delete(contractor)
     audit.record_object(
         "contractor.deleted", actor=actor, home_id=contractor.home_id, title=contractor.name
     )
@@ -336,8 +341,10 @@ def resync_seasons(home: Home) -> int:
     for task in Task.objects.filter(home=home, season__in=recurrence.PREDEFINED_SEASONS):
         window = recurrence.season_window(task.season, home.hemisphere)
         if window is not None and window != (task.season_start_month, task.season_end_month):
+            before = changelog.before(task)
             task.season_start_month, task.season_end_month = window
             task.save(update_fields=["season_start_month", "season_end_month", "updated_at"])
+            changelog.record_saved(task, before)
             changed += 1
     return changed
 
@@ -396,9 +403,11 @@ def create_task(
     task.series_start = due_on
     task.full_clean()
     task.save()
-    Occurrence.objects.create(
+    changelog.record_created([task])
+    first = Occurrence.objects.create(
         home=home, task=task, due_on=due_on, visible_from=_visible_from(task, due_on)
     )
+    changelog.record_created([first])
     audit.record_object("task.created", actor=actor, home_id=home.id, title=task.title)
     return task
 
@@ -409,6 +418,7 @@ def update_task(
 ) -> Task:
     """Change a task. `due_on`, if given, moves the occurrence that is open."""
     _require_write(actor, task.home)
+    before = changelog.before(task)
     estimate_before = task.estimated_minutes
     _apply(task, TASK_FIELDS, changes)
     if _SEASON_FIELDS & set(changes):
@@ -424,11 +434,13 @@ def update_task(
         task.series_start = new_due
     task.full_clean()
     task.save()
+    changelog.record_saved(task, before)
     if current is None:
         # A task that was done for good comes back when it gets a date or a rule.
         if new_due is not None or task.repeats:
             _reopen(task, new_due)
     elif due_on is not _UNSET or "hide_days_before" in changes:
+        current_before = changelog.before(current)
         current.due_on = new_due
         current.visible_from = _visible_from(task, new_due)
         if due_on is not _UNSET and current.status == Status.POSTPONED:
@@ -437,6 +449,7 @@ def update_task(
         current.save(
             update_fields=["due_on", "visible_from", "status", "postponed_from", "updated_at"]
         )
+        changelog.record_saved(current, current_before)
     changed = sorted([*changes, *([] if due_on is _UNSET else ["due_on"])])
     audit.record_object(
         "task.updated", actor=actor, home_id=task.home_id, title=task.title, fields=changed
@@ -461,26 +474,43 @@ def _reopen(task: Task, due_on: datetime.date | None) -> None:
         due_on = recurrence.next_due(
             task.rule, anchor=None, due_on=last.due_on, done_on=last.completed_on
         )
+        before = changelog.before(task)
         task.series_start = due_on
         task.save(update_fields=["series_start", "updated_at"])
-    Occurrence.objects.create(
+        changelog.record_saved(task, before)
+    reopened = Occurrence.objects.create(
         home=task.home,
         task=task,
         due_on=due_on,
         visible_from=_visible_from(task, due_on),
         follows=last,
     )
+    changelog.record_created([reopened])
+
+
+def forget_person(user: User) -> int:
+    """Take an account that is being deleted off the tasks and occurrences that name it.
+
+    The database would empty these references (`SET_NULL`) without a change; done here, each
+    row records it, so that a phone does not keep a person who no longer exists
+    (docs/adr/0077). The number of rows written.
+    """
+    with transaction.atomic():
+        count = changelog.update_queryset(Task.all_objects.filter(assignee=user), assignee=None)
+        count += changelog.update_queryset(
+            Occurrence.all_objects.filter(completed_by=user), completed_by=None
+        )
+    return count
 
 
 @transaction.atomic
 def delete_task(actor: AnyUser, task: Task) -> None:
     """Soft-delete the task with its occurrences and attachments."""
     _require_write(actor, task.home)
-    now = timezone.now()
-    Occurrence.objects.filter(task=task).update(deleted_at=now)
+    changelog.soft_delete(Occurrence.objects.filter(task=task))
     doomed = list(Attachment.objects.filter(task=task))
-    Attachment.objects.filter(task=task).update(deleted_at=now)
-    task.soft_delete()
+    changelog.soft_delete(Attachment.objects.filter(task=task))
+    changelog.soft_delete(task)
     _erase_files(doomed)
     audit.record_object("task.deleted", actor=actor, home_id=task.home_id, title=task.title)
 
@@ -515,6 +545,7 @@ def _spawn_next(occurrence: Occurrence, *, done_on: datetime.date) -> Occurrence
         visible_from=_visible_from(task, due),
         follows=occurrence,
     )
+    changelog.record_created([created])
     return created
 
 
@@ -546,6 +577,7 @@ def _close(
         raise ValidationError({"completed_on": _("The date cannot be in the future.")})
     _check_date(on, "completed_on")
     closed_on = on or day
+    before = changelog.before(locked)
     locked.status_before = locked.status
     locked.status = status
     locked.completed_by = actor if isinstance(actor, User) else None
@@ -555,6 +587,7 @@ def _close(
         setattr(locked, field, value)
     locked.full_clean()
     locked.save()
+    changelog.record_saved(locked, before)
     short = materials.draw_for_done(actor, locked, on=closed_on) if status == Status.DONE else []
     return Closing(locked, _spawn_next(locked, done_on=closed_on), tuple(short))
 
@@ -593,12 +626,14 @@ def postpone(actor: AnyUser, occurrence: Occurrence, to: datetime.date) -> Occur
     if to < today():
         raise ValidationError({"due_on": _("Choose a date that is not in the past.")})
     _check_date(to, "due_on")
+    before = changelog.before(locked)
     if locked.postponed_from is None:
         locked.postponed_from = locked.due_on
     locked.due_on = to
     locked.status = Status.POSTPONED
     locked.visible_from = _visible_from(locked.task, to)
     locked.save()
+    changelog.record_saved(locked, before)
     return locked
 
 
@@ -631,8 +666,9 @@ def undo(actor: AnyUser, occurrence: Occurrence) -> Occurrence:
             raise ValidationError(
                 _("The next occurrence has been changed since: it cannot be undone any more.")
             )
-        following.delete()
+        _withdraw(following)
     materials.return_draws(actor, locked, on=today())
+    before = changelog.before(locked)
     locked.status = locked.status_before or Status.PLANNED
     locked.status_before = ""
     locked.completed_on = None
@@ -640,7 +676,19 @@ def undo(actor: AnyUser, occurrence: Occurrence) -> Occurrence:
     locked.actual_cost = None
     locked.completion_note = ""
     locked.save()
+    changelog.record_saved(locked, before)
     return locked
+
+
+def _withdraw(following: Occurrence) -> None:
+    """The occurrence an undo takes back: deleted with a tombstone, no longer erased.
+
+    A phone that saw it learns of the deletion (docs/adr/0077, need 4). It lets go of the
+    occurrence it followed, so that closing that one again makes a new one.
+    """
+    following.follows = None
+    changelog.save(following, update_fields=["follows", "updated_at"])
+    changelog.soft_delete(following)
 
 
 @transaction.atomic
@@ -660,12 +708,14 @@ def update_occurrence(
     locked = _lock(occurrence)
     if locked.status != Status.DONE:
         raise ValidationError(_("The details can be filled in once the task is done."))
+    before = changelog.before(locked)
     _apply(locked, COMPLETION_FIELDS, changes)
     if locked.completed_on and locked.completed_on > today():
         raise ValidationError({"completed_on": _("The date cannot be in the future.")})
     _check_date(locked.completed_on, "completed_on")
     locked.full_clean()
     locked.save()
+    changelog.record_saved(locked, before)
     if used:
         materials.adjust_draws(actor, locked, used, on=locked.completed_on or today())
     # The caller's object follows the row, as it did when it was the one saved.
@@ -736,7 +786,9 @@ def add_attachment(
         if thumbnail is not None:
             attachment.thumbnail.save("-thumb.jpg", ContentFile(thumbnail), save=False)
         try:
-            attachment.save()
+            with transaction.atomic():
+                attachment.save()
+                changelog.record_created([attachment])
         except Exception:
             attachment.file.delete(save=False)
             attachment.thumbnail.delete(save=False)
@@ -752,11 +804,14 @@ def _looks_like_image(data: bytes) -> bool:
     )
 
 
+@transaction.atomic
 def update_attachment(actor: AnyUser, attachment: Attachment, *, name: str) -> Attachment:
     _require_write(actor, attachment.home)
+    before = changelog.before(attachment)
     attachment.name = files.clean_name(name)
     attachment.full_clean(exclude=["file", "thumbnail"])
     attachment.save()
+    changelog.record_saved(attachment, before)
     return attachment
 
 
@@ -764,7 +819,7 @@ def update_attachment(actor: AnyUser, attachment: Attachment, *, name: str) -> A
 def delete_attachment(actor: AnyUser, attachment: Attachment) -> None:
     """Soft-delete the record and erase its files, once the deletion is committed."""
     _require_write(actor, attachment.home)
-    attachment.soft_delete()
+    changelog.soft_delete(attachment)
     _erase_files([attachment])
     audit.record_object(
         "attachment.deleted",
