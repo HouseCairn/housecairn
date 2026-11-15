@@ -36,6 +36,15 @@ msgstr "Corrigé"
 msgid "Upgrade notes"
 msgstr "Notes de mise à jour"
 
+msgid "0.4.1"
+msgstr "0.4.1"
+
+msgid "HouseCairn is still alpha software. This version lets phones connect with the HouseCairn mobile app: in 0.4.0 the server refused, for want of a CSRF cookie, the requests with which the app exchanges its sign-in code, renews its access and disconnects, so a phone could not finish connecting. Nothing else changes: no migration runs and no setting is new."
+msgstr "HouseCairn est encore un logiciel alpha. Cette version permet aux téléphones de se connecter avec l'application mobile HouseCairn : en 0.4.0, faute de cookie CSRF, le serveur refusait les requêtes par lesquelles l'application échange son code de connexion, renouvelle son accès et se déconnecte, si bien qu'un téléphone ne pouvait pas achever sa connexion. Rien d'autre ne change : aucune migration ne s'exécute et aucun réglage n'est nouveau."
+
+msgid "**Mobile app sign-in.** The token and revocation endpoints (`/o/token/` and `/o/revoke_token/`) no longer answer 403 when the mobile app calls them without a CSRF cookie, which kept the app from exchanging its code, refreshing its access or disconnecting. The consent page keeps its CSRF check."
+msgstr "**Connexion de l'application mobile.** Les points d'accès de jeton et de révocation (`/o/token/` et `/o/revoke_token/`) ne répondent plus 403 quand l'application mobile les appelle sans cookie CSRF, ce qui l'empêchait d'échanger son code, de renouveler son accès ou de se déconnecter. La page de consentement garde sa vérification CSRF."
+
 msgid "0.4.0"
 msgstr "0.4.0"
 
