@@ -90,6 +90,8 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "django_q",
     "csp",
+    # OAuth 2 with PKCE for the mobile app (docs/adr/0078).
+    "oauth2_provider",
     "housecairn.core",
     "housecairn.accounts",
     "housecairn.homes",
@@ -459,10 +461,15 @@ CONTENT_SECURITY_POLICY = {
 # REST API (docs/adr/0004).
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        # First: answers every `hca_` bearer token, the connection or 401 (docs/adr/0078).
+        "housecairn.apitokens.authentication.ConnectionAuthentication",
         "housecairn.apitokens.authentication.ApiTokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
+        # First: a connection opens the sync API only, and only a connection opens it, with
+        # its own code before any other check answers (docs/adr/0078).
+        "housecairn.apitokens.permissions.CredentialFitsView",
         "rest_framework.permissions.IsAuthenticated",
         "housecairn.apitokens.permissions.TokenScopePermission",
     ],
@@ -484,6 +491,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     # An `events` token posts events and reads nothing, the schema included.
     "SERVE_PERMISSIONS": [
+        # First, as in DEFAULT_PERMISSION_CLASSES (docs/adr/0078).
+        "housecairn.apitokens.permissions.CredentialFitsView",
         "rest_framework.permissions.IsAuthenticated",
         "housecairn.apitokens.permissions.TokenScopePermission",
     ],
@@ -537,6 +546,50 @@ HOUSECAIRN_API_TOKEN_DEFAULT_LIFETIME_DAYS: int = env.int(
     "HOUSECAIRN_API_TOKEN_DEFAULT_LIFETIME_DAYS", default=90
 )
 HOUSECAIRN_EVENT_PAYLOAD_MAX_BYTES = 16 * 1024
+# The mobile app's client (docs/adr/0078): on unless the instance turns it off.
+HOUSECAIRN_MOBILE_APP_ENABLED: bool = _ENV.values["mobile_app_enabled"]
+
+# OAuth 2 with PKCE for the mobile app, by django-oauth-toolkit (docs/adr/0078): each value
+# is a rule of that record, and a test reads them back.
+OAUTH2_PROVIDER = {
+    "PKCE_REQUIRED": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_METHOD": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED": True,
+    "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,
+    "ROTATE_REFRESH_TOKEN": True,
+    "REFRESH_TOKEN_REUSE_PROTECTION": True,
+    "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN": True,
+    "REFRESH_TOKEN_GRACE_PERIOD_SECONDS": 0,
+    "ALLOWED_REDIRECT_URI_SCHEMES": ["app.housecairn.mobile"],
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_SCHEME": True,
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING": True,
+    "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT": True,
+    "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS": True,
+    "AUTHORIZATION_CODE_EXPIRE_SECONDS": 60,
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,
+    # Idle-based: a refresh token dies this long after its access token expired.
+    "REFRESH_TOKEN_EXPIRE_SECONDS": HOUSECAIRN_API_TOKEN_DEFAULT_LIFETIME_DAYS * 24 * 3600,
+    "REQUEST_APPROVAL_PROMPT": "force",
+    "ACCESS_TOKEN_GENERATOR": "housecairn.apitokens.oauth.access_token",
+    "REFRESH_TOKEN_GENERATOR": "housecairn.apitokens.oauth.refresh_token",
+    "OAUTH2_BACKEND_CLASS": "housecairn.apitokens.oauth.TransportRuleCore",
+    "OAUTH2_VALIDATOR_CLASS": "housecairn.apitokens.oauth.ConnectionValidator",
+    "OIDC_ENABLED": False,
+    "SCOPES": {
+        "sync": "The sync API of the homes of the connection",
+        "homes.create": "Create homes",
+    },
+    "DEFAULT_SCOPES": ["sync"],
+}
+# django-oauth-toolkit's own models, not swapped: the connection of a token is kept by the
+# link tables of `apitokens`, whose migration names these settings.
+OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"  # noqa: S105 - a model name
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"  # noqa: S105 - a model name
+OAUTH2_PROVIDER_GRANT_MODEL = "oauth2_provider.Grant"
+OAUTH2_PROVIDER_ID_TOKEN_MODEL = "oauth2_provider.IDToken"  # noqa: S105 - a model name
 
 # Cache, which holds the counters of the rate limits (docs/adr/0025). The default is
 # in memory and per process: with several web processes each counts alone, so a limit

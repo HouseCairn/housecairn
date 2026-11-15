@@ -1,0 +1,25 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**A new dependency and its tables.** This version adds django-oauth-toolkit (and jwcrypto, which it pulls in) to the image; its migrations and those of `apitokens` (`0003`, `0004`) run at start-up as usual and create the one client of the mobile app. A new setting, **Mobile app** (`HOUSECAIRN_MOBILE_APP_ENABLED`), on by default, turns the app off ([Settings](../../../administration/settings.md#mobile-app))."
+msgstr "**Une nouvelle dépendance et ses tables.** Cette version ajoute django-oauth-toolkit (et jwcrypto, qu'il installe) à l'image ; ses migrations et celles d'`apitokens` (`0003`, `0004`) s'exécutent au démarrage comme d'habitude et créent l'unique client de l'application mobile. Un nouveau réglage, **Application mobile** (`HOUSECAIRN_MOBILE_APP_ENABLED`), activé par défaut, désactive l'application ([Réglages](../../../administration/settings.md#mobile-app))."
+
+msgid "**Behind a reverse proxy.** The mobile app needs HTTPS, or plain HTTP between local addresses only, and the proxy must pass the original scheme and `Host`. A trusted proxy that sends no `X-Forwarded-For` leaves its own address as the client's ([Reverse proxy](../../../administration/reverse-proxy.md#the-mobile-app))."
+msgstr "**Derrière un reverse proxy.** L'application mobile exige HTTPS, ou le HTTP non chiffré seulement entre adresses locales, et le proxy doit transmettre le schéma et le `Host` d'origine. Un proxy de confiance qui n'envoie pas `X-Forwarded-For` laisse sa propre adresse comme celle du client ([Reverse proxy](../../../administration/reverse-proxy.md#the-mobile-app))."

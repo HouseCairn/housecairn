@@ -18,11 +18,38 @@ msgstr "Révoquer les jetons sélectionnés"
 msgid "API tokens"
 msgstr "Jetons d'API"
 
-msgid "Invalid token header."
-msgstr "En-tête de jeton invalide."
+msgid "An access token of a connected app opens the sync API only."
+msgstr "Le jeton d'accès d'une application connectée n'ouvre que l'API de synchronisation."
 
 msgid "Invalid, expired or revoked token."
 msgstr "Jeton invalide, expiré ou révoqué."
+
+msgid "This instance does not allow the mobile app."
+msgstr "Cette instance n'autorise pas l'application mobile."
+
+msgid "Invalid token header."
+msgstr "En-tête de jeton invalide."
+
+msgid "Mobile app"
+msgstr "Application mobile"
+
+msgid "People may connect the HouseCairn mobile app to their account, each phone with the homes they choose, and revoke it from their access page. Off: no phone can connect or sync; the connected phones stay listed and work again when it is turned back on."
+msgstr "Chacun peut connecter l'application mobile HouseCairn à son compte, chaque téléphone avec les logements qu'il choisit, et la révoquer depuis sa page d'accès. Désactivé : aucun téléphone ne peut se connecter ni se synchroniser ; les téléphones connectés restent dans la liste et fonctionnent de nouveau quand le réglage est réactivé."
+
+msgid "Choose at least one home."
+msgstr "Choisissez au moins un logement."
+
+msgid "Choose one of your homes."
+msgstr "Choisissez l'un de vos logements."
+
+msgid "These homes require different sign-in providers: connect the phone with the homes of one provider."
+msgstr "Ces logements exigent des fournisseurs de connexion différents : connectez le téléphone avec les logements d'un seul fournisseur."
+
+msgid "Choose one of your connected apps."
+msgstr "Choisissez l'une de vos applications connectées."
+
+msgid "These homes require another sign-in provider."
+msgstr "Ces logements exigent un autre fournisseur de connexion."
 
 #, python-format
 msgid "%(n)d year"
@@ -69,6 +96,18 @@ msgstr "Expire après"
 msgid "There is no token without an expiry: you create a new one before it ends."
 msgstr "Il n'existe pas de jeton sans expiration : vous en créez un nouveau avant la fin."
 
+msgid "The phone sees and changes these homes, and no other."
+msgstr "Le téléphone voit et modifie ces logements, et aucun autre."
+
+msgid "May create homes"
+msgstr "Peut créer des logements"
+
+msgid "The phone may send its own homes to this server, which adds them here."
+msgstr "Le téléphone peut envoyer ses propres logements à ce serveur, qui les ajoute ici."
+
+msgid "How you recognise this phone in the list."
+msgstr "Ce qui vous permet de reconnaître ce téléphone dans la liste."
+
 msgid "Read"
 msgstr "Lecture"
 
@@ -105,11 +144,33 @@ msgstr "dernière utilisation le"
 msgid "API token"
 msgstr "jeton d'API"
 
+msgid "may create homes"
+msgstr "peut créer des logements"
+
+msgid "device id"
+msgstr "identifiant d'appareil"
+
+msgid "connected app"
+msgstr "application connectée"
+
+msgid "connected apps"
+msgstr "applications connectées"
+
+#, python-format
+msgid "%(home)s opens only after signing in through %(provider)s."
+msgstr "%(home)s ne s'ouvre qu'après une connexion par %(provider)s."
+
+msgid "Too many attempts. Try again later."
+msgstr "Trop de tentatives. Réessayez plus tard."
+
 msgid "This token does not have the scope this request needs."
 msgstr "Ce jeton n'a pas la portée nécessaire à cette requête."
 
 msgid "API tokens are managed by a person signed in, not by an API token."
 msgstr "Les jetons d'API sont gérés par une personne connectée, pas par un jeton d'API."
+
+msgid "The sync API takes an access token of a connected app only."
+msgstr "L'API de synchronisation n'accepte que le jeton d'accès d'une application connectée."
 
 msgid "A token needs at least one scope."
 msgstr "Un jeton a besoin d'au moins une portée."
@@ -120,11 +181,17 @@ msgstr "Un jeton est lié à au moins un logement."
 msgid "Choose one of the lifetimes offered."
 msgstr "Choisissez l'une des durées proposées."
 
-msgid "Choose one of your homes."
-msgstr "Choisissez l'un de vos logements."
-
 msgid "These homes require different sign-in providers: create one token for each provider."
 msgstr "Ces logements exigent des fournisseurs de connexion différents : créez un jeton par fournisseur."
+
+msgid "Plain HTTP is accepted only from the local network. Use HTTPS."
+msgstr "Le HTTP non chiffré n'est accepté que depuis le réseau local. Utilisez HTTPS."
+
+msgid "Plain HTTP is accepted only on the IP address of the server on the local network, not on a name. Use HTTPS, or the server's local IP address."
+msgstr "Le HTTP non chiffré n'est accepté que sur l'adresse IP du serveur sur le réseau local, pas sur un nom. Utilisez HTTPS, ou l'adresse IP locale du serveur."
+
+msgid "Plain HTTP is accepted only on a local address. Use HTTPS."
+msgstr "Le HTTP non chiffré n'est accepté que sur une adresse locale. Utilisez HTTPS."
 
 #, python-format
 msgid "%(home)s opens only after signing in through %(provider)s: continue with it, then create the token."
@@ -132,6 +199,64 @@ msgstr "%(home)s ne s'ouvre qu'après une connexion par %(provider)s : continuez
 
 msgid "Token revoked: it no longer works."
 msgstr "Jeton révoqué : il ne fonctionne plus."
+
+msgid "Connected app saved."
+msgstr "Application connectée enregistrée."
+
+msgid "Connected app revoked: it no longer works."
+msgstr "Application connectée révoquée : elle ne fonctionne plus."
+
+msgid "Edit the connected app"
+msgstr "Modifier l'application connectée"
+
+#, python-format
+msgid "The phone opens this home only if you change it after signing in through %(provider)s."
+msgstr "Le téléphone n'ouvre ce logement que si vous le modifiez après une connexion par %(provider)s."
+
+msgid "Save the connected app"
+msgstr "Enregistrer l'application connectée"
+
+msgid "Revoke the connected app"
+msgstr "Révoquer l'application connectée"
+
+#, python-format
+msgid "Revoke %(name)s?"
+msgstr "Révoquer %(name)s ?"
+
+msgid "The phone loses its access with its next request; its homes stay on it, and it says it was disconnected. This cannot be undone: you would connect it again."
+msgstr "Le téléphone perd son accès à sa prochaine requête ; ses logements y restent, et il indique qu'il a été déconnecté. C'est définitif : il faudrait le connecter de nouveau."
+
+msgid "Revoke"
+msgstr "Révoquer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Connect the mobile app"
+msgstr "Connecter l'application mobile"
+
+msgid "Connect the HouseCairn mobile app"
+msgstr "Connecter l'application mobile HouseCairn"
+
+#, python-format
+msgid "Server: <strong>%(server)s</strong>"
+msgstr "Serveur : <strong>%(server)s</strong>"
+
+msgid "This connection is not encrypted: anyone on this network can read what the phone sends."
+msgstr "Cette connexion n'est pas chiffrée : toute personne sur ce réseau peut lire ce que le téléphone envoie."
+
+msgid "This phone will see and change everything in the homes you choose, as you can."
+msgstr "Ce téléphone verra et modifiera tout dans les logements que vous choisissez, comme vous le pouvez."
+
+msgid "Name given by the app"
+msgstr "Nom donné par l'application"
+
+#, python-format
+msgid "The phone opens this home only if you connect it after signing in through %(provider)s."
+msgstr "Le téléphone n'ouvre ce logement que si vous le connectez après une connexion par %(provider)s."
+
+msgid "Connect"
+msgstr "Connecter"
 
 msgid "Your new API token"
 msgstr "Votre nouveau jeton d'API"
@@ -206,21 +331,35 @@ msgstr "Jamais"
 msgid "Expired on %(day)s"
 msgstr "Expiré le %(day)s"
 
-msgid "Revoke"
-msgstr "Révoquer"
-
 msgid "No API token yet."
 msgstr "Aucun jeton d'API pour le moment."
+
+msgid "Connected apps"
+msgstr "Applications connectées"
+
+msgid "Each phone you connected with the HouseCairn mobile app, with the homes it sees and changes as you can. Revoke a phone you lost or no longer use."
+msgstr "Chaque téléphone que vous avez connecté avec l'application mobile HouseCairn, avec les logements qu'il voit et modifie comme vous le pouvez. Révoquez un téléphone perdu ou que vous n'utilisez plus."
+
+msgid "Your connected apps"
+msgstr "Vos applications connectées"
+
+msgid "Connected"
+msgstr "Connectée le"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "No"
+msgstr "Non"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "No connected app yet. Connect a phone from the HouseCairn mobile app, with the address of this server."
+msgstr "Aucune application connectée pour l'instant. Connectez un téléphone depuis l'application mobile HouseCairn, avec l'adresse de ce serveur."
 
 msgid "Revoke the token"
 msgstr "Révoquer le jeton"
 
-#, python-format
-msgid "Revoke %(name)s?"
-msgstr "Révoquer %(name)s ?"
-
 msgid "The tool that uses this token loses its access with its next request. This cannot be undone: you would create a new token."
 msgstr "L'outil qui utilise ce jeton perd son accès dès sa prochaine requête. Cette action est irréversible : vous devrez créer un nouveau jeton."
-
-msgid "Cancel"
-msgstr "Annuler"

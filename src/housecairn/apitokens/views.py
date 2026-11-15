@@ -18,9 +18,9 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import FormView, TemplateView
 
 from housecairn.accounts.models import User
-from housecairn.apitokens import services
-from housecairn.apitokens.forms import TokenForm
-from housecairn.apitokens.models import ApiToken, Scope
+from housecairn.apitokens import connections, services
+from housecairn.apitokens.forms import ConnectionForm, TokenForm
+from housecairn.apitokens.models import ApiToken, AppConnection, Scope
 from housecairn.core import navigation
 from housecairn.homes import services as home_services
 from housecairn.homes import sso
@@ -46,8 +46,18 @@ class TokenListView(LoginRequiredMixin, TemplateView):
         ]
         # Every person with a home may create a token: a home that requires a provider is
         # offered on the form, disabled until the session signs in through it.
+        connection_rows = [
+            {
+                "connection": connection,
+                "homes": sorted(home.name for home in connection.homes.all()),
+            }
+            for connection in connections.connections_of(user)
+        ]
         return super().get_context_data(
-            rows=rows, has_homes=services.token_homes(user).exists(), **kwargs
+            rows=rows,
+            has_homes=services.token_homes(user).exists(),
+            connection_rows=connection_rows,
+            **kwargs,
         )
 
 
@@ -128,4 +138,91 @@ class TokenRevokeView(LoginRequiredMixin, View):
         messages.success(request, _("Token revoked: it no longer works."))
         return redirect(
             navigation.after_delete(request, reverse("api-tokens:list"), gone=[token.id])
+        )
+
+
+# ---------- connected apps (docs/adr/0078) ----------
+
+
+def _own_connection(request: HttpRequest, connection_id: UUID) -> AppConnection:
+    user: User = request.user  # type: ignore[assignment]
+    found: AppConnection = get_object_or_404(connections.connections_of(user), pk=connection_id)
+    return found
+
+
+@method_decorator(never_cache, name="dispatch")
+class ConnectionEditView(LoginRequiredMixin, FormView[ConnectionForm]):
+    """Rename a phone, change its homes and its right to create homes."""
+
+    template_name = "apitokens/connection_form.html"
+    form_class = ConnectionForm
+    request: HttpRequest
+
+    def get_initial(self) -> dict[str, Any]:
+        connection = _own_connection(self.request, self.kwargs["connection_id"])
+        return {
+            "name": connection.name,
+            "homes": list(connection.homes.all()),
+            "may_create_homes": connection.may_create_homes,
+        }
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        return {
+            **super().get_form_kwargs(),
+            "user": self.request.user,
+            "signed_in_with": sso.signed_in_providers(self.request),
+            "providers": sso.declared_providers(self.request),
+        }
+
+    def form_valid(self, form: ConnectionForm) -> HttpResponse:
+        user: User = self.request.user  # type: ignore[assignment]
+        connection = _own_connection(self.request, self.kwargs["connection_id"])
+        data = form.cleaned_data
+        try:
+            connections.update_connection(
+                user,
+                connection,
+                name=data["name"],
+                homes=data["homes"],
+                may_create_homes=bool(data.get("may_create_homes")),
+                signed_in_with=sso.signed_in_providers(self.request),
+            )
+        except ValidationError as exc:
+            form.add_error(None, exc)
+            return self.form_invalid(form)
+        except home_services.SsoRequiredError as exc:
+            provider = sso.provider_named(exc.provider_id, self.request)
+            form.add_error(
+                "homes",
+                _("%(home)s opens only after signing in through %(provider)s.")
+                % {"home": exc.home.name, "provider": provider.name},
+            )
+            return self.form_invalid(form)
+        messages.success(self.request, _("Connected app saved."))
+        return redirect(navigation.back_url(self.request, reverse("api-tokens:list")))
+
+
+@method_decorator(never_cache, name="dispatch")
+class ConnectionRevokeView(LoginRequiredMixin, View):
+    """Revoke a phone after a confirmation page; it fails at its next request."""
+
+    request: HttpRequest
+
+    def get(self, request: HttpRequest, connection_id: UUID) -> HttpResponse:
+        connection = _own_connection(request, connection_id)
+        return TemplateResponse(
+            request,
+            "apitokens/connection_revoke.html",
+            {
+                "connection": connection,
+                "cancel_url": navigation.back_url(request, reverse("api-tokens:list")),
+            },
+        )
+
+    def post(self, request: HttpRequest, connection_id: UUID) -> HttpResponse:
+        connection = _own_connection(request, connection_id)
+        connections.revoke_connection(request.user, connection)  # type: ignore[arg-type]
+        messages.success(request, _("Connected app revoked: it no longer works."))
+        return redirect(
+            navigation.after_delete(request, reverse("api-tokens:list"), gone=[connection.id])
         )

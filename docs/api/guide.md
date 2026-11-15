@@ -136,6 +136,13 @@ curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer $TOKEN" \
 # prints: 404
 ```
 
+The sync API of the mobile app, under `/api/v1/sync/`, takes only the access token of a
+[connected app](../screens/api-tokens.md#connected-apps) (`hca_...`): an API token or a session
+gets `403` with `"code": "sync_needs_connection"` there, and the access token of a connected app
+gets `403` with `"code": "connection_outside_sync"` on every other route.
+`GET /api/v1/sync/info`, without a token, says which versions of the sync protocol the server
+speaks and where the app signs in (`"oauth": null` when the instance turned the mobile app off).
+
 ## Trying it in the browser
 
 A running instance serves its OpenAPI schema at `/api/schema/` and an interactive explorer

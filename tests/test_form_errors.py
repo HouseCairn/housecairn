@@ -274,7 +274,35 @@ CASES: list[Case] = [
     ),
     ("notification-channel", lambda c: reverse("notifications:add"), {"name": "", "url": ""}),
     ("api-token", lambda c: reverse("api-tokens:new"), {"name": ""}),
+    (
+        "connected-app",
+        lambda c: reverse("api-tokens:connection-edit", args=[_connection(c).id]),
+        {"name": "Phone", "homes": []},
+    ),
+    # Over HTTPS, as the transport rule of the consent page requires (docs/adr/0078).
+    (
+        "app-consent",
+        lambda c: "https://testserver" + reverse("oauth2_provider:authorize"),
+        {
+            "client_id": "housecairn-mobile",
+            "redirect_uri": "app.housecairn.mobile:/oauth/callback",
+            "response_type": "code",
+            "scope": "sync",
+            "state": "s",
+            "code_challenge": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+            "code_challenge_method": "S256",
+            "allow": "1",
+        },
+    ),
 ]
+
+
+def _connection(c: dict[str, Any]) -> Any:
+    from housecairn.apitokens.models import AppConnection
+
+    connection = AppConnection.objects.create(user=c["alice"], name="Phone")
+    connection.homes.set([c["home"]])
+    return connection
 
 
 # Refused for a reason that belongs to no field (the files together): the summary says it,
@@ -359,7 +387,12 @@ def test_a_refused_form_gets_the_summary(
     signed_in: Client,
     context: dict[str, Any],
 ) -> None:
-    assert_summary(name, signed_in.post(url(context), data))
+    target = url(context)
+    # A case whose address starts with https:// is posted over HTTPS (docs/adr/0078).
+    secure = target.startswith("https://")
+    assert_summary(
+        name, signed_in.post(target.removeprefix("https://testserver"), data, secure=secure)
+    )
 
 
 def _home_invitation(c: dict[str, Any]) -> str:
@@ -470,6 +503,8 @@ TEMPLATE_CASES: dict[str, list[str]] = {
     "accounts/profile.html": ["profile"],
     "accounts/setup.html": ["setup"],
     "apitokens/token_form.html": ["api-token"],
+    "apitokens/connection_form.html": ["connected-app"],
+    "apitokens/consent.html": ["app-consent"],
     "homes/delete.html": ["home-delete"],
     "homes/home_form.html": ["home-create", "home-edit"],
     "homes/household.html": ["household-invite", "household-provider"],

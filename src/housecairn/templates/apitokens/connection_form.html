@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n navigation %}
+{% block head_title %}{% translate "Edit the connected app" %}{% endblock head_title %}
+{% block content %}
+  {% url 'api-tokens:list' as parent %}{% back_link parent %}
+  <h1>{% translate "Edit the connected app" %}</h1>
+  <form method="post" class="card" novalidate>
+    {% csrf_token %}
+    {% next_field %}
+    {% include "components/form_errors.html" with form=form only %}
+    {% for field in form %}
+      {{ field.errors }}
+      {% if field.name == "homes" %}
+        <fieldset class="check-list" aria-describedby="{{ field.auto_id }}_helptext">
+          <legend>{{ field.label }}</legend>
+          {% for box in field %}
+            <div class="check-row">
+              {{ box.tag }}
+              <span class="row-body">
+                <label class="row-title" for="{{ box.id_for_label }}">{{ box.choice_label }}</label>
+                {% if box.data.provider %}
+                  <span class="row-text" id="{{ box.id_for_label }}_locked">{% blocktranslate with provider=box.data.provider.name %}The phone opens this home only if you change it after signing in through {{ provider }}.{% endblocktranslate %}</span>
+                {% endif %}
+              </span>
+            </div>
+          {% endfor %}
+          <span class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span>
+        </fieldset>
+      {% elif field.name == "may_create_homes" %}
+        <p>{{ field }} {{ field.label_tag }} <span class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span></p>
+      {% else %}
+        <p>
+          {{ field.label_tag }}
+          {{ field }}
+          {% if field.help_text %}<span class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span>{% endif %}
+        </p>
+      {% endif %}
+    {% endfor %}
+    <button type="submit" class="button-block">{% translate "Save the connected app" %}</button>
+  </form>
+{% endblock content %}

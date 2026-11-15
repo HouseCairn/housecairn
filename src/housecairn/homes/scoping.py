@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler
 
 from housecairn.accounts import services as account_services
-from housecairn.apitokens.models import ApiToken
+from housecairn.apitokens.credentials import Credential, connection_of, credential_of
 from housecairn.homes import emails, services, sso
 from housecairn.homes.models import Home, Invitation
 from housecairn.instance.config import get_setting
@@ -31,10 +31,14 @@ def homes_for_request(request: HttpRequest | Request) -> models.QuerySet[Home]:
     lists show them, locked. Anything that reads or changes a home goes
     through `HomeScopedMixin`, which only opens the others.
     """
-    token = getattr(request, "auth", None)
     restrict_to: list[UUID] | None = None
-    if isinstance(token, ApiToken):
-        restrict_to = list(token.homes.values_list("id", flat=True))
+    credential = credential_of(request)
+    if credential is Credential.API_TOKEN:
+        restrict_to = list(request.auth.homes.values_list("id", flat=True))  # type: ignore[union-attr]
+    elif credential is Credential.CONNECTION:
+        connection = connection_of(request)
+        assert connection is not None  # noqa: S101 - a connection credential has one
+        restrict_to = list(connection.homes.values_list("id", flat=True))
     return services.homes_for(request.user, restrict_to=restrict_to)
 
 
@@ -132,6 +136,10 @@ def api_exception_handler(exc: Exception, context: dict[str, Any]) -> Response |
     if isinstance(exc, mode.DemoRefusedError):
         # What the demonstration mode refuses (docs/adr/0071), with its reason.
         return Response({"detail": exc.message, "code": "demo"}, status=status.HTTP_403_FORBIDDEN)
+    code = getattr(exc, "housecairn_code", None)
+    if isinstance(exc, exceptions.PermissionDenied) and isinstance(code, str):
+        # The refusals of the sync API's boundary and transport rule (docs/adr/0078).
+        return Response({"detail": exc.detail, "code": code}, status=exc.status_code)
     if isinstance(exc, services.SsoRequiredError):
         return Response(
             {

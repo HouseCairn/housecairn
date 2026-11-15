@@ -36,6 +36,8 @@ we would otherwise write (principle "do not reinvent"):
 | reportlab | Draws the PDF of the QR labels and encodes their QR codes, on the server, with no system library (0047). BSD-3-Clause. Pulls in nothing that was not already locked (Pillow, charset-normalizer). |
 | cryptography | Encrypts the secrets an administrator stores from the interface, with a key derived from `SECRET_KEY` (0035). Already installed by django-allauth's passkey support; now a direct dependency. |
 | django-stubs-ext | Lets generic classes such as `ModelAdmin[Home]` be subscripted at runtime for the type checker. Companion of django-stubs, maintained by the same project, no runtime behaviour otherwise. |
+| django-oauth-toolkit (3.4.x) | OAuth 2 authorization server for the mobile app: authorization code with PKCE, refresh token rotation with reuse detection, revocation, tokens stored hashed (0078). BSD-2-Clause, in the FreeBSD wording (SPDX `BSD-2-Clause-Views`: the same two conditions, plus a sentence that the views are the authors' own), which the dependency review now allows. Builds on oauthlib and requests, already in the lock. |
+| jwcrypto | Pulled in by django-oauth-toolkit, for OpenID Connect, which stays off (0078). LGPL-3.0-or-later, compatible with AGPL-3.0-only. |
 
 Optional runtime dependency, installed with the `postgres` extra
 (`uv sync --extra postgres`) only by instances that use PostgreSQL:
