@@ -15,9 +15,27 @@
       return !field || !field.name || field.type === "file" || field.closest("[data-autosave-skip]");
     }
 
+    // A field the browser already refuses (a required name left empty) is not sent: its
+    // message goes under it and the status says so, as the server would.
+    function refused() {
+      var bad = false;
+      Array.prototype.forEach.call(form.elements, function (field) {
+        if (!field.name || !field.willValidate) return;
+        var place = document.getElementById("autosave-error-" + field.name);
+        var valid = field.checkValidity();
+        if (place) {
+          place.textContent = valid ? "" : field.validationMessage;
+          place.hidden = valid;
+        }
+        bad = bad || !valid;
+      });
+      if (bad && status) status.textContent = status.getAttribute("data-failed-text") || "";
+      return bad;
+    }
+
     function send() {
       timer = null;
-      if (!window.htmx) return;
+      if (!window.htmx || refused()) return;
       window.htmx.ajax("POST", form.getAttribute("action") || window.location.pathname + window.location.search, {
         source: form,
         values: { _autosave: "1" },

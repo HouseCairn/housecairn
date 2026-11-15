@@ -140,6 +140,31 @@ jobs:
           for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:8005/healthz && break; sleep 1; done
           curl -fsS http://127.0.0.1:8005/healthz >/dev/null || { cat "$RUNNER_TEMP/demo-server.log"; exit 1; }
           uv run python tests/e2e/browser_checks.py demo-accounts --base http://localhost:8005
+      - name: Every item, the materials from the stock and the sheets saved field by field (docs/adr/0081, 0082)
+        env:
+          DEBUG: "true"
+          HOUSECAIRN_DATA_DIR: ${{ runner.temp }}/feedback-data
+        run: |
+          mkdir -p "$HOUSECAIRN_DATA_DIR"
+          uv run python manage.py migrate --noinput
+          uv run python manage.py shell -c "
+          from housecairn.accounts.models import User
+          User.objects.create_user(email='feedback@example.com', password='correct-horse-battery-staple')
+          "
+          uv run python manage.py load_demo_data --owner feedback@example.com --language en
+          uv run python manage.py shell -c "
+          from housecairn.accounts.models import User
+          from housecairn.homes.models import Home
+          from housecairn.rooms import services as rooms
+          user = User.objects.get(email='feedback@example.com')
+          home = Home.objects.get(memberships__user=user)
+          rooms.create_item(user, rooms.create_room(user, home, name='Hallway'), name='Smoke alarm')
+          "
+          nohup uv run python manage.py runserver 127.0.0.1:8007 --noreload > "$RUNNER_TEMP/feedback-server.log" 2>&1 &
+          # The last try decides: a server that never answers fails here, with its log.
+          for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:8007/healthz && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8007/healthz >/dev/null || { cat "$RUNNER_TEMP/feedback-server.log"; exit 1; }
+          uv run python tests/e2e/upkeep_feedback_checks.py --base http://localhost:8007
       - name: The offer to receive the reminders on this device, with a simulated browser push (docs/adr/0072)
         env:
           HOUSECAIRN_NOTIFICATIONS_ENABLED: "true"
