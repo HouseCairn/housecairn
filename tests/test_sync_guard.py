@@ -26,12 +26,15 @@ from django.db import connection, models, transaction
 from housecairn.homes.models import Home
 from housecairn.sync import changes
 from housecairn.sync.models import Change
+from tests import sync_scenarios_projects
 from tests.test_export_registry import cascades_from_home, project_models
 
 pytestmark = pytest.mark.django_db
 
 # The apps whose every write path records its change. One line per lot (M3b to M3e).
-COVERED_APPS: tuple[str, ...] = ()
+COVERED_APPS: tuple[str, ...] = (
+    "projects",  # M3e
+)
 
 # The apps whose rows are synced and the lot that covers each; none may be missing, so that a
 # new app of rows of a home cannot slip by. Remove an app from here when it joins COVERED_APPS.
@@ -41,7 +44,6 @@ WAITING_FOR_ITS_LOT = {
     "tasks": "M3c",
     "stock": "M3d",
     "reports": "M3d",
-    "projects": "M3e",
 }
 
 # Tables that hang off a home and are not rows of the protocol: said once, with the reason.
@@ -67,8 +69,10 @@ LINK_KINDS = ("save", "hard_delete")
 Scenario = Callable[[Home], None]
 # (model label, kind) -> the write. Filled by the lots M3b to M3e.
 SCENARIOS: dict[tuple[str, str], Scenario] = {}
+SCENARIOS.update(sync_scenarios_projects.SCENARIOS)
 # (model label, kind) -> why the kind does not apply to the model.
 NOT_APPLICABLE: dict[tuple[str, str], str] = {}
+NOT_APPLICABLE.update(sync_scenarios_projects.NOT_APPLICABLE)
 
 
 def home_models() -> list[type[models.Model]]:
@@ -96,7 +100,7 @@ class _WriteSpy:
     """Notes whether a statement wrote a table (INSERT, UPDATE or DELETE)."""
 
     def __init__(self, table: str) -> None:
-        self.pattern = re.compile(rf'\s*(?:INSERT INTO|UPDATE|DELETE FROM) "{re.escape(table)}"')
+        self.pattern = re.compile(rf'\s*(?:INSERT (?:OR IGNORE )?INTO|UPDATE|DELETE FROM) "{re.escape(table)}"')
         self.wrote = False
 
     def __call__(self, execute: Callable[..., object], sql: str, *args: object) -> object:

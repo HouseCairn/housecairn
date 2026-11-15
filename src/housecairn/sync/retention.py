@@ -6,15 +6,24 @@ year still learns of a deletion. Then the nightly task removes them. A cursor be
 """
 
 import datetime
+import logging
+import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
+from typing import Any
 
 from django.apps import apps
-from django.db import transaction
+from django.core.exceptions import SuspiciousOperation
+from django.db import models, router, transaction
 from django.db.models import Max
+from django.db.models.deletion import Collector
 from django.utils import timezone
 
 from housecairn.core.models import BaseModel
+from housecairn.sync.links import entity_of, link_row_id
 from housecairn.sync.models import Change, HomeHead, RowClocks
+
+logger = logging.getLogger(__name__)
 
 RETENTION = datetime.timedelta(days=400)
 # Rows removed per statement, to keep the lists of identifiers short.
@@ -71,11 +80,63 @@ def _purge_tombstones(expired: datetime.datetime) -> tuple[int, int]:
             chunk = RowClocks.objects.filter(pk__in=pks[start : start + CHUNK])
             if model is not None:
                 ids = list(chunk.values_list("row_id", flat=True))
-                removed_rows += model.all_objects.filter(
-                    pk__in=ids, deleted_at__isnull=False
-                ).delete()[0]
+                doomed = model.all_objects.filter(pk__in=ids, deleted_at__isnull=False)
+                removed += _forget_what_goes_with(doomed)
+                removed_rows += doomed.delete()[0]
             removed += chunk.delete()[0]
     return removed, removed_rows
+
+
+def _forget_what_goes_with(doomed: "models.QuerySet[Any]") -> int:
+    """Remove the clocks and the files of every row the deletion of `doomed` takes with it.
+
+    The deletion cascades to the children of the rows (the quotes of a project, the rows of
+    its link tables), which have no foreign key to their clocks: their clocks would be left
+    behind, and their files on the disk. The files go once the purge is committed.
+    """
+    collector = Collector(using=router.db_for_write(doomed.model))
+    collector.collect(doomed)
+    rows: dict[str, set[uuid.UUID]] = {}
+    files: list[models.fields.files.FieldFile] = []
+    batches: list[tuple[type[models.Model], Iterable[models.Model]]] = list(collector.data.items())
+    batches += [(qs.model, qs) for qs in collector.fast_deletes if isinstance(qs, models.QuerySet)]
+    for model, instances in batches:
+        file_fields = [f for f in model._meta.concrete_fields if isinstance(f, models.FileField)]
+        for instance in instances:
+            row_id = _row_id(model, instance)
+            if row_id is not None:
+                rows.setdefault(entity_of(model), set()).add(row_id)
+            files += [getattr(instance, f.attname) for f in file_fields]
+    removed = 0
+    for entity, ids in rows.items():
+        removed += RowClocks.objects.filter(entity=entity, row_id__in=ids).delete()[0]
+    names = [(f.storage, f.name) for f in files if f]
+    transaction.on_commit(lambda: _erase(names))
+    return removed
+
+
+def _row_id(model: type[models.Model], instance: models.Model) -> uuid.UUID | None:
+    """The id of a row in the change log: its own, or that of a link table (`sync.links`)."""
+    if not model._meta.auto_created:
+        return instance.pk if isinstance(instance.pk, uuid.UUID) else None
+    owner_field, other_field = (
+        f for f in model._meta.concrete_fields if isinstance(f, models.ForeignKey)
+    )
+    owner: Any = getattr(instance, owner_field.name)
+    home_id = getattr(owner, "home_id", None)
+    if home_id is None:
+        return None
+    return link_row_id(
+        home_id, model, getattr(instance, owner_field.attname), getattr(instance, other_field.attname)
+    )
+
+
+def _erase(names: list[tuple[Any, str]]) -> None:
+    for storage, name in names:
+        try:
+            storage.delete(name)
+        except (OSError, ValueError, SuspiciousOperation):
+            logger.error("Could not erase the file of a purged row: %s", name)
 
 
 def _model_of(entity: str) -> type[BaseModel] | None:

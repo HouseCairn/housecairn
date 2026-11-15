@@ -8,6 +8,7 @@ is not a field: it is the sum of its accepted quotes.
 from typing import Any
 
 from housecairn.homes import exports
+from housecairn.projects import changelog
 from housecairn.projects.models import (
     AnnualEnvelope,
     BudgetLine,
@@ -36,20 +37,29 @@ def heating_to_custom(row: dict[str, Any], home: Any) -> dict[str, Any]:
 def register() -> None:
     exports.register(
         "projects",
-        exports.Section("projects", Project, on_restore=heating_to_custom),
-        exports.Section("project_budget_lines", BudgetLine),
-        exports.Section("project_quotes", Quote),
+        exports.Section(
+            "projects", Project, on_restore=heating_to_custom, on_written=changelog.restored
+        ),
+        exports.Section("project_budget_lines", BudgetLine, on_written=changelog.restored),
+        exports.Section("project_quotes", Quote, on_written=changelog.restored),
         exports.Section(
             "project_files",
             ProjectFile,
             files=(exports.FileSpec("file", "projects", thumbnail="thumbnail", documents=True),),
+            on_written=changelog.restored,
         ),
         exports.Section(
             "project_links",
             ProjectLink,
             # Where the reading of the page stands is not data of the home (docs/adr/0070).
             exclude=("preview_state", "preview_started_at"),
+            on_written=changelog.restored,
         ),
-        exports.Section("project_tasks", ProjectTask),
-        exports.Section("project_envelopes", AnnualEnvelope, order_by=("year", "id")),
+        exports.Section("project_tasks", ProjectTask, on_written=changelog.restored),
+        exports.Section(
+            "project_envelopes",
+            AnnualEnvelope,
+            order_by=("year", "id"),
+            on_written=changelog.restored,
+        ),
     )
