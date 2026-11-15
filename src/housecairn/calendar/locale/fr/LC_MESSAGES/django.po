@@ -15,6 +15,9 @@ msgstr ""
 msgid "Calendar"
 msgstr "Calendrier"
 
+msgid "This home is archived. Bring it back to make a feed of it."
+msgstr "Ce logement est archivé. Remettez-le en service pour en créer un flux."
+
 msgid "You already have a feed for this. Regenerate it to get a new address."
 msgstr "Vous avez déjà un flux pour cela. Demandez-lui une nouvelle adresse."
 

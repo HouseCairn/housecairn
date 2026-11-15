@@ -56,6 +56,14 @@ class ConsentView(dot_views.AuthorizationView):  # type: ignore[misc]
         refused = _refused(request, page=True)
         if refused is not None:
             return refused
+        if "approval_prompt" in request.GET:
+            # The toolkit would read `approval_prompt=auto` and skip the page for a person who
+            # already has a token: the consent is never skipped, so the parameter is dropped
+            # and `REQUEST_APPROVAL_PROMPT = "force"` holds whatever the address says.
+            query = request.GET.copy()
+            query.pop("approval_prompt")
+            query._mutable = False
+            request.GET = query  # type: ignore[assignment]
         response: HttpResponse = super().dispatch(request, *args, **kwargs)
         return response
 
@@ -126,7 +134,6 @@ class ConsentView(dot_views.AuthorizationView):  # type: ignore[misc]
                 scopes = [scope for scope in scopes if scope != SCOPE_HOMES_CREATE]
             try:
                 connection = connections.create_connection(
-                    self.request,
                     user,
                     name=form.cleaned_data.get("device_name", ""),
                     homes=form.cleaned_data["homes"],
@@ -159,6 +166,10 @@ class ConsentView(dot_views.AuthorizationView):  # type: ignore[misc]
         if allow and "code=" not in urlsplit(uri).query:
             # oauthlib answered with an error in the redirect: the connection has no code.
             connections.revoke(connection)
+        elif allow:
+            # Only now has oauthlib accepted the request: the email says a phone was connected
+            # only when a code was given for it.
+            connections.send_security_email(self.request, user)
         self.success_url = uri
         redirected: HttpResponse = self.redirect(self.success_url, application)
         return redirected
