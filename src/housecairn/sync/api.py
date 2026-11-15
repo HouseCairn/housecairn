@@ -353,7 +353,8 @@ def _device_of(connection: AppConnection, text: Any) -> bytes:
     """The phone's device id: fixed by the first push of the connection, then refused if other.
 
     It may be neither the server's device id, which would let a phone win every tie as the
-    web, nor that of another connection.
+    web, nor that of another connection still in use. A revoked connection no longer counts:
+    a phone signed out then in again keeps its device id (one install, one device id).
     """
     try:
         device = clock.device_from_b64(text)
@@ -369,7 +370,9 @@ def _device_of(connection: AppConnection, text: Any) -> bytes:
             "wrong_device",
         )
     if not connection.device_id:
-        others = AppConnection.objects.filter(device_id=encoded).exclude(pk=connection.pk)
+        others = AppConnection.objects.filter(
+            device_id=encoded, revoked_at__isnull=True, deleted_at__isnull=True
+        ).exclude(pk=connection.pk)
         if others.exists():
             raise CodedError(
                 status.HTTP_409_CONFLICT,

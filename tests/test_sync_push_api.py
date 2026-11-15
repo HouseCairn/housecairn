@@ -1211,6 +1211,23 @@ class TestDevice:
         assert answer.status_code == 409
         assert answer.json()["code"] == "wrong_device"
 
+    def test_the_same_phone_signed_in_again_pushes_with_its_device(
+        self, phone: Connected, alice: User, alice_home: Home
+    ) -> None:
+        """Mutant: a revoked connection counted in the check: 409 at every push, for good."""
+        row_id = uuid.uuid4()
+        first = [op(alice_home.pk, "rooms.room", row_id, {"name": "Before"})]
+        assert send(phone.access, alice_home.pk, first, number=1).status_code == 200
+        connection_services.revoke(phone.connection, actor=alice)
+        again = connect(alice, [alice_home])
+        later = [op(alice_home.pk, "rooms.room", row_id, {"name": "After"}, c=stamp(5))]
+        answer = send(again.access, alice_home.pk, later, number=1)
+        assert result_of(answer)["status"] == "applied"
+        assert AppConnection.objects.get(pk=again.connection.pk).device_id == DEVICE
+        assert Room.objects.get(pk=row_id).name == "After"
+        # The revoked connection cannot push any more, with that device or another.
+        assert send(phone.access, alice_home.pk, later, number=2).status_code == 401
+
     def test_the_server_device_is_refused(self, phone: Connected, alice_home: Home) -> None:
         """A phone that took the server's device id would win every tie as the web."""
         server = clock.device_to_b64(changes.server_device())
