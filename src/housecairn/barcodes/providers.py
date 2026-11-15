@@ -79,8 +79,13 @@ class Provider:
 
 
 def text(value: Any, length: int) -> str:
-    """A string of the answer on one line, cut to `length`; "" for anything else."""
-    return " ".join(value.split())[:length] if isinstance(value, str) else ""
+    """A string of the answer on one line, cut to `length`; "" for anything else.
+
+    The NUL character is dropped first: PostgreSQL refuses it in a text value.
+    """
+    if not isinstance(value, str):
+        return ""
+    return " ".join(value.replace("\x00", "").split())[:length]
 
 
 class OpenFactsProvider(Provider):

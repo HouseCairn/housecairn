@@ -133,6 +133,26 @@ class TestOnline:
         assert credit["author"] == "example-contributor"
         assert credit["source"] == "Open Food Facts"
 
+    def test_a_nul_character_in_the_answer_is_dropped(
+        self, online_on: None, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # PostgreSQL refuses NUL in a text value: the row must still end `done`, without it.
+        body = (
+            b'{"status": 1, "product": {"product_name": "Fil\\u0000ter", '
+            b'"brands": "Ac\\u0000me", "creator": "ex\\u0000ample"}}'
+        )
+        assert b"\\u0000" in body
+        monkeypatch.setattr(netguard, "fetch", _Sources({OPF: body}))
+        monkeypatch.setattr(services, "_queue", lambda row: None)
+        services.start("4006381333931")
+        row = BarcodeLookup.objects.get()
+        services.run(str(row.pk), row.started_at.isoformat())
+        row.refresh_from_db()
+        assert row.state == "done"
+        assert (row.name, row.brand, row.author) == ("Filter", "Acme", "example")
+        for value in (row.name, row.brand, row.author, row.category, row.product_url):
+            assert "\x00" not in value
+
     def test_the_cache_answers_the_second_scan(
         self, online_on: None, monkeypatch: pytest.MonkeyPatch
     ) -> None:
