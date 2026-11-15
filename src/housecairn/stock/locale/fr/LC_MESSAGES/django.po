@@ -48,6 +48,9 @@ msgstr "Pièce"
 msgid "Litre"
 msgstr "Litre"
 
+msgid "Millilitre (mL)"
+msgstr "Millilitre (mL)"
+
 msgid "Metre"
 msgstr "Mètre"
 
@@ -72,6 +75,11 @@ msgid "litre"
 msgid_plural "litres"
 msgstr[0] "litre"
 msgstr[1] "litres"
+
+msgid "mL"
+msgid_plural "mL"
+msgstr[0] "mL"
+msgstr[1] "mL"
 
 msgid "metre"
 msgid_plural "metres"

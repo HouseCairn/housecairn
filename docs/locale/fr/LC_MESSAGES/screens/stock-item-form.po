@@ -51,8 +51,8 @@ msgstr "Où il est rangé, par exemple « garage, deuxième étagère »."
 msgid "Unit, Which unit"
 msgstr "Unité, Quelle unité"
 
-msgid "A unit of the list (piece, litre, metre, kilogram, roll, box) or **Other**, with the unit written in **Which unit**."
-msgstr "Une unité de la liste (pièce, litre, mètre, kilogramme, rouleau, boîte) ou **Autre**, avec l'unité écrite dans **Quelle unité**."
+msgid "A unit of the list (piece, litre, millilitre, metre, kilogram, roll, box) or **Other**, with the unit written in **Which unit**."
+msgstr "Une unité de la liste (pièce, litre, millilitre, mètre, kilogramme, rouleau, boîte) ou **Autre**, avec l'unité écrite dans **Quelle unité**."
 
 msgid "Threshold"
 msgstr "Seuil"

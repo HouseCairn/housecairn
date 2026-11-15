@@ -1172,6 +1172,7 @@
                         "kilogram",
                         "litre",
                         "metre",
+                        "millilitre",
                         "other",
                         "piece",
                         "roll"

@@ -37,6 +37,13 @@ wrote, 16 bytes in base64url without padding. The server writes the changes made
 as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference named by
 the id of its row, never by the name of the file the server stores.
 
+A field that holds a code of a list takes one of the codes below; a code a phone does not know
+yet is kept and shown as it is, never refused:
+
+- `stock.article.unit`: `piece`, `litre`, `millilitre`, `metre`, `kilogram`, `roll`, `box`,
+  `other` (with `unit_other`), or empty. There is no conversion between units: a quantity is
+  in the unit of its item.
+
 ## The homes
 
 `GET /api/v1/sync/homes/`
