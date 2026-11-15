@@ -26,6 +26,7 @@ from housecairn.audit import services as audit
 from housecairn.homes import quotas
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
+from housecairn.projects import changelog
 from housecairn.projects.models import (
     ACTIVE_STATUSES,
     MAX_FILES_PER_QUOTE,
@@ -338,9 +339,11 @@ def envelope_summary(home: Home, year: int) -> EnvelopeSummary:
 def set_envelope(actor: AnyUser, home: Home, *, year: int, amount: Any) -> AnnualEnvelope:
     _require_write(actor, home)
     envelope = envelopes_of(home).filter(year=year).first() or AnnualEnvelope(home=home, year=year)
+    before = changelog.stored(envelope)
     envelope.amount = _money("amount", amount)
     envelope.full_clean()
     envelope.save()
+    changelog.saved(envelope, before)
     audit.record_object("envelope.set", actor=actor, home_id=home.id, title=str(year))
     return envelope
 
@@ -385,7 +388,9 @@ def create_project(
     chosen = _check_rooms(home, rooms)
     project.full_clean()
     project.save()
+    changelog.saved(project)
     project.rooms.set(chosen)
+    changelog.links_changed(project, "rooms", None)
     audit.record_object("project.created", actor=actor, home_id=home.id, title=project.title)
     if budget is not None:
         create_line(actor, project, label=_("Budget"), nature=BudgetNature.OTHER, planned=budget)
@@ -397,13 +402,17 @@ def update_project(
     actor: AnyUser, project: Project, *, rooms: Iterable[Room] | None = None, **changes: Any
 ) -> Project:
     _require_write(actor, project.home)
+    before = changelog.stored(project)
     _apply(project, PROJECT_FIELDS, changes)
     _clean_season(project)
     chosen = None if rooms is None else _check_rooms(project.home, rooms)
     project.full_clean()
     project.save()
+    changelog.saved(project, before)
     if chosen is not None:
+        linked = changelog.links_of(project, "rooms")
         project.rooms.set(chosen)
+        changelog.links_changed(project, "rooms", linked)
     audit.record_object(
         "project.updated",
         actor=actor,
@@ -419,12 +428,14 @@ def delete_project(actor: AnyUser, project: Project) -> None:
     """Soft-delete the project with its lines, quotes and files; its tasks stay, unlinked."""
     _require_write(actor, project.home)
     doomed = list(ProjectFile.objects.filter(project=project))
-    ProjectTask.objects.filter(project=project).delete()
-    ProjectLink.objects.filter(project=project).soft_delete()  # type: ignore[attr-defined]
-    ProjectFile.objects.filter(project=project).soft_delete()  # type: ignore[attr-defined]
-    Quote.objects.filter(project=project).soft_delete()  # type: ignore[attr-defined]
-    BudgetLine.objects.filter(project=project).soft_delete()  # type: ignore[attr-defined]
+    # The links to tasks go for good, each leaving its tombstone (docs/adr/0077, need 4).
+    changelog.hard_delete(ProjectTask.objects.filter(project=project))
+    changelog.soft_delete(ProjectLink.objects.filter(project=project))
+    changelog.soft_delete(ProjectFile.objects.filter(project=project))
+    changelog.soft_delete(Quote.objects.filter(project=project))
+    changelog.soft_delete(BudgetLine.objects.filter(project=project))
     project.soft_delete()
+    changelog.deleted(project)
     _erase_files(doomed)
     audit.record_object(
         "project.deleted", actor=actor, home_id=project.home_id, title=project.title
@@ -466,7 +477,7 @@ def add_task(
     """Create a task of the project: `tasks.services.create_task`, then the link."""
     _require_write(actor, project.home)
     task = task_services.create_task(actor, project.home, due_on=due_on, **fields)
-    ProjectTask.objects.create(home=project.home, project=project, task=task)
+    changelog.saved(ProjectTask.objects.create(home=project.home, project=project, task=task))
     audit.record_object(
         "project.task_added", actor=actor, home_id=project.home_id, title=project.title
     )
@@ -494,6 +505,7 @@ def attach_task(actor: AnyUser, project: Project, task: Task) -> ProjectTask:
             )
     except IntegrityError:
         raise ValidationError({"task": _("This task is already in a project.")}) from None
+    changelog.saved(link)
     audit.record_object(
         "project.task_added", actor=actor, home_id=project.home_id, title=project.title
     )
@@ -502,8 +514,13 @@ def attach_task(actor: AnyUser, project: Project, task: Task) -> ProjectTask:
 
 @transaction.atomic
 def detach_task(actor: AnyUser, link: ProjectTask) -> None:
-    """Take the task out of the project; the task itself stays."""
+    """Take the task out of the project; the task itself stays.
+
+    The link goes for good, so that the task may join another project, and leaves its
+    tombstone in the change log (docs/adr/0077, need 4).
+    """
     _require_write(actor, link.home)
+    changelog.deleted(link)
     link.delete()
     audit.record_object(
         "project.task_removed", actor=actor, home_id=link.home_id, title=link.project.title
@@ -520,6 +537,7 @@ def create_line(actor: AnyUser, project: Project, **fields: Any) -> BudgetLine:
     _apply(line, LINE_FIELDS, fields)
     line.full_clean()
     line.save()
+    changelog.saved(line)
     audit.record_object(
         "budget_line.created", actor=actor, home_id=project.home_id, title=project.title
     )
@@ -529,9 +547,11 @@ def create_line(actor: AnyUser, project: Project, **fields: Any) -> BudgetLine:
 @transaction.atomic
 def update_line(actor: AnyUser, line: BudgetLine, **changes: Any) -> BudgetLine:
     _require_write(actor, line.home)
+    before = changelog.stored(line)
     _apply(line, LINE_FIELDS, changes)
     line.full_clean()
     line.save()
+    changelog.saved(line, before)
     audit.record_object(
         "budget_line.updated",
         actor=actor,
@@ -546,11 +566,13 @@ def update_line(actor: AnyUser, line: BudgetLine, **changes: Any) -> BudgetLine:
 def delete_line(actor: AnyUser, line: BudgetLine) -> None:
     """Soft-delete the line; its accepted quotes go back to Received, committed on nothing."""
     _require_write(actor, line.home)
-    Quote.objects.filter(budget_line=line, status=QuoteStatus.ACCEPTED).update(
-        status=QuoteStatus.RECEIVED
+    changelog.update(
+        Quote.objects.filter(budget_line=line, status=QuoteStatus.ACCEPTED),
+        status=QuoteStatus.RECEIVED,
     )
-    Quote.objects.filter(budget_line=line).update(budget_line=None)
+    changelog.update(Quote.objects.filter(budget_line=line), budget_line=None)
     line.soft_delete()
+    changelog.deleted(line)
     audit.record_object(
         "budget_line.deleted", actor=actor, home_id=line.home_id, title=line.project.title
     )
@@ -577,13 +599,14 @@ def _check_quote_dates(quote: Quote) -> None:
             )
 
 
-def _save_quote(quote: Quote) -> None:
+def _save_quote(quote: Quote, before: changelog.Stored | None = None) -> None:
     # Only an accepted quote is committed on a line.
     if quote.status != QuoteStatus.ACCEPTED:
         quote.budget_line = None
     _check_quote_dates(quote)
     quote.full_clean()
     quote.save()
+    changelog.saved(quote, before)
 
 
 @transaction.atomic
@@ -622,6 +645,7 @@ def update_quote(
 ) -> Quote:
     """Change a quote. Leaving Accepted releases the line; entering it needs one."""
     _require_write(actor, quote.home)
+    before = changelog.stored(quote)
     _apply(quote, QUOTE_FIELDS, changes)
     if contractor is not _UNSET:
         quote.contractor = contractor
@@ -629,7 +653,7 @@ def update_quote(
         quote.status = status
     if budget_line is not _UNSET:
         quote.budget_line = budget_line
-    _save_quote(quote)
+    _save_quote(quote, before)
     audit.record_object(
         "quote.updated",
         actor=actor,
@@ -653,9 +677,10 @@ def accept_quote(actor: AnyUser, quote: Quote, line: BudgetLine) -> Quote:
     _require_write(actor, quote.home)
     if line.project_id != quote.project_id or line.deleted_at is not None:
         raise ValidationError({"budget_line": _("This budget line is not in this project.")})
+    before = changelog.stored(quote)
     quote.status = QuoteStatus.ACCEPTED
     quote.budget_line = line
-    _save_quote(quote)
+    _save_quote(quote, before)
     audit.record_object(
         "quote.accepted", actor=actor, home_id=quote.home_id, title=quote.project.title
     )
@@ -666,8 +691,9 @@ def accept_quote(actor: AnyUser, quote: Quote, line: BudgetLine) -> Quote:
 def delete_quote(actor: AnyUser, quote: Quote) -> None:
     _require_write(actor, quote.home)
     doomed = list(ProjectFile.objects.filter(quote=quote))
-    ProjectFile.objects.filter(quote=quote).soft_delete()  # type: ignore[attr-defined]
+    changelog.soft_delete(ProjectFile.objects.filter(quote=quote))
     quote.soft_delete()
+    changelog.deleted(quote)
     _erase_files(doomed)
     audit.record_object(
         "quote.deleted", actor=actor, home_id=quote.home_id, title=quote.project.title
@@ -701,6 +727,7 @@ def save_stored(
             stored.file.delete(save=False)
             stored.thumbnail.delete(save=False)
             raise
+    changelog.saved(stored)
 
 
 @transaction.atomic
@@ -774,6 +801,7 @@ def delete_file(actor: AnyUser, stored: ProjectFile) -> None:
     """Soft-delete the record and erase its files, once the deletion is committed."""
     _require_write(actor, stored.home)
     stored.soft_delete()
+    changelog.deleted(stored)
     _erase_files([stored])
     audit.record_object(
         "project_file.deleted", actor=actor, home_id=stored.home_id, title=stored.project.title

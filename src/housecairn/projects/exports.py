@@ -8,6 +8,7 @@ is not a field: it is the sum of its accepted quotes.
 from typing import Any
 
 from housecairn.homes import exports
+from housecairn.projects import changelog
 from housecairn.projects.models import (
     AnnualEnvelope,
     BudgetLine,
@@ -36,7 +37,9 @@ def heating_to_custom(row: dict[str, Any], home: Any) -> dict[str, Any]:
 def register() -> None:
     exports.register(
         "projects",
-        exports.Section("projects", Project, on_restore=heating_to_custom),
+        exports.Section(
+            "projects", Project, on_restore=heating_to_custom, on_written=changelog.restored
+        ),
         exports.Section("project_budget_lines", BudgetLine),
         exports.Section("project_quotes", Quote),
         exports.Section(
@@ -51,5 +54,9 @@ def register() -> None:
             exclude=("preview_state", "preview_started_at"),
         ),
         exports.Section("project_tasks", ProjectTask),
-        exports.Section("project_envelopes", AnnualEnvelope, order_by=("year", "id")),
+        exports.Section(
+            "project_envelopes",
+            AnnualEnvelope,
+            order_by=("year", "id"),
+        ),
     )

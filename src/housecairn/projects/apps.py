@@ -9,7 +9,8 @@ class ProjectsConfig(AppConfig):
 
     def ready(self) -> None:
         from housecairn.homes import files
-        from housecairn.projects import exports
+        from housecairn.projects import exports, syncing
 
         exports.register()
+        syncing.register()
         files.register_media_folder("projects")
