@@ -10,16 +10,22 @@ home answers 410 `home_gone`, to the connections bound to it when it was erased 
 
 import json
 import uuid
-from typing import Any
+from typing import Any, cast
 
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, inline_serializer
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    inline_serializer,
+)
 from rest_framework import exceptions, serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from housecairn.accounts.models import User
 from housecairn.apitokens.credentials import connection_of
 from housecairn.apitokens.models import AppConnection
 from housecairn.apitokens.sync import SyncAPIView
@@ -88,9 +94,7 @@ def _integer(request: Request, name: str, default: int) -> int:
     if raw is None:
         return default
     if not raw.isascii() or not raw.isdigit() or len(raw) > 20:
-        raise exceptions.ParseError(
-            _("%(name)s is a whole number, 0 or more.") % {"name": name}
-        )
+        raise exceptions.ParseError(_("%(name)s is a whole number, 0 or more.") % {"name": name})
     return int(raw)
 
 
@@ -146,7 +150,7 @@ class SyncHomesView(SyncAPIView):
         homes = open_homes_for_request(request).order_by("name", "id")
         return Response(
             {
-                "homes": [reading.home_entry(home, request.user) for home in homes],
+                "homes": [reading.home_entry(home, cast(User, request.user)) for home in homes],
                 "gone": reading.gone_for(connection.pk),
             }
         )
@@ -191,7 +195,9 @@ class SyncChangesView(SyncAPIView):
                     "more": serializers.BooleanField(),
                 },
             ),
-            400: OpenApiResponse(description="A cursor or a limit that is not a whole number, or a cursor beyond the head."),
+            400: OpenApiResponse(
+                description="A cursor or limit not a whole number, or past the head."
+            ),
             404: OpenApiResponse(description="Not a home of this connection."),
             410: OpenApiResponse(description="`cursor_expired` or `home_gone`."),
         },
@@ -229,7 +235,7 @@ class SyncSnapshotView(SyncAPIView):
                 OpenApiTypes.STR,
                 description=(
                     'JSON lines: one row per line, `{"t", "h", "id", "f": {field: [value, '
-                    'clock, device]}}`, tombstones within the retention included, then '
+                    "clock, device]}}`, tombstones within the retention included, then "
                     '`{"members": [...]}`, then `{"covers": pos}`.'
                 ),
             ),

@@ -104,7 +104,9 @@ def is_link(entity: str) -> bool:
 # ---------- values as they leave the server ----------
 
 
-def file_reference(model: type[models.Model], name: str, row: models.Model | None, row_id: Any) -> Any:
+def file_reference(
+    model: type[models.Model], name: str, row: models.Model | None, row_id: Any
+) -> Any:
     """A file the change log keeps by the name of its stored file, as a reference.
 
     The reference is named by the id of the row, as a photo made on the web is
@@ -167,7 +169,11 @@ def members_of(home: Home) -> list[dict[str, str]]:
     task by the account id, which the rows hold (`assignee_id`, `completed_by_id`).
     """
     return [
-        {"id": str(membership.user_id), "name": person_name(membership.user), "role": membership.role}
+        {
+            "id": str(membership.user_id),
+            "name": person_name(membership.user),
+            "role": membership.role,
+        }
         for membership in home_services.members(home)
     ]
 
@@ -179,7 +185,9 @@ def head_of(home_id: uuid.UUID) -> HomeHead:
 
 
 def home_entry(home: Home, user: User) -> dict[str, Any]:
-    archived = RowClocks.objects.filter(home_id=home.pk, entity="homes.home", row_id=home.pk).first()
+    archived = RowClocks.objects.filter(
+        home_id=home.pk, entity="homes.home", row_id=home.pk
+    ).first()
     entry = archived.clocks.get("archived_at") if archived is not None else None
     role = Membership.objects.filter(home=home, user=user).values_list("role", flat=True).first()
     return {
@@ -329,7 +337,11 @@ def _entity_lines(home: Home, entity: str, server_device: str) -> list[dict[str,
     if is_link(entity):
         return _link_lines(home, entity, clocks, server_device)
     model = model_of(entity)
-    queryset = model._base_manager.filter(pk=home.pk) if model is Home else model._base_manager.filter(home_id=home.pk)
+    queryset = (
+        model._base_manager.filter(pk=home.pk)
+        if model is Home
+        else model._base_manager.filter(home_id=home.pk)
+    )
     expired = retention.limit()
     lines = []
     for row in queryset.order_by("pk").iterator():

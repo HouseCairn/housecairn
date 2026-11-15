@@ -294,14 +294,18 @@ class TestChanges:
         report = uuid.uuid4()
         name = f"{alice_home.pk}/{report}.jpg"
         changes.record_change(alice_home, "reports.report", report, changes.PUT, {"photo": name})
-        changes.record_change(alice_home, "stock.article", uuid.uuid4(), changes.PUT, {"label": name})
+        changes.record_change(
+            alice_home, "stock.article", uuid.uuid4(), changes.PUT, {"label": name}
+        )
         answer = get(phone.access, changes_url(alice_home.pk), limit=1000)
         assert name not in answer.content.decode()
         files = [c["op"]["f"] for c in answer.json()["changes"] if c["op"]["t"] != "homes.home"]
         assert files[-2]["photo"]["file"] == str(report)
         assert set(files[-2]["photo"]) == {"file", "size", "type", "width", "height"}
 
-    def test_nothing_internal_is_given(self, alice: User, phone: Connected, alice_home: Home) -> None:
+    def test_nothing_internal_is_given(
+        self, alice: User, phone: Connected, alice_home: Home
+    ) -> None:
         room = room_services.create_room(alice, alice_home, name="Hall")
         room_services.delete_room(alice, room)
         body = get(phone.access, changes_url(alice_home.pk), limit=1000).json()
@@ -317,9 +321,11 @@ class TestCursor:
     """Mutant: a cursor or a limit not bounded fails here, with a 500 or too many changes."""
 
     @pytest.mark.parametrize(
-        "after", ["-1", "abc", "1.5", "", " 1", "１", "0x10", "1e3", "9" * 25, str(2**63)]
+        "after", ["-1", "abc", "1.5", "", " 1", "\uff11", "0x10", "1e3", "9" * 25, str(2**63)]
     )
-    def test_a_forged_cursor_is_refused(self, phone: Connected, alice_home: Home, after: str) -> None:
+    def test_a_forged_cursor_is_refused(
+        self, phone: Connected, alice_home: Home, after: str
+    ) -> None:
         answer = get(phone.access, changes_url(alice_home.pk), after=after)
         assert answer.status_code == 400, after
         assert "detail" in answer.json()
@@ -348,7 +354,9 @@ class TestCursor:
         body = get(phone.access, changes_url(alice_home.pk)).json()
         assert body["more"] is False
 
-    def test_an_expired_cursor_answers_410(self, alice: User, phone: Connected, alice_home: Home) -> None:
+    def test_an_expired_cursor_answers_410(
+        self, alice: User, phone: Connected, alice_home: Home
+    ) -> None:
         make_rooms(alice, alice_home, 3)
         HomeHead.objects.filter(home=alice_home).update(floor=2)
         answer = get(phone.access, changes_url(alice_home.pk), after=1)
@@ -394,7 +402,9 @@ class TestRateLimit:
 
 
 class TestSnapshot:
-    def test_rows_members_then_covers(self, alice: User, phone: Connected, alice_home: Home) -> None:
+    def test_rows_members_then_covers(
+        self, alice: User, phone: Connected, alice_home: Home
+    ) -> None:
         room = room_services.create_room(alice, alice_home, name="Hall")
         answer = get(phone.access, snapshot_url(alice_home.pk))
         assert answer.status_code == 200
