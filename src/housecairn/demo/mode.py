@@ -60,7 +60,6 @@ FORCED: dict[str, Any] = {
     "email_host": "",
     "link_preview_enabled": False,
     "barcode_lookup_online": False,
-    "barcode_catalogue_enabled": False,
     "file_max_bytes": FILE_MAX_BYTES,
     "home_storage_mb": HOME_STORAGE_MB,
     "home_max_files": HOME_MAX_FILES,

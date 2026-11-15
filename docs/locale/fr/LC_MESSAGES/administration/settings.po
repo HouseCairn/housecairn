@@ -379,20 +379,14 @@ msgstr "Application mobile"
 msgid "`HOUSECAIRN_MOBILE_APP_ENABLED`"
 msgstr "`HOUSECAIRN_MOBILE_APP_ENABLED`"
 
-msgid "Local catalogue of barcodes"
-msgstr "Catalogue local des codes-barres"
-
-msgid "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`"
-msgstr "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`"
-
-msgid "Barcodes"
-msgstr "Codes-barres"
-
 msgid "Online lookup of barcodes"
 msgstr "Recherche en ligne des codes-barres"
 
 msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+
+msgid "Barcodes"
+msgstr "Codes-barres"
 
 msgid "The start-up checks (`manage.py check`, which `migrate` runs too) read the variables and the defaults, with one exception: `housecairn.E001`, which stops the start when `HOUSECAIRN_SIGNUP_OPEN` opens sign-up without a mail server, also counts a mail server chosen in the interface. That is why the interface refuses to remove that server, or restore its default, while sign-up is open. Otherwise a setting chosen in the interface is checked when it is saved, not at start-up."
 msgstr "Les contrôles de démarrage (`manage.py check`, que `migrate` lance aussi) lisent les variables et les défauts, à une exception près : `housecairn.E001`, qui arrête le démarrage quand `HOUSECAIRN_SIGNUP_OPEN` ouvre l'inscription sans serveur de messagerie, tient compte aussi d'un serveur de messagerie choisi dans l'interface. C'est pourquoi l'interface refuse de retirer ce serveur, ou de rétablir son défaut, tant que l'inscription est ouverte. Pour le reste, un réglage choisi dans l'interface est contrôlé à l'enregistrement, pas au démarrage."

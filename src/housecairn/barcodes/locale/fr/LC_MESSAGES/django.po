@@ -15,17 +15,11 @@ msgstr ""
 msgid "Barcodes"
 msgstr "Codes-barres"
 
-msgid "Local catalogue of barcodes"
-msgstr "Catalogue local des codes-barres"
-
-msgid "Look a scanned code up in a copy of the open Nudger catalogue kept on this server, refreshed every week; no lookup leaves the server. Downloading it takes hours and space on the disk: see the documentation."
-msgstr "Chercher un code scanné dans une copie du catalogue ouvert de Nudger gardée sur ce serveur, mise à jour chaque semaine ; aucune recherche ne sort du serveur. Le téléchargement prend des heures et de la place sur le disque : voir la documentation."
-
 msgid "Online lookup of barcodes"
 msgstr "Recherche en ligne des codes-barres"
 
-msgid "When a code is not in the local catalogue, ask Open Products Facts, then Open Food Facts. Only the code is sent, nothing else. Off: a code is only kept."
-msgstr "Quand un code n'est pas dans le catalogue local, interroger Open Products Facts, puis Open Food Facts. Seul le code est envoyé, rien d'autre. Désactivé : le code est seulement gardé."
+msgid "Ask Open Products Facts, then Open Food Facts, what a scanned code is. Only the code is sent, nothing else. Off: a code is only kept."
+msgstr "Demander à Open Products Facts, puis à Open Food Facts, ce qu'est un code scanné. Seul le code est envoyé, rien d'autre. Désactivé : le code est seulement gardé."
 
 msgid "barcode (EAN)"
 msgstr "code-barres (EAN)"
@@ -35,30 +29,6 @@ msgstr "Les 8 à 14 chiffres sous les barres. Scannez-le, ou saisissez-le."
 
 msgid "Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14)."
 msgstr "Ce n'est pas un code-barres valide : saisissez les 8, 12, 13 ou 14 chiffres sous les barres (EAN-8, UPC-A, EAN-13 ou GTIN-14)."
-
-msgid "catalogue product"
-msgstr "produit du catalogue"
-
-msgid "catalogue products"
-msgstr "produits du catalogue"
-
-msgid "Downloading"
-msgstr "Téléchargement"
-
-msgid "Importing"
-msgstr "Import"
-
-msgid "Done"
-msgstr "Terminé"
-
-msgid "Failed"
-msgstr "Échec"
-
-msgid "catalogue import"
-msgstr "import du catalogue"
-
-msgid "catalogue imports"
-msgstr "imports du catalogue"
 
 msgid "In progress"
 msgstr "En cours"

@@ -48,7 +48,7 @@ The code is checked (its last digit is a check digit): a code read wrong is refu
 of the list of items finds a record by its code too, with or without its spaces.
 
 If the administrator of the server turned on the [barcode lookup](../administration/barcodes.md),
-a scanned code shows what the open databases know of the product: name, brand, model,
+a scanned code shows what the open databases know of the product: name, brand,
 category, and sometimes a photo. **Use these values** fills only the fields that are still
 empty; nothing is saved until you save the form. Tick **Keep this photo** to add the photo of
 the product to an item that has no photo yet: it is shown with its source, its author and its licence

@@ -186,8 +186,8 @@ msgstr "vide : désactivé"
 msgid "[Projects](../guides/projects.md)"
 msgstr "[Projets et devis](../guides/projects.md)"
 
-msgid "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`, `HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
-msgstr "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`, `HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 
 msgid "[Barcodes](barcodes.md)"
 msgstr "[Codes-barres](barcodes.md)"

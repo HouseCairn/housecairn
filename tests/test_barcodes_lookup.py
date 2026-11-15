@@ -1,124 +1,26 @@
-"""The local catalogue and the online lookup of a code, with simulated sources (docs/adr/0083).
+"""The online lookup of a code and its providers, with simulated sources (docs/adr/0083).
 
 No test calls a real server: the sources are local HTTP servers or `netguard.fetch` replaced.
 """
 
 import io
 import json
-import zipfile
-from pathlib import Path
 from typing import Any
 
 import pytest
+from django.utils import timezone
 from PIL import Image
 
-from housecairn.barcodes import catalogue, online, services
-from housecairn.barcodes.models import BarcodeLookup, CatalogueImport, CatalogueProduct
+from housecairn.barcodes import online, providers, services
+from housecairn.barcodes.models import BarcodeLookup
 from housecairn.core import netguard
 
 pytestmark = pytest.mark.django_db
-
-HEADER = (
-    '"gtin","brand","model","name","last_updated","gs1_country","gtinType","offers_count",'
-    '"min_price","currency","categories","url"\n'
-)
-DISHWASHER = (
-    '"4006381333931","ACME","DW-60","Dishwasher 60 cm","1","DE","GTIN_13","0","","",'
-    '"ELECTROMENAGER | LAVE-VAISSELLE","https://example.com/a"\n'
-)
-JACKET = (
-    '"036000291452","MOTO","J1","Riding jacket","1","US","UPC","0","","",'
-    '"EQUIPEMENT DU MOTARD | BLOUSON MOTO","https://example.com/b"\n'
-)
-BAD = '"4006381333932","X","","Wrong check digit","1","DE","GTIN_13","0","","","PILES",""\n'
-BULB = (
-    '"96385074","LUX","E27","LED bulb","1","FR","EAN_8","0","","",'
-    '"Éclairage > Ampoule","https://example.com/c"\n'
-)
-
-
-def _export(tmp_path: Path, rows: str, *, zipped: bool = True) -> Path:
-    if not zipped:
-        path = tmp_path / "export.csv"
-        path.write_text(HEADER + rows, encoding="utf-8")
-        return path
-    path = tmp_path / "gtin-open-data.zip"
-    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("open4goods-gtin-dataset.csv", HEADER + rows)
-    return path
-
-
-@pytest.fixture
-def catalogue_on(settings: Any, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(services, "catalogue_enabled", lambda: True)
 
 
 @pytest.fixture
 def online_on(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(services, "online_enabled", lambda: True)
-
-
-class TestImport:
-    def test_keeps_the_categories_useful_in_a_house(self, tmp_path: Path) -> None:
-        progress = catalogue.import_file(_export(tmp_path, DISHWASHER + JACKET + BAD + BULB))
-        assert progress.state == "done"
-        assert progress.rows_read == 4
-        assert set(CatalogueProduct.objects.values_list("gtin", flat=True)) == {
-            4006381333931,
-            96385074,
-        }
-
-    def test_all_categories(self, tmp_path: Path) -> None:
-        catalogue.import_file(
-            _export(tmp_path, DISHWASHER + JACKET, zipped=False), all_categories=True
-        )
-        assert CatalogueProduct.objects.count() == 2
-
-    def test_a_stopped_import_goes_on_where_it_was(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setattr(catalogue, "BATCH", 1)
-        path = _export(tmp_path, DISHWASHER + BULB + JACKET)
-        # The first slice stops after its first batch.
-        first = catalogue.import_file(path, seconds=0)
-        assert first.state == "importing"
-        assert first.rows_read == 1
-        seen: list[int] = []
-        original = catalogue._write
-
-        def counting(batch: list[catalogue.Row], *args: Any) -> None:
-            seen.extend(r.gtin for r in batch)
-            original(batch, *args)
-
-        monkeypatch.setattr(catalogue, "_write", counting)
-        done = catalogue.import_file(path)
-        assert done.state == "done"
-        assert 4006381333931 not in seen  # not read again
-        assert CatalogueProduct.objects.count() == 2
-        assert CatalogueImport.objects.count() == 1
-
-    def test_another_file_starts_over(self, tmp_path: Path) -> None:
-        catalogue.import_file(_export(tmp_path, DISHWASHER))
-        other = tmp_path / "other"
-        other.mkdir()
-        catalogue.import_file(_export(other, BULB, zipped=False))
-        assert list(CatalogueProduct.objects.values_list("gtin", flat=True)) == [96385074]
-
-    def test_a_file_without_the_columns_is_refused(self, tmp_path: Path) -> None:
-        path = tmp_path / "x.csv"
-        path.write_text('"a","b"\n"1","2"\n', encoding="utf-8")
-        with pytest.raises(ValueError, match="no column"):
-            catalogue.import_file(path)
-
-    def test_the_lookup_finds_a_upc_a_by_its_ean_13(
-        self, tmp_path: Path, catalogue_on: None
-    ) -> None:
-        catalogue.import_file(_export(tmp_path, JACKET), all_categories=True)
-        answer = services.start("0036000291452")
-        assert answer.state == "done"
-        assert answer.source == "nudger"
-        assert answer.brand == "MOTO"
-        assert not BarcodeLookup.objects.exists()  # nothing left the server
 
 
 def _answer(product: dict[str, Any] | None) -> bytes:
@@ -288,13 +190,79 @@ class TestOnline:
         [b"not json", b"[]", json.dumps({"status": 1, "product": "x"}).encode()],
     )
     def test_a_strange_answer_is_not_a_product(self, body: bytes) -> None:
-        assert online.parse(online.SOURCES[0], "4006381333931", body) is None
+        assert providers.OpenProductsFacts().parse("4006381333931", body) is None
 
     def test_an_image_address_that_is_not_https_is_dropped(self) -> None:
-        found = online.parse(
-            online.SOURCES[0],
+        found = providers.OpenProductsFacts().parse(
             "4006381333931",
             _answer({"product_name": "Filter", "image_front_url": "http://example.com/a.jpg"}),
         )
         assert found is not None
         assert found.image_url == ""
+
+
+class _Account(providers.Provider):
+    """A provider that needs an account, as a free one may later: skipped while it has none."""
+
+    name = "example"
+    attribution = providers.Attribution(
+        "Example", "https://example.com", "CC BY 4.0", "https://example.com/licence"
+    )
+
+    def __init__(self, key: str = "") -> None:
+        self.key = key
+        self.asked: list[str] = []
+
+    def enabled(self) -> bool:
+        return bool(self.key)
+
+    def lookup(self, ean: str, *, seconds: float, allowed: Any = None) -> providers.Found | None:
+        self.asked.append(ean)
+        return providers.Found(provider=self, name="Example product", model="EX-1")
+
+
+class TestProviders:
+    def test_the_order_is_open_products_facts_then_open_food_facts(self) -> None:
+        assert [p.name for p in providers.PROVIDERS] == ["openproductsfacts", "openfoodfacts"]
+        for provider in providers.PROVIDERS:
+            assert provider.attribution.license == "CC BY-SA 3.0"
+            assert provider.attribution.license_url.startswith("https://creativecommons.org/")
+
+    def test_a_new_provider_is_added_to_the_list_and_nothing_else(
+        self, online_on: None, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        extra = _Account(key="a free key")
+        monkeypatch.setattr(providers, "PROVIDERS", (*providers.PROVIDERS, extra))
+        monkeypatch.setattr(netguard, "fetch", _Sources({OPF: _answer(None), OFF: _answer(None)}))
+        monkeypatch.setattr(services, "_queue", lambda row: None)
+        services.start("4006381333931")
+        row = BarcodeLookup.objects.get()
+        services.run(str(row.pk), row.started_at.isoformat())
+        assert extra.asked == ["4006381333931"]
+        answer = services.state("4006381333931")
+        assert (answer.state, answer.source, answer.source_label) == ("done", "example", "Example")
+        assert (answer.name, answer.model) == ("Example product", "EX-1")
+        assert (answer.license, answer.license_url) == ("CC BY 4.0", "https://example.com/licence")
+
+    def test_a_provider_without_its_account_is_skipped(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        extra = _Account()
+        monkeypatch.setattr(providers, "PROVIDERS", (extra, *providers.PROVIDERS))
+        monkeypatch.setattr(netguard, "fetch", _Sources({OPF: _answer({"product_name": "Filter"})}))
+        found = online.lookup("4006381333931")
+        assert found is not None
+        assert found.provider.name == "openproductsfacts"
+        assert extra.asked == []
+
+    def test_an_answer_of_a_provider_taken_out_is_not_credited(self, online_on: None) -> None:
+        BarcodeLookup.objects.create(
+            code="04006381333931",
+            state="done",
+            started_at=timezone.now(),
+            finished_at=timezone.now(),
+            source="gone",
+            name="Filter",
+            image=b"x",
+        )
+        assert services.photo_of("4006381333931") is None

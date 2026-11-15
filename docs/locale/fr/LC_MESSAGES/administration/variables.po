@@ -318,17 +318,11 @@ msgstr "`HOUSECAIRN_LINK_PREVIEW_ENABLED`"
 msgid "Read the title and the picture of a page when a link is added to a project. Off, nothing is read. The server only calls public addresses. Also in the interface. See [Projects](../guides/projects.md)."
 msgstr "Lit le titre et l'image d'une page quand un lien est ajouté à un projet. Désactivé, rien n'est lu. Le serveur n'appelle que des adresses publiques. Aussi dans l'interface. Voir [Projets](../guides/projects.md)."
 
-msgid "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`"
-msgstr "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`"
-
-msgid "Look a scanned barcode up in a copy of the open Nudger catalogue kept on the server, refreshed every week. No lookup leaves the server; the download takes hours and gigabytes. Also in the interface. See [Barcodes](barcodes.md)."
-msgstr "Chercher un code-barres scanné dans une copie du catalogue ouvert de Nudger gardée sur le serveur, mise à jour chaque semaine. Aucune recherche ne sort du serveur ; le téléchargement prend des heures et des gigaoctets. Aussi dans l'interface. Voir [Codes-barres](barcodes.md)."
-
 msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 
-msgid "When a code is not in the local catalogue, ask Open Products Facts, then Open Food Facts. Only the code is sent. Also in the interface. See [Barcodes](barcodes.md)."
-msgstr "Quand un code n'est pas dans le catalogue local, interroger Open Products Facts, puis Open Food Facts. Seul le code est envoyé. Aussi dans l'interface. Voir [Codes-barres](barcodes.md)."
+msgid "Ask Open Products Facts, then Open Food Facts, what a scanned barcode is. Only the code is sent. Also in the interface. See [Barcodes](barcodes.md)."
+msgstr "Demander à Open Products Facts, puis à Open Food Facts, ce qu'est un code-barres scanné. Seul le code est envoyé. Aussi dans l'interface. Voir [Codes-barres](barcodes.md)."
 
 msgid "`HOUSECAIRN_DOCS_URL`"
 msgstr "`HOUSECAIRN_DOCS_URL`"

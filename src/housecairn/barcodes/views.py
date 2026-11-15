@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 
 from housecairn.accounts.services import is_instance_admin
-from housecairn.barcodes import gtin, online, photos, services
+from housecairn.barcodes import gtin, photos, services
 from housecairn.barcodes.models import BarcodeLookup, LookupState
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
@@ -116,7 +116,7 @@ class LookupView(WebHomeScopedMixin, TemplateView):
             ),
             "settings_url": reverse("instance:settings", kwargs={"section": "barcodes"}),
             "photo_field": photos.FIELD,
-            "license_url": online.LICENSE_URL,
+            "license_url": answer.license_url if answer is not None else "",
         }
         response = self.render_to_response(context)
         response["Cache-Control"] = "no-store"

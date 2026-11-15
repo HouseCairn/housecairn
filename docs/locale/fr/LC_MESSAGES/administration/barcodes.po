@@ -21,137 +21,35 @@ msgstr ""
 msgid "Barcodes"
 msgstr "Codes-barres"
 
-msgid "A stock item and an item of a room keep their barcode (EAN): it is typed, or scanned with the camera of the phone or the computer. Scanning a code can also fill in the empty fields of the form (name, brand, model, category) and bring a photo of the product. Two sources can be turned on, independently, and **both are off by default**: an instance that turns nothing on keeps the codes typed and calls nobody. The choices are in [ADR 0083](../adr/0083-barcode-lookup.md)."
-msgstr "Un article du matériel et un élément d'une pièce gardent leur code-barres (EAN) : il est saisi, ou scanné avec la caméra du téléphone ou de l'ordinateur. Scanner un code peut aussi remplir les champs vides du formulaire (nom, marque, modèle, catégorie) et apporter une photo du produit. Deux sources peuvent être activées, indépendamment, et **les deux sont désactivées par défaut** : une instance qui n'active rien garde les codes saisis et n'appelle personne. Les choix sont dans l'[ADR 0083](../adr/0083-barcode-lookup.md)."
-
-msgid "Source"
-msgstr "Source"
+msgid "A stock item and an item of a room keep their barcode (EAN): it is typed, or scanned with the camera of the phone or the computer. Scanning a code can also fill in the empty fields of the form (name, brand, category) and bring a photo of the product, from open databases. That lookup is **off by default**: an instance that does not turn it on keeps the codes typed and calls nobody. The choices are in [ADR 0083](../adr/0083-barcode-lookup.md)."
+msgstr "Un article du matériel et un élément d'une pièce gardent leur code-barres (EAN) : il est saisi, ou scanné avec la caméra du téléphone ou de l'ordinateur. Scanner un code peut aussi remplir les champs vides du formulaire (nom, marque, catégorie) et apporter une photo du produit, depuis des bases ouvertes. Cette recherche est **désactivée par défaut** : une instance qui ne l'active pas garde les codes saisis et n'appelle personne. Les choix sont dans l'[ADR 0083](../adr/0083-barcode-lookup.md)."
 
 msgid "Setting"
 msgstr "Réglage"
 
+msgid "Default"
+msgstr "Par défaut"
+
 msgid "What leaves the server"
 msgstr "Ce qui sort du serveur"
-
-msgid "Local catalogue (Nudger)"
-msgstr "Catalogue local (Nudger)"
-
-msgid "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`"
-msgstr "`HOUSECAIRN_BARCODE_CATALOGUE_ENABLED`"
-
-msgid "Nothing when a code is looked up. The weekly download of the catalogue only."
-msgstr "Rien lors d'une recherche. Seulement le téléchargement hebdomadaire du catalogue."
-
-msgid "Open Products Facts, then Open Food Facts"
-msgstr "Open Products Facts, puis Open Food Facts"
 
 msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
 
+msgid "`false`"
+msgstr "`false`"
+
 msgid "The code, and nothing else."
 msgstr "Le code, et rien d'autre."
 
-msgid "Both are also in **Settings of the instance**, section **Barcodes**. When an administrator scans a code while the online lookup is off, the answer offers a link to turn it on."
-msgstr "Les deux sont aussi dans les **réglages de l'instance**, section **Codes-barres**. Quand un administrateur scanne un code alors que la recherche en ligne est désactivée, la réponse propose un lien pour l'activer."
-
-msgid "The local catalogue"
-msgstr "Le catalogue local"
-
-msgid "The [Nudger open data](https://nudger.fr/opendata/gtin) (open4goods) lists about 114 million barcodes, with a brand, a model, a name and categories, under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/). It has no photos. HouseCairn keeps a copy in its own database, so that a lookup never leaves the server: it is the private way."
-msgstr "Les [données ouvertes de Nudger](https://nudger.fr/opendata/gtin) (open4goods) listent environ 114 millions de codes-barres, avec une marque, un modèle, un nom et des catégories, sous [licence ODbL](https://opendatacommons.org/licenses/odbl/1-0/). Elles n'ont pas de photos. HouseCairn en garde une copie dans sa propre base, pour qu'une recherche ne sorte jamais du serveur : c'est la voie privée."
-
-msgid "Turn it on, then import it once by hand, or let the weekly task do it:"
-msgstr "Activez-le, puis importez-le une fois à la main, ou laissez la tâche hebdomadaire le faire :"
-
-msgid "`--download` fetches the export (`gtin-open-data.zip`, 6 GB) from Nudger. The source limits its speed to 256 kB/s, so the download takes **about seven hours**. A download that stops goes on where it was the next time."
-msgstr "`--download` récupère l'export (`gtin-open-data.zip`, 6 Go) chez Nudger. La source limite son débit à 256 ko/s, donc le téléchargement prend **environ sept heures**. Un téléchargement interrompu reprend où il en était la fois suivante."
-
-msgid "`--file <path>` imports an export already downloaded (the ZIP, or the CSV inside it)."
-msgstr "`--file <chemin>` importe un export déjà téléchargé (le ZIP, ou le CSV qu'il contient)."
-
-msgid "By default only the **categories useful in a house** are kept: household appliances, DIY, tools, lighting and bulbs, batteries, filters, heating, plumbing, electricity, garden, cleaning, paint, hardware. `--all-categories` keeps everything."
-msgstr "Par défaut, seules les **catégories utiles dans une maison** sont gardées : électroménager, bricolage, outillage, éclairage et ampoules, piles, filtres, chauffage, plomberie, électricité, jardin, entretien, peinture, quincaillerie. `--all-categories` garde tout."
-
-msgid "The file is read as a stream, row by row: the memory used does not grow with its size. An import that stops (restart, crash) goes on from the row where it stopped."
-msgstr "Le fichier est lu en flux, ligne par ligne : la mémoire utilisée ne grandit pas avec sa taille. Un import interrompu (redémarrage, panne) reprend à la ligne où il s'est arrêté."
-
-msgid "When the setting is on, a task of the worker downloads and imports the export every week, by slices of a few minutes."
-msgstr "Quand le réglage est activé, une tâche du worker télécharge et importe l'export chaque semaine, par tranches de quelques minutes."
-
-msgid "Size and duration"
-msgstr "Taille et durée"
-
-msgid "Measured on 2026-11-15 on the **first 2,000,000 rows** of the export, with SQLite on 8 processor cores, then extrapolated to the 114.3 million rows of the full file. The full import was not run: these figures are estimates, the categories of the rest of the file may differ."
-msgstr "Mesuré le 2026-11-15 sur les **2 000 000 premières lignes** de l'export, avec SQLite sur 8 cœurs, puis extrapolé aux 114,3 millions de lignes du fichier complet. L'import complet n'a pas été fait : ces chiffres sont des estimations, les catégories du reste du fichier peuvent différer."
-
-msgid "Import"
-msgstr "Import"
-
-msgid "Rows kept"
-msgstr "Lignes gardées"
-
-msgid "Space in the database"
-msgstr "Place dans la base"
-
-msgid "Duration of the import"
-msgstr "Durée de l'import"
-
-msgid "House categories (default), measured"
-msgstr "Catégories de la maison (par défaut), mesuré"
-
-msgid "218,646 of 2,000,000 (10.9 %)"
-msgstr "218 646 sur 2 000 000 (10,9 %)"
-
-msgid "58 MB"
-msgstr "58 Mo"
-
-msgid "6 min 32 s"
-msgstr "6 min 32 s"
-
-msgid "House categories (default), extrapolated"
-msgstr "Catégories de la maison (par défaut), extrapolé"
-
-msgid "about 12.5 million"
-msgstr "environ 12,5 millions"
-
-msgid "about 3.3 GB"
-msgstr "environ 3,3 Go"
-
-msgid "about 6 hours"
-msgstr "environ 6 heures"
-
-msgid "All categories, measured"
-msgstr "Toutes les catégories, mesuré"
-
-msgid "2,000,000"
-msgstr "2 000 000"
-
-msgid "385 MB"
-msgstr "385 Mo"
-
-msgid "14 min 8 s"
-msgstr "14 min 8 s"
-
-msgid "All categories, extrapolated"
-msgstr "Toutes les catégories, extrapolé"
-
-msgid "about 114 million"
-msgstr "environ 114 millions"
-
-msgid "about 22 GB"
-msgstr "environ 22 Go"
-
-msgid "about 13.5 hours"
-msgstr "environ 13 h 30"
-
-msgid "Add the download (about seven hours) to the first import. Keep the space free on the data volume before you turn the catalogue on, and count it in the [backups](backup.md)."
-msgstr "Ajoutez le téléchargement (environ sept heures) au premier import. Prévoyez la place sur le volume de données avant d'activer le catalogue, et comptez-la dans les [sauvegardes](backup.md)."
+msgid "The setting is also in **Settings of the instance**, section **Barcodes**. When an administrator scans a code while the lookup is off, the answer offers a link to turn it on."
+msgstr "Le réglage est aussi dans les **réglages de l'instance**, section **Codes-barres**. Quand un administrateur scanne un code alors que la recherche est désactivée, la réponse propose un lien pour l'activer."
 
 msgid "The online lookup"
 msgstr "La recherche en ligne"
 
-msgid "When a code is not in the local catalogue, the worker asks [Open Products Facts](https://world.openproductsfacts.org), then [Open Food Facts](https://world.openfoodfacts.org), in the background:"
-msgstr "Quand un code n'est pas dans le catalogue local, le worker interroge [Open Products Facts](https://world.openproductsfacts.org), puis [Open Food Facts](https://world.openfoodfacts.org), en arrière-plan :"
+msgid "The worker asks [Open Products Facts](https://world.openproductsfacts.org), then [Open Food Facts](https://world.openfoodfacts.org), in the background; the first that knows the code answers."
+msgstr "Le worker interroge [Open Products Facts](https://world.openproductsfacts.org), puis [Open Food Facts](https://world.openfoodfacts.org), en arrière-plan ; la première qui connaît le code répond."
 
 msgid "**Only the code is sent**, in the address of the request, with the `User-Agent` `HouseCairn/<version> (+https://github.com/HouseCairn/housecairn)` that those databases ask for. No name, no home, no account, no cookie."
 msgstr "**Seul le code est envoyé**, dans l'adresse de la requête, avec le `User-Agent` `HouseCairn/<version> (+https://github.com/HouseCairn/housecairn)` que ces bases demandent. Aucun nom, aucun foyer, aucun compte, aucun cookie."
@@ -171,8 +69,8 @@ msgstr "Désactivée sur une [instance de démonstration](demo.md), quel que soi
 msgid "Photos and their licence"
 msgstr "Les photos et leur licence"
 
-msgid "The photos of Open Products Facts and Open Food Facts are under the [Creative Commons Attribution-ShareAlike 3.0](https://creativecommons.org/licenses/by-sa/3.0/) licence. When a person keeps one, HouseCairn downloads it, re-encodes it without its metadata like any photo, and stores its **attribution** with it: the source, the page of the product, the licence and, when the source gives it, its author. The attribution is shown under the photo. A photo is only added to an item that has none, or as the label of a stock item that has none: a photo taken by a member is never replaced."
-msgstr "Les photos d'Open Products Facts et d'Open Food Facts sont sous licence [Creative Commons Attribution - Partage dans les mêmes conditions 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Quand une personne en garde une, HouseCairn la télécharge, la réencode sans ses métadonnées comme toute photo, et garde avec elle son **attribution** : la source, la page du produit, la licence et, quand la source le donne, son auteur. L'attribution est affichée sous la photo. Une photo n'est ajoutée qu'à un élément qui n'en a pas, ou comme étiquette d'un article qui n'en a pas : une photo prise par un membre n'est jamais remplacée."
+msgid "The data of Open Products Facts and Open Food Facts is under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), their photos under the [Creative Commons Attribution-ShareAlike 3.0](https://creativecommons.org/licenses/by-sa/3.0/) licence. When a person keeps a photo, HouseCairn downloads it, re-encodes it without its metadata like any photo, and stores its **attribution** with it: the source, the page of the product, the licence and, when the source gives it, its author. The attribution is shown under the photo. A photo is only added to an item that has none, or as the label of a stock item that has none: a photo taken by a member is never replaced."
+msgstr "Les données d'Open Products Facts et d'Open Food Facts sont sous [licence ouverte de base de données (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/), leurs photos sous licence [Creative Commons Attribution - Partage dans les mêmes conditions 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Quand une personne garde une photo, HouseCairn la télécharge, la réencode sans ses métadonnées comme toute photo, et garde avec elle son **attribution** : la source, la page du produit, la licence et, quand la source le donne, son auteur. L'attribution est affichée sous la photo. Une photo n'est ajoutée qu'à un élément qui n'en a pas, ou comme étiquette d'un article qui n'en a pas : une photo prise par un membre n'est jamais remplacée."
 
-msgid "The About page names these sources and their licences. HouseCairn does not ship the catalogue: each instance downloads it, so nothing changes in its `NOTICE`."
-msgstr "La page À propos nomme ces sources et leurs licences. HouseCairn ne livre pas le catalogue : chaque instance le télécharge, donc rien ne change dans son `NOTICE`."
+msgid "The About page names these sources and their licences. HouseCairn ships none of their data, so nothing changes in its `NOTICE`."
+msgstr "La page À propos nomme ces sources et leurs licences. HouseCairn ne livre aucune de leurs données, donc rien ne change dans son `NOTICE`."

@@ -1,8 +1,8 @@
 """API of the barcode lookup, for the mobile application (docs/adr/0083).
 
 The same rules as the web form: a member who may write the home asks, only the code is looked
-up, the local catalogue first and the open databases in the background when the instance allows
-it. `POST .../barcodes/lookup/` starts a lookup; `GET .../barcodes/<code>/` says where it stands
+up, in the open databases and in the background, when the instance allows it.
+`POST .../barcodes/lookup/` starts a lookup; `GET .../barcodes/<code>/` says where it stands
 (ask again every two seconds while `state` is `running`); `GET .../barcodes/<code>/photo/` is the
 photo found, to show with its attribution. Nothing is written to the home: the application fills
 its own form, the empty fields only, and saves the record as usual.
@@ -18,7 +18,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from housecairn.barcodes import gtin, online, services
+from housecairn.barcodes import gtin, providers, services
 from housecairn.barcodes.models import BarcodeLookup, LookupState
 from housecairn.barcodes.views import content_type
 from housecairn.homes import services as home_services
@@ -31,10 +31,14 @@ ANSWER = inline_serializer(
         "code": serializers.CharField(),
         "state": serializers.ChoiceField(
             choices=["running", "done", "not_found", "failed", "off"],
-            help_text="`off`: neither the local catalogue nor the online lookup knows the code, "
-            "and the online lookup is off. `running`: ask again in two seconds.",
+            help_text="`off`: the online lookup is off and the code is not in the cache. "
+            "`running`: ask again in two seconds.",
         ),
-        "source": serializers.CharField(help_text="nudger, openproductsfacts or openfoodfacts."),
+        "source": serializers.CharField(
+            help_text="The provider that knew the code: "
+            + ", ".join(p.name for p in providers.PROVIDERS)
+            + "."
+        ),
         "source_label": serializers.CharField(),
         "name": serializers.CharField(),
         "brand": serializers.CharField(),
@@ -51,11 +55,6 @@ ANSWER = inline_serializer(
 
 
 def _data(answer: services.Answer) -> dict[str, Any]:
-    license_url = ""
-    if answer.source == "nudger":
-        license_url = "https://opendatacommons.org/licenses/odbl/1-0/"
-    elif answer.source:
-        license_url = online.LICENSE_URL
     return {
         "code": answer.code,
         "state": answer.state,
@@ -68,7 +67,7 @@ def _data(answer: services.Answer) -> dict[str, Any]:
         "product_url": answer.product_url,
         "author": answer.author,
         "license": answer.license,
-        "license_url": license_url,
+        "license_url": answer.license_url,
         "has_photo": answer.has_photo,
         "online_enabled": services.online_enabled(),
     }
@@ -90,7 +89,7 @@ def _code(raw: Any) -> str:
 
 
 class LookupView(_BarcodeMixin, APIView):
-    """Look a code up: the local catalogue, then the open databases in the background."""
+    """Look a code up in the open databases, in the background."""
 
     @extend_schema(
         request=inline_serializer("BarcodeLookupRequest", {"ean": serializers.CharField()}),

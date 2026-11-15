@@ -543,7 +543,6 @@ HOUSECAIRN_WEBPUSH_DISCREET: bool = _ENV.values["webpush_discreet"]
 # Preview of the links of projects (docs/adr/0050).
 HOUSECAIRN_LINK_PREVIEW_ENABLED: bool = _ENV.values["link_preview_enabled"]
 # Barcode lookup (docs/adr/0083).
-HOUSECAIRN_BARCODE_CATALOGUE_ENABLED: bool = _ENV.values["barcode_catalogue_enabled"]
 HOUSECAIRN_BARCODE_LOOKUP_ONLINE: bool = _ENV.values["barcode_lookup_online"]
 
 # API tokens (docs/adr/0007).

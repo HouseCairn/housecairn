@@ -15,7 +15,7 @@ from rest_framework.test import APIClient
 
 from housecairn.accounts.models import User
 from housecairn.barcodes import services, views
-from housecairn.barcodes.models import BarcodeLookup, CatalogueProduct
+from housecairn.barcodes.models import BarcodeLookup
 from housecairn.homes.models import Home
 from housecairn.rooms.models import Item, Photo, Room
 from housecairn.stock.models import Article
@@ -93,19 +93,6 @@ class TestLookupFragment:
     def test_another_home_is_not_found(self, signed_in: Client, bob_home: Home) -> None:
         response = signed_in.post(f"/h/{bob_home.pk}/barcodes/lookup/", {"ean": CODE})
         assert response.status_code == 404
-
-    def test_the_local_catalogue_offers_its_values(
-        self, signed_in: Client, alice_home: Home, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        monkeypatch.setattr(services, "catalogue_enabled", lambda: True)
-        CatalogueProduct.objects.create(
-            gtin=int(CODE), brand="Acme", model="DW-60", name="Dishwasher", categories="A | B"
-        )
-        html = _lookup(signed_in, alice_home, CODE)
-        assert "Found in Nudger" in html
-        assert 'data-fill-field="model" data-fill-value="DW-60"' in html
-        assert 'data-fill-field="notes" data-fill-value="B"' in html
-        assert "Use these values" in html
 
     def test_a_running_lookup_asks_again_then_stops(
         self,

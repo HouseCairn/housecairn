@@ -1,8 +1,8 @@
-"""Looking a code up: the local catalogue, then the open databases in the background (ADR 0083).
+"""Looking a code up in the open databases, in the background (ADR 0083).
 
-`start` answers at once: from the local catalogue when it knows the code, from the cache when
-the open databases were asked less than `FRESH` ago, otherwise it saves a `running` row and
-queues `run`, which the worker runs under the guard of `core.netguard` (docs/adr/0070).
+`start` answers at once: from the cache when the providers were asked less than `FRESH` ago,
+otherwise it saves a `running` row and queues `run`, which the worker runs under the guard of
+`core.netguard` (docs/adr/0070); the providers and their order are in `barcodes.providers`.
 Nothing here knows a home or a person: the cache is the instance's, and only the code went out.
 """
 
@@ -14,7 +14,7 @@ from typing import Any
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from housecairn.barcodes import catalogue, gtin, online
+from housecairn.barcodes import gtin, online, providers
 from housecairn.barcodes.models import BarcodeLookup, LookupState
 from housecairn.demo import mode
 from housecairn.instance.config import get_setting
@@ -30,10 +30,6 @@ TASK_TIMEOUT = 25
 
 def online_enabled() -> bool:
     return bool(get_setting("barcode_lookup_online")) and not mode.is_on()
-
-
-def catalogue_enabled() -> bool:
-    return bool(get_setting("barcode_catalogue_enabled"))
 
 
 @dataclass(frozen=True)
@@ -52,6 +48,7 @@ class Answer:
     author: str = ""
     has_photo: bool = False
     license: str = ""
+    license_url: str = ""
     extra: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -59,34 +56,14 @@ class Answer:
         return self.state != LookupState.RUNNING
 
 
-def _from_catalogue(code: str) -> Answer | None:
-    if not catalogue_enabled():
-        return None
-    product = catalogue.find(code)
-    if product is None:
-        return None
-    category = product.categories.split("|")[-1].strip() if product.categories else ""
-    return Answer(
-        code=code,
-        state=LookupState.DONE,
-        source="nudger",
-        source_label="Nudger",
-        name=product.name,
-        brand=product.brand,
-        model=product.model,
-        category=category[:200],
-        product_url=f"https://nudger.fr/{gtin.as_published(code)}",
-        license="ODbL 1.0",
-    )
-
-
 def _from_row(row: BarcodeLookup) -> Answer:
-    source = online.BY_KEY.get(row.source)
+    provider = providers.by_name(row.source) if row.source else None
+    credit = provider.attribution if provider else None
     return Answer(
         code=row.code,
         state=row.state,
         source=row.source,
-        source_label=source.label if source else "",
+        source_label=credit.label if credit else row.source,
         name=row.name,
         brand=row.brand,
         model=row.model,
@@ -94,7 +71,8 @@ def _from_row(row: BarcodeLookup) -> Answer:
         product_url=row.product_url,
         author=row.author,
         has_photo=bool(row.image),
-        license=online.LICENSE if row.source else "",
+        license=credit.license if credit else "",
+        license_url=credit.license_url if credit else "",
     )
 
 
@@ -122,9 +100,6 @@ def start(code: str) -> Answer:
 
     `code` must be valid (`gtin.is_valid`); the caller checks rights and rate limits first.
     """
-    local = _from_catalogue(code)
-    if local is not None:
-        return local
     key = gtin.as_gtin14(code)
     row = BarcodeLookup.objects.filter(code=key).first()
     if row is not None:
@@ -178,9 +153,6 @@ def _queue(row: BarcodeLookup) -> None:
 
 def state(code: str) -> Answer:
     """The answer for a code already started, for the screen that asks again."""
-    local = _from_catalogue(code)
-    if local is not None:
-        return local
     row = BarcodeLookup.objects.filter(code=gtin.as_gtin14(code)).first()
     if row is None:
         return Answer(code=code, state="off" if not online_enabled() else LookupState.FAILED)
@@ -188,7 +160,7 @@ def state(code: str) -> Answer:
 
 
 def run(row_id: str, started: str, *, allowed: Any = None) -> None:
-    """Task of the worker: ask the open databases, keep their answer and the photo."""
+    """Task of the worker: ask the providers, keep the first answer and its photo."""
     from housecairn.rooms import images
 
     row = BarcodeLookup.objects.filter(pk=row_id, state=LookupState.RUNNING).first()
@@ -229,9 +201,10 @@ def run(row_id: str, started: str, *, allowed: Any = None) -> None:
     BarcodeLookup.objects.filter(**same).update(
         state=LookupState.DONE,
         finished_at=timezone.now(),
-        source=found.source.key,
+        source=found.provider.name,
         name=found.name,
         brand=found.brand,
+        model=found.model,
         category=found.category,
         product_url=found.product_url,
         author=found.author,
@@ -240,17 +213,20 @@ def run(row_id: str, started: str, *, allowed: Any = None) -> None:
 
 
 def photo_of(code: str) -> tuple[bytes, dict[str, str]] | None:
-    """The photo found for a code and its attribution, or None (only online sources have one)."""
+    """The photo found for a code and its attribution, or None."""
     if not gtin.is_valid(code):
         return None
     row = BarcodeLookup.objects.filter(code=gtin.as_gtin14(code), state=LookupState.DONE).first()
     if row is None or not row.image:
         return None
-    source = online.BY_KEY.get(row.source)
+    provider = providers.by_name(row.source)
+    if provider is None:  # a source taken out since: its photo cannot be credited
+        return None
+    credit = provider.attribution
     return bytes(row.image), {
-        "source": source.label if source else row.source,
+        "source": credit.label,
         "source_url": row.product_url,
-        "license": online.LICENSE,
-        "license_url": online.LICENSE_URL,
+        "license": credit.license,
+        "license_url": credit.license_url,
         "author": row.author,
     }

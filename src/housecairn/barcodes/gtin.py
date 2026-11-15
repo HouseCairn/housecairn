@@ -58,11 +58,6 @@ def as_published(code: str) -> str:
     return digits.rjust(13, "0")
 
 
-def as_number(code: str) -> int:
-    """The code as the integer the local catalogue is keyed by."""
-    return int(code)
-
-
 def validate(value: str) -> None:
     """Model validator: empty, or a valid code without spaces."""
     if not value:
