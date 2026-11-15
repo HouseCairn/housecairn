@@ -441,6 +441,44 @@ class TestBody:
         clocks = RowClocks.objects.get(entity="rooms.room", row_id=row_id)
         assert clocks.extra["moisture_goal"][0] == nested
 
+    def test_the_fields_kept_in_extra_are_bounded_per_row(
+        self, phone: Connected, alice_home: Home
+    ) -> None:
+        """Mutant: no bound: a member fills a row with 20 000 unknown fields in one push."""
+        row_id = uuid.uuid4()
+        many = {f"new_{n}": n for n in range(pushing.MAX_EXTRA_FIELDS)}
+        answer = send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", row_id, {"name": "R", **many})],
+        )
+        assert result_of(answer)["status"] == "applied"
+        # One more, in a later push: the row already keeps the most it may.
+        good = op(alice_home.pk, "rooms.room", uuid.uuid4(), {"name": "Other"})
+        more = op(alice_home.pk, "rooms.room", row_id, {"one_more": 1}, c=stamp(5))
+        answer = send(phone.access, alice_home.pk, [good, more], number=2)
+        assert answer.status_code == 400, answer.content
+        assert (answer.json()["code"], answer.json()["index"]) == ("malformed", 1)
+        assert "one_more" not in RowClocks.objects.get(row_id=row_id).extra
+        # A field it already keeps may still change.
+        again = op(alice_home.pk, "rooms.room", row_id, {"new_3": "three"}, c=stamp(10))
+        assert result_of(send(phone.access, alice_home.pk, [again], number=3))["status"] == (
+            "applied"
+        )
+
+    def test_the_size_kept_in_extra_is_bounded_per_row(
+        self, phone: Connected, alice_home: Home
+    ) -> None:
+        big = "x" * pushing.MAX_EXTRA_BYTES
+        answer = send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", uuid.uuid4(), {"name": "R", "new_text": big})],
+        )
+        assert answer.status_code == 400
+        assert (answer.json()["code"], answer.json()["index"]) == ("malformed", 0)
+        assert not Push.objects.exists()
+
     def test_bad_values_of_every_kind_are_400(
         self, phone: Connected, alice_home: Home, room: Room
     ) -> None:

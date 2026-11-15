@@ -16,6 +16,7 @@ operation is kept as a field the server does not know yet, in `extra`, until M6 
 
 import datetime
 import decimal
+import json
 import re
 import uuid
 from collections.abc import Mapping, Sequence
@@ -37,6 +38,10 @@ MAX_OPS = 500
 MAX_BODY_BYTES = 1024 * 1024
 # How deep a value of a field may nest lists and objects (the fields object itself is 0).
 MAX_DEPTH = 32
+# The fields a row keeps without a column of the server (`extra`): how many, and their size
+# as JSON in UTF-8, the ones it holds and the ones of the operation together.
+MAX_EXTRA_FIELDS = 64
+MAX_EXTRA_BYTES = 64 * 1024
 # The lowest schema version that writes: a phone below it reads but does not write.
 MIN_SV = 1
 
@@ -443,6 +448,7 @@ def _apply_row(
             raise MalformedError(
                 op.index, _("A new row needs %(fields)s.") % {"fields": ", ".join(sorted(missing))}
             )
+    _check_extra(op, {name: value for name, value in fields.items() if name not in values})
     _check_references(home, columns, values)
     recorded = sync_rows.apply_stamped(
         model, home.pk, op.row_id, changes.PUT, logged, values, stamp=stamp, known=columns.writable
@@ -452,6 +458,29 @@ def _apply_row(
     if texts:
         result["other_version"] = texts
     return result
+
+
+def _check_extra(op: Operation, unknown: Mapping[str, Any]) -> None:
+    """The fields the row keeps in `extra`, with those of `op`, stay within the bounds."""
+    if not unknown:
+        return
+    kept = (
+        RowClocks.objects.filter(home_id=op.home_id, entity=op.entity, row_id=op.row_id)
+        .values_list("extra", flat=True)
+        .first()
+    ) or {}
+    merged = {name: entry[0] for name, entry in kept.items()}
+    merged.update(unknown)
+    size = len(json.dumps(merged, ensure_ascii=False, separators=(",", ":")).encode())
+    if len(merged) > MAX_EXTRA_FIELDS or size > MAX_EXTRA_BYTES:
+        raise MalformedError(
+            op.index,
+            _(
+                "A row keeps at most %(fields)s fields the server does not know, "
+                "%(bytes)s bytes together."
+            )
+            % {"fields": MAX_EXTRA_FIELDS, "bytes": MAX_EXTRA_BYTES},
+        )
 
 
 def _check_references(home: Home, columns: Columns, values: Mapping[str, Any]) -> None:
@@ -546,6 +575,7 @@ def _apply_link(home: Home, op: Operation, stamp: tuple[str, bytes]) -> dict[str
             raise _RejectedError(INVALID_REFERENCE)
         if not other_model._base_manager.filter(pk=other, home_id=home.pk).exists():
             raise _RejectedError(INVALID_REFERENCE)
+        _check_extra(op, {name: op.fields[name] for name in unknown_names})
         logged = {link.owner_column: str(owner), link.other_column: str(other)}
         logged.update({name: op.fields[name] for name in unknown_names})
         recorded = changes.record_change(
