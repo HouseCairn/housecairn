@@ -3,9 +3,9 @@
 The mobile app can keep its homes on a HouseCairn server and exchange changes with it
 ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md), cut into lots by
 [ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). This page describes
-the `sync` application, which keeps the log of those changes. It has no screen, no route and
-no API resource yet: the routes arrive with the lot that reads the feed, and each application
-starts to record its writes in its own lot.
+the `sync` application, which keeps the log of those changes. It has no screen; the phone reads
+the log through the routes of the [sync API](../api/sync.md) (`sync/api.py`, `sync/reading.py`),
+which give the homes of a connection, the changes after a position and the snapshot of a home.
 
 ## What is recorded
 

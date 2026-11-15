@@ -223,11 +223,12 @@ A running instance serves the same schema at `/api/schema/` and an
 interactive explorer at `/api/docs/`, both to signed-in users only.
 
 The [guide](guide.md) shows the API at work with `curl`: a token, reads, writes, the
-pages of a list and the errors.
+pages of a list and the errors. The [sync API](sync.md) of the mobile app has its own page.
 
 ```{toctree}
 :maxdepth: 1
 
 guide
+sync
 reference
 ```

@@ -1,0 +1,62 @@
+{
+  "about": "Examples of the answers of the sync API, reading (lot M4 of docs/adr/0079). Each is taken from the mobile protocol (housecairn-mobile docs/protocol.md) or from the table of routes of docs/adr/0077, with the ids that those documents shorten written out. tests/test_sync_read_contract.py compares the real answers to them field by field: the same keys, values of the same kind. `additions` lists the keys this server gives beyond the examples, each with the rule that asks for it; a client ignores keys it does not know (protocol section 4).",
+  "operation": {
+    "source": "protocol section 2.2",
+    "example": {
+      "t": "tasks.task",
+      "h": "5b7e8a1c-2d3f-4a5b-9c6d-7e8f9a0b1c2d",
+      "id": "8f0c1d2e-3f4a-4b5c-8d6e-7f8a9b0c1d2e",
+      "k": "put",
+      "c": "0193a1b2c3d40001",
+      "f": {"title": "Change the smoke alarm battery", "repeat_mode": "fixed", "room_id": "1c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f"}
+    }
+  },
+  "homes": {
+    "source": "docs/adr/0077, GET /api/v1/sync/homes/",
+    "example": {
+      "homes": [
+        {"id": "5b7e8a1c-2d3f-4a5b-9c6d-7e8f9a0b1c2d", "name": "Main house", "role": "owner", "archived_at": null, "head": 42}
+      ],
+      "gone": [
+        {"id": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d", "at": "2026-11-14T10:00:00+00:00"}
+      ]
+    },
+    "additions": {
+      "homes[].members": "docs/adr/0077 need 9: the members of a home are in GET /sync/homes/ and in the snapshot, with their display name and role, never their address"
+    }
+  },
+  "changes": {
+    "source": "docs/adr/0077, GET /api/v1/sync/homes/{h}/changes",
+    "example": {
+      "changes": [{"pos": 43, "op": {"t": "rooms.room", "h": "5b7e8a1c-2d3f-4a5b-9c6d-7e8f9a0b1c2d", "id": "1c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f", "k": "put", "c": "0193a1b2c3d40002", "f": {"name": "Hall"}}}],
+      "head": 43,
+      "more": false
+    },
+    "additions": {
+      "changes[].device": "protocol sections 1 and 2.2: a field is written when (c, device) is greater than its stored clock, so the phone needs the device of each change; on a relay it reads it from the signature of the batch, here the server gives it, 16 bytes in base64url"
+    }
+  },
+  "snapshot_row": {
+    "source": "protocol section 2.4: {\"t\", \"h\", \"id\", \"f\": {field: [value, hlc, device_b64]}}",
+    "example": {
+      "t": "rooms.room",
+      "h": "5b7e8a1c-2d3f-4a5b-9c6d-7e8f9a0b1c2d",
+      "id": "1c2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f",
+      "f": {"name": ["Hall", "0193a1b2c3d40002", "q2Xh0dVt3kWmYc1bS8fP9A"]}
+    }
+  },
+  "snapshot_end": {
+    "source": "docs/adr/0077, GET /api/v1/sync/homes/{h}/snapshot: then {\"covers\": pos}",
+    "example": {"covers": 43},
+    "additions": {
+      "members line": "docs/adr/0077 need 9: {\"members\": [{\"id\", \"name\", \"role\"}]}, the line before covers"
+    }
+  },
+  "error": {
+    "source": "docs/adr/0077: errors are those of the API today, {\"detail\": ...}, with a code",
+    "examples": [
+      {"detail": "This position is older than the oldest change kept: read the snapshot.", "code": "cursor_expired"},
+      {"detail": "This home was erased.", "code": "home_gone"}
+    ]
+  }
+}

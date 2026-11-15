@@ -142,6 +142,7 @@ gets `403` with `"code": "sync_needs_connection"` there, and the access token of
 gets `403` with `"code": "connection_outside_sync"` on every other route.
 `GET /api/v1/sync/info`, without a token, says which versions of the sync protocol the server
 speaks and where the app signs in (`"oauth": null` when the instance turned the mobile app off).
+Its other routes are described in [Sync API](sync.md).
 
 ## Trying it in the browser
 
