@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**A change log for the mobile app, not used yet.** A new `sync` application adds tables to the database (a migration runs at start) and a nightly task at 03:30 that removes what is older than 400 days. Nothing is recorded in it and nothing reads it until the next versions. The identifier the server will write with is made once, by that migration, and is part of the database, so a backup carries it. When a home is deleted, the instance now keeps its identifier and the time it was deleted. See [Data model of the synchronization](../../../developer/sync-data-model.md)."
+msgstr "- **Un journal des changements pour l'application mobile, pas encore utilisé.** Une nouvelle application `sync` ajoute des tables à la base (une migration s'exécute au démarrage) et une tâche nocturne à 03:30 qui retire ce qui a plus de 400 jours. Rien n'y est enregistré et rien ne la lit avant les prochaines versions. L'identifiant avec lequel le serveur écrira est fabriqué une fois par cette migration et fait partie de la base : une sauvegarde le porte. Quand un logement est supprimé, l'instance conserve désormais son identifiant et le moment de la suppression. Voir [Modèle de données de la synchronisation](../../../developer/sync-data-model.md)."
+

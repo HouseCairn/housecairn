@@ -24,8 +24,11 @@ single container. The main rules, each recorded in a decision:
   `tests/test_export_registry.py` fails on a table of the project that the export
   does not read, unless it lists the table with its reason, as data of a home left out
   of the archive (then erased with the home) or as data of the instance or of a person.
+- **A change log for the mobile app**: the `sync` application numbers every change of a home
+  and keeps a clock per field ([Data model of the synchronization](sync-data-model.md),
+  [ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)).
 - **No query per row** in the export and the API lists of stock items and projects:
   `tests/test_query_counts.py` checks that 50 rows take as many queries as 5.
 
 The code is in `src/housecairn/`, one Django application per domain
-(`accounts`, `apitokens`, `core`, `events`, `homes`, `rooms`).
+(`accounts`, `apitokens`, `core`, `events`, `homes`, `rooms`, `sync`).

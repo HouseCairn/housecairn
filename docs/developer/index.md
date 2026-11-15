@@ -6,6 +6,7 @@ How HouseCairn is built, the decisions behind it, and how to contribute.
 :maxdepth: 1
 
 architecture
+sync-data-model
 design-guide
 decisions
 contributing
