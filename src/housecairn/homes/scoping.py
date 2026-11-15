@@ -137,8 +137,9 @@ def api_exception_handler(exc: Exception, context: dict[str, Any]) -> Response |
         # What the demonstration mode refuses (docs/adr/0071), with its reason.
         return Response({"detail": exc.message, "code": "demo"}, status=status.HTTP_403_FORBIDDEN)
     code = getattr(exc, "housecairn_code", None)
-    if isinstance(exc, exceptions.PermissionDenied) and isinstance(code, str):
-        # The refusals of the sync API's boundary and transport rule (docs/adr/0078).
+    if isinstance(exc, exceptions.APIException) and isinstance(code, str):
+        # The refusals of the sync API's boundary and transport rule (docs/adr/0078), and its
+        # coded errors (`cursor_expired`, `home_gone`, docs/adr/0077).
         return Response({"detail": exc.detail, "code": code}, status=exc.status_code)
     if isinstance(exc, services.SsoRequiredError):
         return Response(

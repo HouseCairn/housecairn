@@ -129,6 +129,7 @@ urlpatterns = [
     path("invitations/accept/", AcceptInvitationView.as_view(), name="invitation-accept"),
     path("", include("housecairn.notifications.api_urls")),  # docs/adr/0043
     path("", include("housecairn.calendar.api_urls")),  # docs/adr/0052
-    # The sync API of the mobile app (docs/adr/0077, 0078); M4 adds `include("sync.urls")`.
+    # The sync API of the mobile app (docs/adr/0077, 0078).
     path("sync/info", SyncInfoView.as_view(), name="sync-info"),
+    path("sync/", include("housecairn.sync.urls")),
 ]
