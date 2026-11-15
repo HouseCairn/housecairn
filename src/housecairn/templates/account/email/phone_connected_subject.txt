@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}{% translate "A phone was connected to your account" %}{% endautoescape %}

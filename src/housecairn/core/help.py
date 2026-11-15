@@ -163,6 +163,10 @@ HELP_PAGES: dict[str, str] = {
     "api-tokens:list": "screens/api-tokens/",
     "api-tokens:new": "screens/api-tokens/",
     "api-tokens:revoke": "screens/api-tokens/",
+    "api-tokens:connection-edit": "screens/api-tokens/",
+    "api-tokens:connection-revoke": "screens/api-tokens/",
+    # The consent page the mobile app opens in the browser (docs/adr/0078).
+    "oauth2_provider:authorize": "screens/api-tokens/",
     "about": "screens/about/",
 }
 # Other routes of django-allauth (sign-up, password, email addresses,
@@ -189,6 +193,9 @@ NOT_SCREENS: tuple[str, ...] = (
     "offline",
     # The language of the signed-out pages: a form's target, not a screen (docs/adr/0074).
     "set_language",
+    # The token and revocation endpoints of OAuth, called by the mobile app (docs/adr/0078).
+    "oauth2_provider:token",
+    "oauth2_provider:revoke-token",
 )
 
 # Languages published by the documentation site, and their path.

@@ -226,6 +226,13 @@ EXEMPT: dict[str, str] = {
     "setup": "first-account screen opened by a code of the server log, before any API token exists",
     "calendar:feed": "iCalendar document read by a calendar application, at a secret address",
     "tasks:repeat-summary": "sentence of the task form while it is typed; the API has the fields",
+    # docs/adr/0078: a connection is made in the browser and managed by a person signed in;
+    # a token never manages a credential, and the sync API is the connection's own API.
+    "api-tokens:connection-edit": "a connected phone is changed by a person signed in, on the web",
+    "api-tokens:connection-revoke": "a connected phone is revoked by a person signed in on the web",
+    "oauth2_provider:authorize": "the OAuth consent page of the mobile app, in the browser",
+    "oauth2_provider:token": "the OAuth token endpoint the mobile app calls",
+    "oauth2_provider:revoke-token": "the OAuth revocation endpoint the mobile app calls",
 }
 
 # Third-party route trees: sign-in, administration. Their functions are either

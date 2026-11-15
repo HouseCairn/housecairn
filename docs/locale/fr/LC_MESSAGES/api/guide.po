@@ -130,9 +130,11 @@ msgstr "`429`"
 msgid "Too many attempts of a limited action, such as sending invitations; try again later."
 msgstr "Trop de tentatives d'une action limitée, comme l'envoi d'invitations ; réessayez plus tard."
 
+msgid "The sync API of the mobile app, under `/api/v1/sync/`, takes only the access token of a [connected app](../screens/api-tokens.md#connected-apps) (`hca_...`): an API token or a session gets `403` with `\"code\": \"sync_needs_connection\"` there, and the access token of a connected app gets `403` with `\"code\": \"connection_outside_sync\"` on every other route. `GET /api/v1/sync/info`, without a token, says which versions of the sync protocol the server speaks and where the app signs in (`\"oauth\": null` when the instance turned the mobile app off)."
+msgstr "L'API de synchronisation de l'application mobile, sous `/api/v1/sync/`, n'accepte que le jeton d'accès d'une [application connectée](../screens/api-tokens.md#connected-apps) (`hca_...`) : un jeton d'API ou une session y reçoit `403` avec `\"code\": \"sync_needs_connection\"`, et le jeton d'accès d'une application connectée reçoit `403` avec `\"code\": \"connection_outside_sync\"` sur toute autre route. `GET /api/v1/sync/info`, sans jeton, indique les versions du protocole de synchronisation que parle le serveur et où l'application se connecte (`\"oauth\": null` quand l'instance a désactivé l'application mobile)."
+
 msgid "Trying it in the browser"
 msgstr "Essayer dans le navigateur"
 
 msgid "A running instance serves its OpenAPI schema at `/api/schema/` and an interactive explorer at `/api/docs/`, under its path prefix, to a person signed in: every operation, its parameters and its answers, which you can try with your session. The [reference](reference.md) gives the same operations, generated from the code of this version."
 msgstr "Une instance en marche sert son schéma OpenAPI à `/api/schema/` et un explorateur interactif à `/api/docs/`, sous son préfixe d'adresse, à une personne connectée : chaque opération, ses paramètres et ses réponses, que vous pouvez essayer avec votre session. La [référence](reference.md) donne les mêmes opérations, générées à partir du code de cette version."
-

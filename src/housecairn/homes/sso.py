@@ -13,7 +13,12 @@ from allauth.socialaccount.adapter import get_adapter
 from django.http import HttpRequest
 from rest_framework.request import Request
 
-from housecairn.apitokens.models import ApiToken
+from housecairn.apitokens.credentials import (
+    Credential,
+    api_token_of,
+    connection_of,
+    credential_of,
+)
 
 
 @dataclass(frozen=True)
@@ -44,8 +49,11 @@ def signed_in_providers(request: HttpRequest | Request) -> frozenset[str]:
     home of the token required it (docs/adr/0057). A token made without one has
     none, and opens no home that requires a provider.
     """
-    token = getattr(request, "auth", None)
-    if isinstance(token, ApiToken):
+    credential = credential_of(request)
+    if credential is not Credential.SESSION:
+        # An API token or a connection: the provider recorded when it was made.
+        token = api_token_of(request) or connection_of(request)
+        assert token is not None  # noqa: S101 - not a session, so one of the two
         return frozenset({token.signed_in_provider}) if token.signed_in_provider else frozenset()
     user = getattr(request, "user", None)
     if user is None or not user.is_authenticated:

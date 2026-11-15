@@ -8,7 +8,8 @@ from rest_framework import generics, serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from housecairn.apitokens.models import ApiToken, Scope
+from housecairn.apitokens.credentials import api_token_of
+from housecairn.apitokens.models import Scope
 from housecairn.events import services
 from housecairn.events.models import Event
 from housecairn.homes.scoping import HomeScopedMixin
@@ -32,7 +33,8 @@ class EventCreateView(HomeScopedMixin, generics.GenericAPIView[Event]):
         home = self.get_home()
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        token = request.auth if isinstance(request.auth, ApiToken) else None
+        # The API token, or None for a session; a connection never gets here (docs/adr/0078).
+        token = api_token_of(request)
         try:
             event = services.record_event(
                 request.user,  # type: ignore[arg-type]

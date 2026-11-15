@@ -1,0 +1,4 @@
+{% extends "account/email/base_notification.txt" %}
+{% load i18n %}
+
+{% block notification_message %}{% translate "A phone was connected to your account with the HouseCairn mobile app. If it was not you, revoke it in Connected apps, on the page of your API tokens, and change your password." %}{% endblock notification_message %}

@@ -11,7 +11,8 @@ from rest_framework.views import APIView
 
 from housecairn.accounts import names, provider_names, services
 from housecairn.accounts.models import DisplayNameSource, User
-from housecairn.apitokens.models import ApiToken
+from housecairn.apitokens.credentials import is_session
+from housecairn.apitokens.permissions import CredentialFitsView
 from housecairn.homes.scoping import allow
 
 
@@ -21,7 +22,7 @@ class SignedInPerson(permissions.BasePermission):
     message = "This changes the account itself and needs the person signed in; API tokens cannot."
 
     def has_permission(self, request: Request, view: object) -> bool:
-        return bool(request.user.is_authenticated) and not isinstance(request.auth, ApiToken)
+        return bool(request.user.is_authenticated) and is_session(request)
 
 
 class PersonOnlyToChange:
@@ -113,7 +114,7 @@ class MeView(PersonOnlyToChange, APIView):
 
 
 class AccountDeleteView(APIView):
-    permission_classes = [SignedInPerson]
+    permission_classes = [CredentialFitsView, SignedInPerson]
 
     @extend_schema(
         request=inline_serializer(

@@ -53,6 +53,7 @@ class Section(StrEnum):
     FILES = "files"
     NOTIFICATIONS = "notifications"
     PROJECTS = "projects"
+    MOBILE_APP = "mobile-app"
 
 
 SECTION_LABELS: dict[Section, Promise] = {
@@ -65,6 +66,7 @@ SECTION_LABELS: dict[Section, Promise] = {
     Section.FILES: _("Files of a home"),
     Section.NOTIFICATIONS: _("Notifications"),
     Section.PROJECTS: _("Projects"),
+    Section.MOBILE_APP: _("Mobile app"),
 }
 
 # The one button of a section's page: it names what it saves.
@@ -78,6 +80,7 @@ SECTION_SAVE_LABELS: dict[Section, Promise] = {
     Section.FILES: _("Save the file limits"),
     Section.NOTIFICATIONS: _("Save the notification settings"),
     Section.PROJECTS: _("Save the project settings"),
+    Section.MOBILE_APP: _("Save the mobile app setting"),
 }
 
 # The product name: the default name of an instance, and what an empty name shows.
@@ -683,3 +686,8 @@ from housecairn.projects.conf import SETTINGS as _PROJECTS  # noqa: E402
 
 _SETTINGS += _PROJECTS
 SETTINGS.update({s.key: s for s in _PROJECTS})
+
+from housecairn.apitokens.conf import SETTINGS as _APITOKENS  # noqa: E402
+
+_SETTINGS += _APITOKENS
+SETTINGS.update({s.key: s for s in _APITOKENS})

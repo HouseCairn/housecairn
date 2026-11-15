@@ -5,6 +5,7 @@ from rest_framework.routers import SimpleRouter
 
 from housecairn.accounts.api import AccountDeleteView, MeView
 from housecairn.apitokens.api import TokenDetailView, TokenListView
+from housecairn.apitokens.sync import SyncInfoView
 from housecairn.budget import api as budget_api
 from housecairn.events.api import EventCreateView
 from housecairn.homes.api import AcceptInvitationView, HomeViewSet, InvitationViewSet, MemberViewSet
@@ -128,4 +129,6 @@ urlpatterns = [
     path("invitations/accept/", AcceptInvitationView.as_view(), name="invitation-accept"),
     path("", include("housecairn.notifications.api_urls")),  # docs/adr/0043
     path("", include("housecairn.calendar.api_urls")),  # docs/adr/0052
+    # The sync API of the mobile app (docs/adr/0077, 0078); M4 adds `include("sync.urls")`.
+    path("sync/info", SyncInfoView.as_view(), name="sync-info"),
 ]

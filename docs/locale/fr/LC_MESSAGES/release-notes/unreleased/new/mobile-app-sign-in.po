@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Connected apps.** The HouseCairn mobile app can connect to this server: it opens the server's own sign-in page in the phone's browser (OAuth 2 with PKCE), where you choose the homes the phone sees and whether it may create homes. Each phone is listed under **Connected apps** on the [API tokens](../../../screens/api-tokens.md#connected-apps) page, where you rename it, change its homes or revoke it; every new connection sends you an email. A connected phone opens only the sync API of the app, starting with `GET /api/v1/sync/info`, never the rest of the API."
+msgstr "**Applications connectées.** L'application mobile HouseCairn peut se connecter à ce serveur : elle ouvre la page de connexion du serveur dans le navigateur du téléphone (OAuth 2 avec PKCE), où vous choisissez les logements que voit le téléphone et s'il peut créer des logements. Chaque téléphone est listé sous **Applications connectées** sur la page [Jetons d'API](../../../screens/api-tokens.md#connected-apps), où vous le renommez, changez ses logements ou le révoquez ; chaque nouvelle connexion vous envoie un courriel. Un téléphone connecté n'ouvre que l'API de synchronisation de l'application, à commencer par `GET /api/v1/sync/info`, jamais le reste de l'API."

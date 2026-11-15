@@ -41,4 +41,38 @@
   {% else %}
     <p class="empty">{% translate "No API token yet." %}</p>
   {% endif %}
+  <h2 id="connected-apps">{% translate "Connected apps" %}</h2>
+  <p class="small">{% translate "Each phone you connected with the HouseCairn mobile app, with the homes it sees and changes as you can. Revoke a phone you lost or no longer use." %}</p>
+  {% if connection_rows %}
+    <table class="table-stack">
+      <caption class="visually-hidden">{% translate "Your connected apps" %}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{% translate "Name" %}</th>
+          <th scope="col">{% translate "Homes" %}</th>
+          <th scope="col">{% translate "May create homes" %}</th>
+          <th scope="col">{% translate "Connected" %}</th>
+          <th scope="col">{% translate "Last used" %}</th>
+          <th scope="col"><span class="visually-hidden">{% translate "Actions" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in connection_rows %}
+          <tr>
+            <th scope="row">{{ row.connection.name|default:_("Mobile app") }}</th>
+            <td data-label="{% translate 'Homes' %}">{{ row.homes|join:", " }}</td>
+            <td data-label="{% translate 'May create homes' %}">{% if row.connection.may_create_homes %}{% translate "Yes" %}{% else %}{% translate "No" %}{% endif %}</td>
+            <td data-label="{% translate 'Connected' %}">{{ row.connection.created_at|day }}</td>
+            <td data-label="{% translate 'Last used' %}">{% if row.connection.last_used_at %}{{ row.connection.last_used_at|day }}{% else %}{% translate "Never" %}{% endif %}</td>
+            <td data-label="{% translate 'Actions' %}">
+              <a class="button button-secondary button-small" href="{% url_with_next 'api-tokens:connection-edit' connection_id=row.connection.id %}">{% translate "Edit" %}<span class="visually-hidden"> ({{ row.connection.name }})</span></a>
+              <a class="button button-secondary button-small" href="{% url_with_next 'api-tokens:connection-revoke' connection_id=row.connection.id %}">{% translate "Revoke" %}<span class="visually-hidden"> ({{ row.connection.name }})</span></a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">{% translate "No connected app yet. Connect a phone from the HouseCairn mobile app, with the address of this server." %}</p>
+  {% endif %}
 {% endblock content %}
