@@ -109,9 +109,14 @@ def autosave(browser: Browser, base: str) -> None:
     page.goto(f"{home}items/")
     page.locator("[data-item-list] a", has_text="Espresso machine").click()
     page.locator("a", has_text="Edit the item").click()
+    # Wait for the form and its deferred scripts: a key typed before the script listens is lost.
+    page.wait_for_url(re.compile(r".*/edit/.*"))
+    page.wait_for_load_state("load")
     edit = page.url
     status = page.locator("#autosave-status")
     check(status.get_attribute("aria-live") == "polite", "autosave: a polite live region")
+    # The script shows the status once it listens to the form: only then is a key typed.
+    expect(status).to_be_visible(timeout=10000)
     page.fill("#id_serial_number", "SN-E2E-1")
     # The page forbids eval (CSP): wait from the outside, never with a function in the page.
     expect(status).to_have_text("Saved", timeout=5000)
