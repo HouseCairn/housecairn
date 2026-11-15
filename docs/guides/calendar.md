@@ -34,7 +34,9 @@ a day other than its due date, gets a next date that was not the forecast one.
 
 The feed of a home that an owner [archived](../screens/home.md) keeps its address and stays
 valid, but holds no event; the combined feed leaves archived homes out. The events come back
-when the home is brought back.
+when the home is brought back. An archived home offers no **Create**, and a new feed of it is
+refused, from the page as from the API: bring the home back first. A feed it already has keeps
+its line, to get a new address or revoke it.
 
 It follows the time zone you chose in [Notifications](../screens/notifications.md) (the time
 zone of the instance when empty) and the language of your

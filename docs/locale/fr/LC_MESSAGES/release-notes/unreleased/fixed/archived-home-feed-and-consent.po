@@ -1,0 +1,26 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**No new calendar feed for an archived home.** Creating a feed of an archived home is now refused, from the page as from the API, as the page already offered none; a feed it has keeps working as before. See [Calendar and feeds](../../../guides/calendar.md)."
+msgstr "**Pas de nouveau flux de calendrier pour un logement archivé.** Créer un flux d'un logement archivé est désormais refusé, depuis la page comme depuis l'API, comme la page n'en proposait déjà aucun ; un flux qu'il a continue de fonctionner comme avant. Voir [Calendrier et flux](../../../guides/calendar.md)."
+
+msgid "**Connecting a phone.** A link to the consent page with `approval_prompt=auto` showed an error page; it now shows the consent page, which is never skipped. The email that says a phone was connected is sent only once the server has given the phone its code."
+msgstr "**Connexion d'un téléphone.** Un lien vers la page de consentement avec `approval_prompt=auto` affichait une page d'erreur ; il affiche maintenant la page de consentement, qui n'est jamais sautée. Le courriel qui signale qu'un téléphone a été connecté n'est envoyé qu'une fois que le serveur a donné son code au téléphone."
+

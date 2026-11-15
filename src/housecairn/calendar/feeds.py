@@ -55,10 +55,17 @@ def _record(action: str, user: User, home: Home | None, kind: str) -> None:
 
 @transaction.atomic
 def create_feed(actor: AnyUser, home: Home | None = None) -> tuple[Feed, str]:
-    """Create the feed of `home` (all the homes when None) and return it with its secret."""
+    """Create the feed of `home` (all the homes when None) and return it with its secret.
+
+    An archived home gets no new feed (docs/adr/0079): its feeds stay valid but empty, so a
+    new one would hold nothing until the home is brought back. A feed it already has can
+    still be regenerated or revoked.
+    """
     user = _person(actor)
     if home is not None and not feed_homes(user).filter(pk=home.pk).exists():
         raise PermissionDenied
+    if home is not None and home.archived_at is not None:
+        raise ValidationError(_("This home is archived. Bring it back to make a feed of it."))
     raw, digest = _secret()
     try:
         with transaction.atomic():
