@@ -18,6 +18,8 @@ from django.db.models.deletion import Collector
 from django.utils import timezone
 
 from housecairn.core.models import BaseModel
+from housecairn.sync import changes as sync_changes
+from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, HomeHead, RowClocks
 
 RETENTION = datetime.timedelta(days=400)
@@ -94,7 +96,9 @@ def _delete_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
     """Delete rows that are still deleted, and what hangs off them.
 
     The children go by cascade (the items and photos of a room). Their clocks go with them, and
-    so do their files, once the transaction is committed: neither may outlive the row.
+    so do their files, once the transaction is committed: neither may outlive the row. A row
+    that stays but whose reference the deletion empties (`SET_NULL`: the paint of a room when
+    its article goes) records that change, as any write of a row of a home does.
     """
     rows = model.all_objects.filter(pk__in=ids, deleted_at__isnull=False)
     collector = Collector(using=rows.db)
@@ -114,10 +118,48 @@ def _delete_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
                 RowClocks.objects.filter(
                     entity=kind._meta.label_lower, row_id__in=gone[start : start + CHUNK]
                 ).delete()
+    emptied = _emptied(collector, doomed)
     deleted: int = collector.delete()[0]
+    for row, written in emptied:
+        sync_changes.record_change(
+            sync_rows.home_of(row),
+            sync_rows.entity_of(type(row)),
+            row.pk,
+            sync_changes.PUT,
+            written,
+            updated_at=getattr(row, "updated_at", None),
+        )
     if files:
         transaction.on_commit(lambda: _remove_files(files))
     return deleted
+
+
+def _emptied(
+    collector: Collector, doomed: dict[type[models.Model], list[models.Model]]
+) -> list[tuple[models.Model, dict[str, Any]]]:
+    """The rows of a home that stay, and the synced references the deletion sets on each.
+
+    Read before `collector.delete()`, which writes them: Django keeps, per field and value,
+    lists of rows or querysets that it evaluates only then.
+    """
+    gone = {(type(row), row.pk) for instances in doomed.values() for row in instances}
+    found: dict[tuple[type[models.Model], Any], tuple[models.Model, dict[str, Any]]] = {}
+    for (field, set_to), batches in collector.field_updates.items():
+        # `SET(row)` gives a row, `SET_NULL` None: the column holds the key.
+        value = set_to.pk if isinstance(set_to, models.Model) else set_to
+        for batch in batches:
+            for row in list(batch):
+                kind = type(row)
+                if (
+                    not issubclass(kind, BaseModel)
+                    or (kind, row.pk) in gone
+                    or field.attname not in sync_rows.raw_values(row, {field.attname})
+                    or getattr(row, field.attname) == value
+                ):
+                    continue
+                _row, fields = found.setdefault((kind, row.pk), (row, {}))
+                fields[field.attname] = sync_rows.encode(kind, field.attname, value)
+    return list(found.values())
 
 
 def _files_of(kind: type[models.Model], instances: list[models.Model]) -> list[tuple[Any, str]]:

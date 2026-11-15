@@ -1,28 +1,52 @@
 """Write a row of a home and record its change in one step (docs/adr/0077, 0079).
 
 `changes.record_change` takes the fields whose value changed. The services of an application do
-not compute them by hand: they save, soft-delete or update through the functions below, which
-read the row as the database holds it, write, and record the difference:
+not compute them by hand: they write through this module, which reads the row as the database
+holds it, writes, and records the difference. It is the one helper of every lot of the change
+log (M3b to M3e): a service of a covered model never calls `save()`, `soft_delete()`,
+`restore()` or `queryset.update()` on its own, or the guard (`tests/test_sync_guard.py`) fails.
 
-- `save(instance)`: a new row records every field, an existing one only those that changed;
-- `soft_delete(instance)` and `soft_delete_queryset(rows)`: a deletion, with its tombstone;
-- `update_queryset(rows, **values)`: a queryset update, one change per row and field changed;
-- `record_created(...)`: rows inserted in bulk (restoring an archive).
+Writing a row:
+
+- `save(instance, **kwargs) -> Recorded | None`: `instance.save(**kwargs)`, then its change. A
+  new row records every field, an existing one only those whose value changed; with
+  `update_fields`, only those fields are compared and recorded. None when nothing changed.
+- `soft_delete(instance) -> Recorded | None`: `instance.soft_delete()` and its tombstone; a row
+  already deleted records nothing.
+- `soft_delete(queryset) -> int`, the same as `soft_delete_queryset(queryset)`: the live rows
+  of a queryset soft-deleted, a tombstone each; the number of rows deleted.
+- `restore(instance) -> Recorded | None`: `instance.restore()` and its restoration; a row that
+  is not deleted records nothing.
+- `update_queryset(queryset, **values) -> int`: `queryset.update(**values)` with plain values
+  (a row or None for a foreign key, by the name of the field), then one change per row with the
+  fields whose value changed; the number of rows written.
+
+Recording a write made elsewhere:
+
+- `before(instance) -> Before`, read before the write, then `record_saved(instance, was) ->
+  Recorded | None` after it: the two halves of `save`, for a write that `save` cannot wrap.
+- `record_created(instances: Iterable[Model]) -> None`: rows inserted in bulk (restoring an
+  archive), every field of each.
 
 What a model sends is its concrete fields under their column names (`room_id`), except `id`,
-`home` (the home is the key of the change), `created_at`, `updated_at` and `deleted_at`. A
-model adjusts that with `register(model, Spec(...))` from the `ready()` of its application:
-fields left out, fields without a column (a file reference), fields that are an instant made by
-the write itself. Dates are `YYYY-MM-DD`, amounts decimal strings, instants hybrid clocks.
+`home` (the home is the key of the change), `created_at`, `updated_at` and `deleted_at`, and
+except its derived fields: a model lists them in `SYNC_DERIVED` (`tasks.Occurrence.visible_from`);
+they are recomputed on every side and never synced (mobile ADR 0003, "Derived"). A model adjusts
+the rest with `register(model, Spec(...))` from the `ready()` of its application: fields left
+out, fields without a column (a file reference), fields that are an instant made by the write
+itself. A file field is never sent as such: a model that syncs one registers a `virtual` field.
+Dates are `YYYY-MM-DD`, amounts decimal strings with the places of their field, instants hybrid
+clocks (`encode`).
 """
 
 import datetime
 import decimal
 import uuid
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Collection, Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, overload
 
+from django.core.exceptions import FieldDoesNotExist
 from django.db import models, transaction
 from django.utils import timezone
 
@@ -74,25 +98,53 @@ def home_of(instance: models.Model) -> uuid.UUID:
     return home_id
 
 
+def derived(model: type[models.Model]) -> frozenset[str]:
+    """The derived fields of a model (`SYNC_DERIVED`): recomputed on every side, never synced."""
+    return frozenset(getattr(model, "SYNC_DERIVED", ()))
+
+
 def _fields(model: type[models.Model]) -> list[models.Field[Any, Any]]:
     spec = spec_of(model)
+    left_out = spec.skip | derived(model)
     return [
         f
         for f in model._meta.concrete_fields
         if f.name not in BOOKKEEPING
-        and f.attname not in spec.skip
-        and f.name not in spec.skip
+        and f.attname not in left_out
+        and f.name not in left_out
         and not isinstance(f, models.FileField)
     ]
 
 
-def raw_values(instance: models.Model) -> dict[str, Any]:
-    """The values of the synced columns, as Python holds them, under their column names."""
-    values = {f.attname: getattr(instance, f.attname) for f in _fields(type(instance))}
-    virtual = spec_of(type(instance)).virtual
-    if virtual is not None:
+def raw_values(instance: models.Model, only: Collection[str] | None = None) -> dict[str, Any]:
+    """The values of the synced columns, as Python holds them, under their column names.
+
+    `only`: the fields to read, by name or column, as `save(update_fields=...)` gives them; the
+    virtual fields are read when one of the columns they stand for is.
+    """
+    model = type(instance)
+    values = {
+        f.attname: getattr(instance, f.attname)
+        for f in _fields(model)
+        if only is None or f.name in only or f.attname in only
+    }
+    virtual = spec_of(model).virtual
+    if virtual is not None and (only is None or _touches_hidden(model, only)):
         values.update(virtual(instance))
     return values
+
+
+def _touches_hidden(model: type[models.Model], only: Collection[str]) -> bool:
+    """Whether a write of the fields `only` writes a column the model does not send as such.
+
+    Those columns (a file, its size and type) are what the virtual fields stand for.
+    """
+    sent = set(_fields(model))
+    return any(
+        f not in sent and (f.name in only or f.attname in only)
+        for f in model._meta.concrete_fields
+        if f.name not in BOOKKEEPING
+    )
 
 
 def encode(model: type[models.Model], name: str, value: Any) -> Any:
@@ -106,10 +158,21 @@ def encode(model: type[models.Model], name: str, value: Any) -> Any:
     if isinstance(value, datetime.date | datetime.time):
         return value.isoformat()
     if isinstance(value, decimal.Decimal):
-        return str(value)
+        return _amount(model, name, value)
     if isinstance(value, uuid.UUID):
         return str(value)
     raise TypeError(f"{model._meta.label}.{name}: cannot send a {type(value).__name__}.")
+
+
+def _amount(model: type[models.Model], name: str, value: decimal.Decimal) -> str:
+    """An amount with the places of its field (`12.50`, not `12.5`), never in exponent form."""
+    try:
+        places = getattr(model._meta.get_field(name), "decimal_places", None)
+    except FieldDoesNotExist:
+        places = None
+    if places is not None:
+        value = value.quantize(decimal.Decimal(1).scaleb(-places))
+    return format(value, "f")
 
 
 def _jsonable(value: Any) -> Any:
@@ -136,8 +199,10 @@ def before(instance: models.Model) -> Before:
     return Before(raw_values(stored), getattr(stored, "updated_at", None))
 
 
-def _diff(instance: models.Model, was: Before) -> dict[str, Any]:
-    now = raw_values(instance)
+def _diff(
+    instance: models.Model, was: Before, only: Collection[str] | None = None
+) -> dict[str, Any]:
+    now = raw_values(instance, only)
     model = type(instance)
     return {
         name: encode(model, name, value)
@@ -146,9 +211,14 @@ def _diff(instance: models.Model, was: Before) -> dict[str, Any]:
     }
 
 
-def record_saved(instance: models.Model, was: Before) -> changes.Recorded | None:
-    """Record what the write of `instance` changed against `was`; None when nothing did."""
-    diff = _diff(instance, was)
+def record_saved(
+    instance: models.Model, was: Before, only: Collection[str] | None = None
+) -> changes.Recorded | None:
+    """Record what the write of `instance` changed against `was`; None when nothing did.
+
+    `only`: the fields the write wrote (`update_fields`); the others are not compared.
+    """
+    diff = _diff(instance, was, only)
     if not diff:
         return None
     return changes.record_change(
@@ -162,15 +232,39 @@ def record_saved(instance: models.Model, was: Before) -> changes.Recorded | None
 
 
 def save(instance: Any, **kwargs: Any) -> changes.Recorded | None:
-    """`instance.save(**kwargs)`, then its change: the fields whose value changed only."""
+    """`instance.save(**kwargs)`, then its change: the fields whose value changed only.
+
+    With `update_fields`, only those fields are written, so only those are compared: a field
+    changed on the instance but not written is not recorded.
+    """
+    written = kwargs.get("update_fields")
+    only = None if written is None else frozenset(written)
     with transaction.atomic():
         was = before(instance)
         instance.save(**kwargs)
-        return record_saved(instance, was)
+        return record_saved(instance, was, only)
 
 
-def soft_delete(instance: Any) -> changes.Recorded | None:
-    """`instance.soft_delete()`, then the deletion; a row already deleted records nothing."""
+@overload
+def soft_delete(target: models.QuerySet[Any]) -> int: ...
+
+
+@overload
+def soft_delete(target: models.Model) -> changes.Recorded | None: ...
+
+
+def soft_delete(target: Any) -> changes.Recorded | None | int:
+    """Soft-delete a row, or the live rows of a queryset, with a tombstone each.
+
+    A row: `row.soft_delete()`, then its deletion; None when it was deleted already. A queryset:
+    `soft_delete_queryset(queryset)`, the number of rows it deleted.
+    """
+    if isinstance(target, models.QuerySet):
+        return soft_delete_queryset(target)
+    return _soft_delete_row(target)
+
+
+def _soft_delete_row(instance: Any) -> changes.Recorded | None:
     with transaction.atomic():
         stored = type(instance)._base_manager.filter(pk=instance.pk).first()
         if stored is None or stored.deleted_at is not None:
@@ -182,6 +276,23 @@ def soft_delete(instance: Any) -> changes.Recorded | None:
             entity_of(type(instance)),
             instance.pk,
             changes.DELETE,
+            updated_at=getattr(stored, "updated_at", None),
+        )
+
+
+def restore(instance: Any) -> changes.Recorded | None:
+    """`instance.restore()`, then its restoration; a row that is not deleted records nothing."""
+    with transaction.atomic():
+        stored = type(instance)._base_manager.filter(pk=instance.pk).first()
+        if stored is None or stored.deleted_at is None:
+            instance.restore()
+            return None
+        instance.restore()
+        return changes.record_change(
+            home_of(instance),
+            entity_of(type(instance)),
+            instance.pk,
+            changes.RESTORE,
             updated_at=getattr(stored, "updated_at", None),
         )
 

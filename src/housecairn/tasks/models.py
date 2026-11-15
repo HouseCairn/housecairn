@@ -324,6 +324,9 @@ class TaskMaterial(HomeOwnedModel):
 class Occurrence(HomeOwnedModel):
     """One time a task has to be done: when, and how it ended."""
 
+    # Recomputed from the due date on every side, never synced (mobile ADR 0003, "Derived").
+    SYNC_DERIVED = ("visible_from",)
+
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="occurrences")
     due_on = models.DateField(_("due on"), null=True, blank=True)
     # The day the occurrence starts to show: the due date minus the task's masking delay.
