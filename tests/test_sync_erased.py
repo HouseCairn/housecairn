@@ -1,6 +1,7 @@
 """Erasing a home writes the row of the erased homes and takes its change log with it."""
 
 import uuid
+from collections.abc import Callable
 
 import pytest
 from django.db import transaction
@@ -9,9 +10,9 @@ from django.utils import timezone
 from housecairn.accounts.models import User
 from housecairn.apitokens.models import AppConnection
 from housecairn.homes import services
-from housecairn.homes.models import Home
+from housecairn.homes.models import Home, Membership, Role
 from housecairn.sync import changes, erased
-from housecairn.sync.models import Change, ErasedHome, HomeHead, RowClocks
+from housecairn.sync.models import Change, ErasedHome, ErasedHomeConnection, HomeHead, RowClocks
 
 pytestmark = pytest.mark.django_db
 
@@ -27,7 +28,7 @@ def test_erasing_a_home_writes_one_row_in_the_table_of_erased_homes(alice_home: 
     services.erase_home(alice_home)
     row = ErasedHome.objects.get(pk=home_id)
     assert before <= row.erased_at <= timezone.now()
-    assert row.connection_ids == []
+    assert not row.connections.exists()
     assert ErasedHome.objects.count() == 1
 
 
@@ -90,7 +91,8 @@ def test_the_connections_bound_to_the_home_are_kept_with_the_row(
     ids = [str(uuid.uuid4()), str(uuid.uuid4())]
     monkeypatch.setattr(erased, "connection_ids_of", lambda home_id: ids)
     services.erase_home(alice_home)
-    assert ErasedHome.objects.get().connection_ids == ids
+    kept = ErasedHomeConnection.objects.values_list("connection_id", flat=True)
+    assert sorted(str(pk) for pk in kept) == sorted(ids)
 
 
 def test_the_connected_apps_bound_to_the_home_are_read(alice: User, alice_home: Home) -> None:
@@ -109,7 +111,33 @@ def test_erasing_a_home_keeps_the_connections_bound_to_it(alice: User, alice_hom
     bound = AppConnection.objects.create(user=alice)
     bound.homes.add(alice_home)
     services.erase_home(alice_home)
-    assert ErasedHome.objects.get().connection_ids == [str(bound.pk)]
+    assert [
+        str(pk) for pk in ErasedHomeConnection.objects.values_list("connection_id", flat=True)
+    ] == [str(bound.pk)]
+
+
+def test_a_member_removed_before_the_erasure_is_not_told(
+    alice: User, bob: User, alice_home: Home, add_member: Callable[[Home, User, Role], Membership]
+) -> None:
+    membership = add_member(alice_home, bob, Role.MEMBER)
+    kept = AppConnection.objects.create(user=alice)
+    kept.homes.add(alice_home)
+    left = AppConnection.objects.create(user=bob)
+    left.homes.add(alice_home)
+    assert erased.connection_ids_of(alice_home.pk) == sorted([str(kept.pk), str(left.pk)])
+    services.remove_member(alice, membership)  # bob's connection stays bound to the home
+    assert erased.connection_ids_of(alice_home.pk) == [str(kept.pk)]
+    services.erase_home(alice_home)
+    told = ErasedHomeConnection.objects.values_list("connection_id", flat=True)
+    assert [str(pk) for pk in told] == [str(kept.pk)]
+
+
+def test_a_connection_bound_twice_is_told_once(alice: User, alice_home: Home) -> None:
+    bound = AppConnection.objects.create(user=alice)
+    bound.homes.add(alice_home)
+    erased.record_erased(alice_home.pk)
+    erased.record_erased(alice_home.pk)
+    assert ErasedHomeConnection.objects.count() == 1
 
 
 def test_erasing_twice_keeps_one_row_and_the_latest_time(alice_home: Home) -> None:

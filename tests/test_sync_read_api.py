@@ -13,6 +13,7 @@ from typing import Any
 import pytest
 from django.core.cache import cache
 from django.test import Client
+from django.urls import reverse
 from django.utils import timezone
 from oauth2_provider.models import AccessToken
 
@@ -224,6 +225,50 @@ class TestErasedHome:
             assert answer.status_code == 410, path
             assert answer.json()["code"] == "home_gone"
 
+    def test_the_list_of_gone_homes_costs_one_query_whatever_their_number(
+        self, alice: User, alice_home: Home, django_assert_num_queries: Any
+    ) -> None:
+        def erase_one(n: int) -> None:
+            home = home_services.create_home(alice, name=f"Gone {n}")
+            phone.connection.homes.add(home)
+            home_services.delete_home(alice, home, confirmation=home.name)
+
+        phone = connect(alice, [alice_home])
+        erase_one(0)
+        with django_assert_num_queries(1):
+            assert len(reading.gone_for(phone.connection.pk)) == 1
+        for n in range(1, 8):
+            erase_one(n)
+        with django_assert_num_queries(1):
+            assert len(reading.gone_for(phone.connection.pk)) == 8
+
+    def test_the_gone_homes_are_found_by_an_index(self) -> None:
+        from django.db import connection
+
+        from housecairn.sync.models import ErasedHomeConnection
+
+        table = ErasedHomeConnection._meta.db_table
+        with connection.cursor() as cursor:
+            found = connection.introspection.get_constraints(cursor, table)
+        indexed = [c["columns"] for c in found.values() if c["index"] or c["unique"]]
+        assert ["connection_id"] in indexed
+
+    def test_a_member_removed_before_the_erasure_is_not_told(
+        self, alice: User, bob: User, alice_home: Home
+    ) -> None:
+        shared = home_services.create_home(alice, name="Shared")
+        membership = Membership.objects.create(home=shared, user=bob, role=Role.MEMBER)
+        bob_phone = connect(bob, [shared])
+        alice_phone = connect(alice, [shared])
+        home_services.remove_member(alice, membership)  # bob's connection stays bound
+        assert get(bob_phone.access, changes_url(shared.pk)).status_code == 404
+        home_services.delete_home(alice, shared, confirmation="Shared")
+        assert get(bob_phone.access, HOMES).json()["gone"] == []
+        assert get(bob_phone.access, changes_url(shared.pk)).status_code == 404
+        assert get(bob_phone.access, snapshot_url(shared.pk)).status_code == 404
+        assert [g["id"] for g in get(alice_phone.access, HOMES).json()["gone"]] == [str(shared.pk)]
+        assert get(alice_phone.access, changes_url(shared.pk)).status_code == 410
+
     def test_any_other_connection_gets_404(
         self, alice: User, bob: User, alice_home: Home, bob_home: Home
     ) -> None:
@@ -396,6 +441,71 @@ class TestRateLimit:
         assert get(phone.access, changes_url(alice_home.pk)).status_code == 200
         assert get(phone.access, snapshot_url(alice_home.pk)).status_code == 429
         assert get(other.access, HOMES).status_code == 200  # its own count
+
+
+class TestSnapshotRateLimit:
+    def test_snapshots_are_limited_apart_from_the_reads(
+        self, phone: Connected, alice: User, alice_home: Home
+    ) -> None:
+        from housecairn.instance import ratelimits
+
+        assert ratelimits.rates()["housecairn_sync_snapshot"] == "6/m/key"
+        for _ in range(6):
+            assert get(phone.access, snapshot_url(alice_home.pk)).status_code == 200
+        refused = get(phone.access, snapshot_url(alice_home.pk))
+        assert refused.status_code == 429
+        # The feed and the list are not slowed by it, and another phone has its own count.
+        assert get(phone.access, HOMES).status_code == 200
+        assert get(phone.access, changes_url(alice_home.pk)).status_code == 200
+        other = connect(alice, [alice_home])
+        assert get(other.access, snapshot_url(alice_home.pk)).status_code == 200
+
+    def test_a_refused_snapshot_is_not_built(
+        self, phone: Connected, alice_home: Home, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from housecairn.instance import ratelimits
+
+        real = ratelimits.rates
+        monkeypatch.setattr(
+            ratelimits, "rates", lambda: {**real(), "housecairn_sync_snapshot": "1/m/key"}
+        )
+        assert get(phone.access, snapshot_url(alice_home.pk)).status_code == 200
+
+        def built(home: Home) -> Any:
+            raise AssertionError("a refused snapshot is not built")
+
+        monkeypatch.setattr(reading, "snapshot_lines", built)
+        assert get(phone.access, snapshot_url(alice_home.pk)).status_code == 429
+
+    def test_the_info_route_announces_the_limits(self, phone: Connected) -> None:
+        answer = Client().get(
+            "/api/v1/sync/info", secure=True, HTTP_AUTHORIZATION=f"Bearer {phone.access}"
+        )
+        assert answer.json()["limits"] == {
+            "reads_per_minute": 600,
+            "snapshots_per_minute": 6,
+            "pushes_per_minute": 60,
+            "ops_per_push": 500,
+            "push_bytes": 1024 * 1024,
+        }
+
+
+class TestSchema:
+    def test_the_three_reads_declare_what_a_client_hostile_or_late_gets(self, alice: User) -> None:
+        client = Client()
+        client.force_login(alice)
+        schema = client.get(
+            reverse("api-schema"), HTTP_ACCEPT="application/vnd.oai.openapi+json"
+        ).json()
+        reads = {
+            path: item["get"]["responses"]
+            for path, item in schema["paths"].items()
+            if path.startswith("/api/v1/sync/homes") and "get" in item
+        }
+        assert len(reads) == 3, sorted(reads)
+        for path, responses in reads.items():
+            assert {"401", "403", "429"} <= set(responses), path
+            assert all(responses[code]["description"] for code in ("401", "403", "429")), path
 
 
 # ---------- the snapshot ----------

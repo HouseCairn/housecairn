@@ -27,7 +27,7 @@ from housecairn.homes.models import Home, Membership
 from housecairn.sync import changes as sync_changes
 from housecairn.sync import clock, retention
 from housecairn.sync import rows as sync_rows
-from housecairn.sync.models import Change, ErasedHome, HomeHead, RowClocks
+from housecairn.sync.models import Change, ErasedHome, ErasedHomeConnection, HomeHead, RowClocks
 
 # The entity types of the protocol a server carries (mobile protocol, section 2.2), in the order
 # of the snapshot: a row comes after the rows it refers to whenever that order exists. The family
@@ -202,18 +202,18 @@ def home_entry(home: Home, user: User) -> dict[str, Any]:
 
 
 def gone_for(connection_id: uuid.UUID) -> list[dict[str, str]]:
-    """The erased homes that were bound to a connection when they were erased."""
-    wanted = str(connection_id)
+    """The erased homes that were told to a connection: bound to it, its account a member."""
+    erased = ErasedHome.objects.filter(connections__connection_id=connection_id)
     return [
-        {"id": str(erased.pk), "at": erased.erased_at.isoformat()}
-        for erased in ErasedHome.objects.order_by("erased_at", "id").iterator()
-        if wanted in (erased.connection_ids or [])
+        {"id": str(row.pk), "at": row.erased_at.isoformat()}
+        for row in erased.order_by("erased_at", "id")
     ]
 
 
 def was_bound_when_erased(home_id: uuid.UUID, connection_id: uuid.UUID) -> bool:
-    erased = ErasedHome.objects.filter(pk=home_id).first()
-    return erased is not None and str(connection_id) in (erased.connection_ids or [])
+    return ErasedHomeConnection.objects.filter(
+        erased_id=home_id, connection_id=connection_id
+    ).exists()
 
 
 # ---------- the feed ----------

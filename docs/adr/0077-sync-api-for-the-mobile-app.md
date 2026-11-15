@@ -108,8 +108,10 @@ Errors are those of the API today (`{"detail": ...}`), with a `code` (`cursor_ex
 `insecure_transport`) so that the app words them itself.
 
 **A home that was erased.** Every route under `/api/v1/sync/homes/{h}/` answers 410 `home_gone`
-when `h` is in the table of erased homes and was bound to the connection when it was erased (the
-row of the erased home keeps the ids of those connections); the phone then erases the home as
+when `h` is in the table of erased homes and was bound to the connection when it was erased, its
+account still a member of the home (one row per erased home and connection, indexed by the
+connection, so that `gone` costs one query whatever the number of erased homes; a member removed
+earlier learns nothing of a later erasure); the phone then erases the home as
 the purge of the protocol does and drops every operation of it, sent or not. For any other
 connection the answer is 404, as for a home it never had, so an erased home reveals nothing.
 A push to an erased home applies nothing.
@@ -269,8 +271,11 @@ the server mode.
 11. **Versions and limits announced.** `GET /sync/info` gives the server's version, the
     versions of the sync protocol it speaks, its features, the entity types it knows and its
     limits: operations per push (500), size of a push body (1 MiB), file size, and requests per
-    minute per connection (proposed defaults: 60 pushes and 600 reads, under the rate limits of
-    [ADR 0042](0042-rate-limits-quotas-language-and-instance-name.md)). **A field the server
+    minute per connection (60 pushes and 600 reads, under the rate limits of
+    [ADR 0042](0042-rate-limits-quotas-language-and-instance-name.md); the snapshot, built in
+    memory from every row, is held to 6 a minute on top of the reads). `info` gives them, with a
+    connection's token, as `limits`: `reads_per_minute`, `snapshots_per_minute`,
+    `pushes_per_minute`, `ops_per_push` and `push_bytes`. **A field the server
     does not know is kept** (the maintainer's decision, and protocol section 2.2: "a receiver
     MUST keep fields it does not know"): the server stores it in `extra`, a JSON value per row
     kept by the `sync` app with, for each unknown field, its value, clock and device; it merges

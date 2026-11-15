@@ -37,10 +37,11 @@ from housecairn.homes import sso
 from housecairn.homes.models import Home
 from housecairn.homes.scoping import allow, homes_for_request, open_homes_for_request
 from housecairn.sync import changes as sync_changes
-from housecairn.sync import clock, pushing, reading
+from housecairn.sync import clock, limits, pushing, reading
 from housecairn.sync.models import Push
 
-READ_RATE_ACTION = "housecairn_sync_read"
+READ_RATE_ACTION = limits.READ_ACTION
+SNAPSHOT_RATE_ACTION = limits.SNAPSHOT_ACTION
 SNAPSHOT_TYPE = "application/x-ndjson"
 
 
@@ -75,6 +76,12 @@ def _connection(request: Request) -> AppConnection:
 def _limited(request: Request) -> None:
     """Reads per minute per connection (docs/adr/0077, need 11)."""
     if not allow(request, READ_RATE_ACTION, key=f"connection:{_connection(request).pk}"):
+        raise exceptions.Throttled
+
+
+def _snapshot_limited(request: Request) -> None:
+    """Snapshots per minute per connection, on top of the reads: it is built in memory."""
+    if not allow(request, SNAPSHOT_RATE_ACTION, key=f"connection:{_connection(request).pk}"):
         raise exceptions.Throttled
 
 
@@ -266,11 +273,13 @@ class SyncSnapshotView(SyncAPIView):
         },
         description=(
             "Every row of the home with every field and its clock, so that a new phone, or "
-            "one whose cursor expired, starts from it and then reads the feed after `covers`."
+            "one whose cursor expired, starts from it and then reads the feed after `covers`. "
+            "Limited apart from the other reads, to a few a minute per connection (429)."
         ),
     )
     def get(self, request: Request, home_id: uuid.UUID, *args: Any, **kwargs: Any) -> HttpResponse:
         _limited(request)
+        _snapshot_limited(request)
         home = readable_home(request, home_id)
         body = "".join(
             json.dumps(line, ensure_ascii=False, separators=(",", ":")) + "\n"
@@ -281,7 +290,7 @@ class SyncSnapshotView(SyncAPIView):
 
 # ---------- writing: the push (lot M5a of docs/adr/0079) ----------
 
-PUSH_RATE_ACTION = "housecairn_sync_push"
+PUSH_RATE_ACTION = limits.PUSH_ACTION
 JSON_TYPE = "application/json"
 MAX_PUSH_NUMBER = (1 << 63) - 1
 
