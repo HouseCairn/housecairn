@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "housecairn.core",
     "housecairn.accounts",
     "housecairn.homes",
+    "housecairn.sync",
     "housecairn.apitokens",
     "housecairn.events",
     "housecairn.audit",

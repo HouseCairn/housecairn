@@ -43,6 +43,11 @@ LEFT_OUT = {
     # The text of CSV files between the preview of an import and its confirmation,
     # removed once confirmed and within the hour after it expires (homes.csv_import).
     "homes.ImportPreview": "the files of an import waiting for its confirmation",
+    # The change log of the sync API (docs/adr/0077): positions, changes and field clocks of
+    # the home, for the phones. Erased with the home, which is why they cascade from it.
+    "sync.HomeHead": "the position of the change log of the home",
+    "sync.Change": "the changes of the home, for the sync API",
+    "sync.RowClocks": "the clock of every field of a row of the home",
 }
 
 # Not data of a home: of the instance, or of a person (erased with the account,
@@ -64,6 +69,8 @@ NOT_OF_A_HOME = {
     "notifications.Preference": "when a person wants reminders",
     "notifications.Device": "a browser of a person that receives notifications (docs/adr/0066)",
     "notifications.PushKey": "the push key pair of the instance (docs/adr/0066)",
+    "sync.ServerDevice": "the device id the server writes with (docs/adr/0077)",
+    "sync.ErasedHome": "that a home was erased, which outlives the home (docs/adr/0077)",
 }
 
 
