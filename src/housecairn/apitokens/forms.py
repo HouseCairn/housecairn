@@ -5,6 +5,7 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
+from oauth2_provider.forms import AllowForm
 
 from housecairn.accounts.models import User
 from housecairn.apitokens import services
@@ -120,3 +121,96 @@ class TokenForm(forms.Form):
 
     def clean_name(self) -> str:
         return " ".join(self.cleaned_data["name"].split())
+
+
+# ---------- connected apps (docs/adr/0078) ----------
+
+
+class ConnectionHomesMixin(forms.Form):
+    """The homes of a connection, with the rules of the token form."""
+
+    homes = HomeChoiceField(
+        label=_("Homes"),
+        queryset=Home.objects.none(),
+        widget=HomesWidget,
+        help_text=_("The phone sees and changes these homes, and no other."),
+    )
+    may_create_homes = forms.BooleanField(
+        label=_("May create homes"),
+        required=False,
+        help_text=_("The phone may send its own homes to this server, which adds them here."),
+    )
+
+    def setup_homes(
+        self, user: User, signed_in_with: frozenset[str], providers: list[Provider]
+    ) -> None:
+        homes = list(services.token_homes(user))
+        issuable = {home.id for home in services.issuable_homes(user, signed_in_with)}
+        declared = {provider.id: provider for provider in providers}
+        locked = {
+            str(home.id): declared.get(home.required_provider)
+            or Provider(id=home.required_provider, name=home.required_provider)
+            for home in homes
+            if home.id not in issuable
+        }
+        self.fields["homes"].queryset = services.token_homes(user)  # type: ignore[attr-defined]
+        widget = self.fields["homes"].widget
+        assert isinstance(widget, HomesWidget)  # noqa: S101 - declared above
+        widget.locked = locked
+        widget.declared = set(declared)
+        if not self.is_bound and len(issuable) == 1 and "homes" not in self.initial:
+            self.initial["homes"] = [home for home in homes if home.id in issuable]
+        self.sign_in_providers = list(
+            {p.id: p for p in locked.values() if p.id in declared}.values()
+        )
+
+
+class ConsentForm(AllowForm, ConnectionHomesMixin):  # type: ignore[misc]
+    """The consent page: the hidden fields of django-oauth-toolkit, the homes, the right."""
+
+    # The name the phone gave, carried from the page to its answer: a label only.
+    device_name = forms.CharField(required=False, widget=forms.HiddenInput())
+
+    def __init__(
+        self,
+        *args: Any,
+        user: User,
+        signed_in_with: frozenset[str],
+        providers: list[Provider],
+        asks_homes_create: bool,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self.setup_homes(user, signed_in_with, providers)
+        if asks_homes_create:
+            self.fields["may_create_homes"].initial = True
+        else:
+            del self.fields["may_create_homes"]
+
+    def clean(self) -> dict[str, Any]:
+        cleaned: dict[str, Any] = super().clean() or {}
+        # Cancel needs no home; Connect does.
+        if not cleaned.get("allow"):
+            self.errors.pop("homes", None)
+        return cleaned
+
+
+class ConnectionForm(ConnectionHomesMixin):
+    name = forms.CharField(
+        label=_("Name"),
+        max_length=100,
+        required=False,
+        help_text=_("How you recognise this phone in the list."),
+    )
+    field_order = ["name", "homes", "may_create_homes"]
+
+    def __init__(
+        self,
+        *args: Any,
+        user: User,
+        signed_in_with: frozenset[str],
+        providers: list[Provider],
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self.setup_homes(user, signed_in_with, providers)

@@ -12,6 +12,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Website"
+msgstr "Site web"
+
+msgid "Documentation"
+msgstr "Documentation"
+
+msgid "Application code"
+msgstr "Code de l'application"
+
+msgid "Home Assistant app"
+msgstr "Module Home Assistant"
+
+msgid "Home Assistant integration"
+msgstr "Intégration Home Assistant"
+
+msgid "Mobile application"
+msgstr "Application mobile"
+
 msgid "Core"
 msgstr "Cœur"
 
@@ -359,6 +377,12 @@ msgstr "Votre compte vient d'être utilisé pour se connecter depuis un navigate
 msgid "New sign-in to your account"
 msgstr "Nouvelle connexion à votre compte"
 
+msgid "A phone was connected to your account with the HouseCairn mobile app. If it was not you, revoke it in Connected apps, on the page of your API tokens, and change your password."
+msgstr "Un téléphone a été connecté à votre compte avec l'application mobile HouseCairn. Si ce n'était pas vous, révoquez-le dans Applications connectées, sur la page de vos jetons d'API, et changez votre mot de passe."
+
+msgid "A phone was connected to your account"
+msgstr "Un téléphone a été connecté à votre compte"
+
 msgid "Sign in"
 msgstr "Se connecter"
 
@@ -461,6 +485,12 @@ msgstr "Code source et signalement de sécurité sur GitHub."
 
 msgid "Developed with an AI agent, under human review."
 msgstr "Développé avec un agent IA, sous revue humaine."
+
+msgid "Links"
+msgstr "Liens"
+
+msgid "Coming soon"
+msgstr "Bientôt"
 
 msgid "Add a home"
 msgstr "Ajouter un logement"

@@ -34,6 +34,13 @@ owner of one home.
 
     python tests/e2e/browser_checks.py home-archive --base http://localhost:8001
 
+`about-links` (local only) measures the links of the About screen at 375 and 1280 px, in English
+and in French, with and without script: the six links carry a safe `rel`, the iOS and Android icons
+are marked as coming soon and are not links, every tile is a 44 px touch target inside the width,
+and the page asks nothing of another host. It needs no account.
+
+    python tests/e2e/browser_checks.py about-links --base http://localhost:8001
+
 `task-form` and `task-lines` (local only) measure the task form at 320, 360, 375 and 1280 px,
 in French, with and without script: the repetition, the duration and the contractor, then the
 room, item and stock item added in place and the lines of the materials.
@@ -62,6 +69,7 @@ import argparse
 import sys
 from itertools import pairwise
 from typing import Any
+from urllib.parse import urlsplit
 
 from playwright.sync_api import Browser, BrowserContext, Locator, Page, sync_playwright
 
@@ -822,6 +830,75 @@ def home_archive(browser: Browser, base: str) -> None:
                 context.close()
 
 
+ABOUT_WIDTHS = (375, 1280)
+# The label of the first link and the mark of a store without an address, per language.
+ABOUT_TEXTS = {"en": ("Website", "Coming soon"), "fr": ("Site web", "Bientôt")}
+
+
+def _note_foreign(found: list[str], host: str) -> Any:
+    def note(request: Any) -> None:
+        if urlsplit(request.url).netloc not in {host, ""} and not request.url.startswith("data:"):
+            found.append(request.url)
+
+    return note
+
+
+def about_links(browser: Browser, base: str) -> None:
+    """The links of the About screen, measured. Local only.
+
+    At 375 and 1280 px, in English and in French, with and without script: six links with a
+    safe `rel`, two stores that are not links, tiles of 44 px at least inside the width, and no
+    request to another host. Prints the measures.
+    """
+    host = urlsplit(base).netloc
+    for width in ABOUT_WIDTHS:
+        for locale, (first, soon) in ABOUT_TEXTS.items():
+            for script in (True, False):
+                label = f"{width} px, {locale}{'' if script else ', no script'}"
+                context = browser.new_context(
+                    viewport={"width": width, "height": 900},
+                    locale=locale,
+                    java_script_enabled=script,
+                )
+                page = context.new_page()
+                foreign: list[str] = []
+                page.on("request", _note_foreign(foreign, host))
+                page.goto(f"{base}/about/")
+                page.wait_for_selector(".about-links")
+                links = page.locator("a.about-link")
+                check(links.count() == 6, f"{label}: six links ({links.count()})")
+                check(first in links.first.inner_text(), f"{label}: first link {first}")
+                for index in range(links.count()):
+                    rel = set((links.nth(index).get_attribute("rel") or "").split())
+                    check(rel == {"noopener", "noreferrer"}, f"{label}: rel of link {index}")
+                stores = page.locator("span.about-link-soon")
+                check(stores.count() == 2, f"{label}: two stores without a link")
+                check(page.locator("a.about-link-soon").count() == 0, f"{label}: no store link")
+                for index in range(stores.count()):
+                    check(soon in stores.nth(index).inner_text(), f"{label}: store marked {soon}")
+                tiles = page.locator(".about-links .about-link")
+                for index in range(tiles.count()):
+                    box = tiles.nth(index).bounding_box()
+                    check(box is not None, f"{label}: tile {index} shown")
+                    assert box is not None
+                    say(
+                        f"{label}: tile {index} {box['x']:.0f}..{box['x'] + box['width']:.0f} px,"
+                        f" {box['width']:.0f} x {box['height']:.0f}"
+                    )
+                    check(
+                        box["height"] >= 44 and box["width"] >= 44,
+                        f"{label}: tile {index} is 44 px",
+                    )
+                    check(
+                        box["x"] >= 0 and box["x"] + box["width"] <= width,
+                        f"{label}: tile {index} inside the width",
+                    )
+                scroll = page.evaluate("document.documentElement.scrollWidth")
+                check(scroll <= width, f"{label}: the page does not scroll ({scroll} px)")
+                check(foreign == [], f"{label}: nothing asked of another host: {foreign}")
+                context.close()
+
+
 BACKGROUND_WIDTHS = (320, 360, 375, 1280)
 # Words of the screens, per language: the link being read, a link that could not be read, the
 # test being sent, the test that failed (docs/adr/0070).
@@ -1171,6 +1248,7 @@ def main() -> None:
             "task-lines",
             "item-contract",
             "home-archive",
+            "about-links",
             "form-errors",
             "instance-tabs",
             "background-calls",
@@ -1195,6 +1273,8 @@ def main() -> None:
             item_contract(browser, base)
         elif args.mode == "home-archive":
             home_archive(browser, base)
+        elif args.mode == "about-links":
+            about_links(browser, base)
         elif args.mode == "form-errors":
             form_errors(browser, base)
         elif args.mode == "instance-tabs":

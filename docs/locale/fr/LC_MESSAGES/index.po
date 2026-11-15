@@ -18,17 +18,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
+msgid "HouseCairn plans your home's maintenance and renovation work, room by room: what to do, where, when, with what and for how much. Free, self-hosted, works with Home Assistant."
+msgstr "HouseCairn planifie l'entretien et les travaux de votre maison, pièce par pièce : quoi faire, où, quand, avec quoi et pour combien. Libre, auto-hébergé, compatible avec Home Assistant."
+
 msgid "HouseCairn"
 msgstr "HouseCairn"
 
-msgid "HouseCairn plans the upkeep and the projects of a home, room by room: what needs doing, where, when, with what and for how much. Self-hosted, free software, in English and French."
-msgstr "HouseCairn planifie l'entretien et les travaux d'une maison, pièce par pièce : ce qu'il y a à faire, où, quand, avec quoi et pour combien. Auto-hébergé, logiciel libre, en français et en anglais."
+msgid "**Plan your home's maintenance and renovation work, room by room.**"
+msgstr "**Planifiez l'entretien et les travaux de votre maison, pièce par pièce.**"
 
-msgid "**Early development**"
-msgstr "**Développement précoce**"
+msgid "HouseCairn keeps the list of everything your house needs, from recurring upkeep such as the smoke detector battery to projects such as repainting the living room. For each job it knows the room, the date, the supplies and the planned cost, and anyone in the household marks it done in one tap. It is free software that you host yourself, works on its own, and connects to Home Assistant if you use it."
+msgstr "HouseCairn tient la liste de tout ce dont votre maison a besoin, de l'entretien récurrent comme la pile du détecteur de fumée aux projets comme repeindre le salon. Pour chaque tâche, il connaît la pièce, la date, le matériel et le coût prévu, et chaque membre du foyer la coche en un geste. C'est un logiciel libre que vous hébergez vous-même, qui fonctionne seul et se relie à Home Assistant si vous l'utilisez."
 
-msgid "HouseCairn is not usable for everyday life yet. Accounts and sign-in, homes, the REST API and the container image exist; the screens to plan maintenance and projects do not. These pages describe only what exists today."
-msgstr "HouseCairn n'est pas encore utilisable au quotidien. Les comptes et la connexion, les logements, l'API REST et l'image de conteneur existent ; les écrans pour planifier l'entretien et les travaux n'existent pas encore. Ces pages décrivent seulement ce qui existe aujourd'hui."
+msgid "For example:"
+msgstr "Par exemple :"
+
+msgid "test the smoke detector every six months, without remembering the last time;"
+msgstr "tester le détecteur de fumée tous les six mois, sans retenir la dernière fois ;"
+
+msgid "clean the ventilation filter every three months, with a warning when the spare filters run low;"
+msgstr "nettoyer le filtre de la VMC tous les trois mois, avec une alerte quand les filtres de rechange viennent à manquer ;"
+
+msgid "book the yearly boiler service, with the boiler's model and warranty at hand;"
+msgstr "prévoir l'entretien annuel de la chaudière, avec son modèle et sa garantie sous la main ;"
+
+msgid "repaint the living room, with its quotes and its budget, planned, committed and paid."
+msgstr "repeindre le salon, avec ses devis et son budget, prévu, engagé et payé."
+
+msgid "**Alpha**"
+msgstr "**Alpha**"
+
+msgid "HouseCairn is released as 0.x versions and has not been used in a real home for any length of time yet: what it stores can still change between versions. Try it, and keep a backup of what you enter. These pages describe only what exists today."
+msgstr "HouseCairn est publié en versions 0.x et n'a pas encore servi longtemps dans une vraie maison : ce qu'il enregistre peut encore changer d'une version à l'autre. Essayez-le, et gardez une sauvegarde de ce que vous saisissez. Ces pages décrivent seulement ce qui existe aujourd'hui."
 
 msgid "[Get started](getting-started/index.md)"
 msgstr "[Démarrer](getting-started/index.md)"
@@ -39,8 +60,8 @@ msgstr "Installer HouseCairn avec Docker Compose et se connecter pour la premiè
 msgid "[Guides](guides/index.md)"
 msgstr "[Guides](guides/index.md)"
 
-msgid "Step-by-step pages, written as the planning screens arrive."
-msgstr "Des pages pas à pas, écrites à mesure qu'arrivent les écrans de planification."
+msgid "Tasks and recurrence, rooms and items, projects, budget, stock, step by step."
+msgstr "Tâches et récurrence, pièces et équipements, projets, budget, stock, pas à pas."
 
 msgid "[Screen reference](screens/index.md)"
 msgstr "[Référence des écrans](screens/index.md)"
@@ -66,9 +87,21 @@ msgstr "[Sécurité](security/index.md)"
 msgid "No telemetry, signed images, and how to report a vulnerability."
 msgstr "Aucune télémétrie, des images signées, et comment signaler une vulnérabilité."
 
+msgid "The website, <https://housecairn.app>, presents the project; the source code is on [GitHub](https://github.com/HouseCairn/housecairn), with the [Home Assistant app](https://github.com/HouseCairn/home-assistant-addons) and the [Home Assistant integration](https://github.com/HouseCairn/home-assistant-housecairn)."
+msgstr "Le site, <https://housecairn.app/fr/>, présente le projet ; le code source est sur [GitHub](https://github.com/HouseCairn/housecairn), avec l'[application Home Assistant](https://github.com/HouseCairn/home-assistant-addons) et l'[intégration Home Assistant](https://github.com/HouseCairn/home-assistant-housecairn)."
+
 #~ msgid "The start page of HouseCairn on a computer: the navigation on the left, the HouseCairn logo and a button to go to the homes."
 #~ msgstr "La page d'accueil de HouseCairn sur un ordinateur : la navigation à gauche, le logo HouseCairn et un bouton pour aller aux logements."
 
 #~ msgid "The start page of the application, on a demonstration instance."
 #~ msgstr "La page d'accueil de l'application, sur une instance de démonstration."
+
+#~ msgid "**Early development**"
+#~ msgstr "**Développement précoce**"
+
+#~ msgid "HouseCairn is not usable for everyday life yet. Accounts and sign-in, homes, the REST API and the container image exist; the screens to plan maintenance and projects do not. These pages describe only what exists today."
+#~ msgstr "HouseCairn n'est pas encore utilisable au quotidien. Les comptes et la connexion, les logements, l'API REST et l'image de conteneur existent ; les écrans pour planifier l'entretien et les travaux n'existent pas encore. Ces pages décrivent seulement ce qui existe aujourd'hui."
+
+#~ msgid "Step-by-step pages, written as the planning screens arrive."
+#~ msgstr "Des pages pas à pas, écrites à mesure qu'arrivent les écrans de planification."
 

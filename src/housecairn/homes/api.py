@@ -20,7 +20,8 @@ from rest_framework.views import APIView
 
 from housecairn.accounts.models import User
 from housecairn.accounts.names import person_name
-from housecairn.apitokens.models import ApiToken
+from housecairn.apitokens.credentials import is_session
+from housecairn.apitokens.permissions import CredentialFitsView
 from housecairn.audit import services as audit_services
 from housecairn.audit.api import AuditEventSerializer
 from housecairn.demo.mode import DemoRefusedError
@@ -52,7 +53,7 @@ class NoTokenForHousehold(permissions.BasePermission):
     def has_permission(self, request: Request, view: Any) -> bool:
         if request.method in permissions.SAFE_METHODS:
             return True
-        return not isinstance(request.auth, ApiToken)
+        return is_session(request)
 
 
 # ---------- homes ----------
@@ -176,7 +177,7 @@ class HomeViewSet(
         return self.get_home()
 
     def perform_create(self, serializer: serializers.BaseSerializer[Home]) -> None:
-        if isinstance(self.request.auth, ApiToken):
+        if not is_session(self.request):
             # A token is bound to existing homes; creating one needs a sign-in.
             raise exceptions.PermissionDenied("API tokens cannot create homes.")
         data = serializer.validated_data
@@ -196,7 +197,7 @@ class HomeViewSet(
         serializer.is_valid(raise_exception=True)
         changes = dict(serializer.validated_data)
         provider = changes.pop("required_provider", None)
-        if provider is not None and isinstance(request.auth, ApiToken):
+        if provider is not None and not is_session(request):
             # Refused before anything is written: no rename applied, then a 403.
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         try:
@@ -230,7 +231,7 @@ class HomeViewSet(
         return self._archiving(request, archive=False)
 
     def _archiving(self, request: Request, *, archive: bool) -> Response:
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             # A leaked integration token must not silence the reminders of a home.
             raise exceptions.PermissionDenied(
                 "API tokens cannot archive or bring back a home; sign in instead."
@@ -247,7 +248,7 @@ class HomeViewSet(
     @action(detail=True, methods=["post"])
     def leave(self, request: Request, home_id: str) -> Response:
         """Leave the home. The last owner cannot leave."""
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         home = self.get_home(allow_locked=True)  # leaving never needs the provider
         try:
@@ -261,7 +262,7 @@ class HomeViewSet(
     def audit(self, request: Request, home_id: str) -> Response:
         """Audit log of the home: roles, invitations, sign-in rule, export. Owners only."""
         home = self.get_home()
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         try:
             entries = audit_services.home_log(request.user, home.id)
@@ -282,7 +283,7 @@ class HomeViewSet(
     @action(detail=True, methods=["post"])
     def export(self, request: Request, home_id: str) -> Any:
         home = self.get_home()
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         try:
             exports.check_owner(request.user, home)
@@ -303,7 +304,7 @@ class HomeViewSet(
 
     def _job(self, request: Request, job_id: str) -> tuple[Home, ExportJob]:
         home = self.get_home()
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         try:
             return home, jobs.job_of(request.user, home, uuid.UUID(job_id))
@@ -414,7 +415,7 @@ class HomeViewSet(
     )
     @action(detail=False, methods=["post"], parser_classes=[MultiPartParser])
     def restore(self, request: Request) -> Response:
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied("API tokens cannot restore a home; sign in instead.")
         declared = int(request.META.get("CONTENT_LENGTH") or 0)
         if declared > restore.max_unpacked_bytes():
@@ -445,7 +446,7 @@ class HomeViewSet(
     @action(detail=True, methods=["post"], url_path="delete")
     def delete_home(self, request: Request, home_id: str) -> Response:
         home = self.get_home()
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         confirmation = request.data.get("confirmation") if isinstance(request.data, dict) else None
         try:
@@ -459,7 +460,7 @@ class HomeViewSet(
     def unlock(self, request: Request, home_id: str) -> Response:
         """Stop requiring a sign-in provider the instance no longer offers (owners)."""
         home = self.get_home(allow_locked=True)
-        if isinstance(request.auth, ApiToken):
+        if not is_session(request):
             raise exceptions.PermissionDenied(NoTokenForHousehold.message)
         try:
             home = services.lift_unavailable_requirement(
@@ -665,7 +666,7 @@ class AcceptInvitationView(APIView):
     expired secrets all answer 404.
     """
 
-    permission_classes = [permissions.IsAuthenticated, NoTokenForHousehold]
+    permission_classes = [CredentialFitsView, permissions.IsAuthenticated, NoTokenForHousehold]
 
     @extend_schema(
         request=inline_serializer("InvitationAccept", {"token": serializers.CharField()}),

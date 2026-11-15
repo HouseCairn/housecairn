@@ -46,6 +46,11 @@ reads the page of a link once, in the background just after someone adds it to a
 picture (see [Projects and quotes](../guides/projects.md)). It only calls public addresses:
 never a private network nor a cloud metadata service.
 
+**Mobile app** has one switch, **Mobile app** (on by default): people may connect the HouseCairn
+mobile app to their account ([Connected apps](api-tokens.md#connected-apps)). Off, no phone can
+connect or sync; the connected phones stay listed and work again when it is turned back on (see
+[Settings](../administration/settings.md#mobile-app)).
+
 Saving asks you to have signed in within the last five minutes; if you have not, you
 are sent to confirm your sign-in and then back to the same page, and you make the change again.
 Every change is in the [audit log](instance.md).

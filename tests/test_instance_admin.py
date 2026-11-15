@@ -224,6 +224,8 @@ class TestAccountsAreNotTakenOver:
             "accounts.User",
             "accounts.InstanceSetup",
             "apitokens.ApiToken",
+            # The public client of the mobile app, read only: no secret (docs/adr/0078).
+            "oauth2_provider.Application",
         }
 
     @pytest.mark.parametrize(

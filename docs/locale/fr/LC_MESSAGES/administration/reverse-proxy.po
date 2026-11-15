@@ -72,11 +72,29 @@ msgstr "L'adresse de cette machine."
 msgid "If the value is wrong, HouseCairn ignores the proxy's headers: every request is redirected to HTTPS again (the browser reports too many redirects), and every client is counted under the proxy's address. `*` trusts any peer; use it only if nothing but the proxy can reach the container's port."
 msgstr "Si la valeur est fausse, HouseCairn ignore les en-têtes du proxy : chaque requête est de nouveau redirigée vers HTTPS (le navigateur signale trop de redirections), et tous les clients sont comptés sous l'adresse du proxy. `*` fait confiance à n'importe quel pair ; ne l'utilisez que si rien d'autre que le proxy ne peut atteindre le port du conteneur."
 
+msgid "A trusted proxy that sends no `X-Forwarded-For` leaves its own address as the client's: every client is then counted under the proxy's address, and the mobile app's rule of plain HTTP ([below](#the-mobile-app)) judges the proxy, not the phone. Make the proxy set the header, as Caddy, Traefik and the nginx example below do."
+msgstr "Un proxy de confiance qui n'envoie pas `X-Forwarded-For` laisse sa propre adresse comme celle du client : chaque client est alors compté sous l'adresse du proxy, et la règle du HTTP non chiffré de l'application mobile ([plus bas](#the-mobile-app)) juge le proxy, pas le téléphone. Faites poser l'en-tête par le proxy, comme le font Caddy, Traefik et l'exemple nginx ci-dessous."
+
 msgid "HouseCairn reads the site's name from the `Host` header, never from `X-Forwarded-Host`: the proxy must pass `Host` through. Caddy and Traefik do by default; nginx needs `proxy_set_header Host $host`."
 msgstr "HouseCairn lit le nom du site dans l'en-tête `Host`, jamais dans `X-Forwarded-Host` : le proxy doit transmettre `Host`. Caddy et Traefik le font par défaut ; nginx a besoin de `proxy_set_header Host $host`."
 
 msgid "A proxy may replace HouseCairn's `Referrer-Policy: same-origin` header, as Home Assistant does with `no-referrer`. Each page also states the policy in its `<head>`, which the browser follows over the header: forms keep sending their origin, which the CSRF check needs ([ADR 0076](../adr/0076-referrer-policy-in-the-page.md))."
 msgstr "Un proxy peut remplacer l'en-tête `Referrer-Policy: same-origin` de HouseCairn, comme Home Assistant le fait avec `no-referrer`. Chaque page indique aussi la politique dans son `<head>`, que le navigateur suit plutôt que l'en-tête : les formulaires continuent d'envoyer leur origine, dont le contrôle CSRF a besoin ([ADR 0076](../adr/0076-referrer-policy-in-the-page.md))."
+
+msgid "The mobile app"
+msgstr "L'application mobile"
+
+msgid "The HouseCairn mobile app signs in through `/o/` (its consent page, its token and revocation endpoints) and syncs through `/api/v1/sync/` ([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). These routes answer over HTTPS. Plain HTTP is accepted only when both of these hold:"
+msgstr "L'application mobile HouseCairn se connecte par `/o/` (sa page de consentement, ses points d'accès de jeton et de révocation) et se synchronise par `/api/v1/sync/` ([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). Ces routes répondent en HTTPS. Le HTTP non chiffré n'est accepté que si ces deux conditions sont réunies :"
+
+msgid "**the client is on a local network**: its address, as the trusted proxy reports it in `X-Forwarded-For` (or the peer itself without a trusted proxy), is not a public address: loopback, private networks, unique local IPv6, link-local, the shared space `100.64.0.0/10` of a household VPN, documentation ranges;"
+msgstr "**le client est sur un réseau local** : son adresse, telle que le proxy de confiance la donne dans `X-Forwarded-For` (ou le pair lui-même sans proxy de confiance), n'est pas une adresse publique : boucle locale, réseaux privés, IPv6 unique locale, lien local, l'espace partagé `100.64.0.0/10` d'un VPN du foyer, plages de documentation ;"
+
+msgid "**the address the phone uses is a local IP address**, such as `http://192.0.2.20:8000`, never a name: `.local` and `.home.arpa` names are refused on plain HTTP, since anyone on the network can answer for them. A household that wants a name uses HTTPS."
+msgstr "**l'adresse qu'utilise le téléphone est une adresse IP locale**, comme `http://192.0.2.20:8000`, jamais un nom : les noms en `.local` et `.home.arpa` sont refusés en HTTP non chiffré, puisque n'importe qui sur le réseau peut répondre à leur place. Un foyer qui veut un nom utilise HTTPS."
+
+msgid "Any other plain HTTP request gets 403 with the code `insecure_transport`. A client cannot claim HTTPS: `X-Forwarded-Proto` counts only from a trusted proxy, with `HOUSECAIRN_BEHIND_TLS_PROXY=true`. Behind a proxy, pass the original scheme and `Host`, or the phone is refused. The instance setting **Mobile app** turns the app off ([Settings](settings.md#mobile-app))."
+msgstr "Toute autre requête en HTTP non chiffré reçoit 403 avec le code `insecure_transport`. Un client ne peut pas se faire passer pour HTTPS : `X-Forwarded-Proto` ne compte que venant d'un proxy de confiance, avec `HOUSECAIRN_BEHIND_TLS_PROXY=true`. Derrière un proxy, transmettez le schéma et le `Host` d'origine, sinon le téléphone est refusé. Le réglage d'instance **Application mobile** désactive l'application ([Réglages](settings.md#mobile-app))."
 
 msgid "Caddy on the host"
 msgstr "Caddy sur l'hôte"
@@ -125,4 +143,3 @@ msgstr "Quand un proxy demande une connexion avant HouseCairn (authentification 
 
 msgid "The service worker keeps Today and the task list of the person for reading offline ([Install on a phone](../getting-started/phone.md)). Whatever the proxy, it never keeps a page whose answer is `Cache-Control: no-store`: a proxy that adds that header to every page turns offline reading off."
 msgstr "Le service worker garde Aujourd'hui et la liste des tâches de la personne pour une lecture hors ligne ([Installer sur un téléphone](../getting-started/phone.md)). Quel que soit le proxy, il ne garde jamais une page dont la réponse porte `Cache-Control: no-store` : un proxy qui ajoute cet en-tête à chaque page désactive la lecture hors ligne."
-

@@ -8,5 +8,8 @@ the **Me** group of [More](more.md):
 - **Email addresses**, when the instance sends email: add or verify the
   addresses of your account.
 
+The phones you connected with the HouseCairn mobile app are listed, and revoked, under
+[Connected apps](api-tokens.md#connected-apps); each new connection sends you an email.
+
 **Delete my account** is at the bottom of the page. It opens a confirmation
 page, described under [Delete my account](account.md#delete-my-account).

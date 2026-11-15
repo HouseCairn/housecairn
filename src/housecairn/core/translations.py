@@ -116,6 +116,27 @@ def untranslated(path: Path) -> list[str]:
     return problems
 
 
+def docs_catalogs() -> list[Path]:
+    """The catalogs of the documentation (`docs/locale/<language>/LC_MESSAGES/**/*.po`)."""
+    return sorted((Path(settings.BASE_DIR).parents[1] / "docs" / "locale").rglob("*.po"))
+
+
+def fuzzy_in_docs() -> list[str]:
+    """Fuzzy entries (headers aside) of the documentation catalogs.
+
+    Sphinx drops a fuzzy translation without a warning: the page, release notes
+    included, then shows the English text.
+    """
+    root = Path(settings.BASE_DIR).parents[1] / "docs" / "locale"
+    return [
+        f"{path.relative_to(root) if path.is_relative_to(root) else path}: "
+        f"fuzzy: {entry.msgid[:60]!r}"
+        for path in docs_catalogs()
+        for entry in parse_po(path.read_text(encoding="utf-8"))
+        if entry.fuzzy and entry.msgid
+    ]
+
+
 def inconsistent(language: str) -> list[str]:
     """Strings translated differently in two catalogs: only one of them would be shown."""
     seen: dict[tuple[str | None, str], tuple[list[str], Path]] = {}

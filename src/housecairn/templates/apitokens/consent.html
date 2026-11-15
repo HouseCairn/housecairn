@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Connect the mobile app" %}{% endblock head_title %}
+{% block content %}
+  <h1>{% translate "Connect the HouseCairn mobile app" %}</h1>
+  {% if error %}
+    <p class="card" role="alert">{{ error.description|default:error.error }}</p>
+  {% else %}
+    <form method="post" class="card" novalidate>
+      {% csrf_token %}
+      {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+      <p>{% blocktranslate %}Server: <strong>{{ server }}</strong>{% endblocktranslate %}</p>
+      {% if insecure %}
+        <p role="alert">{% translate "This connection is not encrypted: anyone on this network can read what the phone sends." %}</p>
+      {% endif %}
+      <p>{% translate "This phone will see and change everything in the homes you choose, as you can." %}</p>
+      {% if device_name %}
+        <h2 class="small">{% translate "Name given by the app" %}</h2>
+        <p class="small">{{ device_name }}</p>
+      {% endif %}
+      {% include "components/form_errors.html" with form=form only %}
+      {% with field=form.homes %}
+        {{ field.errors }}
+        <fieldset class="check-list" aria-describedby="{{ field.auto_id }}_helptext">
+          <legend>{{ field.label }}</legend>
+          {% for box in field %}
+            <div class="check-row">
+              {{ box.tag }}
+              <span class="row-body">
+                <label class="row-title" for="{{ box.id_for_label }}">{{ box.choice_label }}</label>
+                {% if box.data.provider %}
+                  <span class="row-text" id="{{ box.id_for_label }}_locked">{% blocktranslate with provider=box.data.provider.name %}The phone opens this home only if you connect it after signing in through {{ provider }}.{% endblocktranslate %}</span>
+                {% endif %}
+              </span>
+            </div>
+          {% endfor %}
+          <span class="helptext" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span>
+        </fieldset>
+      {% endwith %}
+      {% if form.may_create_homes %}
+        <p>
+          {{ form.may_create_homes }} {{ form.may_create_homes.label_tag }}
+          <span class="helptext" id="{{ form.may_create_homes.auto_id }}_helptext">{{ form.may_create_homes.help_text }}</span>
+        </p>
+      {% endif %}
+      <div class="button-row">
+        <button type="submit" name="allow" value="1">{% translate "Connect" %}</button>
+        <button type="submit" class="button-secondary">{% translate "Cancel" %}</button>
+      </div>
+    </form>
+  {% endif %}
+{% endblock content %}

@@ -1,0 +1,167 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Message"
+msgstr "Message"
+
+msgid "The one way HouseCairn describes itself. The website, the README of every repository, this documentation and the GitHub descriptions reuse these words, so that a newcomer reads the same thing everywhere. Change the message here first, then everywhere it is quoted, in the same round of pull requests."
+msgstr "La façon unique dont HouseCairn se présente. Le site, le README de chaque dépôt, cette documentation et les descriptions GitHub reprennent ces mots, pour qu'un nouveau venu lise la même chose partout. Le message se change d'abord ici, puis partout où il est cité, dans la même série de pull requests."
+
+msgid "Headline"
+msgstr "Accroche"
+
+msgid "Plan your home's maintenance and renovation work, room by room."
+msgstr "Planifiez l'entretien et les travaux de votre maison, pièce par pièce."
+
+msgid "Paragraph"
+msgstr "Paragraphe"
+
+msgid "HouseCairn keeps the list of everything your house needs, from recurring upkeep such as the smoke detector battery to projects such as repainting the living room. For each job it knows the room, the date, the supplies and the planned cost, and anyone in the household marks it done in one tap. It is free software that you host yourself, works on its own, and connects to Home Assistant if you use it."
+msgstr "HouseCairn tient la liste de tout ce dont votre maison a besoin, de l'entretien récurrent comme la pile du détecteur de fumée aux projets comme repeindre le salon. Pour chaque tâche, il connaît la pièce, la date, le matériel et le coût prévu, et chaque membre du foyer la coche en un geste. C'est un logiciel libre que vous hébergez vous-même, qui fonctionne seul et se relie à Home Assistant si vous l'utilisez."
+
+msgid "Examples"
+msgstr "Exemples"
+
+msgid "Real situations, each covered by what exists on the `main` branch:"
+msgstr "Des situations réelles, chacune couverte par ce qui existe sur la branche `main` :"
+
+msgid "**The smoke detector**: test it every six months and change its battery when it is due, without having to remember the last time."
+msgstr "**Le détecteur de fumée** : le tester tous les six mois et changer sa pile le moment venu, sans avoir à retenir la dernière fois."
+
+msgid "**The ventilation filter**: clean it every three months, and get a warning when the spare filters in stock run low."
+msgstr "**Le filtre de la VMC** : le nettoyer tous les trois mois, et être prévenu quand les filtres de rechange en stock viennent à manquer."
+
+msgid "**The boiler**: its yearly service, with the brand, the model and the end of the warranty kept on the boiler's page."
+msgstr "**La chaudière** : son entretien annuel, avec la marque, le modèle et la fin de garantie gardés sur la fiche de la chaudière."
+
+msgid "**Repainting the living room**: a project with its quotes and its budget lines (paint and primer, the painter for the ceiling), planned, committed and paid, and the paint reference kept on the room for next time."
+msgstr "**Repeindre le salon** : un projet avec ses devis et ses lignes de budget (peinture et sous-couche, le peintre pour le plafond), prévues, engagées et payées, et la référence de la peinture gardée sur la pièce pour la prochaine fois."
+
+msgid "**The gutters**: cleared every autumn only, as a seasonal task."
+msgstr "**Les gouttières** : nettoyées chaque automne seulement, en tâche saisonnière."
+
+msgid "Who it is for, and what it is not"
+msgstr "Pour qui, et ce qu'il n'est pas"
+
+msgid "HouseCairn is for the people who live in a house or a flat, owners or tenants, alone or as a household, who want one shared list instead of notes, spreadsheets and memory."
+msgstr "HouseCairn s'adresse aux personnes qui vivent dans une maison ou un appartement, propriétaires ou locataires, seules ou en foyer, qui veulent une liste partagée plutôt que des notes, des tableurs et de la mémoire."
+
+msgid "It is not:"
+msgstr "Ce n'est pas :"
+
+msgid "**business maintenance software** (a CMMS) for buildings, sites or fleets;"
+msgstr "**un logiciel de maintenance d'entreprise** (une GMAO) pour des bâtiments, des sites ou des flottes ;"
+
+msgid "**a home automation app**: it drives no device and reads no sensor by itself. It works alongside [Home Assistant](https://www.home-assistant.io/), which calls HouseCairn, never the other way round;"
+msgstr "**une application de domotique** : il ne pilote aucun appareil et ne lit aucun capteur de lui-même. Il fonctionne avec [Home Assistant](https://www.home-assistant.io/), qui appelle HouseCairn, jamais l'inverse ;"
+
+msgid "**a home inventory** of everything you own, nor a grocery and household manager: [Homebox](https://homebox.software/) and [Grocy](https://grocy.info/) do that well. HouseCairn keeps only the items that need upkeep (the boiler, the smoke detectors) and the supplies they use."
+msgstr "**un inventaire** de tout ce que vous possédez, ni un gestionnaire de courses et du foyer : [Homebox](https://homebox.software/) et [Grocy](https://grocy.info/) le font bien. HouseCairn ne garde que les équipements qui demandent de l'entretien (la chaudière, les détecteurs de fumée) et les fournitures qu'ils consomment."
+
+msgid "Words people search for"
+msgstr "Les mots que les gens cherchent"
+
+msgid "Chosen from how comparable projects and sites describe themselves (listed below). No search volume is claimed: these are the words they use, placed naturally in a title, a first paragraph or a description, never as a list of keywords."
+msgstr "Choisis d'après la façon dont des projets et des sites comparables se décrivent (liste ci-dessous). Aucun volume de recherche n'est avancé : ce sont les mots qu'ils emploient, placés naturellement dans un titre, un premier paragraphe ou une description, jamais en liste de mots-clés."
+
+msgid "English:"
+msgstr "En anglais :"
+
+msgid "home maintenance app, home maintenance tracker, house maintenance tracker"
+msgstr "home maintenance app, home maintenance tracker, house maintenance tracker"
+
+msgid "home maintenance planner, maintenance tracker, recurring tasks"
+msgstr "home maintenance planner, maintenance tracker, recurring tasks"
+
+msgid "renovation planner, renovation budget, home improvement"
+msgstr "renovation planner, renovation budget, home improvement"
+
+msgid "self-hosted, Home Assistant, household"
+msgstr "self-hosted, Home Assistant, household"
+
+msgid "French:"
+msgstr "En français :"
+
+msgid "entretien de la maison, suivi de l'entretien de la maison"
+msgstr "entretien de la maison, suivi de l'entretien de la maison"
+
+msgid "carnet d'entretien maison, carnet d'entretien du logement"
+msgstr "carnet d'entretien maison, carnet d'entretien du logement"
+
+msgid "suivi des travaux, travaux de la maison, budget travaux"
+msgstr "suivi des travaux, travaux de la maison, budget travaux"
+
+msgid "entretien de la chaudière, auto-hébergé, Home Assistant"
+msgstr "entretien de la chaudière, auto-hébergé, Home Assistant"
+
+msgid "Sources"
+msgstr "Sources"
+
+msgid "How comparable projects and sites name what they do (read on 2026-11-15):"
+msgstr "Comment des projets et des sites comparables nomment ce qu'ils font (lu le 2026-11-15) :"
+
+msgid "[HomeLogger](https://github.com/FrancisLaboratories/homelogger): \"An open source self-hosted home maintenance tracker\"."
+msgstr "[HomeLogger](https://github.com/FrancisLaboratories/homelogger) : « An open source self-hosted home maintenance tracker »."
+
+msgid "[Homi](https://github.com/Yuss9/homi): \"A private, self-hosted home maintenance journal\"; GitHub topics `home-maintenance`, `maintenance-tracker`, `household`, `self-hosted`."
+msgstr "[Homi](https://github.com/Yuss9/homi) : « A private, self-hosted home maintenance journal » ; sujets GitHub `home-maintenance`, `maintenance-tracker`, `household`, `self-hosted`."
+
+msgid "[HomeKeeper](https://gethomekeeper.app/): home maintenance, warranties, inspections and costs."
+msgstr "[HomeKeeper](https://gethomekeeper.app/) : entretien de la maison, garanties, contrôles et coûts."
+
+msgid "[Home Keeper for Home Assistant](https://github.com/prestomation/ha-home-keeper) and [Maintenance Supporter](https://github.com/iluebbe/maintenance_supporter): \"tracking home maintenance\" inside Home Assistant."
+msgstr "[Home Keeper pour Home Assistant](https://github.com/prestomation/ha-home-keeper) et [Maintenance Supporter](https://github.com/iluebbe/maintenance_supporter) : « tracking home maintenance » dans Home Assistant."
+
+msgid "[Grocy](https://github.com/grocy/grocy): \"self-hosted groceries & household management\", with chores and batteries."
+msgstr "[Grocy](https://github.com/grocy/grocy) : « self-hosted groceries & household management », avec tâches ménagères et piles."
+
+msgid "[Homebox](https://homebox.software/): \"home inventory management\"."
+msgstr "[Homebox](https://homebox.software/) : « home inventory management »."
+
+msgid "[HomeBook](https://monhomebook.fr/): « Le carnet d'entretien numérique de votre logement »."
+msgstr "[HomeBook](https://monhomebook.fr/) : « Le carnet d'entretien numérique de votre logement »."
+
+msgid "[Houskare](https://www.houskare.com/): « le carnet d'entretien numérique de votre maison »."
+msgstr "[Houskare](https://www.houskare.com/) : « le carnet d'entretien numérique de votre maison »."
+
+msgid "[Hom'easy](https://hom-easy.com/carnet-entretien-maison): « Carnet d'entretien de la maison »."
+msgstr "[Hom'easy](https://hom-easy.com/carnet-entretien-maison) : « Carnet d'entretien de la maison »."
+
+msgid "[Housemindr](https://housemindr.app/fr): « Suivi de l'entretien de la maison »."
+msgstr "[Housemindr](https://housemindr.app/fr) : « Suivi de l'entretien de la maison »."
+
+msgid "[CLÉA](https://clea.qualitel.org/particuliers): « l'entretien et la rénovation de votre logement »."
+msgstr "[CLÉA](https://clea.qualitel.org/particuliers) : « l'entretien et la rénovation de votre logement »."
+
+msgid "Where it is used"
+msgstr "Où il est repris"
+
+msgid "The website, `HouseCairn/website`: the first section of the home page, the page titles and descriptions, the Open Graph images."
+msgstr "Le site, `HouseCairn/website` : la première section de l'accueil, les titres et descriptions des pages, les images Open Graph."
+
+msgid "The README of each repository: `housecairn`, `website`, `home-assistant-addons`, `home-assistant-housecairn`, `housecairn-mobile`."
+msgstr "Le README de chaque dépôt : `housecairn`, `website`, `home-assistant-addons`, `home-assistant-housecairn`, `housecairn-mobile`."
+
+msgid "The home page of this documentation and its description."
+msgstr "L'accueil de cette documentation et sa description."
+
+msgid "The description of each repository on GitHub."
+msgstr "La description de chaque dépôt sur GitHub."
+

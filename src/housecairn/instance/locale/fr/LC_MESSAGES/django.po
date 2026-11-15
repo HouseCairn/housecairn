@@ -205,6 +205,9 @@ msgstr "Notifications"
 msgid "Projects"
 msgstr "Projets"
 
+msgid "Mobile app"
+msgstr "Application mobile"
+
 msgid "Save the public address"
 msgstr "Enregistrer l'adresse publique"
 
@@ -231,6 +234,9 @@ msgstr "Enregistrer les réglages des notifications"
 
 msgid "Save the project settings"
 msgstr "Enregistrer les réglages des projets"
+
+msgid "Save the mobile app setting"
+msgstr "Enregistrer le réglage de l'application mobile"
 
 msgid "Expected a whole number."
 msgstr "Un nombre entier est attendu."
