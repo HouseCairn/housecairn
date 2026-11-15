@@ -47,6 +47,7 @@ WAITING_FOR_ITS_LOT = {
 # Tables that hang off a home and are not rows of the protocol: said once, with the reason.
 NOT_SYNCED = {
     "apitokens.ApiToken_homes": "which homes a token reaches",
+    "apitokens.AppConnection_homes": "which homes a connected app reaches",
     "calendar.Feed": "the secret address of a calendar feed of the web",
     "events.Event": "the instance log of events",
     "homes.ExportJob": "an archive made for a download",

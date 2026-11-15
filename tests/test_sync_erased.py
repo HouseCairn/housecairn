@@ -3,11 +3,11 @@
 import uuid
 
 import pytest
-from django.apps import apps
 from django.db import transaction
 from django.utils import timezone
 
 from housecairn.accounts.models import User
+from housecairn.apitokens.models import AppConnection
 from housecairn.homes import services
 from housecairn.homes.models import Home
 from housecairn.sync import changes, erased
@@ -71,6 +71,19 @@ def test_a_deletion_rolled_back_with_its_transaction_leaves_no_row(alice_home: H
     assert Home.objects.filter(pk=alice_home.pk).exists()
 
 
+def test_a_failure_while_erasing_leaves_no_row_even_outside_a_transaction(
+    alice_home: Home, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from unittest import mock
+
+    broken = mock.MagicMock()
+    broken.filter.return_value.delete.side_effect = RuntimeError
+    monkeypatch.setattr(services.Home, "all_objects", broken)
+    with pytest.raises(RuntimeError):
+        services.erase_home(alice_home)
+    assert not ErasedHome.objects.exists()
+
+
 def test_the_connections_bound_to_the_home_are_kept_with_the_row(
     alice_home: Home, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -80,31 +93,23 @@ def test_the_connections_bound_to_the_home_are_kept_with_the_row(
     assert ErasedHome.objects.get().connection_ids == ids
 
 
-@pytest.mark.skipif(
-    not apps.is_installed("housecairn.apitokens")
-    or not any(
-        m.__name__ == "AppConnection" for m in apps.get_app_config("apitokens").get_models()
-    ),
-    reason="The connected apps arrive with the OAuth lot",
-)
-def test_the_connected_apps_bound_to_the_home_are_read(
-    alice: User, alice_home: Home
-) -> None:  # pragma: no cover - runs once the model exists
-    model = apps.get_model("apitokens", "AppConnection")
-    mine = model.objects.create(user=alice)
-    mine.homes.add(alice_home)
-    model.objects.create(user=alice)  # bound to no home
-    assert erased.connection_ids_of(alice_home.pk) == [str(mine.pk)]
+def test_the_connected_apps_bound_to_the_home_are_read(alice: User, alice_home: Home) -> None:
+    bound = AppConnection.objects.create(user=alice)
+    bound.homes.add(alice_home)
+    revoked = AppConnection.objects.create(user=alice, revoked_at=timezone.now())
+    revoked.homes.add(alice_home)
+    AppConnection.objects.create(user=alice)  # bound to no home
+    other = Home.objects.create(name="Other")
+    elsewhere = AppConnection.objects.create(user=alice)
+    elsewhere.homes.add(other)
+    assert erased.connection_ids_of(alice_home.pk) == sorted([str(bound.pk), str(revoked.pk)])
 
 
-def test_a_home_with_no_connected_app_model_has_no_connection_to_remember(
-    alice_home: Home, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    def missing(app_label: str, model_name: str) -> None:
-        raise LookupError
-
-    monkeypatch.setattr(erased.apps, "get_model", missing)
-    assert erased.connection_ids_of(alice_home.pk) == []
+def test_erasing_a_home_keeps_the_connections_bound_to_it(alice: User, alice_home: Home) -> None:
+    bound = AppConnection.objects.create(user=alice)
+    bound.homes.add(alice_home)
+    services.erase_home(alice_home)
+    assert ErasedHome.objects.get().connection_ids == [str(bound.pk)]
 
 
 def test_erasing_twice_keeps_one_row_and_the_latest_time(alice_home: Home) -> None:
