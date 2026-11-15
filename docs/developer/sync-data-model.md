@@ -78,6 +78,16 @@ written or removed in its table. Every check that can refuse an operation (role,
 id, references) runs before anything is written; the whole push is one transaction, and an
 operation that breaks a rule of the database refuses the push (400) instead of failing.
 
+A `delete` or a `restore` of a row the table does not hold is recorded all the same
+(`record_change` alone): its `RowClocks` keeps the clock of `deleted_at`, and `tombstoned_at`
+for a deletion, so that a `put` arriving later, from another phone, inserts the row deleted
+(`rows._create_stamped`); the snapshot gives such a tombstone as a line of its own. When a push
+inserts a row, the columns the phone did not set get the zero clock in `RowClocks`: without a
+clock of its own, a field reads as the `updated_at` of the row, the time of the insert, and an
+older write of it would lose to nobody. The values of an operation are walked with a stack, not
+by recursion (at most 32 levels, texts UTF-8 only), and `extra` is bounded per row (64 fields,
+64 KiB), so that a push is refused with 400 rather than failing.
+
 `sync_push` keeps, per connection, the number of each push, the SHA-256 of its body and the
 answer, 30 days; the nightly purge removes the older ones. The connection keeps the device id of
 its first push (`AppConnection.device_id`).

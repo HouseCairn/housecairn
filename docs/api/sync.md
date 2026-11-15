@@ -151,24 +151,31 @@ change it already has from the snapshot changes nothing when applied again.
 - `sv`: the schema version of the app. Below the lowest version the server accepts (1), the
   app reads but does not write: `400` with `"code": "sync_version"`.
 - `device`: the device id of the phone, 16 bytes in base64url. The first push of a connection
-  fixes it; another one afterwards, the device id of another connection or the server's own is
-  refused (`409` with `"code": "wrong_device"`, or `400`).
+  fixes it; another one afterwards, the device id of another connection in use or the server's
+  own is refused (`409` with `"code": "wrong_device"`, or `400`). A revoked connection holds no
+  device id: a phone signed out then in again pushes with its own.
 - `ops`: at most 500 operations of the protocol, in the order the phone made them. A body is at
   most 1 MiB. Beyond either limit: `400` with `"code": "too_large"`.
 
 The push is applied in one transaction, as a whole or not at all. An operation the server
-cannot read (a type, an id, a clock or a value out of form, a new row without the fields it
-needs, a write that breaks a rule of the data) makes the whole push `400` with
-`"code": "malformed"` and the `index` of the operation, and nothing is written.
+cannot read (a type, an id, a clock or a value out of form, a text that is not valid Unicode, a
+value that nests lists or objects more than 32 deep, a new row without the fields it needs, a
+write that breaks a rule of the data) makes the whole push `400` with `"code": "malformed"` and
+the `index` of the operation, and nothing is written. So does an operation that would leave a
+row with more than 64 fields the server does not know, or more than 64 KiB of them as JSON.
 
 **Each field is decided on its own**: a field is written only if the clock of the operation,
 then its device id, is greater than the ones the field holds; the server keeps a clock per field
 of every row, and a write made on the web gets one from the server's clock. A `put` of a row the
-server does not have creates it with the phone's id. A `delete` or a `restore` writes the field
-`deleted_at`; a `put` never brings back a deleted row, only a `restore` with a later clock
-does. A field the server has no column for (written by a newer app) is kept and given back to
+server does not have creates it with the phone's id; the fields it does not set can be written
+by any later operation. A `delete` or a `restore` writes the field `deleted_at`; a `put` never
+brings back a deleted row, only a `restore` with a later clock does. A `delete` may come before
+the `put` of its row, from another phone: the server keeps it, the row then comes deleted, and
+the snapshot gives the deletion of a row the server does not have yet. A field the server has no column for (written by a newer app) is kept and given back to
 the other phones; a file reference is kept the same way until the server stores the files of
-the phone. A phone writes `completed_by_id` as its own account, whatever the operation says.
+the phone. The server writes who acted, whatever the operation says: `completed_by_id` and
+`closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no
+later operation changes. `assignee_id` may name any member of the home.
 
 ```json
 {
@@ -189,7 +196,7 @@ Each operation gets one result, with its index `i`:
 | Status | Meaning |
 | --- | --- |
 | `applied` | Written, perhaps with some fields lost. |
-| `ignored` | Nothing written: every field lost, the same operation was applied before, or the row to delete or restore is not on the server. |
+| `ignored` | Nothing written: every field lost, or the same operation was applied before. |
 | `rejected` | Not written, with a `code` the app shows on the row without blocking the rest of the push. |
 
 - `lost`: for each field that lost, the value, the clock and the device of the write that won.
@@ -206,6 +213,7 @@ The codes of a rejected operation:
 | `invalid_reference` | A reference names a row that is not in this home, or a person who is not a member; or the id of a link row does not name its two rows. |
 | `wrong_home` | The operation names another home than the one of the route. |
 | `id_taken` | The id is held by a row of another home or of another type. The answer does not say where. |
+| `clock_ahead` | The clock of the operation is more than 24 hours ahead of the server's: the date of the phone is wrong. The other operations of the push apply. |
 
 A push to a home that was erased answers `410` with `"code": "home_gone"`, and applies nothing.
 

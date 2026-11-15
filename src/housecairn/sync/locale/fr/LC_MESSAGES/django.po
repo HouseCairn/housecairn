@@ -70,6 +70,13 @@ msgstr "%(name)s est un UUID sous sa forme textuelle canonique."
 msgid "A text holds a NUL character."
 msgstr "Un texte contient un caractère NUL."
 
+msgid "A text is not valid Unicode."
+msgstr "Un texte n'est pas de l'Unicode valide."
+
+#, python-format
+msgid "A value is nested more than %(depth)s deep."
+msgstr "Une valeur est imbriquée sur plus de %(depth)s niveaux."
+
 msgid "An operation is a JSON object."
 msgstr "Une opération est un objet JSON."
 
@@ -134,6 +141,10 @@ msgstr "Cette opération enfreint une règle des données."
 #, python-format
 msgid "A new row needs %(fields)s."
 msgstr "Une nouvelle ligne a besoin de %(fields)s."
+
+#, python-format
+msgid "A row keeps at most %(fields)s fields the server does not know, %(bytes)s bytes together."
+msgstr "Une ligne garde au plus %(fields)s champs inconnus du serveur, %(bytes)s octets en tout."
 
 msgid "A link names both of its rows."
 msgstr "Un lien nomme ses deux lignes."
