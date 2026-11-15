@@ -20,6 +20,158 @@ The notes of each version are also published with it on the project's
 ```{release-fragments} upgrade
 ```
 
+## 0.4.0
+
+HouseCairn is still alpha software. This version opens the server to the HouseCairn mobile app: a phone connects with OAuth 2 and PKCE, sees only the homes it was given, and reads and pushes their changes field by field through a new sync API, checked against the rules the web applies. It also adds barcodes to the stock and the items, a list of every item of the home with its manufacturer's warranty, the archiving of a home and sheets saved as you go, and fixes a sign-in that could sign the person out at once. Read the upgrade notes before updating: eleven migrations of HouseCairn and those of a new dependency run, two settings are new, the export format becomes version 4, and going back to 0.3.2 needs the backup made before.
+
+### New
+
+- **Connected apps.** The HouseCairn mobile app can connect to this server: it opens the
+  server's own sign-in page in the phone's browser (OAuth 2 with PKCE), where you choose the
+  homes the phone sees and whether it may create homes. Each phone is listed under
+  **Connected apps** on the [API tokens](screens/api-tokens.md#connected-apps) page,
+  where you rename it, change its homes or revoke it; every new connection sends you an email.
+  A connected phone opens only the sync API of the app, starting with
+  `GET /api/v1/sync/info`, never the rest of the API.
+
+- **Sync API, reading.** A connected mobile app reads the homes it was given, with their
+  members, the changes of a home since its last position and the snapshot of a home, under
+  `/api/v1/sync/` ([Sync API](api/sync.md)). An erased home is reported to the phones
+  that had it, and a phone away longer than the 400 days changes are kept starts again from the
+  snapshot.
+
+- **Sync API, pushing.** A connected mobile app sends what was typed on the phone to a home it
+  was given (`POST /api/v1/sync/homes/{id}/push`, [Sync API](api/sync.md)). Each field
+  is decided on its own by its clock, so two people who edit two fields of one task both keep
+  their change; the app learns which of its values lost, and keeps its long texts that lost as
+  an other version. A push sent twice runs once, a read-only member writes nothing, and only an
+  owner archives a home.
+
+- **Sync API, rules across rows.** What a phone pushes is checked against the rules of the
+  tasks, as the web applies them ([Sync API](api/sync.md)): a task never keeps two open
+  occurrences, an undo taken on a phone while someone else postponed the next occurrence gives
+  way to that edit, the next date of a task done on a phone is the one its repeat rule gives,
+  and the stock follows a task marked done on a phone once. The home's activity log lists the
+  tasks marked done or skipped from a phone, with the person who did it.
+
+- **Same ids as the mobile app.** The occurrence that follows a closed one, the materials of a
+  task, what a closing takes from the stock and the annual envelope of a year now get the ids
+  the mobile app computes for them, so that the same row made on the web and on a phone is one
+  row. Closing a task again after an undo brings back the occurrence the undo removed, and a
+  restore as a copy computes these ids again. Ids stay UUIDs with no meaning for a client; the
+  rows made before keep theirs.
+
+- **Barcodes.** A stock item and an item of a room keep their barcode (EAN-8, EAN-13, UPC-A or GTIN-14, with its check digit), which you can type or scan with the camera, and you can search by it. If the administrator turns the lookup on (it is off by default), scanning a barcode can fill in the empty fields of the form from Open Products Facts, then Open Food Facts, and bring a photo of the product with its credit. See [Stock](guides/stock.md) and [Barcodes](administration/barcodes.md).
+
+- **Every item of the home.** **Equipment**, a new tab of Rooms beside Stock, lists the items of
+  every room, filtered by room and by text, with their warranty and their next task. See
+  [Equipment](screens/equipment.md).
+
+- **Manufacturer's warranty.** An item has a purchase date and a warranty apart from its
+  maintenance contract: a duration in months or years, who gives it (the manufacturer or the
+  shop, with its name) and its start, the purchase date by default; its end is worked out and
+  shown. The end typed on an item before is kept. See
+  [Rooms and items](guides/rooms-and-items.md).
+
+- **Millilitre.** The units of a stock item include the millilitre (mL).
+
+- **One line of materials.** The task form opens with one empty line of materials;
+  **+ Add a line** adds the next ones.
+
+- **Materials from the stock.** A task whose stock items have a unit price has its materials
+  calculated from them, each time and over the year, with no material budget to type; a material
+  budget typed before is kept but no longer added to them, so such a task plans less than before.
+  Its page puts what is planned apart from what was really paid. See
+  [Budget](guides/budget.md).
+
+- **Saved as you go.** The sheets of an item, a room, a task and a stock item save each field as
+  it changes, and say **Saved**; **Save** stays for a browser without script.
+
+- **Archive a home.** An owner can archive a home that is no longer in use, from its page, and bring it back. An archived home is listed apart on My homes, leaves Today, the calendar and the home selector, sends no reminder, and its calendar feeds stay valid but empty. Nothing is deleted: it can still be opened, changed and exported. See [Home](screens/home.md).
+
+- **Two worked examples.** The demo home now holds the descaling of an espresso machine, with its water filter taken from the stock at each Done and its cost a year, and a bathroom project with two quotes compared, one accepted on a budget line, inspiration links and the envelope of the year. The [Examples](guides/examples.md) page follows both, step by step.
+
+- **Links on About.** The About screen shows a row of icons that lead to the project site, the documentation, the application code, the Home Assistant app and integration, and the mobile application. The iOS and Android icons are marked **Coming soon** and are not links until the apps are published. See [About](screens/about.md).
+
+### Fixed
+
+- **Signed out right after signing in.** On a slow server, signing in with the password could
+  land back on the sign-in page, under "Successfully signed in": a request the sign-in page had
+  started by itself (the passkey offered in the address field, or the offline pages the
+  installable application keeps) answered after the sign-in with the session of before. The
+  passkey request is now cancelled when the form is sent, and the offline pages are kept
+  without the session.
+
+- **Connecting a phone.** A link to the consent page with `approval_prompt=auto` showed an error
+  page; it now shows the consent page, which is never skipped. The email that says a phone was
+  connected is sent only once the server has given the phone its code.
+
+- **No new calendar feed for an archived home.** Creating a feed of an archived home is now
+  refused, from the page as from the API, as the page already offered none; a feed it has keeps
+  working as before. See [Calendar and feeds](guides/calendar.md).
+
+- **Pages on a phone.** Below the five sections, a page now starts with its back link and its
+  title, without the brand bar, and the button that saves a form stays at the bottom of the
+  screen while the form scrolls.
+
+- **Words.** Labels of the forms no longer end with a colon. In French, the filters of the
+  reports read *Ouverts*, *Classés* and *Tous*, a planned project is *Prévu*, and the memory of a
+  room says *Peinture restante en stock*.
+
+### Upgrade notes
+
+- **Eleven migrations, and a new dependency.** This version adds django-oauth-toolkit (and
+  jwcrypto, which it pulls in) to the image. At start-up its own migrations run, then those of
+  HouseCairn: `apitokens.0003` (the connected apps) and `apitokens.0004` (it creates the one
+  client of the mobile app), `sync.0001` (the change log, and the identifier the server writes
+  with, made once and part of the database, so a backup carries it), `sync.0002` (the pushes
+  already answered), `sync.0003` (the connected apps of an erased home, moved to a table of
+  their own), `homes.0007` (the date a home was archived), `rooms.0006` (the purchase date and
+  the warranty of an item), `rooms.0007` and `stock.0007` (the barcode, and the credit of a
+  photo), `stock.0006` (the millilitre) and `barcodes.0001` (the answers of the lookup).
+
+- **Two new settings, also in the interface.** **Mobile app**
+  (`HOUSECAIRN_MOBILE_APP_ENABLED`), on by default, lets people connect the mobile app; off, no
+  phone can connect or sync ([Settings](administration/settings.md#mobile-app)). **Online
+  lookup of barcodes** (`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`), off by default, asks Open Products
+  Facts, then Open Food Facts, what a scanned code is, and sends them the code only
+  ([Barcodes](administration/barcodes.md)). The Coolify file and
+  `deploy/production.env.example` name both: left empty, a variable gives the default and leaves
+  the field free in the interface ([variables](administration/variables.md)).
+
+- **The change log of the mobile app, and its nightly purge.** A new `sync` application records
+  every write of a home, a room, an item, a photo, the stock, a report, a task and a project,
+  from the web, the API, a CSV import, a restore or the background reading of a link, field by
+  field and only for what changed; the sync API reads it. A nightly task at 03:30, in the time
+  zone of the instance, removes what is older than 400 days, with the files of the photos it
+  deletes. Taking back a "Done" now keeps the next occurrence as a deleted row, so that a phone
+  learns of it, and deleting an account takes it off the tasks of the homes that stay. When a
+  home is deleted, the instance keeps its identifier, the time it was deleted and the connected
+  apps that were linked to it. Restoring an archive whose "updated at" date of the home or of an
+  object is more than a day ahead of the clock of the instance is now refused
+  ([Data model of the synchronization](developer/sync-data-model.md)).
+
+- **Export format 4, and `archived_at` in the API.** The archive of a home now carries the date the home was archived (`archived_at` in `data/homes.json`), so its export format is version 4; archives of versions 2 and 3 are still restored, as homes that are not archived. In the API, a home has a read-only `archived_at` (`null` when it is not archived), and `GET /api/v1/homes/` still lists archived homes: nothing changes for an integration. `POST /api/v1/homes/<id>/archive/` and `unarchive/` are new, for owners signed in. See [Export and deletion](administration/data.md).
+
+- **Behind a reverse proxy.** The mobile app needs HTTPS, or plain HTTP between local addresses
+  only, and the proxy must pass the original scheme and `Host`. A trusted proxy that sends no
+  `X-Forwarded-For` leaves its own address as the client's
+  ([Reverse proxy](administration/reverse-proxy.md#the-mobile-app)).
+
+- **The camera, behind a proxy.** The `Permissions-Policy` header of HouseCairn now allows the
+  camera to the pages of the instance, `camera=(self)` instead of `camera=()`, for the **Scan**
+  button of a barcode field; microphone, location, payment and USB stay off. A proxy that sets
+  its own `Permissions-Policy` must allow `camera=(self)` too, or the button only answers "No
+  camera could be used. Type the digits under the bars." The browser gives the camera only to a
+  page served over HTTPS or from `localhost`: over plain HTTP the button is not shown, and the
+  code is typed ([Reverse proxy](administration/reverse-proxy.md)).
+
+- **Going back to 0.3.2 needs the backup.** The 0.3.2 image does not undo these migrations, and
+  on the database they changed it can no longer create a stock item, an item or a photo (their
+  new columns have no default in the database) nor restore an archive of format 4. To go back,
+  restore the [backup](administration/backup.md) made before the update: what was done since is
+  lost ([Update](administration/update.md)).
+
 ## 0.3.2
 
 HouseCairn is still alpha software. This version makes forms work again in the Home Assistant app, where every form got "Session expired": the app takes the fix with its own version 0.3.2, which runs this image. It also counts every planned amount of a task in the budget, applies the language a person chooses everywhere, shows the photo of a report on the task made from it, and offers on Today to receive the reminders on the device. Read the upgrade notes before updating: the notification settings lose their `language` in the API, three migrations run, and no setting is new.
