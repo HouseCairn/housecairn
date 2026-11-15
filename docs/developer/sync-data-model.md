@@ -121,6 +121,10 @@ files of their photos are removed from the disk once the purge is committed. A r
 whose reference the purge empties (`SET_NULL`: the paint of a room whose article is purged, the
 contract of an item whose contractor is) records that change, as any write of a row does.
 
+The rows a purged row takes with it by cascade (the quotes of a project, the rows of its link
+tables) lose their clocks too, and their files are removed from the disk once the purge is
+committed: the purge leaves no clock without its row and no file without its record.
+
 ## Which applications record their changes
 
 An application is covered when every write path of its models calls the change log and the
@@ -164,4 +168,29 @@ covered application adds no change. A lot that covers an application adds its na
 deletion, hard deletion) that runs the code the application really runs, in a file of its own,
 `tests/sync_scenarios_<lot>.py`, that the test loads. A kind that cannot happen goes to
 `NOT_APPLICABLE` with its reason. An application that is listed without scenarios, or whose
-scenario writes without recording, fails. Covered today: `homes` (the home itself) and `rooms` (rooms, items, photos).
+scenario writes without recording, fails. Covered today: `homes` (the home itself) and `rooms` (rooms, items, photos); the later lots add their application to the table below.
+
+## Covered applications
+
+| Application | Lot | Rows |
+| --- | --- | --- |
+| `projects` | M3e | project, budget line, quote, file, link, task of a project, annual envelope, rooms of a project |
+
+**Projects.** The services of `housecairn.projects` call `housecairn.projects.changelog`, which
+compares the row with what the database held before the write and records the fields whose
+value changed. A change carries the columns of the model, a foreign key by its column name
+(`project_id`); it leaves out the times the server keeps, where the reading of a link's page
+stands (`preview_state`, not data of the home, as in the export) and the stored files of a
+`projects.projectfile`, whose references the lot of the files maps. Taking a task out of a
+project deletes its link for good, so that the task may join another project, and leaves a
+tombstone first; so does deleting a project for the links to its tasks.
+
+**Link tables.** A row of a link table has no id a phone could share: its change is recorded
+under `uuid5(home, t + ":" + owner + ":" + other)`, as ADR 0077 names it
+(`housecairn.sync.links`). Linking two rows again restores the row from its tombstone.
+
+**Restore.** A restore records the rows it inserts itself (`sync.rows.record_created`), the rows
+of the projects included; the rows of a link table have no row of their own there. The projects
+section of the export therefore gives `on_written`, which a restore, as a copy or not, calls with
+the rows of the section once they and their links are written, in its transaction: the
+application records the links under their new ids.

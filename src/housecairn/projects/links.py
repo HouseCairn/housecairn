@@ -24,7 +24,7 @@ from rest_framework.request import Request
 from housecairn.audit import services as audit
 from housecairn.homes.scoping import allow
 from housecairn.instance.config import get_setting
-from housecairn.projects import preview
+from housecairn.projects import changelog, preview
 from housecairn.projects.models import (
     MAX_LINKS_PER_PROJECT,
     PreviewState,
@@ -129,6 +129,7 @@ def _save(actor: AnyUser, project: Project, address: str, title: str, reading: b
     )
     link.full_clean(exclude=["image"])
     link.save()
+    changelog.saved(link)
     audit.record_object(
         "project_link.added",
         actor=actor,
@@ -204,6 +205,7 @@ def _fill(link_id: object, started: datetime.datetime | None, found: preview.Pre
     )
     if link is None:  # deleted, or already ended past its deadline
         return
+    before = changelog.stored(link)
     changed = []
     if found.title and not link.title:
         link.title = found.title
@@ -214,6 +216,7 @@ def _fill(link_id: object, started: datetime.datetime | None, found: preview.Pre
             changed.append("image")
     if changed:
         link.save(update_fields=[*changed, "updated_at"])
+        changelog.saved(link, before)
 
 
 def _store_picture(project: Project, link: ProjectLink, data: bytes) -> ProjectFile | None:
@@ -249,8 +252,10 @@ def delete_link(actor: AnyUser, link: ProjectLink) -> None:
     _require_write(actor, link.home)
     doomed = [link.image] if link.image is not None else []
     link.soft_delete()
+    changelog.deleted(link)
     for stored in doomed:
         stored.soft_delete()
+        changelog.deleted(stored)
     _erase_files(doomed)
     audit.record_object(
         "project_link.deleted",

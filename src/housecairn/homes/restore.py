@@ -745,6 +745,8 @@ def _write(home: Home, prepared: list[Prepared], archive: Archive, written: list
                 ],
                 batch_size=500,
             )
+        if section.on_written is not None:
+            section.on_written([p.instance for p in group])
         del name
 
 
