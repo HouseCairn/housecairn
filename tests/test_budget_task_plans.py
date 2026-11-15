@@ -227,7 +227,8 @@ class TestTheTasksOfAProject:
             alice, found, title="Filters", due_on=datetime.date(YEAR, 12, 1), material_budget=D("5")
         )
         with_stock(alice, alice_home, task, "2", "12.34")
-        assert planned_of(alice_home, "Boiler") == D("29.68")  # 10 covered, then 19.68 more
+        # The stock (24.68) in place of the 5 typed: 10 covered, then 14.68 more (ADR 0081).
+        assert planned_of(alice_home, "Boiler") == D("24.68")
 
     def test_each_time_done_or_open_is_planned_and_a_skipped_one_is_not(
         self, alice: User, alice_home: Home

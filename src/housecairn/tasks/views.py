@@ -233,7 +233,14 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
         return cast(BaseMaterialFormSet, formset)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        return super().get_context_data(**self.page(materials=self.materials), **kwargs)
+        from housecairn.budget import services as budget_services
+
+        # The stock items saved on the task: priced, they replace the material budget.
+        task = self.get_task() if "task_id" in self.kwargs else None
+        plan = budget_services.stock_plan_of(task) if task else budget_services.StockPlan()
+        return super().get_context_data(
+            **self.page(materials=self.materials, stock_plan=plan), **kwargs
+        )
 
     @cached_property
     def materials_sent(self) -> bool:

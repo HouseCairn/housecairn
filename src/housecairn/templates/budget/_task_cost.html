@@ -1,13 +1,18 @@
-{% load i18n money %}{# The cost of a task: its estimate, a year, what was paid. `row` is empty in a project. #}
+{% load i18n money %}{# The cost of a task: what is planned, then what was really paid, each under its own label (docs/adr/0081). `row` is empty in a project. #}
 {% if row and row.has_estimate or row and paid %}
   <h2>{% translate "Cost" %}</h2>
-  <section class="card">
-    <dl class="facts">
-      {% if row.has_estimate %}
+  <section class="card" data-task-cost>
+    {% if row.has_estimate %}
+      <h3 class="cost-kind"><span class="pill pill-sand">{% translate "Planned" %}</span></h3>
+      <dl class="facts" data-planned>
         <div><dt>{% translate "Estimate each time" %}</dt><dd>{{ row.estimate|money:home.currency }}</dd></div>
-        {% if row.stock.priced %}<div><dt>{% translate "Of which stock" %}</dt><dd>{{ row.stock.amount|money:home.currency }}</dd></div>{% endif %}
+        {% if row.material_from_stock %}<div><dt>{% translate "Materials, from the stock" %}</dt><dd data-materials-from-stock>{{ row.stock.amount|money:home.currency }}</dd></div>{% endif %}
         {% if row.annual_cost is not None %}<div><dt>{% translate "Cost a year" %}</dt><dd>{{ row.annual_cost|money:home.currency }}</dd></div>{% endif %}
-      {% endif %}
+      </dl>
+      {% if row.material_from_stock %}<p class="small">{% translate "The materials are calculated from the stock items of the task: quantity times unit price." %}</p>{% endif %}
+    {% endif %}
+    <h3 class="cost-kind"><span class="pill">{% translate "Real" %}</span></h3>
+    <dl class="facts" data-real>
       <div><dt>{% translate "Paid so far" %}</dt><dd>{{ paid|money:home.currency }}</dd></div>
     </dl>
     {% if row.stock.unpriced %}<p class="small">{% blocktranslate count counter=row.stock.unpriced %}{{ counter }} stock item without a price is not counted: give it a unit price on its page.{% plural %}{{ counter }} stock items without a price are not counted: give them a unit price on their page.{% endblocktranslate %}</p>{% endif %}

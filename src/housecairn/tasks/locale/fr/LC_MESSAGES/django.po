@@ -272,6 +272,9 @@ msgstr "Budget main d'œuvre"
 msgid "Material budget"
 msgstr "Budget matériel"
 
+msgid "Only without priced stock items: with them, it is calculated from the stock."
+msgstr "Seulement sans article chiffré : avec, il est calculé à partir du stock."
+
 msgid "Markdown: how to do it, step by step. Links to web pages only."
 msgstr "Markdown : comment faire, pas à pas. Liens vers des pages web seulement."
 
@@ -990,9 +993,6 @@ msgstr "Une tâche liste %(max)s articles au plus."
 msgid "Add a line"
 msgstr "Ajouter une ligne"
 
-msgid "Add lines"
-msgstr "Ajouter des lignes"
-
 msgctxt "reported problem"
 msgid "Photo"
 msgstr "Photo"
@@ -1249,6 +1249,10 @@ msgstr "Utilisé seulement avec « Ajouter un intervenant… » dans la liste ci
 
 msgid "Time and budget"
 msgstr "Durée et budget"
+
+#, python-format
+msgid "%(amount)s each time, calculated from the stock items of the task."
+msgstr "%(amount)s à chaque fois, calculé à partir des articles de la tâche."
 
 msgid "Delete the task"
 msgstr "Supprimer la tâche"

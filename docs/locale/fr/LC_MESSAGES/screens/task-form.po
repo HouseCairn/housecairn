@@ -48,8 +48,8 @@ msgstr "Priorité, la personne responsable (un membre du logement, affiché par 
 msgid "Time and budget"
 msgstr "Durée et budget"
 
-msgid "Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home."
-msgstr "Durée estimée (un nombre et une unité : minutes, heures, jours, semaines, mois ou ans), budgets main d'œuvre et matériel, dans la devise du logement."
+msgid "Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home. With a priced stock item in **Materials**, the material budget is calculated from the stock and shown in place of its field."
+msgstr "Durée estimée (un nombre et une unité : minutes, heures, jours, semaines, mois ou années), budgets main-d'œuvre et matériel, dans la devise du logement. Avec un article chiffré dans **Matériel**, le budget matériel est calculé à partir du stock et affiché à la place de son champ."
 
 msgid "Materials"
 msgstr "Fournitures"

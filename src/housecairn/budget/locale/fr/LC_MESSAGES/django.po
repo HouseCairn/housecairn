@@ -127,6 +127,18 @@ msgstr "Voir le détail du budget"
 msgid "Cost"
 msgstr "Coût"
 
+msgid "Planned"
+msgstr "Prévu"
+
+msgid "Materials, from the stock"
+msgstr "Matériel, depuis le stock"
+
+msgid "The materials are calculated from the stock items of the task: quantity times unit price."
+msgstr "Le matériel est calculé à partir des articles de la tâche : quantité fois prix unitaire."
+
+msgid "Real"
+msgstr "Réel"
+
 msgid "Paid so far"
 msgstr "Payé jusqu'ici"
 
@@ -327,8 +339,8 @@ msgid "Estimate, cost a year and what was paid, task by task"
 msgstr "Estimation, coût par an et ce qui a été payé, tâche par tâche"
 
 #, python-format
-msgid "of which stock: %(amount)s"
-msgstr "dont articles en stock : %(amount)s"
+msgid "materials from the stock: %(amount)s"
+msgstr "matériel depuis le stock : %(amount)s"
 
 #, python-format
 msgid "%(counter)s stock item without a price"

@@ -17,13 +17,20 @@ stored: the figures are worked out each time you open a page. Open **Tasks**, th
 
 ### The stock in the cost of a task
 
-The stock items a task lists add to its estimate: for each one, its quantity times its
-[unit price](stock.md#give-an-item-a-unit-price), added to the material budget you typed.
-The part that comes from the stock is shown apart, as **Of which stock** on the page of the
-task and in the budget of the upkeep, and never mixed into the amount you typed. An item
-with no unit price counts for nothing, and the screen says how many: "2 stock items without a
-price are not counted". It is a plan, like the rest of the estimate: what was really spent
-is the cost typed when the task is done, and in your accounts.
+When a task lists stock items with a [unit price](stock.md#give-an-item-a-unit-price), its
+materials are **calculated**: for each item, its quantity times its unit price, each time the
+task is done, and over the year as often as it repeats. There is then no material budget to
+type: the form shows the amount calculated in its place, and a material budget typed before
+is kept but not counted. Without a priced stock item, the material budget you type counts.
+For example, descaling the espresso machine every 3 months with one filter at 7.90 plans
+7.90 each time and 31.60 a year.
+
+On the page of the task, **Cost** puts what is **Planned** (the estimate each time, the
+materials from the stock, the cost a year) apart from what is **Real** (paid so far); the
+budget of the upkeep says *materials from the stock* under the estimate. An item with no unit
+price counts for nothing, and the screen says how many: "2 stock items without a price are
+not counted". It is a plan, like the rest of the estimate: what was really spent is the cost
+typed when the task is done, and in your accounts.
 
 ### A task in a project
 

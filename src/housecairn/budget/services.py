@@ -115,6 +115,18 @@ def stock_plan(lines: Iterable[tuple[Decimal, Decimal | None]]) -> StockPlan:
     return StockPlan(cents(total), priced, unpriced)
 
 
+def material_of(typed: Decimal | None, stock: StockPlan) -> Decimal:
+    """The materials a task plans each time (docs/adr/0081): the one rule, read everywhere.
+
+    With a stock item that has a unit price, the materials are worked out from the stock alone,
+    quantity times unit price; the material budget typed is then not counted, since it would be
+    a second figure for the same filter. Without a priced stock item, it is the budget typed.
+    """
+    if stock.priced:
+        return stock.amount
+    return typed or ZERO
+
+
 def _stock_lines(**filters: Any) -> Iterable[tuple[UUID, Decimal, Decimal | None]]:
     return TaskMaterial.objects.filter(
         task__deleted_at__isnull=True, article__deleted_at__isnull=True, **filters
@@ -157,8 +169,13 @@ class TaskRow:
 
     @property
     def material_planned(self) -> Decimal:
-        """The materials of one time: the amount typed and the stock items at their prices."""
-        return self.material + self.stock.amount
+        """The materials of one time: the stock items at their prices, else the amount typed."""
+        return material_of(self.material, self.stock)
+
+    @property
+    def material_from_stock(self) -> bool:
+        """Whether the materials are worked out from the stock rather than typed (ADR 0081)."""
+        return self.stock.priced > 0
 
     @property
     def estimate(self) -> Decimal:
@@ -406,10 +423,10 @@ def load(home: Home, today: datetime.date | None = None) -> Ledger:
         if task is None:
             continue
         times = len(occurrences.get(task_id, ()))
-        stock = stock_plan(stock_lines.get(task_id, ())).amount
+        stock = stock_plan(stock_lines.get(task_id, ()))
         wanted = from_tasks[project_id]
         for nature, each in (
-            (BudgetNature.MATERIAL, (task.material_budget or ZERO) + stock),
+            (BudgetNature.MATERIAL, material_of(task.material_budget, stock)),
             (BudgetNature.LABOUR, task.labour_budget or ZERO),
         ):
             wanted[nature] = wanted.get(nature, ZERO) + each * times

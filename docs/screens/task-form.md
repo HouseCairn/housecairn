@@ -13,7 +13,7 @@ leaving the form (see [Adding a room or an item](#adding-a-room-or-an-item)):
 | --- | --- |
 | Repeat (open when the task is added from an item, or when it repeats) | One sentence: **Repeat this task**, **Repeat every** N days, weeks, months or years, **Count from** the due date or the day it is done (see below). A **season** outside of which nothing falls (see below), the number of days before the date from which the task shows, and the repetition said in plain words. |
 | Who | Priority, the person in charge (a member of the home, shown by name) and the contractor, chosen in the list of the contractors of the home; its last choice, **Add a contractor…**, adds one without leaving the form (see below). The dash removes the contractor. |
-| Time and budget | Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home. |
+| Time and budget | Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home. With a priced stock item in **Materials**, the material budget is calculated from the stock and shown in place of its field. |
 | Materials | The stock items the task needs, one line each: the stock item and the quantity; the last choice of the list, **Add a stock item…**, adds one. One empty line is offered; **+** adds a line and **−** removes one, up to 50 (see [Materials](#materials)). Marking the task done takes these quantities from the stock. |
 | How to do it | The procedure in Markdown, notes and, when adding, photos and files. |
 

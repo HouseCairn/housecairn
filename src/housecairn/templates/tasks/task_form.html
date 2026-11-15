@@ -88,7 +88,13 @@
       <div>
         {% include "tasks/_duration_field.html" %}
         {% include "tasks/_field.html" with field=form.labour_budget %}
-        {% include "tasks/_field.html" with field=form.material_budget %}
+        {% if stock_plan.priced %}
+          {# Priced stock items: the materials are calculated, no second figure to type (docs/adr/0081). #}
+          <input type="hidden" name="{{ form.material_budget.html_name }}" value="{{ form.material_budget.value|default_if_none:'' }}">
+          <p data-material-from-stock><span class="label">{% translate "Material budget" %}</span> {% load money %}{% blocktranslate with amount=stock_plan.amount|money:home.currency %}{{ amount }} each time, calculated from the stock items of the task.{% endblocktranslate %}</p>
+        {% else %}
+          {% include "tasks/_field.html" with field=form.material_budget %}
+        {% endif %}
       </div>
     </details>
     <details class="form-section"{% if materials.is_open %} open{% endif %}>
