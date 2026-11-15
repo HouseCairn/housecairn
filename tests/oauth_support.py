@@ -4,6 +4,7 @@ import base64
 import hashlib
 import secrets
 from dataclasses import dataclass
+from importlib import import_module
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
@@ -37,6 +38,23 @@ def authorize_params(challenge: str, *, scope: str = "sync", **extra: str) -> di
     }
 
 
+def ensure_client() -> None:
+    """The client of the mobile app, as migration 0004 makes it.
+
+    A test with `transaction=True` empties the database when it ends, data of the migrations
+    included; the tests that run after it on the same worker would find no client.
+    """
+    from django.apps import apps
+
+    module = import_module("housecairn.apitokens.migrations.0004_mobile_app_client")
+    if (
+        not apps.get_model("oauth2_provider", "Application")
+        .objects.filter(client_id=CLIENT_ID)
+        .exists()
+    ):
+        module.create_client(apps, None)
+
+
 def consent(
     client: Client,
     homes: list[Home],
@@ -49,6 +67,7 @@ def consent(
     **request: Any,
 ) -> tuple[Any, str]:
     """Open the consent page, post it, and return the answer and the PKCE verifier."""
+    ensure_client()
     verifier, challenge = pkce_pair()
     params = authorize_params(challenge, scope=scope, device_name=device_name)
     page = client.get(reverse("oauth2_provider:authorize"), params, secure=secure, **request)
