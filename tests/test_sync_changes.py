@@ -8,11 +8,20 @@ from typing import Any
 import pytest
 from django.db import connection, connections, transaction
 
+from housecairn.accounts.models import User
 from housecairn.homes.models import Home
 from housecairn.sync import changes, clock
 from housecairn.sync.models import Change, HomeHead, RowClocks, ServerDevice
+from tests.sync_support import quiet_home
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def alice_home(alice: User) -> Home:
+    """A home whose change log is empty: these tests pin positions and clocks from a known start."""
+    return quiet_home(alice)
+
 
 ENTITY = "rooms.room"
 WALL = 1_763_251_200_000
