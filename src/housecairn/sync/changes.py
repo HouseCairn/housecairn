@@ -86,6 +86,8 @@ def record_change(
         raise ValueError("An entity type is <app>.<model>, in lower case.")
     if kind != PUT and fields:
         raise ValueError("A deletion or a restoration carries no field.")
+    if fields and DELETED_AT in fields:
+        raise ValueError("`deleted_at` is written by a deletion or a restoration, not as a field.")
     written = {DELETED_AT: None} if kind != PUT else dict(fields or {})
     if not written:
         raise ValueError("A change writes at least one field.")
@@ -98,17 +100,20 @@ def record_change(
         Home.all_objects.select_for_update().only("pk").get(pk=home_id)
         head, _created = HomeHead.objects.get_or_create(home_id=home_id)
         last = clock.parse_clock(head.clock)
-        if stamp is None:
-            device = server_device()
-            made = clock.tick(last, now_ms)
-        else:
-            made, device = clock.stamp_of(*stamp)
-        new: clock.Stamp = (made, device)
         server_stamp = (
             (clock.clock_of_instant(updated_at), server_device())
             if updated_at is not None
             else None
         )
+        if stamp is None:
+            device = server_device()
+            # After the `updated_at` the row had before this write too, so that a write of
+            # the server never loses against a field that has no clock of its own.
+            floor = last if server_stamp is None else max(last, server_stamp[0])
+            made = clock.tick(floor, now_ms)
+        else:
+            made, device = clock.stamp_of(*stamp)
+        new: clock.Stamp = (made, device)
 
         row, _created = RowClocks.objects.get_or_create(
             home_id=home_id, entity=entity, row_id=row_id

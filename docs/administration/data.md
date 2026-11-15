@@ -271,8 +271,8 @@ name. The home and everything in it go for good, for all its members: members,
 invitations, events, calendar feeds, its audit log and its files; an API token left without a
 home is revoked. **There is no grace period and no way back**: export first.
 The audit log of the instance records that a home was deleted, without its
-name. The instance also keeps the identifier of the home and the time it was deleted, nothing
-else, so that the mobile app can tell that a home it knew is gone.
+name. The instance also keeps the identifier of the home, the time it was deleted and the
+identifiers of the connected apps that were linked to it, nothing else, so that the mobile app can tell that a home it knew is gone.
 
 The photos, the labels of stock items, the photos, link pictures and quote files of projects, the photos of reports and the files attached to tasks are erased from the disk with the home
 (photos deleted one by one included). If the disk refuses (permissions, a full or

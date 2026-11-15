@@ -3,6 +3,7 @@
 import datetime
 import threading
 import uuid
+from typing import Any
 
 import pytest
 from django.db import connection, connections, transaction
@@ -206,6 +207,31 @@ def test_a_field_with_no_clock_reads_as_the_updated_at_of_its_row(alice_home: Ho
     assert fresh.change is not None
 
 
+def test_a_write_of_the_server_wins_against_its_own_updated_at_in_the_same_millisecond(
+    alice_home: Home,
+) -> None:
+    row = uuid.uuid4()
+    updated = datetime.datetime.fromtimestamp(WALL / 1000, tz=datetime.UTC)
+    done = put(alice_home, row, {"name": "server"}, updated_at=updated)  # wall == updated_at
+    assert done.change is not None
+    assert done.lost == {}
+    assert clock.parse_clock(done.change.clock) > clock.clock_of_instant(updated)
+
+
+def test_a_write_of_the_server_wins_against_an_updated_at_ahead_of_its_wall_clock(
+    alice_home: Home,
+) -> None:
+    row = uuid.uuid4()
+    updated = datetime.datetime.fromtimestamp((WALL + 5_000) / 1000, tz=datetime.UTC)
+    # The wall clock went back 5 s since the row was written.
+    done = put(alice_home, row, {"name": "server"}, updated_at=updated)
+    assert done.change is not None
+    assert done.lost == {}
+    assert clock.parse_clock(done.change.clock) > clock.clock_of_instant(updated)
+    again = put(alice_home, row, {"name": "again"}, updated_at=updated)
+    assert again.change is not None  # and the clock of the home keeps rising
+
+
 def test_the_updated_at_gives_way_to_a_clock_the_field_has(alice_home: Home) -> None:
     row = uuid.uuid4()
     put(alice_home, row, {"name": "first"}, stamp=stamp_at(WALL - 5_000))
@@ -324,14 +350,18 @@ def test_a_deletion_that_loses_leaves_the_row_alive(alice_home: Home) -> None:
         {"kind": "delete", "fields": {"name": "x"}},
         {"fields": {}},
         {"fields": None},
+        {"fields": {"name": "x", "deleted_at": None}},
+        {"fields": {"deleted_at": "2026-01-01T00:00:00Z"}},
     ],
 )
 def test_a_malformed_change_is_refused(alice_home: Home, arguments: dict[str, object]) -> None:
-    call = {"entity": ENTITY, "kind": "put", "fields": {"name": "x"}} | arguments
-    with pytest.raises(ValueError, match=r"Unknown kind|entity type|at least one field|no field"):
+    call: dict[str, Any] = {"entity": ENTITY, "kind": "put", "fields": {"name": "x"}} | arguments
+    with pytest.raises(
+        ValueError, match=r"Unknown kind|entity type|at least one field|no field|deleted_at"
+    ):
         changes.record_change(
             alice_home, call["entity"], uuid.uuid4(), call["kind"], call["fields"]
-        )  # type: ignore[arg-type]
+        )
     assert not Change.objects.exists()
 
 
