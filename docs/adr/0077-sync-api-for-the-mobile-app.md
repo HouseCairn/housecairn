@@ -5,6 +5,10 @@
   [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md#decisions-of-the-maintainer-2026-11-14)
   (deletions kept 400 days, then a fresh start by a reconciliation rule; archiving by owners;
   unknown fields kept by the server); the shape of the API below is what this record proposes.
+  The reading routes are built by lot M4, which gives two keys the first shapes lacked: the
+  `device` of each change of the feed, which the per-field rule needs to break a tie (as the
+  relay's signature gives it), and the `members` of a home in `GET /sync/homes/` and in the
+  snapshot, which need 9 asks for.
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and
@@ -87,10 +91,10 @@ between local addresses only).
 | Method and path | Body | Answer |
 | --- | --- | --- |
 | `GET /api/v1/sync/info` | | without a token: `{"sync": [1], "oauth": {"authorize", "token", "revoke", "client_id"}}`, nothing else, and `"oauth": null` when the instance turned the mobile app off; with one: also `{"server": "0.3.1", "server_device": b64, "features": [...], "limits": {...}, "connection": {"id", "may_create_homes"}}` |
-| `GET /api/v1/sync/homes/` | | the homes bound to the connection: `{"homes": [{"id", "name", "role", "archived_at", "head"}], "gone": [{"id", "at"}]}` |
+| `GET /api/v1/sync/homes/` | | the homes bound to the connection: `{"homes": [{"id", "name", "role", "archived_at", "head", "members": [{"id", "name", "role"}]}], "gone": [{"id", "at"}]}` |
 | `POST /api/v1/sync/homes/` | `{"id", "name", "currency", "hemisphere"}` | 201 the home, created with the phone's id and bound to the connection; 200 if the same id and fields exist; 409 with other fields; 403 without the right to create homes |
-| `GET /api/v1/sync/homes/{h}/changes?after={pos}&limit={n}` | | `{"changes": [{"pos", "op"}], "head", "more"}` in `pos` order; 410 `cursor_expired` when `after` is older than the oldest change kept |
-| `GET /api/v1/sync/homes/{h}/snapshot` | | JSON lines: one row per line with every field and its clock, tombstones within the retention included, then `{"covers": pos}` |
+| `GET /api/v1/sync/homes/{h}/changes?after={pos}&limit={n}` | | `{"changes": [{"pos", "device", "op"}], "head", "more"}` in `pos` order, `device` the device id of the change in `b64`; 410 `cursor_expired` when `after` is older than the oldest change kept |
+| `GET /api/v1/sync/homes/{h}/snapshot` | | JSON lines: one row per line with every field and its clock, tombstones within the retention included, then `{"members": [...]}`, then `{"covers": pos}` |
 | `POST /api/v1/sync/homes/{h}/push` | `{"push": n, "sv": n, "ops": [op, ...]}` | `{"head", "results": [...]}`, see below; 409 `push_conflict` when the push number was used with other bytes |
 | `PUT /api/v1/sync/homes/{h}/files/{file_id}` | octet-stream, `Content-Type`, `HC-Sha256` | 201; 200 if the same bytes exist; 409 with other bytes; 413 above the limit |
 | `GET /api/v1/sync/homes/{h}/files/{file_id}` | | the file, and `?size=thumbnail` for an image |

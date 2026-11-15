@@ -1,0 +1,29 @@
+# French translation of HouseCairn.
+# This file is distributed under the same license as HouseCairn (AGPL-3.0-only).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn\n"
+"Report-Msgid-Bugs-To: \n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "This home was erased."
+msgstr "Ce logement a été effacé."
+
+msgid "This position is older than the oldest change kept: read the snapshot."
+msgstr "Cette position est plus ancienne que la plus ancienne modification conservée : lisez l'instantané."
+
+#, python-format
+msgid "%(name)s is a whole number, 0 or more."
+msgstr "%(name)s est un nombre entier, 0 ou plus."
+
+msgid "limit is 1 or more."
+msgstr "limit vaut 1 ou plus."
+
+msgid "This position is beyond the last change of the home."
+msgstr "Cette position est au-delà de la dernière modification du logement."

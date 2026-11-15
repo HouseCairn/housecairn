@@ -1,0 +1,149 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Sync API"
+msgstr "API de synchronisation"
+
+msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, and starts from a snapshot of the home when it has none. This page describes the reading routes; sending changes comes in a later version."
+msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, et part d'un instantané du logement quand elle n'en a aucune. Cette page décrit les routes de lecture ; l'envoi des modifications vient dans une version ultérieure."
+
+msgid "Access"
+msgstr "Accès"
+
+msgid "Every route but `info` takes only the access token of a [connected app](../screens/api-tokens.md#connected-apps) (`Authorization: Bearer hca_...`), with the scope `sync`, given when a person connects the app in the browser ([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). An API token or a session gets `403` with `\"code\": \"sync_needs_connection\"`. The routes answer over HTTPS, and over plain HTTP only between local addresses (`403` with `\"code\": \"insecure_transport\"` otherwise). Every answer carries the header `HC-Sync: 1`."
+msgstr "Toutes les routes sauf `info` n'acceptent que le jeton d'accès d'une [application connectée](../screens/api-tokens.md#connected-apps) (`Authorization: Bearer hca_...`), avec la portée `sync`, donné quand une personne connecte l'application dans le navigateur ([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). Un jeton d'API ou une session reçoit `403` avec `\"code\": \"sync_needs_connection\"`. Les routes répondent en HTTPS, et en HTTP en clair seulement entre adresses locales (`403` avec `\"code\": \"insecure_transport\"` sinon). Chaque réponse porte l'en-tête `HC-Sync: 1`."
+
+msgid "A connection reads the homes chosen when it was made, as long as its account is a member of them, with the account's role. A home it was not given, a home its account left, and a home that does not exist all answer `404`, never `403`. A home that requires a sign-in provider is read only by a connection made after signing in through it (`403` with `\"code\": \"sso_required\"` otherwise), as for an API token. An archived home is listed and read like the others."
+msgstr "Une connexion lit les logements choisis quand elle a été créée, tant que son compte en est membre, avec le rôle du compte. Un logement qui ne lui a pas été donné, un logement que son compte a quitté et un logement qui n'existe pas répondent tous `404`, jamais `403`. Un logement qui exige un fournisseur de connexion n'est lu que par une connexion créée après s'être connecté par lui (`403` avec `\"code\": \"sso_required\"` sinon), comme pour un jeton d'API. Un logement archivé est listé et lu comme les autres."
+
+msgid "Reads are limited to 600 a minute per connection; beyond that the answer is `429`."
+msgstr "Les lectures sont limitées à 600 par minute et par connexion ; au-delà, la réponse est `429`."
+
+msgid "Values"
+msgstr "Valeurs"
+
+msgid "The operations and rows are those of the mobile protocol: entity types `<app>.<model>` in lower case (`rooms.room`), field names those of the models with foreign keys by their column name (`room_id`), amounts as decimal strings, dates `YYYY-MM-DD`. A **clock** is a hybrid logical clock, 16 lower-case hexadecimal digits; a **device** is the id of the device that wrote, 16 bytes in base64url without padding. The server writes the changes made on the web as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference named by the id of its row, never by the name of the file the server stores."
+msgstr "Les opérations et les lignes sont celles du protocole mobile : types d'entité `<app>.<model>` en minuscules (`rooms.room`), noms de champs ceux des modèles, les clés étrangères par leur nom de colonne (`room_id`), montants en chaînes décimales, dates `YYYY-MM-DD`. Une **horloge** est une horloge logique hybride, 16 chiffres hexadécimaux en minuscules ; un **appareil** est l'identifiant de l'appareil qui a écrit, 16 octets en base64url sans remplissage. Le serveur écrit les modifications faites sur le web comme un seul appareil, dont `GET /api/v1/sync/info` donne l'identifiant. Un fichier est donné comme une référence nommée par l'identifiant de sa ligne, jamais par le nom du fichier que le serveur stocke."
+
+msgid "The homes"
+msgstr "Les logements"
+
+msgid "`GET /api/v1/sync/homes/`"
+msgstr "`GET /api/v1/sync/homes/`"
+
+msgid "`role`: `owner`, `member` or `read_only`, the role of the account in the home."
+msgstr "`role` : `owner`, `member` ou `read_only`, le rôle du compte dans le logement."
+
+msgid "`archived_at`: null, or the clock of the archiving."
+msgstr "`archived_at` : null, ou l'horloge de l'archivage."
+
+msgid "`head`: the position of the last change of the home."
+msgstr "`head` : la position de la dernière modification du logement."
+
+msgid "`members`: the accounts of the home, with the name shown for them and their role, never their address. The rows name a person by this `id` (`assignee_id`, `completed_by_id`)."
+msgstr "`members` : les comptes du logement, avec le nom affiché pour eux et leur rôle, jamais leur adresse. Les lignes désignent une personne par cet `id` (`assignee_id`, `completed_by_id`)."
+
+msgid "`gone`: the homes erased while they were bound to this connection, and when. The app erases them on the phone."
+msgstr "`gone` : les logements effacés alors qu'ils étaient liés à cette connexion, et quand. L'application les efface du téléphone."
+
+msgid "The changes"
+msgstr "Les modifications"
+
+#, python-brace-format
+msgid "`GET /api/v1/sync/homes/{home id}/changes?after={position}&limit={n}`"
+msgstr "`GET /api/v1/sync/homes/{id du logement}/changes?after={position}&limit={n}`"
+
+msgid "The changes of the home after the position `after` (0 at first), in position order, every entity type together. Each change is the operation of the protocol (`op`: type `t`, home `h`, row `id`, kind `k` among `put`, `delete` and `restore`, clock `c`, fields `f`, empty for a deletion or a restoration) and the device that wrote it. Positions are numbered 1, 2, 3... per home, with no gap; the app keeps the last one it applied and asks for the next page with it while `more` is true."
+msgstr "Les modifications du logement après la position `after` (0 au début), dans l'ordre des positions, tous types d'entité ensemble. Chaque modification est l'opération du protocole (`op` : type `t`, logement `h`, ligne `id`, nature `k` parmi `put`, `delete` et `restore`, horloge `c`, champs `f`, vides pour une suppression ou une restauration) et l'appareil qui l'a écrite. Les positions sont numérotées 1, 2, 3... par logement, sans trou ; l'application garde la dernière qu'elle a appliquée et demande la page suivante avec elle tant que `more` est vrai."
+
+msgid "`limit`: 500 by default, at most 1 000; a larger value gives 1 000."
+msgstr "`limit` : 500 par défaut, 1 000 au plus ; une valeur plus grande donne 1 000."
+
+msgid "`after` or `limit` that is not a whole number, or `after` beyond `head`: `400`."
+msgstr "`after` ou `limit` qui n'est pas un nombre entier, ou `after` au-delà de `head` : `400`."
+
+msgid "`after` older than the oldest change kept: `410` with `\"code\": \"cursor_expired\"`. Changes and deleted rows are kept 400 days; the app then starts again from the snapshot."
+msgstr "`after` plus ancien que la plus ancienne modification conservée : `410` avec `\"code\": \"cursor_expired\"`. Les modifications et les lignes supprimées sont conservées 400 jours ; l'application repart alors de l'instantané."
+
+msgid "The snapshot"
+msgstr "L'instantané"
+
+#, python-brace-format
+msgid "`GET /api/v1/sync/homes/{home id}/snapshot`"
+msgstr "`GET /api/v1/sync/homes/{id du logement}/snapshot`"
+
+msgid "The state of the home, in JSON lines (`application/x-ndjson`): one row per line, with every field, its clock and its device, then the members, then the position the snapshot covers."
+msgstr "L'état du logement, en lignes JSON (`application/x-ndjson`) : une ligne du modèle par ligne, avec chaque champ, son horloge et son appareil, puis les membres, puis la position que couvre l'instantané."
+
+msgid "A deleted row is in the snapshot for 400 days after its deletion, with the field `deleted_at` (its value is the clock of the deletion). The fields the server has no column for, written by a newer app, are given back as the others. The app then reads the changes after `covers`; a change it already has from the snapshot changes nothing when applied again."
+msgstr "Une ligne supprimée reste dans l'instantané 400 jours après sa suppression, avec le champ `deleted_at` (sa valeur est l'horloge de la suppression). Les champs pour lesquels le serveur n'a pas de colonne, écrits par une application plus récente, sont rendus comme les autres. L'application lit ensuite les modifications après `covers` ; une modification qu'elle a déjà par l'instantané ne change rien quand elle est appliquée à nouveau."
+
+msgid "Errors"
+msgstr "Erreurs"
+
+#, python-brace-format
+msgid "Errors are those of the rest of the API, `{\"detail\": \"...\"}`, with a `code` the app words itself:"
+msgstr "Les erreurs sont celles du reste de l'API, `{\"detail\": \"...\"}`, avec un `code` que l'application formule elle-même :"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "When"
+msgstr "Quand"
+
+msgid "`sync_needs_connection`"
+msgstr "`sync_needs_connection`"
+
+msgid "`403`"
+msgstr "`403`"
+
+msgid "An API token, a session or no credential."
+msgstr "Un jeton d'API, une session ou aucun identifiant."
+
+msgid "`insecure_transport`"
+msgstr "`insecure_transport`"
+
+msgid "Plain HTTP outside the local network."
+msgstr "HTTP en clair hors du réseau local."
+
+msgid "`sso_required`"
+msgstr "`sso_required`"
+
+msgid "The home requires a sign-in provider the connection was not made with."
+msgstr "Le logement exige un fournisseur de connexion par lequel la connexion n'a pas été créée."
+
+msgid "`cursor_expired`"
+msgstr "`cursor_expired`"
+
+msgid "`410`"
+msgstr "`410`"
+
+msgid "`after` is older than the oldest change kept."
+msgstr "`after` est plus ancien que la plus ancienne modification conservée."
+
+msgid "`home_gone`"
+msgstr "`home_gone`"
+
+msgid "The home was erased while it was bound to this connection. To any other connection, the same home is a `404`."
+msgstr "Le logement a été effacé alors qu'il était lié à cette connexion. Pour toute autre connexion, le même logement est un `404`."
+

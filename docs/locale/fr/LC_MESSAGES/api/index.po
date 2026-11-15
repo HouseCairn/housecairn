@@ -106,8 +106,8 @@ msgstr "**Calendrier** ([ADR 0052](../adr/0052-calendar-and-secret-ics-feeds.md)
 msgid "The [reference](reference.md) lists every operation. It is generated from the OpenAPI 3.1 schema of the code at each build of this site: {download}`download the schema (openapi.json) </_generated/openapi.json>`. A running instance serves the same schema at `/api/schema/` and an interactive explorer at `/api/docs/`, both to signed-in users only."
 msgstr "La [référence](reference.md) liste chaque opération. Elle est générée à chaque construction de ce site à partir du schéma OpenAPI 3.1 du code : {download}`télécharger le schéma (openapi.json) </_generated/openapi.json>`. Une instance en marche sert le même schéma sur `/api/schema/` et un explorateur interactif sur `/api/docs/`, réservés aux personnes connectées."
 
-msgid "The [guide](guide.md) shows the API at work with `curl`: a token, reads, writes, the pages of a list and the errors."
-msgstr "Le [guide](guide.md) montre l'API à l'œuvre avec `curl` : un jeton, des lectures, des écritures, les pages d'une liste et les erreurs."
+msgid "The [guide](guide.md) shows the API at work with `curl`: a token, reads, writes, the pages of a list and the errors. The [sync API](sync.md) of the mobile app has its own page."
+msgstr "Le [guide](guide.md) montre l'API à l'œuvre avec `curl` : un jeton, des lectures, des écritures, les pages d'une liste et les erreurs. L'[API de synchronisation](sync.md) de l'application mobile a sa propre page."
 
 #~ msgid "**JSON** only, for requests and responses."
 #~ msgstr "**JSON** uniquement, pour les requêtes et les réponses."

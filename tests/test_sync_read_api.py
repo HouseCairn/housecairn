@@ -441,8 +441,10 @@ class TestSnapshot:
         lines = lines_of(get(phone.access, snapshot_url(alice_home.pk)))
         assert str(room.pk) not in {line.get("id") for line in lines}
 
-    def test_unknown_fields_are_given_back(self, phone: Connected, alice_home: Home) -> None:
-        room = uuid.uuid4()
+    def test_unknown_fields_are_given_back(
+        self, alice: User, phone: Connected, alice_home: Home
+    ) -> None:
+        room = room_services.create_room(alice, alice_home, name="Hall").pk
         device = bytes(range(16))
         changes.record_change(
             alice_home,
@@ -450,12 +452,16 @@ class TestSnapshot:
             room,
             changes.PUT,
             {"name": "Hall", "glow": "amber"},
-            stamp=("0193a1b2c3d40001", device),
+            stamp=("ff93a1b2c3d40001", device),
             known={"name"},
         )
         changes_body = get(phone.access, changes_url(alice_home.pk), limit=1000).json()
         assert changes_body["changes"][-1]["op"]["f"] == {"name": "Hall", "glow": "amber"}
         assert changes_body["changes"][-1]["device"] == clock.device_to_b64(device)
+        lines = lines_of(get(phone.access, snapshot_url(alice_home.pk)))
+        (line,) = [line for line in lines if line.get("id") == str(room)]
+        stamp = ["ff93a1b2c3d40001", clock.device_to_b64(device)]
+        assert line["f"]["glow"] == ["amber", *stamp]
 
     def test_links(self, alice: User, phone: Connected, alice_home: Home) -> None:
         from housecairn.projects import services as project_services
