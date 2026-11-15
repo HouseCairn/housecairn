@@ -24,7 +24,9 @@ def stamp_at(ms: int, counter: int = 0, device: bytes = PHONE) -> tuple[str, byt
     return clock.format_clock(clock.make_clock(ms, counter)), device
 
 
-def put(home: Home, row: uuid.UUID, fields: dict[str, object], **kwargs: object) -> changes.Recorded:
+def put(
+    home: Home, row: uuid.UUID, fields: dict[str, object], **kwargs: object
+) -> changes.Recorded:
     return changes.record_change(home, ENTITY, row, changes.PUT, fields, wall=WALL, **kwargs)  # type: ignore[arg-type]
 
 
@@ -60,9 +62,14 @@ def test_each_home_counts_its_own_positions(alice_home: Home, make_user: object)
 
 def test_a_rolled_back_write_leaves_no_hole(alice_home: Home) -> None:
     put(alice_home, uuid.uuid4(), {"name": "a"})
-    with pytest.raises(RuntimeError), transaction.atomic():
-        put(alice_home, uuid.uuid4(), {"name": "b"})
-        raise RuntimeError
+
+    def fail_after_recording() -> None:
+        with transaction.atomic():
+            put(alice_home, uuid.uuid4(), {"name": "b"})
+            raise RuntimeError
+
+    with pytest.raises(RuntimeError):
+        fail_after_recording()
     done = put(alice_home, uuid.uuid4(), {"name": "c"})
     assert done.change is not None
     assert done.change.pos == 2
@@ -131,9 +138,7 @@ def test_an_older_stamp_loses_and_says_who_won(alice_home: Home) -> None:
 def test_a_write_that_partly_loses_records_only_what_won(alice_home: Home) -> None:
     row = uuid.uuid4()
     put(alice_home, row, {"name": "web"}, stamp=stamp_at(WALL + 100, device=OTHER))
-    mixed = put(
-        alice_home, row, {"name": "late", "notes": "new"}, stamp=stamp_at(WALL + 10)
-    )
+    mixed = put(alice_home, row, {"name": "late", "notes": "new"}, stamp=stamp_at(WALL + 10))
     assert mixed.change is not None
     assert mixed.change.fields == {"notes": "new"}
     assert list(mixed.lost) == ["name"]
@@ -145,7 +150,8 @@ def test_equal_clocks_go_to_the_greater_device_in_any_order(alice_home: Home) ->
     greater = stamp_at(WALL + 5, 3, OTHER)
     low = put(alice_home, row, {"name": "low"}, stamp=same)
     high = put(alice_home, row, {"name": "high"}, stamp=greater)
-    assert low.change is not None and high.change is not None
+    assert low.change is not None
+    assert high.change is not None
     again = put(alice_home, row, {"name": "low again"}, stamp=same)
     assert again.change is None
     assert again.lost["name"] == (same[0], clock.device_to_b64(OTHER))
@@ -191,8 +197,12 @@ def test_a_field_with_no_clock_reads_as_the_updated_at_of_its_row(alice_home: Ho
     stale = put(alice_home, row, {"name": "phone"}, stamp=stamp_at(WALL + 999), updated_at=updated)
     assert stale.change is None
     assert clock.parse_clock(stale.lost["name"][0]) == clock.make_clock(WALL + 1_000, 0)
-    assert stale.lost["name"][1] == clock.device_to_b64(bytes(ServerDevice.objects.get(pk=1).device))
-    fresh = put(alice_home, row, {"name": "phone"}, stamp=stamp_at(WALL + 1_001), updated_at=updated)
+    assert stale.lost["name"][1] == clock.device_to_b64(
+        bytes(ServerDevice.objects.get(pk=1).device)
+    )
+    fresh = put(
+        alice_home, row, {"name": "phone"}, stamp=stamp_at(WALL + 1_001), updated_at=updated
+    )
     assert fresh.change is not None
 
 
@@ -200,7 +210,9 @@ def test_the_updated_at_gives_way_to_a_clock_the_field_has(alice_home: Home) -> 
     row = uuid.uuid4()
     put(alice_home, row, {"name": "first"}, stamp=stamp_at(WALL - 5_000))
     updated = datetime.datetime.fromtimestamp((WALL + 60_000) / 1000, tz=datetime.UTC)
-    done = put(alice_home, row, {"name": "second"}, stamp=stamp_at(WALL - 4_000), updated_at=updated)
+    done = put(
+        alice_home, row, {"name": "second"}, stamp=stamp_at(WALL - 4_000), updated_at=updated
+    )
     assert done.change is not None  # the field has its own clock; the later updated_at is not read
 
 
@@ -226,7 +238,9 @@ def test_an_unknown_field_merges_by_the_same_rule(alice_home: Home) -> None:
     put(alice_home, row, {"future": "new"}, stamp=stamp_at(WALL + 20, device=OTHER), **kw)
     older = put(alice_home, row, {"future": "old"}, stamp=stamp_at(WALL + 10), **kw)
     assert older.change is None
-    assert older.lost == {"future": (clock.format_clock(clock.make_clock(WALL + 20)), clock.device_to_b64(OTHER))}
+    assert older.lost == {
+        "future": (clock.format_clock(clock.make_clock(WALL + 20)), clock.device_to_b64(OTHER))
+    }
     newer = put(alice_home, row, {"future": "newest"}, stamp=stamp_at(WALL + 30), **kw)
     assert newer.change is not None
     extra = RowClocks.objects.get(home=alice_home, entity=ENTITY, row_id=row).extra
@@ -239,7 +253,8 @@ def test_a_known_field_and_an_unknown_one_of_the_same_name_do_not_meet(alice_hom
     done = put(alice_home, row, {"name": "b"}, stamp=stamp_at(WALL + 10), known={"other"})
     assert done.change is not None  # for this caller `name` is unknown: its own clock
     state = RowClocks.objects.get(home=alice_home, entity=ENTITY, row_id=row)
-    assert "name" in state.clocks and "name" in state.extra
+    assert "name" in state.clocks
+    assert "name" in state.extra
 
 
 def test_a_deletion_is_a_change_that_writes_deleted_at(alice_home: Home) -> None:
@@ -281,7 +296,9 @@ def test_a_deletion_that_loses_leaves_the_row_alive(alice_home: Home) -> None:
     row = uuid.uuid4()
     changes.record_change(alice_home, ENTITY, row, changes.DELETE, stamp=stamp_at(WALL + 10))
     changes.record_change(alice_home, ENTITY, row, changes.RESTORE, stamp=stamp_at(WALL + 20))
-    older = changes.record_change(alice_home, ENTITY, row, changes.DELETE, stamp=stamp_at(WALL + 15))
+    older = changes.record_change(
+        alice_home, ENTITY, row, changes.DELETE, stamp=stamp_at(WALL + 15)
+    )
     assert older.change is None
     assert RowClocks.objects.get(home=alice_home, row_id=row).tombstoned_at is None
 
@@ -300,15 +317,17 @@ def test_a_deletion_that_loses_leaves_the_row_alive(alice_home: Home) -> None:
 )
 def test_a_malformed_change_is_refused(alice_home: Home, arguments: dict[str, object]) -> None:
     call = {"entity": ENTITY, "kind": "put", "fields": {"name": "x"}} | arguments
-    with pytest.raises(ValueError):
-        changes.record_change(alice_home, call["entity"], uuid.uuid4(), call["kind"], call["fields"])  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match=r"Unknown kind|entity type|at least one field|no field"):
+        changes.record_change(
+            alice_home, call["entity"], uuid.uuid4(), call["kind"], call["fields"]
+        )  # type: ignore[arg-type]
     assert not Change.objects.exists()
 
 
 def test_a_stamp_must_be_a_clock_and_sixteen_bytes(alice_home: Home) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 lower-case"):
         put(alice_home, uuid.uuid4(), {"name": "x"}, stamp=("zz", PHONE))
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 bytes"):
         put(alice_home, uuid.uuid4(), {"name": "x"}, stamp=("0" * 16, b"short"))
     assert not Change.objects.exists()
 
@@ -389,10 +408,8 @@ def test_positions_have_no_gap_and_no_repeat_under_concurrent_writers() -> None:
         try:
             barrier.wait(timeout=30)
             for i in range(each):
-                changes.record_change(
-                    home, ENTITY, rows[i % 3], changes.PUT, {"name": f"w{n}-{i}"}
-                )
-        except BaseException as error:  # noqa: BLE001 - reported to the test below
+                changes.record_change(home, ENTITY, rows[i % 3], changes.PUT, {"name": f"w{n}-{i}"})
+        except BaseException as error:
             errors.append(error)
         finally:
             connections.close_all()

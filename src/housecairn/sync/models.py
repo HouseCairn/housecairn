@@ -30,6 +30,9 @@ class ServerDevice(models.Model):
             models.CheckConstraint(condition=models.Q(id=1), name="sync_one_server_device")
         ]
 
+    def __str__(self) -> str:
+        return "server device"
+
 
 class HomeHead(models.Model):
     """The head of the change log of one home: its last position and its clock.
@@ -47,6 +50,9 @@ class HomeHead(models.Model):
     floor = models.PositiveBigIntegerField(default=0)
     # The last clock the server made or read for this home (16 hexadecimal digits).
     clock = models.CharField(max_length=CLOCK_LENGTH, default=ZERO_CLOCK)
+
+    def __str__(self) -> str:
+        return f"{self.home_id} at {self.pos}"
 
 
 class Change(models.Model):
@@ -71,12 +77,11 @@ class Change(models.Model):
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["home", "pos"], name="sync_change_position")
-        ]
-        indexes = [
-            models.Index(fields=["home", "entity", "row_id"], name="sync_change_row")
-        ]
+        constraints = [models.UniqueConstraint(fields=["home", "pos"], name="sync_change_position")]
+        indexes = [models.Index(fields=["home", "entity", "row_id"], name="sync_change_row")]
+
+    def __str__(self) -> str:
+        return f"{self.home_id} #{self.pos} {self.kind} {self.entity}"
 
 
 class RowClocks(models.Model):
@@ -102,6 +107,9 @@ class RowClocks(models.Model):
             models.UniqueConstraint(fields=["home", "entity", "row_id"], name="sync_row_clocks")
         ]
 
+    def __str__(self) -> str:
+        return f"{self.entity} {self.row_id}"
+
 
 class ErasedHome(models.Model):
     """A home that was erased, outside the home: erasing it erased its changes too.
@@ -114,3 +122,6 @@ class ErasedHome(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     erased_at = models.DateTimeField(default=timezone.now)
     connection_ids = models.JSONField(default=list)
+
+    def __str__(self) -> str:
+        return str(self.id)

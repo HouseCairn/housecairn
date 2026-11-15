@@ -33,21 +33,21 @@ walls = st.integers(min_value=0, max_value=MAX_MS - 1)
 
 def kulkarni_send(last: int, wall: int) -> int:
     """The stepwise rule of Kulkarni et al., Logical Physical Clocks, for a local event."""
-    l, c = last >> 16, last & 0xFFFF
-    new_l = max(l, wall)
-    new_c = c + 1 if new_l == l else 0
+    phys, c = last >> 16, last & 0xFFFF
+    new_l = max(phys, wall)
+    new_c = c + 1 if new_l == phys else 0
     if new_c > 0xFFFF:  # the counter carries into the milliseconds
         new_l, new_c = new_l + 1, 0
     return (new_l << 16) | new_c
 
 
 def kulkarni_receive(last: int, remote: int, wall: int) -> int:
-    l, c = last >> 16, last & 0xFFFF
+    phys, c = last >> 16, last & 0xFFFF
     lm, cm = remote >> 16, remote & 0xFFFF
-    new_l = max(l, lm, wall)
-    if new_l == l == lm:
+    new_l = max(phys, lm, wall)
+    if new_l == phys == lm:
         new_c = max(c, cm) + 1
-    elif new_l == l:
+    elif new_l == phys:
         new_c = c + 1
     elif new_l == lm:
         new_c = cm + 1
@@ -87,13 +87,13 @@ def test_vector_device_ids_are_base64url_without_padding(vector: dict[str, Any])
 
 @pytest.mark.parametrize("text", VECTORS["invalid_clocks"])
 def test_vector_malformed_clocks_are_refused(text: str) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 lower-case"):
         clock.parse_clock(text)
 
 
 @pytest.mark.parametrize("text", VECTORS["invalid_devices"])
 def test_vector_malformed_device_ids_are_refused(text: str) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="22 characters"):
         clock.device_from_b64(text)
 
 
@@ -222,7 +222,7 @@ def test_a_device_id_round_trips_through_its_text(raw: bytes) -> None:
 
 @given(raw=st.binary().filter(lambda b: len(b) != 16))
 def test_only_sixteen_bytes_make_a_device_id(raw: bytes) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 bytes"):
         clock.device_to_b64(raw)
 
 
@@ -237,11 +237,11 @@ def test_the_counter_overflows_into_the_milliseconds() -> None:
 def test_the_clock_has_a_largest_value() -> None:
     with pytest.raises(OverflowError):
         clock.tick(clock.MAX_CLOCK, 0)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="64-bit"):
         clock.format_clock(clock.MAX_CLOCK + 1)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 bits"):
         clock.make_clock(0, 1 << 16)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 bits"):
         clock.make_clock(-1, 0)
 
 
@@ -252,7 +252,7 @@ def test_the_stored_stamp_must_be_beaten_strictly() -> None:
 
 
 def test_a_stamp_needs_a_device_of_sixteen_bytes() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="16 bytes"):
         clock.stamp_of("0" * 16, b"short")
 
 
@@ -260,7 +260,7 @@ def test_an_instant_reads_as_the_clock_of_its_milliseconds() -> None:
     instant = datetime.datetime(2026, 11, 14, 12, 0, 0, 999_999, tzinfo=datetime.UTC)
     expected_ms = int(instant.timestamp()) * 1000 + 999
     assert clock.clock_of_instant(instant) == expected_ms << 16
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="aware"):
         clock.clock_of_instant(datetime.datetime(2026, 1, 1))
 
 

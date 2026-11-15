@@ -105,8 +105,10 @@ def record_change(
             made, device = clock.stamp_of(*stamp)
         new: clock.Stamp = (made, device)
         server_stamp = (
-            clock.clock_of_instant(updated_at), server_device()
-        ) if updated_at is not None else None
+            (clock.clock_of_instant(updated_at), server_device())
+            if updated_at is not None
+            else None
+        )
 
         row, _created = RowClocks.objects.get_or_create(
             home_id=home_id, entity=entity, row_id=row_id
@@ -116,8 +118,7 @@ def record_change(
         for name, value in written.items():
             is_known = known is None or name in known or name == DELETED_AT
             stored = _stored_stamp(row, name, is_known, server_stamp)
-            if not clock.wins(new, stored):
-                assert stored is not None  # a stamp that wins over nothing always wins
+            if stored is not None and not clock.wins(new, stored):
                 lost[name] = (clock.format_clock(stored[0]), clock.device_to_b64(stored[1]))
                 continue
             won[name] = value

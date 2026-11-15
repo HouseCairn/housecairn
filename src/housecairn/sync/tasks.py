@@ -21,7 +21,9 @@ def next_run(now: datetime.datetime | None = None) -> datetime.datetime:
     at = datetime.time(PURGE_HOUR, PURGE_MINUTE)
     candidate = datetime.datetime.combine(local.date(), at, tzinfo=zone)
     if candidate <= local:
-        candidate = datetime.datetime.combine(local.date() + datetime.timedelta(days=1), at, tzinfo=zone)
+        candidate = datetime.datetime.combine(
+            local.date() + datetime.timedelta(days=1), at, tzinfo=zone
+        )
     return candidate
 
 

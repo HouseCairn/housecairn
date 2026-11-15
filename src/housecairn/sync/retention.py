@@ -9,11 +9,11 @@ import datetime
 from dataclasses import dataclass
 
 from django.apps import apps
-from django.db import models, transaction
+from django.db import transaction
 from django.db.models import Max
-from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
+from housecairn.core.models import BaseModel
 from housecairn.sync.models import Change, HomeHead, RowClocks
 
 RETENTION = datetime.timedelta(days=400)
@@ -56,8 +56,8 @@ def _purge_changes(expired: datetime.datetime) -> int:
 def _purge_tombstones(expired: datetime.datetime) -> tuple[int, int]:
     """Remove the clocks of rows deleted before `expired`, and those rows themselves.
 
-    A row is removed only if it is still deleted. A row another row still protects, or the
-    entity of a link table that has no model of its own, keeps no clocks and no row to remove.
+    A row is removed only if it is still deleted. The entity of a link table has no model of
+    its own: its clocks go, there is no row to remove.
     """
     removed_rows = 0
     old = RowClocks.objects.filter(tombstoned_at__lt=expired)
@@ -71,22 +71,18 @@ def _purge_tombstones(expired: datetime.datetime) -> tuple[int, int]:
             chunk = RowClocks.objects.filter(pk__in=pks[start : start + CHUNK])
             if model is not None:
                 ids = list(chunk.values_list("row_id", flat=True))
-                try:
-                    with transaction.atomic():
-                        removed_rows += model.all_objects.filter(
-                            pk__in=ids, deleted_at__isnull=False
-                        ).delete()[0]
-                except ProtectedError:
-                    continue
+                removed_rows += model.all_objects.filter(
+                    pk__in=ids, deleted_at__isnull=False
+                ).delete()[0]
             removed += chunk.delete()[0]
     return removed, removed_rows
 
 
-def _model_of(entity: str) -> type[models.Model] | None:
+def _model_of(entity: str) -> type[BaseModel] | None:
     """The model an entity type names (`rooms.room`), None for a link table or an unknown one."""
     app_label, _dot, model_name = entity.partition(".")
     try:
         model = apps.get_model(app_label, model_name)
     except LookupError:
         return None
-    return model if hasattr(model, "all_objects") else None
+    return model if issubclass(model, BaseModel) else None

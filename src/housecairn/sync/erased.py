@@ -18,7 +18,9 @@ def connection_ids_of(home_id: uuid.UUID) -> list[str]:
         model = apps.get_model("apitokens", "AppConnection")
     except LookupError:
         return []
-    return sorted(str(pk) for pk in model.all_objects.filter(homes=home_id).values_list("pk", flat=True))
+    return sorted(
+        str(pk) for pk in model.all_objects.filter(homes=home_id).values_list("pk", flat=True)
+    )
 
 
 def record_erased(home_id: uuid.UUID) -> ErasedHome:
