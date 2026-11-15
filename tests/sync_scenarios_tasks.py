@@ -1,4 +1,4 @@
-"""The writes of the `tasks` app for the guard of the change log (lot M3c, docs/adr/0079)."""
+"""Scenarios of the guard of the change log for the app `tasks` (lot M3c, docs/adr/0079)."""
 
 import datetime
 from collections.abc import Callable

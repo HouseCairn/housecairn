@@ -9,12 +9,21 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+from housecairn.accounts.models import User
 from housecairn.homes.models import Home
 from housecairn.rooms.models import Room
 from housecairn.sync import changes, retention, tasks
 from housecairn.sync.models import Change, HomeHead, RowClocks
+from tests.sync_support import quiet_home
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def alice_home(alice: User) -> Home:
+    """A home whose change log is empty: these tests pin positions and clocks from a known start."""
+    return quiet_home(alice)
+
 
 NOW = datetime.datetime(2026, 11, 15, 3, 30, tzinfo=datetime.UTC)
 DAYS = datetime.timedelta(days=1)

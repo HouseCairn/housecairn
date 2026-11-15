@@ -51,11 +51,8 @@ from housecairn.core.text import without_control_characters
 from housecairn.homes import exports, quotas, services
 from housecairn.homes.exports import FileSpec, Section
 from housecairn.homes.models import Home, Membership, Role
-from housecairn.sync import rows as changelog
-
-# The apps whose restored rows record their change (docs/adr/0079): one line per lot, M3b to
-# M3e, as the app joins the guard of the change log.
-RECORDED_APPS: tuple[str, ...] = ("tasks",)
+from housecairn.sync import clock
+from housecairn.sync import rows as sync_rows
 
 SUPPORTED_VERSIONS = frozenset({2, 3, 4})
 DOCUMENT_MAX_BYTES = 64 * 1024 * 1024
@@ -278,6 +275,15 @@ def _bad(section: str, index: int, name: str) -> ArchiveRefusedError:
         index=str(index + 1),
         field=name,
     )
+
+
+def _ahead_of_the_clock(value: datetime.datetime) -> bool:
+    """Whether an `updated_at` is more than a day later than the wall clock.
+
+    Such a date would hold the clock of the change log of the home a day or more ahead, since
+    a field with no clock reads as the `updated_at` of its row (docs/adr/0077).
+    """
+    return value > timezone.now() + datetime.timedelta(milliseconds=clock.DRIFT_LIMIT_MS)
 
 
 def _parse(f: models.Field[Any, Any], raw: Any) -> Any:
@@ -511,6 +517,8 @@ def _prepare(
                 if as_copy and f.primary_key:
                     value = fresh[section.model][value]
                 if isinstance(f, models.DateTimeField) and (f.auto_now or f.auto_now_add):
+                    if f.name == "updated_at" and value is not None and _ahead_of_the_clock(value):
+                        raise _bad(section.name, index, f.name)
                     stamps[f.attname] = value
                 values[f.attname] = value
             m2m: dict[str, list[uuid.UUID]] = {}
@@ -662,6 +670,8 @@ def _home_values(document: dict[str, Any], version: int) -> tuple[uuid.UUID, dic
         try:
             values[name] = _parse(fields[name], raw.get(name))
             _validate(fields[name], values[name])
+            if name == "updated_at" and _ahead_of_the_clock(values[name]):
+                raise ValueError(name)
         except (ValueError, TypeError, ValidationError):
             raise _bad("home", 0, name) from None
     try:
@@ -721,12 +731,8 @@ def _write(home: Home, prepared: list[Prepared], archive: Archive, written: list
             section.model._base_manager.bulk_update(
                 [p.instance for p in stamped], list(stamped[0].stamps), batch_size=500
             )
-        if section.model._meta.app_label in RECORDED_APPS:
-            # Each restored row is a write of the home: the change log has it (docs/adr/0077).
-            for p in group:
-                changelog.record_created(p.instance)
-                if getattr(p.instance, "deleted_at", None) is not None:
-                    changelog.record_deleted(p.instance)
+        # The change log of the new home: every field of every row, whatever its application.
+        sync_rows.record_created(p.instance for p in group)
         for relation in section.many_to_many():
             through: Any = relation.remote_field.through
             source = relation.m2m_field_name()
@@ -823,7 +829,7 @@ def restore_home(
     written: list[Any] = []
     try:
         with transaction.atomic():
-            home.save(force_insert=True)
+            sync_rows.save(home, force_insert=True)
             Home.all_objects.filter(pk=home.pk).update(
                 created_at=home_values["created_at"], updated_at=home_values["updated_at"]
             )

@@ -25,6 +25,7 @@ from housecairn.demo import mode
 from housecairn.homes import files
 from housecairn.homes.models import WRITE_ROLES, Hemisphere, Home, Invitation, Membership, Role
 from housecairn.instance.config import get_setting
+from housecairn.sync import rows as sync_rows
 
 AnyUser = User | AnonymousUser
 
@@ -135,7 +136,7 @@ def create_home(
 ) -> Home:
     home = Home(name=name, currency=currency, hemisphere=hemisphere)
     home.full_clean()
-    home.save()
+    sync_rows.save(home)
     Membership.objects.create(home=home, user=owner, role=Role.OWNER)
     audit.record("home.created", actor=owner, home_id=home.id)
     return home
@@ -153,7 +154,7 @@ def update_home(actor: AnyUser, home: Home, **changes: Any) -> Home:
     for field, value in changes.items():
         setattr(home, field, value)
     home.full_clean()
-    home.save(update_fields=[*changes, "updated_at"])
+    sync_rows.save(home, update_fields=[*changes, "updated_at"])
     if moved:
         # The predefined seasons of the tasks follow the hemisphere (docs/adr/0045).
         from housecairn.tasks import services as task_services  # imported late: tasks import homes
@@ -185,7 +186,7 @@ def set_required_provider(
                 _("Sign in through this provider first, then require it for the home.")
             )
     home.required_provider = provider_id
-    home.save(update_fields=["required_provider", "updated_at"])
+    sync_rows.save(home, update_fields=["required_provider", "updated_at"])
     if provider_id:
         audit.record("sso.required", actor=actor, home_id=home.id, provider=provider_id)
     else:
@@ -205,7 +206,7 @@ def lift_unavailable_requirement(actor: AnyUser, home: Home, *, declared: Iterab
     if not home.required_provider or home.required_provider in set(declared):
         raise ValidationError(_("This home's sign-in provider is still offered by this instance."))
     home.required_provider = ""
-    home.save(update_fields=["required_provider", "updated_at"])
+    sync_rows.save(home, update_fields=["required_provider", "updated_at"])
     audit.record("sso.lifted", actor=actor, home_id=home.id)
     return home
 
@@ -216,10 +217,10 @@ def lift_all_unavailable_requirements(*, declared: Iterable[str]) -> int:
     Names no home and reads none: it only clears a rule that points at a provider
     that no longer exists.
     """
-    return int(
-        Home.objects.exclude(required_provider="")
-        .exclude(required_provider__in=list(declared))
-        .update(required_provider="", updated_at=timezone.now())
+    return sync_rows.update_queryset(
+        Home.objects.exclude(required_provider="").exclude(required_provider__in=list(declared)),
+        required_provider="",
+        updated_at=timezone.now(),
     )
 
 
@@ -236,7 +237,7 @@ def archive_home(actor: AnyUser, home: Home) -> Home:
     _require_owner(actor, home)
     if home.archived_at is None:
         home.archived_at = timezone.now()
-        home.save(update_fields=["archived_at", "updated_at"])
+        sync_rows.save(home, update_fields=["archived_at", "updated_at"])
         audit.record(
             "home.archived", actor=actor if isinstance(actor, User) else None, home_id=home.id
         )
@@ -249,7 +250,7 @@ def unarchive_home(actor: AnyUser, home: Home) -> Home:
     _require_owner(actor, home)
     if home.archived_at is not None:
         home.archived_at = None
-        home.save(update_fields=["archived_at", "updated_at"])
+        sync_rows.save(home, update_fields=["archived_at", "updated_at"])
         audit.record(
             "home.unarchived", actor=actor if isinstance(actor, User) else None, home_id=home.id
         )

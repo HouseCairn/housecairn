@@ -39,6 +39,31 @@ only the fields whose value changed: a form that sends every field must not give
 field nobody touched. A deletion is `changes.DELETE`, a restoration `changes.RESTORE`; both
 write the field `deleted_at`.
 
+Services do not call it by hand. They write through `housecairn.sync.rows`, which reads the row
+as the database holds it, writes, and records the difference, so that only the fields whose
+value changed are sent:
+
+| Function | For |
+| --- | --- |
+| `rows.save(instance, **kwargs)` | `instance.save()`: a new row records every field, an existing one the fields that changed. With `update_fields`, only those fields are compared. |
+| `rows.soft_delete(instance)` | A soft deletion of one row, with its tombstone. A row already deleted records nothing. Given a queryset, the same as `rows.soft_delete_queryset`. |
+| `rows.soft_delete_queryset(rows)` | A soft deletion of a queryset: one tombstone per row it deleted. |
+| `rows.restore(instance)` | `instance.restore()`, with its restoration. A row that is not deleted records nothing. |
+| `rows.update_queryset(rows, **values)` | A queryset update with plain values: one change per row and field that changed. |
+| `rows.record_created(instances)` | Rows inserted in bulk (restoring an archive). |
+| `rows.before(instance)`, then `rows.record_saved(instance, was)` | Read before a write, then recorded after it: the two halves of `rows.save`, for a write it cannot wrap. |
+
+What a row sends is its concrete fields under their column names (`room_id`), without `id`,
+`home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`, nor the derived
+fields a model lists in `SYNC_DERIVED` (`tasks.occurrence.visible_from`): they are recomputed on
+every side and never synced (mobile ADR 0003). Dates are `YYYY-MM-DD`, amounts decimal strings
+with the places of their field (`12.50`). An application adjusts that for a model with
+`rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not
+send `required_provider`, a rule of the instance), fields without a column (a photo sends its
+file as `image`, a reference with the size, type and dimensions of the stored picture, and no
+thumbnail), and fields that read as the clock of their own write (`homes.home.archived_at`: an
+archive made on the web is the clock of that write, and an empty value stays empty).
+
 A write made on the web gets a clock from the server's hybrid clock and the device id of the
 server. A write that comes from a phone passes its own `stamp` (clock and device id).
 
@@ -78,52 +103,35 @@ Erasing a home writes one row to `sync_erasedhome` in the same transaction, with
 connected apps bound to the home. That row, not the home, tells a phone that the home is gone.
 It is kept: it is a few dozen bytes, and the 400 days of retention below do not apply to it.
 
+Restoring an archive (as a copy or not) records the new home and every row it inserts, whatever
+their application, with every field: a phone that reads the feed from position 0 gets them all.
+An archive whose `updated_at` of the home or of a row is more than 24 hours ahead of the clock of
+the instance is refused: a field with no clock of its own reads as that date, and a date in the
+future would hold the clock of the home there.
+
 ## Retention
 
 A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes
 them every night at 03:30 (time zone of the instance). The purge removes the changes created
 more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position
 it removed, so that a cursor below it can be answered with 410, and removes the clocks of the
-rows deleted more than 400 days ago, with those rows when they are still deleted.
-
-A row removed this way takes its children with it by cascade (the occurrences and attachments
-of a task, say). The purge removes their clocks too and, once it is committed, their files on
-the disk. A live row whose reference the cascade empties records that change, as any write
-does.
-
-## Recording a write
-
-The services of a covered application call the helpers of `housecairn.sync.rows` in the
-transaction that writes, right after the write:
-
-- `snapshot(row)` before an edit and `record_edit(row, before)` after it record only the fields
-  whose value changed, so a form that sends every field moves the clock of the one it changed;
-  `stored(row)` takes the snapshot from the database, for an object a form may have changed
-  already;
-- `record_created(row)` after an insert records every field;
-- `delete_row(row)` and `restore_row(row)` replace `row.soft_delete()` and `row.restore()`;
-- `soft_delete(queryset)` and `update(queryset, **values)` replace the queryset methods, with
-  one change for each row whose value changed.
-
-Fields are named by their column (`room_id`) and given as the protocol writes them: amounts as
-decimal strings with the places of the field, dates as `YYYY-MM-DD`, instants as clocks, a file
-by its name in the storage until the files lot gives it the reference of the protocol. The base
-fields (`id`, `home`, `created_at`, `updated_at`, `deleted_at`) are not fields of a change, nor
-the derived ones a model lists in `SYNC_DERIVED` (`visible_from` of an occurrence). A restore,
-as a copy or not, records every row it inserts for the applications of `RECORDED_APPS` in
-`homes/restore.py`.
-
-## Covered applications
-
-| Application | Lot | Rows | Notes |
-| --- | --- | --- | --- |
-| `tasks` | M3c | contractor, task, task material, occurrence, material draw, attachment | Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. |
+rows deleted more than 400 days ago, with those rows when they are still deleted. What hangs off
+a purged row goes with it: the items and photos of a purged room lose their clocks too, and the
+files of their photos are removed from the disk once the purge is committed. A row that stays but
+whose reference the purge empties (`SET_NULL`: the paint of a room whose article is purged, the
+contract of an item whose contractor is) records that change, as any write of a row does.
 
 ## The guard test
 
 `tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a
 covered application adds no change. A lot that covers an application adds its name to
-`COVERED_APPS` and, in `tests/sync_scenarios/<app>.py`, one scenario per model and kind of write
-(save, queryset update, soft deletion, hard deletion) that runs the code the application really
-runs, after setting its rows up straight in the tables. An application that is listed without
-scenarios, or whose scenario writes without recording, fails.
+`COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft
+deletion, hard deletion) that runs the code the application really runs, in a file of its own,
+`tests/sync_scenarios_<lot>.py`, that the test loads. A kind that cannot happen goes to
+`NOT_APPLICABLE` with its reason. An application that is listed without scenarios, or whose
+scenario writes without recording, fails. Covered today: `homes` (the home itself) and `rooms` (rooms, items, photos).
+
+`tasks` (lot M3c) is covered too: contractors, tasks, task materials, occurrences, material
+draws and attachments. Taking back a closing deletes the occurrence that followed with a
+tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing
+can be made again.
