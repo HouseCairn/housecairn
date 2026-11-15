@@ -26,11 +26,12 @@
   const signInForm = field.form
   let pending = null
 
-  async function fetchOptions () {
+  async function fetchOptions (signal) {
     const response = await fetch(form.dataset.optionsUrl, {
       method: 'GET',
       headers: { Accept: 'application/json' },
-      credentials: 'same-origin'
+      credentials: 'same-origin',
+      signal
     })
     if (!response.ok) {
       throw new Error('Unable to fetch the passkey challenge.')
@@ -39,10 +40,14 @@
   }
 
   async function signIn (conditional) {
-    const options = await fetchOptions()
+    // The request that waits in the autofill list starts with the page, while the person
+    // may already be signing in with a password: the challenge is asked for under the same
+    // abort as the request itself. Its answer carries the session cookie of before the
+    // sign-in; arriving after it, it would replace the new one and sign the person out.
+    pending = conditional ? new AbortController() : null
+    const options = await fetchOptions(pending ? pending.signal : undefined)
     const request = Object.assign({}, options)
     if (conditional) {
-      pending = new AbortController()
       request.mediation = 'conditional'
       request.signal = pending.signal
     }
@@ -101,7 +106,7 @@
       offer()
       return
     }
-    // Typing a password instead cancels the pending passkey request.
+    // Typing a password instead cancels the pending passkey request, challenge included.
     signInForm.addEventListener('submit', function () {
       if (pending) {
         pending.abort()

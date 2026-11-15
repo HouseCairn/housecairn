@@ -21,11 +21,18 @@ const STATIC = NAME + "static:" + CONFIG.version;
 const PAGES = NAME + "pages:";
 const KEY = /^[0-9a-f]{32}$/;
 
+// Without cookies: what is kept here is the same for everyone (the offline page is rendered
+// with nothing of the person), and a request that carries the session cookie can answer
+// after a sign-in that has just changed it. The install usually runs on the sign-in page,
+// while the person signs in: the answer to the old cookie would then replace the new one,
+// and the person would be signed out at once.
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(STATIC)
-      .then((cache) => cache.addAll(CONFIG.precache))
+      .then((cache) =>
+        cache.addAll(CONFIG.precache.map((url) => new Request(url, { credentials: "omit" }))),
+      )
       .then(() => self.skipWaiting()),
   );
 });
