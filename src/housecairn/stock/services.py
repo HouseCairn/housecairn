@@ -29,9 +29,9 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.rooms import conf, images
 from housecairn.rooms.models import Item, Room
-from housecairn.stock import changelog
 from housecairn.stock.models import Article, Movement, MovementKind, Supplier, Unit
 from housecairn.stock.storage import stock_storage
+from housecairn.sync import rows as changelog
 
 if TYPE_CHECKING:
     from housecairn.tasks.models import Occurrence

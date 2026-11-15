@@ -35,8 +35,8 @@ from housecairn.reports.models import (
 from housecairn.rooms import images
 from housecairn.rooms.models import Item, Room
 from housecairn.rooms.services import _read_upload
-from housecairn.stock import changelog
 from housecairn.stock.models import Article
+from housecairn.sync import rows as changelog
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import Occurrence, Task
 

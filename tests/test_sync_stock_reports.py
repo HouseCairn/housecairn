@@ -26,9 +26,10 @@ from housecairn.homes.models import Home
 from housecairn.reports import services as report_services
 from housecairn.reports.models import Report
 from housecairn.rooms.models import Item, Room
-from housecairn.stock import changelog, services
+from housecairn.stock import services
 from housecairn.stock.models import Article, Movement, Supplier
 from housecairn.sync import retention
+from housecairn.sync import rows as changelog
 from housecairn.sync.models import Change, ErasedHome, RowClocks
 from housecairn.tasks.models import Occurrence
 from tests.rooms_support import image_bytes, upload

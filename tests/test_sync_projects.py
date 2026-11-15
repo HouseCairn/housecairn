@@ -25,8 +25,8 @@ from housecairn.projects.models import (
 )
 from housecairn.rooms.models import Room
 from housecairn.sync import retention
-from housecairn.sync.links import link_row_id
 from housecairn.sync.models import Change, RowClocks
+from housecairn.sync.rows import link_row_id
 from housecairn.tasks import services as task_services
 from tests.data_support import archive_bytes
 from tests.rooms_support import image_bytes, upload

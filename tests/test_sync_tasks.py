@@ -309,10 +309,15 @@ def test_an_undo_deletes_the_next_occurrence_with_a_tombstone(
     assert delete.kind == "delete"
     assert RowClocks.objects.get(row_id=following.pk).tombstoned_at is not None
     assert last_change(owner_occurrence).fields["status"] == "planned"
-    # The closing can be made again: the deleted one no longer holds the occurrence it followed.
+    # The closing can be made again: its successor has the id of ADR 0077 (need 2), so the one
+    # the undo deleted comes back from its tombstone, as on a phone.
     again = services.complete(alice, Occurrence.objects.get(pk=owner_occurrence.pk))
     assert again.next is not None
-    assert again.next.pk != following.pk
+    assert again.next.pk == following.pk
+    assert again.next.deleted_at is None
+    assert again.next.follows_id == owner_occurrence.pk
+    assert [c.kind for c in changes_of(following)[-2:]] == ["restore", "put"]
+    assert RowClocks.objects.get(row_id=following.pk).tombstoned_at is None
 
 
 def test_completing_the_details_records_them(

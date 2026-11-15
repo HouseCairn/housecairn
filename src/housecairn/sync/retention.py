@@ -21,8 +21,8 @@ from django.utils import timezone
 from housecairn.core.models import BaseModel
 from housecairn.sync import changes as sync_changes
 from housecairn.sync import rows as sync_rows
-from housecairn.sync.links import entity_of, link_row_id
 from housecairn.sync.models import Change, HomeHead, RowClocks
+from housecairn.sync.rows import entity_of, link_row_id
 
 RETENTION = datetime.timedelta(days=400)
 # Rows removed per statement, to keep the lists of identifiers short.
@@ -141,7 +141,7 @@ def _delete_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
 def _forget_links(through: type[models.Model], instances: list[models.Model]) -> None:
     """Remove the clocks of the rows of a link table that the deletion takes with it.
 
-    A link row has no id of its own: its clock is under `sync.links.link_row_id`.
+    A link row has no id of its own: its clock is under `sync.rows.link_row_id`.
     """
     owner_field, other_field = (
         f for f in through._meta.concrete_fields if isinstance(f, models.ForeignKey)

@@ -1,0 +1,166 @@
+{
+  "about": "Deterministic ids of docs/adr/0077 (need 2) and mobile ADR 0003: id = uuid5(home, name), RFC 4122 version 5 (SHA-1) in the namespace of the home, name in UTF-8, ids in lower-case canonical text, the year in four decimal digits. Every vector gives the home, the inputs, the exact name and the expected id.",
+  "version": 1,
+  "vectors": [
+    {
+      "row": "successor",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "occurrence": "3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812"
+      },
+      "name": "next:3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812",
+      "id": "6fcbf1f4-0ea4-5dbf-a057-c28e8232727b"
+    },
+    {
+      "row": "material",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "task": "11223344-5566-4778-8899-aabbccddeeff",
+        "article": "fedcba98-7654-4321-8fed-cba987654321"
+      },
+      "name": "material:11223344-5566-4778-8899-aabbccddeeff:fedcba98-7654-4321-8fed-cba987654321",
+      "id": "988a548f-6ebb-5162-ad16-7a9111f752dc"
+    },
+    {
+      "row": "draw",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "occurrence": "3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812",
+        "article": "fedcba98-7654-4321-8fed-cba987654321"
+      },
+      "name": "draw:3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812:fedcba98-7654-4321-8fed-cba987654321",
+      "id": "3b8b44c8-5fa7-59f4-b706-821d1212c901"
+    },
+    {
+      "row": "envelope",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "year": 2026
+      },
+      "name": "envelope:2026",
+      "id": "de22ebdb-23c4-52f1-ac23-a8f69bf71406"
+    },
+    {
+      "row": "envelope",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "year": 987
+      },
+      "name": "envelope:0987",
+      "id": "49390cab-8470-5b6a-a286-d64fbd796d8f"
+    },
+    {
+      "row": "link",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "entity": "projects.project_rooms",
+        "owner": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+        "other": "5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a"
+      },
+      "name": "projects.project_rooms:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d:5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a",
+      "id": "35ef0a95-8573-5e5e-8660-831807fe44df"
+    },
+    {
+      "row": "link",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "entity": "stock.article_rooms",
+        "owner": "fedcba98-7654-4321-8fed-cba987654321",
+        "other": "5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a"
+      },
+      "name": "stock.article_rooms:fedcba98-7654-4321-8fed-cba987654321:5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a",
+      "id": "88f5d528-c2e5-55bf-a687-fc45c93ecb8f"
+    },
+    {
+      "row": "link",
+      "home": "6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "inputs": {
+        "entity": "stock.article_compatible_items",
+        "owner": "fedcba98-7654-4321-8fed-cba987654321",
+        "other": "c0ffee00-1234-4abc-9def-0123456789ab"
+      },
+      "name": "stock.article_compatible_items:fedcba98-7654-4321-8fed-cba987654321:c0ffee00-1234-4abc-9def-0123456789ab",
+      "id": "20f32d4c-31d3-5b79-83b9-0a7bc8c82e2b"
+    },
+    {
+      "row": "successor",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "occurrence": "3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812"
+      },
+      "name": "next:3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812",
+      "id": "4dd5a289-e99e-51a8-95eb-f74b363a19dd"
+    },
+    {
+      "row": "material",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "task": "11223344-5566-4778-8899-aabbccddeeff",
+        "article": "fedcba98-7654-4321-8fed-cba987654321"
+      },
+      "name": "material:11223344-5566-4778-8899-aabbccddeeff:fedcba98-7654-4321-8fed-cba987654321",
+      "id": "7d7ff97f-f4c7-5427-8dae-f0a632d68b8e"
+    },
+    {
+      "row": "draw",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "occurrence": "3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812",
+        "article": "fedcba98-7654-4321-8fed-cba987654321"
+      },
+      "name": "draw:3a4b5c6d-7e8f-4091-a2b3-c4d5e6f70812:fedcba98-7654-4321-8fed-cba987654321",
+      "id": "6b10eb86-c004-5b0b-ac64-b98016040c79"
+    },
+    {
+      "row": "envelope",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "year": 2026
+      },
+      "name": "envelope:2026",
+      "id": "823ece6b-ecc3-5680-849e-269a6427269e"
+    },
+    {
+      "row": "envelope",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "year": 987
+      },
+      "name": "envelope:0987",
+      "id": "da94640c-8b01-5574-adcd-a934132d64a8"
+    },
+    {
+      "row": "link",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "entity": "projects.project_rooms",
+        "owner": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+        "other": "5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a"
+      },
+      "name": "projects.project_rooms:a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d:5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a",
+      "id": "e8d74fea-bb07-5c74-86a8-f64fde08bc31"
+    },
+    {
+      "row": "link",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "entity": "stock.article_rooms",
+        "owner": "fedcba98-7654-4321-8fed-cba987654321",
+        "other": "5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a"
+      },
+      "name": "stock.article_rooms:fedcba98-7654-4321-8fed-cba987654321:5d4c3b2a-1f0e-4d9c-8b7a-6f5e4d3c2b1a",
+      "id": "72f60d4c-3cb5-59da-9466-60cdabfe2228"
+    },
+    {
+      "row": "link",
+      "home": "0d9c8b7a-6f5e-4d4c-9b3a-2f1e0d9c8b7a",
+      "inputs": {
+        "entity": "stock.article_compatible_items",
+        "owner": "fedcba98-7654-4321-8fed-cba987654321",
+        "other": "c0ffee00-1234-4abc-9def-0123456789ab"
+      },
+      "name": "stock.article_compatible_items:fedcba98-7654-4321-8fed-cba987654321:c0ffee00-1234-4abc-9def-0123456789ab",
+      "id": "80b6304e-c9dc-5b30-a195-d8a040ce3e81"
+    }
+  ]
+}

@@ -42,7 +42,7 @@ clocks (`encode`).
 import datetime
 import decimal
 import uuid
-from collections.abc import Callable, Collection, Iterable, Mapping
+from collections.abc import Callable, Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, overload
 
@@ -51,7 +51,8 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from housecairn.homes.models import Home
-from housecairn.sync import changes, clock
+from housecairn.sync import changes, clock, ids
+from housecairn.sync.models import ErasedHome, RowClocks
 
 # Never sent as fields: the key, the home (it keys the change), the bookkeeping columns.
 BOOKKEEPING = frozenset({"id", "home", "created_at", "updated_at", "deleted_at"})
@@ -71,6 +72,11 @@ class Spec:
     skip: frozenset[str] = frozenset()
     write_clock: frozenset[str] = frozenset()
     virtual: Callable[[Any], dict[str, Any]] | None = None
+    # Bookkeeping columns a model sends all the same (`created_at` of the stock and reports).
+    send: frozenset[str] = frozenset()
+    # File fields sent by the name of the stored file, empty as null, until the lot of the
+    # files (M6) maps them to the reference of ADR 0077.
+    file_names: frozenset[str] = frozenset()
 
 
 _SPECS: dict[str, Spec] = {}
@@ -109,10 +115,10 @@ def _fields(model: type[models.Model]) -> list[models.Field[Any, Any]]:
     return [
         f
         for f in model._meta.concrete_fields
-        if f.name not in BOOKKEEPING
+        if (f.name not in BOOKKEEPING or f.name in spec.send)
         and f.attname not in left_out
         and f.name not in left_out
-        and not isinstance(f, models.FileField)
+        and (not isinstance(f, models.FileField) or f.name in spec.file_names)
     ]
 
 
@@ -149,8 +155,11 @@ def _touches_hidden(model: type[models.Model], only: Collection[str]) -> bool:
 
 def encode(model: type[models.Model], name: str, value: Any) -> Any:
     """A value as the protocol writes it (JSON): text, number, boolean or null."""
-    if name in spec_of(model).write_clock:
+    spec = spec_of(model)
+    if name in spec.write_clock:
         return None if value is None else changes.WRITE_CLOCK
+    if name in spec.file_names:
+        return (str(value) or None) if value is not None else None
     if value is None or isinstance(value, bool | int | float | str | list | dict):
         return _jsonable(value)
     if isinstance(value, datetime.datetime):
@@ -189,6 +198,39 @@ class Before:
 
     values: dict[str, Any] | None
     updated_at: datetime.datetime | None
+    deleted: bool = False
+
+
+def read(model: type[models.Model], pk: Any) -> Before:
+    """The row `pk` of `model` as the database holds it now, deleted or not (`before`)."""
+    stored = model._base_manager.filter(pk=pk).first()
+    return Before(None, None) if stored is None else _before_of(stored)
+
+
+def record_save(model: type[models.Model], pk: Any, was: Before | None) -> None:
+    """Record a write of the row `pk` against `was` (None: a new row), read as stored now.
+
+    For a write `save` cannot wrap, whose instance may not hold what the database does: the
+    row is read again. A deletion or a restoration that the write made is recorded too.
+    """
+    stored = model._base_manager.filter(pk=pk).first()
+    if stored is None:
+        return
+    was = was or Before(None, None)
+    deleted = getattr(stored, "deleted_at", None) is not None
+    record_saved(stored, was)
+    if was.values is None:
+        if deleted:  # a row made already deleted: only a restore import does
+            changes.record_change(home_of(stored), entity_of(model), pk, changes.DELETE)
+        return
+    if deleted != was.deleted:
+        changes.record_change(
+            home_of(stored),
+            entity_of(model),
+            pk,
+            changes.DELETE if deleted else changes.RESTORE,
+            updated_at=was.updated_at,
+        )
 
 
 def before(instance: models.Model) -> Before:
@@ -196,7 +238,16 @@ def before(instance: models.Model) -> Before:
     stored = type(instance)._base_manager.filter(pk=instance.pk).first()
     if stored is None:
         return Before(None, None)
-    return Before(raw_values(stored), getattr(stored, "updated_at", None))
+    return _before_of(stored)
+
+
+def _before_of(stored: models.Model) -> Before:
+    """A row just read from the database, as `before` gives it."""
+    return Before(
+        raw_values(stored),
+        getattr(stored, "updated_at", None),
+        getattr(stored, "deleted_at", None) is not None,
+    )
 
 
 def _diff(
@@ -336,8 +387,9 @@ def update_queryset(rows: models.QuerySet[Any], **values: Any) -> int:
     """`rows.update(**values)` with plain values, then a change per row and field that changed."""
     model = rows.model
     with transaction.atomic():
+        # One read of the rows before the write, locked: it is what each change compares.
         targets = list(model._base_manager.filter(pk__in=rows.values("pk")).select_for_update())
-        was = {row.pk: before(row) for row in targets}
+        was = {row.pk: _before_of(row) for row in targets}
         count = 0
         for chunk in _chunks([row.pk for row in targets]):
             count += model._base_manager.filter(pk__in=chunk).update(**values)
@@ -346,6 +398,12 @@ def update_queryset(rows: models.QuerySet[Any], **values: Any) -> int:
                 setattr(row, name, value)
             record_saved(row, was[row.pk])
         return count
+
+
+# The names the stock and the reports write with since M3d: the same functions.
+soft_delete_all = soft_delete_queryset
+update_rows = update_queryset
+link_id = ids.link
 
 
 def record_created(instances: Iterable[models.Model]) -> None:
@@ -357,3 +415,135 @@ def record_created(instances: Iterable[models.Model]) -> None:
 def values_of(instance: models.Model) -> Mapping[str, Any]:
     """The fields a new row would send (tests, documentation)."""
     return {name: encode(type(instance), name, v) for name, v in raw_values(instance).items()}
+
+
+def create_or_revive(instance: Any) -> Any:
+    """Write a row whose id is deterministic (`sync.ids`), and record its change.
+
+    The id names the row on every side, so a row of that id may exist already: one that an
+    undo or a removal deleted, which comes back (`restore`) with the values of `instance`,
+    or a live one, which takes them. Otherwise the row is created. Returns the row written.
+    """
+    model = type(instance)
+    with transaction.atomic():
+        stored = model._base_manager.select_for_update().filter(pk=instance.pk).first()
+        if stored is None:
+            instance.save(force_insert=True)
+            record_created([instance])
+            return instance
+        if stored.deleted_at is not None:
+            restore(stored)
+        for f in model._meta.concrete_fields:
+            if f.name not in BOOKKEEPING:
+                setattr(stored, f.attname, getattr(instance, f.attname))
+        save(stored)
+        return stored
+
+
+# ---------- link tables ----------
+
+
+def link_row_id(
+    home_id: uuid.UUID, through: type[models.Model], owner: Any, other: Any
+) -> uuid.UUID:
+    """The id of the row of a link table that links `owner` to `other` in a home.
+
+    A link table (`projects.project_rooms`) has no id of its own that a phone could share: its
+    row is named by its entity type, the id of the row that holds the link and the id of the
+    row it links to (`sync.ids.link`).
+    """
+    return ids.link(home_id, entity_of(through), owner, other)
+
+
+def link_fields(relation: models.ManyToManyField[Any, Any]) -> tuple[str, str]:
+    """The column names of the two sides of a link table: the owner's, then the other's."""
+    through: Any = relation.remote_field.through
+    owner = through._meta.get_field(relation.m2m_field_name()).attname
+    other = through._meta.get_field(relation.m2m_reverse_field_name()).attname
+    return owner, other
+
+
+def set_links(owner: models.Model, relation: str, targets: Iterable[models.Model]) -> None:
+    """Make `targets` the elements of the set of links `owner.<relation>`, and record the change.
+
+    An element added is a `put` of the link row, or a `restore` when the row was removed
+    before; an element removed is a `delete`. The elements are read from the table itself,
+    before and after.
+    """
+    field: Any = type(owner)._meta.get_field(relation)
+    through: Any = field.remote_field.through
+    entity = entity_of(through)
+    owner_column, other_column = link_fields(field)
+    home_id = home_of(owner)
+
+    def elements() -> set[uuid.UUID]:
+        found = through._default_manager.filter(**{owner_column: owner.pk})
+        return set(found.values_list(other_column, flat=True))
+
+    # The row of the owner is locked, so that two edits of its links at once do not both add
+    # the same element: the table is written with plain inserts, which a conflict would refuse.
+    type(owner)._base_manager.select_for_update().get(pk=owner.pk)
+    was = elements()
+    wanted = {target.pk for target in targets}
+    if wanted - was:
+        through._default_manager.bulk_create(
+            [through(**{owner_column: owner.pk, other_column: o}) for o in wanted - was]
+        )
+    if was - wanted:
+        through._default_manager.filter(
+            **{owner_column: owner.pk, f"{other_column}__in": was - wanted}
+        ).delete()
+    now = elements()
+    for other in sorted(now - was, key=str):
+        row_id = link_row_id(home_id, through, owner.pk, other)
+        was_removed = RowClocks.objects.filter(
+            home_id=home_id, entity=entity, row_id=row_id, tombstoned_at__isnull=False
+        ).exists()
+        if was_removed:
+            changes.record_change(home_id, entity, row_id, changes.RESTORE)
+        else:
+            changes.record_change(
+                home_id,
+                entity,
+                row_id,
+                changes.PUT,
+                {owner_column: str(owner.pk), other_column: str(other)},
+            )
+    for other in sorted(was - now, key=str):
+        changes.record_change(
+            home_id, entity, link_row_id(home_id, through, owner.pk, other), changes.DELETE
+        )
+
+
+# ---------- what a hard deletion elsewhere does to the rows of a home ----------
+
+
+def home_is_erased(home_id: uuid.UUID) -> bool:
+    """True once `erase_home` has written its row: the home and its change log go together."""
+    return ErasedHome.objects.filter(pk=home_id).exists()
+
+
+def clear_reference(model: type[models.Model], column: str, target: Any) -> None:
+    """Record that rows of `model` lose the reference `column` to a row that is deleted for good.
+
+    Called before the deletion, by the receivers of `pre_delete`: the database sets the
+    column to NULL (`on_delete=SET_NULL`) without going through a service.
+    """
+    entity = entity_of(model)
+    found = list(
+        model._base_manager.filter(**{column: target}).values_list("pk", "home_id", "updated_at")
+    )
+    for pk, home_id, updated_at in found:
+        if home_is_erased(home_id):
+            continue
+        changes.record_change(
+            home_id, entity, pk, changes.PUT, {column: None}, updated_at=updated_at
+        )
+
+
+def forget_clocks(home_id: uuid.UUID, entity: str, row_ids: Sequence[uuid.UUID]) -> None:
+    """Remove the clocks of rows that are gone for good, so that none is left without its row."""
+    for start in range(0, len(row_ids), CHUNK):
+        RowClocks.objects.filter(
+            home_id=home_id, entity=entity, row_id__in=row_ids[start : start + CHUNK]
+        ).delete()

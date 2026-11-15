@@ -47,6 +47,8 @@ from housecairn.projects.storage import project_storage
 from housecairn.rooms import images
 from housecairn.rooms.models import Room
 from housecairn.rooms.services import _read_upload
+from housecairn.sync import ids
+from housecairn.sync import rows as sync_rows
 from housecairn.tasks import files as task_files
 from housecairn.tasks import recurrence
 from housecairn.tasks import services as task_services
@@ -338,12 +340,20 @@ def envelope_summary(home: Home, year: int) -> EnvelopeSummary:
 @transaction.atomic
 def set_envelope(actor: AnyUser, home: Home, *, year: int, amount: Any) -> AnnualEnvelope:
     _require_write(actor, home)
-    envelope = envelopes_of(home).filter(year=year).first() or AnnualEnvelope(home=home, year=year)
-    before = changelog.stored(envelope)
-    envelope.amount = _money("amount", amount)
-    envelope.full_clean()
-    envelope.save()
-    changelog.saved(envelope, before)
+    envelope = envelopes_of(home).filter(year=year).first()
+    if envelope is None:
+        # A new one gets the id of ADR 0077 (need 2), the same on a phone.
+        made = AnnualEnvelope(
+            id=ids.envelope(home.pk, year), home=home, year=year, amount=_money("amount", amount)
+        )
+        made.full_clean(validate_unique=False)  # the id may be that of a deleted envelope
+        envelope = sync_rows.create_or_revive(made)
+    else:
+        before = changelog.stored(envelope)
+        envelope.amount = _money("amount", amount)
+        envelope.full_clean()
+        envelope.save()
+        changelog.saved(envelope, before)
     audit.record_object("envelope.set", actor=actor, home_id=home.id, title=str(year))
     return envelope
 
