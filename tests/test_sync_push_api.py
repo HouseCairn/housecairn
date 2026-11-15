@@ -1240,6 +1240,28 @@ class TestCodes:
         assert result_of(delete)["code"] == "id_taken"
         assert Room.objects.filter(pk=theirs.pk).exists()
 
+    def test_id_taken_by_a_row_of_another_home_known_only_by_its_clocks(
+        self, phone: Connected, alice_home: Home, bob: User, bob_home: Home
+    ) -> None:
+        """Mutant: the ids held only in the clocks (a row purged, or deleted before its put
+        came) not looked up: the id is reused in another home, and the row becomes Alice's."""
+        theirs = uuid.uuid4()
+        bob_phone = connect(bob, [bob_home])
+        deleted = op(bob_home.pk, "rooms.room", theirs, k="delete")
+        assert (
+            result_of(send(bob_phone.access, bob_home.pk, [deleted], device=OTHER_DEVICE))["status"]
+            == "applied"
+        )
+        assert not Room.all_objects.filter(pk=theirs).exists()
+        answer = send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", theirs, {"name": "Mine"}, c=stamp(60_000))],
+        )
+        assert result_of(answer) == {"i": 0, "status": "rejected", "code": "id_taken"}
+        assert not Room.all_objects.filter(pk=theirs).exists()
+        assert not RowClocks.objects.filter(home=alice_home, row_id=theirs).exists()
+
     def test_id_taken_by_a_row_of_another_table_and_by_another_home_itself(
         self, phone: Connected, alice_home: Home, room: Room, bob_home: Home
     ) -> None:
@@ -1344,6 +1366,28 @@ class TestLinks:
         fields = {"article_id": str(article.pk), "room_id": str(theirs.pk)}
         answer = send(phone.access, alice_home.pk, [op(alice_home.pk, entity, link_id, fields)])
         assert result_of(answer)["code"] == "invalid_reference"
+
+    def test_a_link_whose_owner_is_a_row_of_another_home_is_rejected(
+        self,
+        phone: Connected,
+        alice: User,
+        alice_home: Home,
+        room: Room,
+        bob: User,
+        bob_home: Home,
+    ) -> None:
+        """Mutant: the owner of a link (the article) not checked against the home: Alice links
+        Bob's article to her room, and the link table of Bob's article changes."""
+        from housecairn.sync import ids
+
+        theirs = self._article(bob, bob_home)
+        entity = "stock.article_rooms"
+        link_id = ids.link(alice_home.pk, entity, theirs.pk, room.pk)
+        fields = {"article_id": str(theirs.pk), "room_id": str(room.pk)}
+        answer = send(phone.access, alice_home.pk, [op(alice_home.pk, entity, link_id, fields)])
+        assert result_of(answer) == {"i": 0, "status": "rejected", "code": "invalid_reference"}
+        assert not theirs.rooms.exists()
+        assert not RowClocks.objects.filter(row_id=link_id).exists()
 
 
 # ---------- a push runs once ----------
