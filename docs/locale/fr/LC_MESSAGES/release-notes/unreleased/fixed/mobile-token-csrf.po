@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Mobile app sign-in.** The token and revocation endpoints (`/o/token/` and `/o/revoke_token/`) no longer answer 403 when the mobile app calls them without a CSRF cookie, which kept the app from exchanging its code, refreshing its access or disconnecting. The consent page keeps its CSRF check."
+msgstr "**Connexion de l'app mobile.** Les points d'accès de jeton et de révocation (`/o/token/` et `/o/revoke_token/`) ne répondent plus 403 quand l'app mobile les appelle sans cookie CSRF, ce qui l'empêchait d'échanger son code, de renouveler son accès ou de se déconnecter. La page de consentement garde sa vérification CSRF."

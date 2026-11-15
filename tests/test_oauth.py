@@ -833,3 +833,32 @@ class TestTokenEndpoint:
         assert not AccessToken.objects.exists()
         # The code is still the phone's: its own client exchanges it.
         assert exchange(Client(), code, verifier).status_code == 200
+
+
+class TestCsrf:
+    """The app has no cookie: the two machine endpoints take a POST without a CSRF token, the
+    consent page keeps it (`TestConsentIsNeverSkipped`). `Client()` skips the check, so these
+    tests enforce it."""
+
+    def test_the_token_endpoint_needs_no_csrf_cookie(self, alice: User, alice_home: Home) -> None:
+        client = Client()
+        client.force_login(alice)
+        answer, verifier = consent(client, [alice_home])
+        strict = Client(enforce_csrf_checks=True)
+        exchanged = exchange(strict, code_of(answer), verifier)
+        assert exchanged.status_code == 200, exchanged.content
+        refreshed = refresh(Client(enforce_csrf_checks=True), exchanged.json()["refresh_token"])
+        assert refreshed.status_code == 200, refreshed.content
+
+    def test_the_revocation_endpoint_needs_no_csrf_cookie(
+        self, alice: User, alice_home: Home
+    ) -> None:
+        phone = connect(alice, [alice_home])
+        answer = Client(enforce_csrf_checks=True).post(
+            reverse("oauth2_provider:revoke-token"),
+            {"token": phone.refresh, "client_id": CLIENT_ID},
+            secure=True,
+        )
+        assert answer.status_code == 200, answer.content
+        phone.connection.refresh_from_db()
+        assert phone.connection.revoked_at is not None
