@@ -1,4 +1,4 @@
-{% load i18n %}{# The stock items a task needs. `materials`: the formset. With script, + adds a line and − removes one (static/js/task-form.js); without, "Add lines" sends the form back with more lines and checks nothing. #}
+{% load i18n %}{# The stock items a task needs. `materials`: the formset. With script, + adds a line and − removes one (static/js/task-form.js); without, "Add a line" sends the form back with one more line and checks nothing. #}
 {{ materials.management_form }}
 {{ materials.non_form_errors }}
 <p class="small">{% translate "Stock items the task needs, with the quantity. Marking the task done takes these quantities from the stock." %} <span data-material-nojs>{% translate "To remove a line, set its stock item to the dash." %}</span></p>
@@ -7,5 +7,5 @@
 </div>
 <p class="small" data-material-limit data-limit-text="{% blocktranslate with max=materials.max_num %}A task lists at most {{ max }} stock items.{% endblocktranslate %}" aria-live="polite">{% if not materials.can_add_more %}{% blocktranslate with max=materials.max_num %}A task lists at most {{ max }} stock items.{% endblocktranslate %}{% endif %}</p>
 <button type="button" class="button-secondary" data-material-add hidden><span aria-hidden="true">+</span> {% translate "Add a line" %}</button>
-{% if materials.can_add_more %}<button type="submit" name="materials-add" value="1" class="button-secondary" formnovalidate data-material-more>{% translate "Add lines" %}</button>{% endif %}
+{% if materials.can_add_more %}<button type="submit" name="materials-add" value="1" class="button-secondary" formnovalidate data-material-more>{% translate "Add a line" %}</button>{% endif %}
 <template data-material-template>{% include "tasks/_material_line.html" with line=materials.empty_form number="" %}</template>

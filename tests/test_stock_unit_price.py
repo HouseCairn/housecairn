@@ -150,7 +150,7 @@ class TestPlannedCostOfATask:
         for article, quantity in lines:
             materials.add_material(alice, task, article, D(quantity))
 
-    def test_the_stock_is_added_to_the_typed_budget_and_shown_apart(
+    def test_priced_stock_replaces_the_typed_budget_which_is_kept(  # ADR 0081
         self, alice: User, alice_home: Home
     ) -> None:
         task = make_task(alice, alice_home, material_budget=D("10"), labour_budget=D("5"))
@@ -161,9 +161,11 @@ class TestPlannedCostOfATask:
             (make_article(alice, alice_home, "Tape", "1.50"), "3"),
         )
         row = plan_of(alice_home, task)
-        assert row.material == D("10")  # what was typed, untouched
+        assert row.material == D("10")  # what was typed, untouched but not counted
         assert row.stock.amount == D("44.50")
-        assert row.estimate == D("59.50")
+        assert row.material_from_stock
+        assert row.material_planned == D("44.50")
+        assert row.estimate == D("49.50")
         assert row.stock.unpriced == 0
 
     def test_a_decimal_quantity_is_rounded_once_to_the_cent(
@@ -244,7 +246,7 @@ class TestPlannedCostOfATask:
             line.label: line.amounts
             for line in budget.by_nature(budget.load(alice_home, TODAY), 2026)
         }
-        assert natures["material"].planned == D("30.00")
+        assert natures["material"].planned == D("20.00")  # the stock, not 10 + 20
 
     def test_a_task_of_another_home_is_not_counted(
         self, alice: User, bob: User, alice_home: Home, bob_home: Home
@@ -287,13 +289,13 @@ class TestEstimateOfADoneOccurrence:
         )
         return signed_in.get(url).content.decode()
 
-    def test_the_estimate_is_the_typed_materials_plus_the_stock(
+    def test_the_estimate_is_the_stock_in_place_of_the_typed_materials(
         self, signed_in: Client, alice: User, alice_home: Home
     ) -> None:
         task = make_task(alice, alice_home, material_budget=D("10"))
         materials.add_material(alice, task, make_article(alice, alice_home, "Paint", "20"), D("2"))
         done_once(alice, task)
-        assert "Estimated at €50.00 each time" in self.page(signed_in, alice_home, task)
+        assert "Estimated at €40.00 each time" in self.page(signed_in, alice_home, task)
 
     def test_the_stock_alone_is_an_estimate(
         self, signed_in: Client, alice: User, alice_home: Home
@@ -316,7 +318,7 @@ class TestPaidByNature:
     def test_the_real_cost_is_shared_as_the_estimate_with_the_stock_in_the_materials(
         self, alice: User, alice_home: Home
     ) -> None:
-        # Estimate 40 = 10 typed + 20 of stock (materials, 30) + 10 of labour.
+        # Estimate 30 = 20 of stock (materials, the 10 typed not counted) + 10 of labour.
         task = make_task(alice, alice_home, material_budget=D("10"), labour_budget=D("10"))
         materials.add_material(alice, task, make_article(alice, alice_home, "Paint", "20"), D("1"))
         done_once(alice, task, "80")
@@ -324,9 +326,9 @@ class TestPaidByNature:
             line.label: line.amounts
             for line in budget.by_nature(budget.load(alice_home, TODAY), 2026)
         }
-        # 80 paid, shared 30/40 and 10/40: 60 in materials, 20 in labour, none in other.
-        assert natures["material"].paid == D("60.00")
-        assert natures["labour"].paid == D("20.00")
+        # 80 paid, shared 20/30 and 10/30: 53.33 in materials, 26.67 in labour.
+        assert natures["material"].paid == D("53.33")
+        assert natures["labour"].paid == D("26.67")
         assert natures["other"].paid == D("0")
 
 
@@ -341,9 +343,9 @@ class TestOnTheScreens:
         page = signed_in.get(
             reverse("tasks:detail", kwargs={"home_id": alice_home.id, "task_id": task.id})
         ).content.decode()
-        assert "€50.00" in page  # 10 typed + 2 x 20
-        assert "Of which stock" in page
-        assert "€40.00" in page
+        assert "€40.00" in page  # 2 x 20, the 10 typed not counted
+        assert "Materials, from the stock" in page
+        assert "€50.00" not in page
         assert "2 stock items without a price are not counted" in page
 
     def test_one_item_without_price_is_said_in_the_singular(
@@ -355,7 +357,8 @@ class TestOnTheScreens:
             reverse("tasks:detail", kwargs={"home_id": alice_home.id, "task_id": task.id})
         ).content.decode()
         assert "1 stock item without a price is not counted" in page
-        assert "Of which stock" not in page
+        assert "Materials, from the stock" not in page
+        assert "€10.00" in page  # no priced stock item: the budget typed counts
 
     def test_the_budget_of_the_upkeep_shows_the_part_of_the_stock(
         self, signed_in: Client, alice: User, alice_home: Home
@@ -366,7 +369,7 @@ class TestOnTheScreens:
         page = signed_in.get(
             reverse("budget:tasks", kwargs={"home_id": alice_home.id}) + "?year=2026"
         ).content.decode()
-        assert "of which stock: €20.00" in page
+        assert "materials from the stock: €20.00" in page
         assert "1 stock item without a price" in page
 
     def test_the_items_without_price_are_said_even_without_an_estimate(
@@ -515,7 +518,7 @@ class TestApi:
         body = client_of_alice.get(api("budget-tasks", alice_home), {"year": 2026}).json()
         (line,) = body["lines"]
         assert (line["estimate"], line["stock_estimate"], line["unpriced_materials"]) == (
-            "30.00",
+            "20.00",
             "20.00",
             1,
         )

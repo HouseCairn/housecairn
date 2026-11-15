@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n navigation static %}
 {% block head_title %}{% if article %}{% translate "Edit the stock item" %}{% else %}{% translate "Add a stock item" %}{% endif %}{% endblock head_title %}
-{% block extra_head %}<script src="{% static 'js/chip-select.js' %}" defer></script>{% endblock extra_head %}
+{% block extra_head %}<script src="{% static 'js/chip-select.js' %}" defer></script>{% if autosave %}<script src="{% static 'js/autosave.js' %}" defer></script>{% endif %}{% endblock extra_head %}
 {% block content %}
   {% if article %}
     {% url 'stock:detail' home_id=home.id article_id=article.id as parent %}{% back_link parent article.name %}
@@ -10,13 +10,14 @@
     {% url 'stock:list' home_id=home.id as parent %}{% back_link parent %}
     <h1>{% translate "Add a stock item" %}</h1>
   {% endif %}
-  <form method="post" enctype="multipart/form-data" class="card">
+  <form method="post" enctype="multipart/form-data" class="card"{% if autosave %} data-autosave{% endif %}>
     {% csrf_token %}
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
     <p class="small">{% blocktranslate with size=max_bytes|filesizeformat %}Label photo: JPEG, PNG or WebP, up to {{ size }}. Location data and other information stored in the file are removed.{% endblocktranslate %}</p>
     <div class="form-submit"><button type="submit" class="button-block">{% if article %}{% translate "Save" %}{% else %}{% translate "Add the stock item" %}{% endif %}</button></div>
+    {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
   {% if article %}
     <a class="button button-danger button-block" href="{% url_with_next 'stock:delete' home_id=home.id article_id=article.id %}">{% translate "Delete the stock item" %}</a>

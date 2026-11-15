@@ -51,8 +51,8 @@ msgstr "Où il est rangé, par exemple « garage, deuxième étagère »."
 msgid "Unit, Which unit"
 msgstr "Unité, Quelle unité"
 
-msgid "A unit of the list (piece, litre, metre, kilogram, roll, box) or **Other**, with the unit written in **Which unit**."
-msgstr "Une unité de la liste (pièce, litre, mètre, kilogramme, rouleau, boîte) ou **Autre**, avec l'unité écrite dans **Quelle unité**."
+msgid "A unit of the list (piece, litre, millilitre, metre, kilogram, roll, box) or **Other**, with the unit written in **Which unit**."
+msgstr "Une unité de la liste (pièce, litre, millilitre, mètre, kilogramme, rouleau, boîte) ou **Autre**, avec l'unité écrite dans **Quelle unité**."
 
 msgid "Threshold"
 msgstr "Seuil"
@@ -92,4 +92,10 @@ msgstr "Texte libre, 4 000 caractères au plus."
 
 msgid "The quantity is not a field: the stock starts at zero and changes with the movements, which you record on the [page of the item](stock-item.md). Only the name is required."
 msgstr "La quantité n'est pas un champ : le stock part de zéro et évolue avec les mouvements, que vous enregistrez sur la [page de l'article](stock-item.md). Seul le nom est requis."
+
+msgid "Saved as you go"
+msgstr "Enregistré au fil de la saisie"
+
+msgid "When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script."
+msgstr "Quand vous modifiez une fiche qui existe, chaque champ est enregistré dès que vous le changez, ou après une courte pause de saisie, et **Enregistré** s'affiche sous le bouton (un lecteur d'écran l'annonce). Une erreur s'affiche sous son champ, et ce que vous avez saisi reste. Un intervenant, une pièce, un élément ou un article ajouté sur place, et un fichier, attendent **Enregistrer** ; de même que toute modification sans script."
 

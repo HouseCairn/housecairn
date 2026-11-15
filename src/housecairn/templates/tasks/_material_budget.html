@@ -1,0 +1,9 @@
+{% load i18n money %}{# The material budget of a task: typed, or calculated from its priced stock items (docs/adr/0081). `form`, `stock_plan`, `home`; `oob`: swapped in place after a field saved on the fly. #}
+<div id="material-budget"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if stock_plan.priced %}
+    <input type="hidden" name="{{ form.material_budget.html_name }}" value="{{ form.material_budget.value|default_if_none:'' }}">
+    <p data-material-from-stock><span class="label">{% translate "Material budget" %}</span> {% blocktranslate with amount=stock_plan.amount|money:home.currency %}{{ amount }} each time, calculated from the stock items of the task.{% endblocktranslate %}</p>
+  {% else %}
+    {% include "tasks/_field.html" with field=form.material_budget %}
+  {% endif %}
+</div>

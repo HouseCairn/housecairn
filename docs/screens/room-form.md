@@ -14,3 +14,7 @@ The paint, the coverings and the photos of the room are kept in its
 
 A room added from the list of rooms opens on its page. Saved changes go back to the
 screen the form was opened from.
+
+## Saved as you go
+
+When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script.

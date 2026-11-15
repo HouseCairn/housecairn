@@ -11,7 +11,8 @@ The form to add an item to a room, at
 | Type | Equipment or surface. |
 | Brand | Free text, 120 characters at most. The brands already entered for the items of the home are suggested as you type; any other text is kept. |
 | Model, serial number | Free text, 120 characters at most each. |
-| Installed on, warranty ends on | Dates. |
+| Purchased on, installed on | Dates. |
+| Manufacturer's warranty | Apart from the maintenance contract. **Duration**: a number from 1 to 99, in months or years (years when nothing is chosen). **Given by**: the manufacturer or the shop, and its name. **Starts on**: empty, from the purchase date. **Ends on** is worked out from the start and the duration when both are known, and shown under the fields; type it only when you do not know them. |
 | Maintenance contract: provider | Who services it: one of the contractors of the home, or the last choice, **Add a contractor…**, which shows the fields of a new one right under the list: its name (required) and its trade. The contractor is created when the item is saved; complete it later on its [sheet](contractor.md). A form refused for another reason creates no contractor, and a name that is already a contractor of the home, whatever its case, is refused: choose it in the list. Without script the fields of a new contractor are always shown, and read only when **Add a contractor…** is chosen. Optional. |
 | Maintenance contract: number | The number to quote when you call them, 120 characters at most. |
 | Contract link | An `http` or `https` address. |
@@ -23,3 +24,7 @@ Only the name is required.
 The link at the top and the form once sent lead back to the screen the form was
 opened from: an item added from its room goes back to the room, with the message
 **Item added · Open**. Saved changes go back to where the form was opened.
+
+## Saved as you go
+
+When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script.

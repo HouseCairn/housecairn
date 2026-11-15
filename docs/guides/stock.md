@@ -12,9 +12,10 @@ it is kept. A photo of the label saves typing the reference now and finding it a
 later: HouseCairn keeps the picture and nothing else (the location and every other
 piece of information hidden in the file are removed).
 
-The **unit** comes from a list (piece, litre, metre, kilogram, roll, box) plus **Other**,
+The **unit** comes from a list (piece, litre, millilitre, metre, kilogram, roll, box) plus **Other**,
 where you write your own (bag, pallet). Quantities are then written with it: *1 litre*,
-*2 litres*.
+*2 litres*, *250 mL*. There is no conversion between units: a quantity is always in the unit
+of its item.
 
 Choose the **compatible items** when the part is made for a given piece of
 equipment, such as the boiler a filter fits, and the **rooms** where it is used: type in

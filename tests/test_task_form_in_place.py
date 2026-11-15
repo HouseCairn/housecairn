@@ -443,11 +443,11 @@ class TestNewArticle:
 
 
 class TestMaterialLines:
-    def test_the_page_offers_three_empty_lines_and_the_buttons(
+    def test_the_page_offers_one_empty_line_and_the_buttons(
         self, signed_in: Client, alice_home: Home
     ) -> None:
         page = signed_in.get(url("create", alice_home)).text
-        assert line_count(page) == 3
+        assert line_count(page) == 1
         assert f'data-max="{LINE_LIMIT}"' in page
         assert 'name="materials-add"' in page
         # The title is required: without formnovalidate the browser would refuse to add lines.
@@ -475,7 +475,7 @@ class TestMaterialLines:
         assert "materials-add" not in first.group(0)
         assert page.index('visually-hidden" tabindex="-1"') < page.index('name="materials-add"')
 
-    def test_add_lines_shows_the_form_again_with_three_more_and_saves_nothing(
+    def test_add_a_line_shows_the_form_again_with_one_more_and_saves_nothing(
         self, signed_in: Client, alice: User, alice_home: Home, owner_room: Room
     ) -> None:
         brush = stock_services.create_article(alice, alice_home, name="Brush")
@@ -491,8 +491,8 @@ class TestMaterialLines:
         response = signed_in.post(url("create", alice_home), sent)
         assert response.status_code == 200
         page = response.text
-        # 3 sent lines + 3 more, with what was typed, and no error shown for the empty title.
-        assert line_count(page) == 6
+        # 3 sent lines + 1 more, with what was typed, and no error shown for the empty title.
+        assert line_count(page) == 4
         assert "Keep me" in page
         assert f'value="{brush.id}" selected' in page
         assert f'value="{owner_room.id}" selected' in page
@@ -503,7 +503,7 @@ class TestMaterialLines:
         assert Article.objects.filter(home=alice_home).count() == 1
 
     def test_add_lines_stops_at_the_limit(self, signed_in: Client, alice_home: Home) -> None:
-        rows = [{"article": "", "quantity": ""}] * (LINE_LIMIT - 2)
+        rows = [{"article": "", "quantity": ""}] * (LINE_LIMIT - 1)
         sent = with_lines(*rows)
         sent["materials-add"] = "1"
         page = signed_in.post(url("create", alice_home), sent).text
@@ -519,7 +519,7 @@ class TestMaterialLines:
         sent["materials-TOTAL_FORMS"] = "lots"
         sent["materials-add"] = "1"
         page = signed_in.post(url("create", alice_home), sent).text
-        assert line_count(page) == 3
+        assert line_count(page) == 1
         sent["materials-TOTAL_FORMS"] = "100000"
         page = signed_in.post(url("create", alice_home), sent).text
         assert line_count(page) == LINE_LIMIT

@@ -48,14 +48,14 @@ msgstr "Priorité, la personne responsable (un membre du logement, affiché par 
 msgid "Time and budget"
 msgstr "Durée et budget"
 
-msgid "Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home."
-msgstr "Durée estimée (un nombre et une unité : minutes, heures, jours, semaines, mois ou ans), budgets main d'œuvre et matériel, dans la devise du logement."
+msgid "Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home. With a priced stock item in **Materials**, the material budget is calculated from the stock and shown in place of its field."
+msgstr "Durée estimée (un nombre et une unité : minutes, heures, jours, semaines, mois ou années), budgets main-d'œuvre et matériel, dans la devise du logement. Avec un article chiffré dans **Matériel**, le budget matériel est calculé à partir du stock et affiché à la place de son champ."
 
 msgid "Materials"
 msgstr "Fournitures"
 
-msgid "The stock items the task needs, one line each: the stock item and the quantity; the last choice of the list, **Add a stock item…**, adds one. Three empty lines are offered; **+** adds a line and **−** removes one, up to 50 (see [Materials](#materials)). Marking the task done takes these quantities from the stock."
-msgstr "Les articles dont la tâche a besoin, une ligne chacun : l'article et la quantité ; le dernier choix de la liste, **Ajouter un article…**, en ajoute un. Trois lignes vides sont proposées ; **+** ajoute une ligne et **−** en retire une, jusqu'à 50 (voir [Matériel](#materials)). Marquer la tâche faite prend ces quantités dans le stock."
+msgid "The stock items the task needs, one line each: the stock item and the quantity; the last choice of the list, **Add a stock item…**, adds one. One empty line is offered; **+** adds a line and **−** removes one, up to 50 (see [Materials](#materials)). Marking the task done takes these quantities from the stock."
+msgstr "Les articles dont la tâche a besoin, une ligne chacun : l'article et la quantité ; le dernier choix de la liste, **Ajouter un article…**, en ajoute un. Une ligne vide est proposée ; **+** ajoute une ligne et **−** en retire une, jusqu'à 50 (voir [Matériel](#materials)). Marquer la tâche faite prend ces quantités dans le stock."
 
 msgid "How to do it"
 msgstr "Comment faire"
@@ -108,8 +108,8 @@ msgstr "La pièce et l'élément sont créés à l'enregistrement de la tâche, 
 msgid "One line per stock item: the stock item, in the list of the stock of the home, and the quantity. The last choice of the list, **Add a stock item…**, opens its name (required) and its unit, from the list of units (**Which unit** for Other) right under the list; the stock item joins the stock of the home when the task is saved, linked to the equipment chosen for the task (the one added by the same form included), and a form refused creates nothing. A name already in the stock, or added by another line, is refused with a message."
 msgstr "Une ligne par article : l'article, pris dans la liste du matériel du logement, et la quantité. Le dernier choix de la liste, **Ajouter un article…**, ouvre juste sous la liste son nom (obligatoire) et son unité, prise dans la liste des unités (**Quelle unité** pour Autre) ; l'article rejoint le matériel du logement à l'enregistrement de la tâche, lié à l'équipement choisi pour la tâche (celui ajouté par le même formulaire compris), et un formulaire refusé ne crée rien. Un nom déjà présent dans le matériel, ou ajouté par une autre ligne, est refusé avec un message."
 
-msgid "Three empty lines are offered. With script, **+** adds a line and **−** removes the line it is on, up to 50 lines (the number of stock items a task may list); when the limit is reached **+** is disabled and a notice says so, which a screen reader announces. Without script, **Add lines** sends the form back with what was typed and three more lines, without checking or saving anything (the files chosen have to be chosen again); to remove a line, set its stock item to the dash. Pressing Enter in a field saves the task, never **Add lines**."
-msgstr "Trois lignes vides sont proposées. Avec le script, **+** ajoute une ligne et **−** retire celle où il se trouve, jusqu'à 50 lignes (le nombre d'articles qu'une tâche peut lister) ; une fois la limite atteinte, **+** est désactivé et un avis le dit, qu'un lecteur d'écran annonce. Sans script, **Ajouter des lignes** renvoie le formulaire avec ce qui a été saisi et trois lignes de plus, sans rien vérifier ni enregistrer (les fichiers choisis sont à choisir de nouveau) ; pour retirer une ligne, remettez son article sur le tiret. Entrée dans un champ enregistre la tâche, jamais **Ajouter des lignes**."
+msgid "One empty line is offered. With script, **+** adds a line and **−** removes the line it is on, up to 50 lines (the number of stock items a task may list); when the limit is reached **+** is disabled and a notice says so, which a screen reader announces. Without script, **Add a line** sends the form back with what was typed and one more line, without checking or saving anything (the files chosen have to be chosen again); to remove a line, set its stock item to the dash. Pressing Enter in a field saves the task, never **Add a line**."
+msgstr "Une ligne vide est proposée. Avec le script, **+** ajoute une ligne et **−** retire celle où il se trouve, jusqu'à 50 lignes (le nombre d'articles qu'une tâche peut lister) ; une fois la limite atteinte, **+** est désactivé et un avis le dit, qu'un lecteur d'écran annonce. Sans script, **Ajouter une ligne** renvoie le formulaire avec ce qui a été saisi et une ligne de plus, sans rien vérifier ni enregistrer (les fichiers choisis sont à choisir de nouveau) ; pour retirer une ligne, remettez son article sur le tiret. Entrée dans un champ enregistre la tâche, jamais **Ajouter une ligne**."
 
 msgid "Contractor"
 msgstr "Intervenant"
@@ -137,6 +137,12 @@ msgstr "Revenir"
 
 msgid "The link at the top and the form once sent lead back to the screen the form was opened from: a task added from an item goes back to the item, with the message **Task added · Open**, whose link opens the new task. Opened from the task list, the form opens the new task instead. A form sent with an error stays open and still goes back to the same screen. After **Delete the task**, the page of the deleted task no longer exists: you land on the task list, or on the screen you came from if it was another one."
 msgstr "Le lien du haut et le formulaire une fois envoyé ramènent à l'écran d'où le formulaire a été ouvert : une tâche ajoutée depuis un élément revient à l'élément, avec le message **Tâche ajoutée · Ouvrir**, dont le lien ouvre la nouvelle tâche. Ouvert depuis la liste des tâches, le formulaire ouvre plutôt la nouvelle tâche. Un formulaire envoyé avec une erreur reste ouvert et ramène toujours au même écran. Après **Supprimer la tâche**, la page de la tâche supprimée n'existe plus : vous arrivez sur la liste des tâches, ou sur l'écran d'où vous veniez s'il s'agit d'un autre."
+
+msgid "Saved as you go"
+msgstr "Enregistré au fil de la saisie"
+
+msgid "When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script."
+msgstr "Quand vous modifiez une fiche qui existe, chaque champ est enregistré dès que vous le changez, ou après une courte pause de saisie, et **Enregistré** s'affiche sous le bouton (un lecteur d'écran l'annonce). Une erreur s'affiche sous son champ, et ce que vous avez saisi reste. Un intervenant, une pièce, un élément ou un article ajouté sur place, et un fichier, attendent **Enregistrer** ; de même que toute modification sans script."
 
 #~ msgid "Repeat"
 #~ msgstr "Répétition"

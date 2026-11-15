@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n navigation static %}
-{% block extra_head %}<script src="{% static 'js/task-form.js' %}" defer></script>{% endblock extra_head %}
+{% block extra_head %}<script src="{% static 'js/task-form.js' %}" defer></script>{% if autosave %}<script src="{% static 'js/autosave.js' %}" defer></script>{% endif %}{% endblock extra_head %}
 {% block head_title %}{% if item %}{% translate "Edit the item" %}{% else %}{% translate "Add an item" %}{% endif %}{% endblock head_title %}
 {% block content %}
   {% if item %}
@@ -10,14 +10,32 @@
     {% url 'rooms:detail' home_id=home.id room_id=room.id as parent %}{% back_link parent room.name %}
     <h1>{% translate "Add an item" %}</h1>
   {% endif %}
-  <form method="post" class="card" data-in-place-form>
+  <form method="post" class="card" data-in-place-form{% if autosave %} data-autosave{% endif %}>
     {% csrf_token %}
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {% for field in form %}
-      {% if field.name == "new_contractor_name" or field.name == "new_contractor_trade" or field.name == "new_contractor_trade_other" %}
+      {% if field.name == "new_contractor_name" or field.name == "new_contractor_trade" or field.name == "new_contractor_trade_other" or field.name|slice:":9" == "warranty_" %}
       {% else %}
         {% include "tasks/_field.html" %}
+      {% endif %}
+      {% if field.name == "installed_on" %}
+        {# The warranty of the maker or of the shop, apart from the maintenance contract (docs/adr/0080). #}
+        <fieldset class="add-in-place">
+          <legend>{% translate "Manufacturer's warranty" %}</legend>
+          <p>
+            {{ form.warranty_duration.errors }}{{ form.warranty_duration_unit.errors }}
+            <label for="{{ form.warranty_duration.id_for_label }}">{% translate "Duration" %}</label>
+            <span class="field-pair">{{ form.warranty_duration }}<label class="sr-only" for="{{ form.warranty_duration_unit.id_for_label }}">{% translate "Unit" %}</label>{{ form.warranty_duration_unit }}</span>
+            <span class="helptext">{{ form.warranty_duration.help_text }}</span>
+            {% if autosave %}<span id="autosave-error-{{ form.warranty_duration.html_name }}" class="autosave-error" hidden></span><span id="autosave-error-{{ form.warranty_duration_unit.html_name }}" class="autosave-error" hidden></span>{% endif %}
+          </p>
+          {% include "tasks/_field.html" with field=form.warranty_provider %}
+          {% include "tasks/_field.html" with field=form.warranty_provider_name %}
+          {% include "tasks/_field.html" with field=form.warranty_starts_on %}
+          {% include "tasks/_field.html" with field=form.warranty_ends_on %}
+          {% if item.warranty_ends_on %}<p class="small" data-warranty-end>{% load dates %}{% blocktranslate with date=item.warranty_ends_on|day %}Ends on {{ date }}.{% endblocktranslate %}</p>{% endif %}
+        </fieldset>
       {% endif %}
       {% if field.name == "contract_contractor" %}
         {# Added in place: shown with the choice "Add a contractor…"; without script always shown, and read only with that choice. #}
@@ -34,6 +52,7 @@
     {% endfor %}
     <datalist id="brand-suggestions">{% for brand in form.brands %}<option value="{{ brand }}">{% endfor %}</datalist>
     <div class="form-submit"><button type="submit" class="button-block">{% if item %}{% translate "Save" %}{% else %}{% translate "Add the item" %}{% endif %}</button></div>
+    {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
   {% if item %}
     <a class="button button-danger button-block" href="{% url_with_next 'rooms:item-delete' home_id=home.id item_id=item.id %}">{% translate "Delete the item" %}</a>

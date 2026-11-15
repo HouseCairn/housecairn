@@ -62,9 +62,13 @@ class TestSectionTabs:
         assert current(one) == ["Calendar"]
 
     def test_rooms(self, signed_in: Client, alice_home: Home) -> None:
-        for view, label in [("rooms:list", "Rooms"), ("stock:list", "Stock")]:
+        for view, label in [
+            ("rooms:list", "Rooms"),
+            ("rooms:items", "Equipment"),
+            ("stock:list", "Stock"),
+        ]:
             html = signed_in.get(reverse(view, kwargs={"home_id": alice_home.id})).text
-            assert [t for t, _ in tabs_of(html)] == ["Rooms", "Stock"]
+            assert [t for t, _ in tabs_of(html)] == ["Rooms", "Equipment", "Stock"]
             assert current(html) == [label]
 
     def test_projects(self, signed_in: Client, alice_home: Home) -> None:
@@ -114,6 +118,7 @@ class TestSectionTabs:
             )
         ] == [
             "Pièces",
+            "Équipements",
             "Matériel",
         ]
         projects = signed_in.get(reverse("projects:list", kwargs=kwargs), headers=fr).text

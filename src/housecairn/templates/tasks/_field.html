@@ -1,2 +1,2 @@
-{# One form field in the layout of `form.as_p` (the style sheet targets `form p`). `field`. #}
-<p>{{ field.errors }}{{ field.label_tag }}{{ field }}{% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}</p>
+{# One form field in the layout of `form.as_p` (the style sheet targets `form p`). `field`; with `autosave`, the place of its error when it is saved on the fly. #}
+<p>{{ field.errors }}{{ field.label_tag }}{{ field }}{% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}{% if autosave %}<span id="autosave-error-{{ field.html_name }}" class="autosave-error" hidden></span>{% endif %}</p>

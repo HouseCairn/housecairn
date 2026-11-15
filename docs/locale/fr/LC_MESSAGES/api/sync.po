@@ -42,6 +42,15 @@ msgstr "Valeurs"
 msgid "The operations and rows are those of the mobile protocol: entity types `<app>.<model>` in lower case (`rooms.room`), field names those of the models with foreign keys by their column name (`room_id`), amounts as decimal strings, dates `YYYY-MM-DD`. A **clock** is a hybrid logical clock, 16 lower-case hexadecimal digits; a **device** is the id of the device that wrote, 16 bytes in base64url without padding. The server writes the changes made on the web as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference named by the id of its row, never by the name of the file the server stores."
 msgstr "Les opérations et les lignes sont celles du protocole mobile : types d'entité `<app>.<model>` en minuscules (`rooms.room`), noms de champs ceux des modèles, les clés étrangères par leur nom de colonne (`room_id`), montants en chaînes décimales, dates `YYYY-MM-DD`. Une **horloge** est une horloge logique hybride, 16 chiffres hexadécimaux en minuscules ; un **appareil** est l'identifiant de l'appareil qui a écrit, 16 octets en base64url sans remplissage. Le serveur écrit les modifications faites sur le web comme un seul appareil, dont `GET /api/v1/sync/info` donne l'identifiant. Un fichier est donné comme une référence nommée par l'identifiant de sa ligne, jamais par le nom du fichier que le serveur stocke."
 
+msgid "A field that holds a code of a list takes one of the codes below; a code a phone does not know yet is kept and shown as it is, never refused:"
+msgstr "Un champ qui porte un code d'une liste prend l'un des codes ci-dessous ; un code qu'un téléphone ne connaît pas encore est gardé et affiché tel quel, jamais refusé :"
+
+msgid "`rooms.item.warranty_duration_unit`: `month` or `year` (with `warranty_duration`, from 1 to 99); `rooms.item.warranty_provider`: `manufacturer`, `shop`, or empty. `warranty_ends_on` is worked out from `warranty_starts_on`, else `purchased_on`, plus the duration, the same date that many months or years later (the last day of a shorter month); without a duration or a start, it is the date typed. A phone that changes one of these fields sends the end it works out the same way."
+msgstr "`rooms.item.warranty_duration_unit` : `month` ou `year` (avec `warranty_duration`, de 1 à 99) ; `rooms.item.warranty_provider` : `manufacturer`, `shop`, ou vide. `warranty_ends_on` se calcule à partir de `warranty_starts_on`, sinon de `purchased_on`, plus la durée : la même date autant de mois ou d'années plus tard (le dernier jour d'un mois plus court) ; sans durée ni départ, c'est la date saisie. Un téléphone qui change l'un de ces champs envoie la fin qu'il calcule de la même façon."
+
+msgid "`stock.article.unit`: `piece`, `litre`, `millilitre`, `metre`, `kilogram`, `roll`, `box`, `other` (with `unit_other`), or empty. There is no conversion between units: a quantity is in the unit of its item."
+msgstr "`stock.article.unit` : `piece`, `litre`, `millilitre`, `metre`, `kilogram`, `roll`, `box`, `other` (avec `unit_other`), ou vide. Il n'y a pas de conversion entre unités : une quantité est dans l'unité de son article."
+
 msgid "The homes"
 msgstr "Les logements"
 

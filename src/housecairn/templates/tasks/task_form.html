@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n navigation static %}
-{% block extra_head %}<script src="{% static 'js/task-form.js' %}" defer></script>{% endblock extra_head %}
+{% block extra_head %}<script src="{% static 'js/task-form.js' %}" defer></script>{% if autosave %}<script src="{% static 'js/autosave.js' %}" defer></script>{% endif %}{% endblock extra_head %}
 {% block head_title %}{% if task %}{% translate "Edit the task" %}{% else %}{% translate "Add a task" %}{% endif %}{% endblock head_title %}
 {% block content %}
   {% if task %}
@@ -10,10 +10,10 @@
     {% url 'tasks:list' home_id=home.id as parent %}{% back_link parent %}
     <h1>{% translate "Add a task" %}</h1>
   {% endif %}
-  <form method="post" data-task-form{% if form.uploads %} enctype="multipart/form-data"{% endif %}>
+  <form method="post" data-task-form{% if form.uploads %} enctype="multipart/form-data"{% endif %}{% if autosave %} data-autosave{% endif %}>
     {% csrf_token %}
     {% next_field %}
-    {% if materials.can_add_more %}{# Enter in a field saves the task: this button, first in the form, is the one it presses, not "Add lines" of the materials. #}<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button>{% endif %}
+    {% if materials.can_add_more %}{# Enter in a field saves the task: this button, first in the form, is the one it presses, not "Add a line" of the materials. #}<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button>{% endif %}
     {% include "components/form_errors.html" with form=form formset=materials only %}
     <div class="card">
       {% include "tasks/_field.html" with field=form.title %}
@@ -88,7 +88,7 @@
       <div>
         {% include "tasks/_duration_field.html" %}
         {% include "tasks/_field.html" with field=form.labour_budget %}
-        {% include "tasks/_field.html" with field=form.material_budget %}
+        {% include "tasks/_material_budget.html" %}
       </div>
     </details>
     <details class="form-section"{% if materials.is_open %} open{% endif %}>
@@ -106,6 +106,7 @@
       </div>
     </details>
     <div class="form-submit"><button type="submit" class="button-block">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button></div>
+    {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
   {% if task %}
     <a class="button button-danger button-block" href="{% url_with_next 'tasks:delete' home_id=home.id task_id=task.id %}">{% translate "Delete the task" %}</a>

@@ -8,7 +8,7 @@ to edit one, at `/h/<home id>/stock/<item id>/edit/`.
 | Name | Required, 120 characters at most. |
 | Manufacturer reference, dimensions | Free text, 120 characters at most each. |
 | Storage location | Where it is kept, for example "garage, second shelf". |
-| Unit, Which unit | A unit of the list (piece, litre, metre, kilogram, roll, box) or **Other**, with the unit written in **Which unit**. |
+| Unit, Which unit | A unit of the list (piece, litre, millilitre, metre, kilogram, roll, box) or **Other**, with the unit written in **Which unit**. |
 | Threshold | The item is flagged when the stock falls to this quantity or below. |
 | Unit price | What one unit costs, in the currency of the home; optional, not negative. The cost of the tasks that list the item is planned from it ([budget](../guides/budget.md#the-stock-in-the-cost-of-a-task)). A supplier's last price paid fills it when it is empty. |
 | Rooms | The rooms where the item is used, besides those of the equipment it fits; only rooms of this home can be chosen. A search field: type to narrow the list, pick a room, and it becomes a chip you remove with its **Remove** button (or Backspace in the empty field). Without JavaScript, a list where you choose several rooms. |
@@ -19,3 +19,7 @@ to edit one, at `/h/<home id>/stock/<item id>/edit/`.
 The quantity is not a field: the stock starts at zero and changes with the
 movements, which you record on the [page of the item](stock-item.md). Only the name
 is required.
+
+## Saved as you go
+
+When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script.

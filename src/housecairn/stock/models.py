@@ -26,6 +26,7 @@ class Unit(models.TextChoices):
 
     PIECE = "piece", _("Piece")
     LITRE = "litre", _("Litre")
+    MILLILITRE = "millilitre", _("Millilitre (mL)")
     METRE = "metre", _("Metre")
     KILOGRAM = "kilogram", _("Kilogram")
     ROLL = "roll", _("Roll")
@@ -49,6 +50,8 @@ def unit_text(unit: str, other: str, quantity: Decimal | int = 1) -> str:
             return ngettext("piece", "pieces", count)
         case Unit.LITRE:
             return ngettext("litre", "litres", count)
+        case Unit.MILLILITRE:
+            return ngettext("mL", "mL", count)
         case Unit.METRE:
             return ngettext("metre", "metres", count)
         case Unit.KILOGRAM:

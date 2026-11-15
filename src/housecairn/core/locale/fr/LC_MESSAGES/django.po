@@ -33,6 +33,15 @@ msgstr "Application mobile"
 msgid "Core"
 msgstr "Cœur"
 
+msgid "Not saved: see the field."
+msgstr "Non enregistré : voir le champ."
+
+msgid "Press Save to add the new record."
+msgstr "Appuyez sur Enregistrer pour ajouter la nouvelle fiche."
+
+msgid "Saved"
+msgstr "Enregistré"
+
 msgid "Enter a number with a point as the decimal mark, for example 12.5."
 msgstr "Saisissez un nombre avec un point comme séparateur décimal, par exemple 12.5."
 
@@ -162,6 +171,10 @@ msgstr "Historique"
 
 msgid "Rooms"
 msgstr "Pièces"
+
+msgctxt "tab"
+msgid "Equipment"
+msgstr "Équipements"
 
 msgctxt "screen"
 msgid "Search"

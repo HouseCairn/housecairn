@@ -17,6 +17,7 @@ from django.db.models import prefetch_related_objects
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.urls import Resolver404, reverse
 from django.utils import translation
@@ -28,6 +29,7 @@ from django.views.generic import FormView, TemplateView
 
 from housecairn.accounts import names
 from housecairn.core import navigation, offline
+from housecairn.core.autosave import AutosaveMixin
 from housecairn.core.form_errors import banner_messages
 from housecairn.core.language import instance_default
 from housecairn.core.prefix import in_application, resolve_url
@@ -49,7 +51,7 @@ from housecairn.tasks.forms.materials import BaseMaterialFormSet, MaterialLineFo
 from housecairn.tasks.models import Attachment, Occurrence, Status, Task
 
 PAGE_SIZE = 30
-# The button "Add lines" of the materials, for the form without script.
+# The button "Add a line" of the materials, for the form without script.
 MORE_LINES = "materials-add"
 # How many photos of the item or the room the page of a task shows; the sheet has them all.
 PLACE_PHOTOS = 6
@@ -178,7 +180,7 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
         kwargs = super().get_form_kwargs()
         kwargs.update(home=self.home, with_files=self.with_files)
         if self.more_lines:
-            # "Add lines" without script: the form again with what was typed, nothing checked.
+            # "Add a line" without script: the form again with what was typed, nothing checked.
             kwargs.pop("data", None)
             kwargs.pop("files", None)
             kwargs["initial"] = {**kwargs.get("initial", {}), **self.typed()}
@@ -186,7 +188,7 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
 
     @cached_property
     def more_lines(self) -> bool:
-        """The button "Add lines" (without script) sent the form: show it again, longer."""
+        """The button "Add a line" (without script) sent the form: show it again, longer."""
         return self.request.method == "POST" and MORE_LINES in self.request.POST
 
     def typed(self) -> dict[str, Any]:
@@ -233,7 +235,14 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
         return cast(BaseMaterialFormSet, formset)
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        return super().get_context_data(**self.page(materials=self.materials), **kwargs)
+        from housecairn.budget import services as budget_services
+
+        # The stock items saved on the task: priced, they replace the material budget.
+        task = self.get_task() if "task_id" in self.kwargs else None
+        plan = budget_services.stock_plan_of(task) if task else budget_services.StockPlan()
+        return super().get_context_data(
+            **self.page(materials=self.materials, stock_plan=plan), **kwargs
+        )
 
     @cached_property
     def materials_sent(self) -> bool:
@@ -406,8 +415,32 @@ class TaskDetailView(HomeTasksMixin, TemplateView):
         )
 
 
-class TaskEditView(TaskFormMixin):
+class TaskEditView(AutosaveMixin, TaskFormMixin):
     with_files = False
+
+    def autosave_forms(self, form: forms.TaskForm) -> list[Any]:
+        return [form, *self.materials.forms] if self.materials_sent else [form]
+
+    def autosave_changed(self, form: forms.TaskForm) -> bool:
+        return form.has_changed() or (self.materials_sent and self.materials.has_changed())
+
+    def autosave_extra(self, form: forms.TaskForm) -> str:
+        """The material budget follows the stock items just saved: calculated, or typed again."""
+        if not (self.materials_sent and self.materials.has_changed()):
+            return ""
+        from housecairn.budget import services as budget_services
+
+        return render_to_string(
+            "tasks/_material_budget.html",
+            {
+                "form": form,
+                "home": self.home,
+                "stock_plan": budget_services.stock_plan_of(self.get_task()),
+                "autosave": True,
+                "oob": True,
+            },
+            request=self.request,
+        )
 
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()

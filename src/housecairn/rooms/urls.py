@@ -16,6 +16,7 @@ urlpatterns = [
     path("rooms/<uuid:room_id>/move/", views.RoomMoveView.as_view(), name="move"),
     path("rooms/<uuid:room_id>/items/new/", views.ItemCreateView.as_view(), name="item-create"),
     path("rooms/<uuid:room_id>/photos/new/", views.PhotoAddView.as_view(), name="room-photo-add"),
+    path("items/", views.ItemListView.as_view(), name="items"),
     path("items/<uuid:item_id>/", views.ItemDetailView.as_view(), name="item-detail"),
     path("items/<uuid:item_id>/edit/", views.ItemEditView.as_view(), name="item-edit"),
     path("items/<uuid:item_id>/delete/", views.ItemDeleteView.as_view(), name="item-delete"),
