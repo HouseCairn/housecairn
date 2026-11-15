@@ -16,9 +16,9 @@ from django.core.files.storage import Storage
 from django.db import transaction
 from django.db.models.signals import pre_delete
 
-from housecairn.stock import changelog
 from housecairn.stock.models import Article, Movement, Supplier
 from housecairn.stock.storage import stock_storage
+from housecairn.sync import rows as changelog
 
 logger = logging.getLogger(__name__)
 

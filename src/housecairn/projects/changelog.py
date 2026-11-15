@@ -23,8 +23,8 @@ from typing import Any
 from django.db import models
 
 from housecairn.sync import changes, clock
-from housecairn.sync.links import entity_of, link_fields, link_row_id
 from housecairn.sync.models import RowClocks
+from housecairn.sync.rows import entity_of, link_fields, link_row_id
 
 Values = dict[str, Any]
 # A row as the database held it before a write: its carried fields and its `updated_at`.

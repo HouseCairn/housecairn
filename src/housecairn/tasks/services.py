@@ -33,6 +33,7 @@ from housecairn.rooms import images
 from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Item, Room
 from housecairn.rooms.services import _read_upload
+from housecairn.sync import ids
 from housecairn.sync import rows as changelog
 from housecairn.tasks import durations, files, materials, recurrence
 from housecairn.tasks.models import (
@@ -538,14 +539,18 @@ def _spawn_next(occurrence: Occurrence, *, done_on: datetime.date) -> Occurrence
     )
     if due is None:  # a task done once, or a date beyond what a calendar holds
         return None
-    created: Occurrence = Occurrence.objects.create(
-        home=occurrence.home,
-        task=task,
-        due_on=due,
-        visible_from=_visible_from(task, due),
-        follows=occurrence,
+    # The id of ADR 0077 (need 2): a phone that closes the same occurrence makes the same one.
+    # Closing again after an undo brings back the successor the undo deleted.
+    created: Occurrence = changelog.create_or_revive(
+        Occurrence(
+            id=ids.successor(occurrence.home_id, occurrence.pk),
+            home=occurrence.home,
+            task=task,
+            due_on=due,
+            visible_from=_visible_from(task, due),
+            follows=occurrence,
+        )
     )
-    changelog.record_created([created])
     return created
 
 

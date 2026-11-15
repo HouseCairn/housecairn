@@ -52,6 +52,7 @@ from housecairn.homes import exports, quotas, services
 from housecairn.homes.exports import FileSpec, Section
 from housecairn.homes.models import Home, Membership, Role
 from housecairn.sync import clock
+from housecairn.sync import ids as sync_ids
 from housecairn.sync import rows as sync_rows
 
 SUPPORTED_VERSIONS = frozenset({2, 3, 4})
@@ -425,6 +426,88 @@ def _upgrade_v2(objects: dict[str, list[dict[str, Any]]]) -> None:
 # Old identifier -> new identifier, per model: what a copy gives each object of the archive.
 Fresh = dict[type[models.Model], dict[uuid.UUID, uuid.UUID]]
 
+# The rows whose id is deterministic (docs/adr/0077, need 2), by their model label: the
+# function of `sync.ids` and the fields of the archive row it is named by. A reference is
+# given as the new id of the row it names, the year as it is.
+_DETERMINISTIC: dict[str, tuple[Any, tuple[str, ...]]] = {
+    "tasks.Occurrence": (sync_ids.successor, ("follows",)),
+    "tasks.TaskMaterial": (sync_ids.material, ("task", "article")),
+    "tasks.MaterialDraw": (sync_ids.draw, ("occurrence", "article")),
+    "projects.AnnualEnvelope": (sync_ids.envelope, ("year",)),
+}
+
+
+def _deterministic(
+    home_id: uuid.UUID,
+    sections: list[Section],
+    objects: dict[str, list[dict[str, Any]]],
+    ids: dict[type[models.Model], set[uuid.UUID]],
+    fresh: Fresh,
+) -> None:
+    """Give the rows of a copy whose id is deterministic the id named by their new parents.
+
+    A copy draws new ids (docs/adr/0069); a row named by ADR 0077 is named again from the new
+    ids of the rows it is named by, in the namespace of the new home, so that a phone of the
+    copy makes the same ids. The successor of an occurrence is named by the occurrence it
+    follows, itself perhaps a successor: the chain is named from its start. An occurrence that
+    follows none, a reference outside the archive (refused later), or a deleted row whose name
+    a live one has (a line removed then listed again before ids were deterministic) keeps its
+    new random id.
+    """
+    for section in sections:
+        rule = _DETERMINISTIC.get(section.model._meta.label)
+        if rule is None:
+            continue
+        make, names = rule
+        model = section.model
+        relations = {
+            name: model._meta.get_field(name).related_model
+            for name in names
+            if model._meta.get_field(name).is_relation
+        }
+        rows_by_id = {uuid.UUID(str(row.get("id"))): row for row in objects.get(section.name, [])}
+        taken: set[uuid.UUID] = set()
+        # The rows named by the rows of their own model (successors) wait for them; the live
+        # rows are named before the deleted ones.
+        pending = sorted(rows_by_id, key=lambda pk: rows_by_id[pk].get("deleted_at") is not None)
+        named: set[uuid.UUID] = set()
+        while pending:
+            waiting: list[uuid.UUID] = []
+            for old in pending:
+                parts: list[Any] = []
+                for name in names:
+                    raw = rows_by_id[old].get(name)
+                    if name not in relations:
+                        parts.append(
+                            raw if isinstance(raw, int) and not isinstance(raw, bool) else None
+                        )
+                        continue
+                    try:
+                        parent = uuid.UUID(str(raw))
+                    except ValueError:
+                        parent = None
+                    target: Any = relations[name]
+                    if parent is None or parent not in ids.get(target, set()):
+                        parts.append(None)
+                    elif target is model and parent not in named and parent in rows_by_id:
+                        parts = []  # its predecessor first
+                        break
+                    else:
+                        parts.append(fresh[target][parent])
+                if not parts:
+                    waiting.append(old)
+                    continue
+                named.add(old)
+                if None in parts:
+                    continue
+                made = make(home_id, *parts)
+                if made not in taken:
+                    taken.add(made)
+                    fresh[model][old] = made
+            if len(waiting) == len(pending):  # a loop of successors: the archive is refused later
+                break
+            pending = waiting
+
 
 def _prepare(
     home: Home,
@@ -457,6 +540,7 @@ def _prepare(
     fresh: Fresh = {}
     if as_copy:
         fresh = {model: {old: uuid.uuid4() for old in seen} for model, seen in ids.items()}
+        _deterministic(home.pk, sections, objects, ids, fresh)
     prepared: list[Prepared] = []
     entries = archive.manifest["entries"]
     for section in sections:

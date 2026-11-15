@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Same ids as the mobile app.** The occurrence that follows a closed one, the materials of a task, what a closing takes from the stock and the annual envelope of a year now get the ids the mobile app computes for them, so that the same row made on the web and on a phone is one row. Closing a task again after an undo brings back the occurrence the undo removed, and a restore as a copy computes these ids again. Ids stay UUIDs with no meaning for a client; the rows made before keep theirs."
+msgstr "**Mêmes identifiants que l'application mobile.** L'occurrence qui suit une occurrence close, les matériels d'une tâche, ce qu'une clôture prend au stock et l'enveloppe annuelle d'une année reçoivent désormais les identifiants que l'application mobile calcule pour eux, pour que la même ligne faite sur le web et sur un téléphone soit une seule ligne. Clore de nouveau une tâche après une annulation ramène l'occurrence que l'annulation avait retirée, et une restauration en copie recalcule ces identifiants. Les identifiants restent des UUID sans signification pour un client ; les lignes faites avant gardent les leurs."

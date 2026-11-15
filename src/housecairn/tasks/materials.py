@@ -22,6 +22,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.stock import services as stock_services
 from housecairn.stock.models import Article
+from housecairn.sync import ids
 from housecairn.sync import rows as changelog
 from housecairn.tasks.models import MaterialDraw, Occurrence, Task, TaskMaterial
 
@@ -95,12 +96,18 @@ def add_material(actor: AnyUser, task: Task, article: Article, quantity: Decimal
         raise ValidationError(
             _("At most %(max)d stock items for a task."), params={"max": MAX_MATERIALS_PER_TASK}
         )
-    line = TaskMaterial(home=task.home, task=task, article=article, quantity=quantity)
-    line.full_clean()
-    line.save()
-    changelog.record_created([line])
+    # The id of ADR 0077 (need 2), the same on a phone; a line removed before comes back.
+    line = TaskMaterial(
+        id=ids.material(task.home_id, task.pk, article.pk),
+        home=task.home,
+        task=task,
+        article=article,
+        quantity=quantity,
+    )
+    line.full_clean(validate_unique=False)  # the id may be that of the removed line
+    written: TaskMaterial = changelog.create_or_revive(line)
     _changed(actor, task)
-    return line
+    return written
 
 
 @transaction.atomic
@@ -199,14 +206,17 @@ def draw_for_done(actor: AnyUser, occurrence: Occurrence, *, on: datetime.date) 
         taken = stock_services.draw_for_task(
             actor, line.article, line.quantity, occurrence=occurrence, occurred_on=on
         )
-        draw = MaterialDraw.objects.create(
-            home=occurrence.home,
-            occurrence=occurrence,
-            article=line.article,
-            wanted=line.quantity,
-            drawn=taken,
+        # The id of ADR 0077 (need 2): closing again after an undo brings back its draw.
+        changelog.create_or_revive(
+            MaterialDraw(
+                id=ids.draw(occurrence.home_id, occurrence.pk, line.article_id),
+                home=occurrence.home,
+                occurrence=occurrence,
+                article=line.article,
+                wanted=line.quantity,
+                drawn=taken,
+            )
         )
-        changelog.record_created([draw])
         if taken < line.quantity:
             short.append(Shortage(line.article, line.quantity, taken))
     return short

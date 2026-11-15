@@ -13,8 +13,8 @@ from django.db.models.signals import pre_delete
 
 from housecairn.reports.models import Report
 from housecairn.reports.storage import report_storage
-from housecairn.stock import changelog
 from housecairn.stock.cascades import erase_file_on_commit
+from housecairn.sync import rows as changelog
 
 
 def report_is_going(sender: Any, instance: Report, **_kwargs: Any) -> None:

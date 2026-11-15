@@ -137,17 +137,22 @@ own section here.
 `stock` records `stock.article`, `stock.supplier`, `stock.movement` and the link rows
 `stock.article_rooms` and `stock.article_compatible_items`; `reports` records `reports.report`.
 
-They share `housecairn.stock.changelog`, which turns a write into a change:
+They write through `housecairn.sync.rows`, the one helper of the change log, which turns a
+write into a change:
 
 - `read` takes the state of a row before the write and `record_save` records the fields whose
-  value differs afterwards (a new row is a `put` of every field, a form that sends every field
-  records the ones that changed and no other);
+  value differs afterwards, read again from the database (a new row is a `put` of every field,
+  a form that sends every field records the ones that changed and no other);
 - `soft_delete` and `soft_delete_all` write the deletion of one row or of a queryset, a tombstone
-  per row; `update_rows` is a queryset `update` that records its rows one by one;
+  per row; `update_rows` is a queryset `update` that reads its rows once, then records them one
+  by one;
 - `set_links` writes a set of links (the rooms and the compatible items of an article). Each
   element is a row of a link table whose id is `uuid5(home, "<entity>:<owner id>:<other id>")`:
   adding one is a `put` of `<owner>_id` and `<other>_id` (a `restore` when it was removed before),
   removing one is a `delete`.
+
+What the two applications send is registered in `stock.syncing` and `reports.syncing`: their
+`created_at`, and a file by the name of the stored file.
 
 Values are those of the protocol: decimals as strings, dates `YYYY-MM-DD`, instants as clock
 strings, foreign keys by their column name (`article_id`). A movement does not carry its effect
@@ -159,6 +164,36 @@ A row that goes for good (the retention purge, the erasure of a home, the deleti
 leaves nothing behind: `stock.cascades` and `reports.cascades` remove the clocks of the children
 that have no foreign key to their row (suppliers, movements, link rows) and the files on the
 disk, and record the reference that a report or a movement loses (`SET_NULL`) as a change.
+
+## Deterministic ids
+
+The rows that have a uniqueness rule get the ids of mobile ADR 0003, so that the web and a
+phone that make the same row make it under one id, whose fields then merge
+([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md), need 2). `housecairn.sync.ids` computes
+them: a UUID version 5 in the namespace of the home, from a name in UTF-8, ids in their
+lower-case canonical text, the year in four decimal digits.
+
+| Row | Name | Written by |
+| --- | --- | --- |
+| successor of an occurrence | `next:<occurrence>` | `tasks.services._spawn_next` |
+| material line of a task | `material:<task>:<article>` | `tasks.materials.add_material` |
+| draw of a material | `draw:<occurrence>:<article>` | `tasks.materials.draw_for_done` |
+| annual envelope | `envelope:<year>` | `projects.services.set_envelope` |
+| row of a link table | `<entity type>:<owner>:<other>` | the change log of the link |
+
+Because the id names the row, a row of that id may exist already: an undo deletes the successor
+and the draws of a closing, and removing a material deletes its line. `sync.rows.create_or_revive`
+then brings the row back from its tombstone (a `restore`, then a `put` of the fields that
+changed) instead of inserting a second one. A restore as a copy, which gives every row a new id
+([ADR 0069](../adr/0069-restore-as-a-copy-with-new-identifiers.md)), names these rows again from
+the new ids of their parents, the chain of successors from its start.
+
+The rows written before these ids keep their random id: none was ever sent to a phone, and a
+phone reads them from the snapshot before it writes, so nothing is migrated.
+`tests/fixtures/sync_ids.json` holds vectors of every row of the table in two homes (the home,
+the inputs, the exact name and the id), which the mobile repository pins as it does the
+recurrence vectors; `tests/test_sync_ids.py` replays them against an RFC 4122 version 5 written
+out by hand and against the rows the web writes.
 
 ## The guard test
 
@@ -188,7 +223,7 @@ tombstone first; so does deleting a project for the links to its tasks.
 
 **Link tables.** A row of a link table has no id a phone could share: its change is recorded
 under `uuid5(home, t + ":" + owner + ":" + other)`, as ADR 0077 names it
-(`housecairn.sync.links`). Linking two rows again restores the row from its tombstone.
+(`housecairn.sync.rows.link_row_id`). Linking two rows again restores the row from its tombstone.
 
 **Restore.** A restore records the rows it inserts itself (`sync.rows.record_created`), the rows
 of the projects included; the rows of a link table have no row of their own there. The projects

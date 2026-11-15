@@ -105,29 +105,29 @@ msgstr "`rows.soft_delete_queryset(rows)`"
 msgid "A soft deletion of a queryset: one tombstone per row it deleted."
 msgstr "La suppression logique d'un queryset : une pierre tombale par ligne supprimée."
 
-msgid "`rows.update_queryset(rows, **values)`"
-msgstr "`rows.update_queryset(rows, **values)`"
-
-msgid "A queryset update with plain values: one change per row and field that changed."
-msgstr "La mise à jour d'un queryset avec des valeurs simples : un changement par ligne et par champ modifié."
-
 msgid "`rows.restore(instance)`"
 msgstr "`rows.restore(instance)`"
 
 msgid "`instance.restore()`, with its restoration. A row that is not deleted records nothing."
 msgstr "`instance.restore()`, avec sa restauration. Une ligne qui n'est pas supprimée n'enregistre rien."
 
-msgid "`rows.before(instance)`, then `rows.record_saved(instance, was)`"
-msgstr "`rows.before(instance)`, puis `rows.record_saved(instance, was)`"
+msgid "`rows.update_queryset(rows, **values)`"
+msgstr "`rows.update_queryset(rows, **values)`"
 
-msgid "Read before a write, then recorded after it: the two halves of `rows.save`, for a write it cannot wrap."
-msgstr "Lu avant une écriture, puis enregistré après elle : les deux moitiés de `rows.save`, pour une écriture qu'elle ne peut pas envelopper."
+msgid "A queryset update with plain values: one change per row and field that changed."
+msgstr "La mise à jour d'un queryset avec des valeurs simples : un changement par ligne et par champ modifié."
 
 msgid "`rows.record_created(instances)`"
 msgstr "`rows.record_created(instances)`"
 
 msgid "Rows inserted in bulk (restoring an archive)."
 msgstr "Des lignes insérées en masse (restauration d'une archive)."
+
+msgid "`rows.before(instance)`, then `rows.record_saved(instance, was)`"
+msgstr "`rows.before(instance)`, puis `rows.record_saved(instance, was)`"
+
+msgid "Read before a write, then recorded after it: the two halves of `rows.save`, for a write it cannot wrap."
+msgstr "Lu avant une écriture, puis enregistré après elle : les deux moitiés de `rows.save`, pour une écriture qu'elle ne peut pas envelopper."
 
 msgid "What a row sends is its concrete fields under their column names (`room_id`), without `id`, `home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`, nor the derived fields a model lists in `SYNC_DERIVED` (`tasks.occurrence.visible_from`): they are recomputed on every side and never synced (mobile ADR 0003). Dates are `YYYY-MM-DD`, amounts decimal strings with the places of their field (`12.50`). An application adjusts that for a model with `rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not send `required_provider`, a rule of the instance), fields without a column (a photo sends its file as `image`, a reference with the size, type and dimensions of the stored picture, and no thumbnail), and fields that read as the clock of their own write (`homes.home.archived_at`: an archive made on the web is the clock of that write, and an empty value stays empty)."
 msgstr "Une ligne envoie ses champs concrets sous le nom de leur colonne (`room_id`), sans `id`, `home` (le logement est la clé du changement), `created_at`, `updated_at` ni `deleted_at`, ni les champs dérivés qu'un modèle liste dans `SYNC_DERIVED` (`tasks.occurrence.visible_from`) : ils sont recalculés de chaque côté et jamais synchronisés (ADR 0003 du mobile). Les dates sont au format `AAAA-MM-JJ`, les montants des chaînes décimales avec les décimales de leur champ (`12.50`). Une application l'ajuste pour un modèle par `rows.register(model, rows.Spec(...))` dans son `ready()` : colonnes écartées (`homes.home` n'envoie pas `required_provider`, une règle de l'instance), champs sans colonne (une photo envoie son fichier sous `image`, une référence avec la taille, le type et les dimensions de l'image stockée, et sans la vignette), et champs qui valent l'horloge de leur propre écriture (`homes.home.archived_at` : un archivage fait sur le web vaut l'horloge de cette écriture, et une valeur vide reste vide)."
@@ -186,23 +186,92 @@ msgstr "Stock et signalements"
 msgid "`stock` records `stock.article`, `stock.supplier`, `stock.movement` and the link rows `stock.article_rooms` and `stock.article_compatible_items`; `reports` records `reports.report`."
 msgstr "`stock` enregistre `stock.article`, `stock.supplier`, `stock.movement` et les lignes de liaison `stock.article_rooms` et `stock.article_compatible_items` ; `reports` enregistre `reports.report`."
 
-msgid "They share `housecairn.stock.changelog`, which turns a write into a change:"
-msgstr "Elles partagent `housecairn.stock.changelog`, qui transforme une écriture en changement :"
+msgid "They write through `housecairn.sync.rows`, the one helper of the change log, which turns a write into a change:"
+msgstr "Elles écrivent par `housecairn.sync.rows`, l'unique assistant du journal des changements, qui fait d'une écriture un changement :"
 
-msgid "`read` takes the state of a row before the write and `record_save` records the fields whose value differs afterwards (a new row is a `put` of every field, a form that sends every field records the ones that changed and no other);"
-msgstr "`read` prend l'état d'une ligne avant l'écriture et `record_save` enregistre ensuite les champs dont la valeur diffère (une ligne nouvelle est un `put` de tous ses champs ; un formulaire qui envoie tous les champs n'enregistre que ceux qui ont changé) ;"
+msgid "`read` takes the state of a row before the write and `record_save` records the fields whose value differs afterwards, read again from the database (a new row is a `put` of every field, a form that sends every field records the ones that changed and no other);"
+msgstr "`read` prend l'état d'une ligne avant l'écriture et `record_save` enregistre les champs dont la valeur diffère ensuite, relus dans la base (une nouvelle ligne est un `put` de chaque champ, un formulaire qui envoie tous les champs enregistre ceux qui ont changé et aucun autre) ;"
 
-msgid "`soft_delete` and `soft_delete_all` write the deletion of one row or of a queryset, a tombstone per row; `update_rows` is a queryset `update` that records its rows one by one;"
-msgstr "`soft_delete` et `soft_delete_all` écrivent la suppression d'une ligne ou d'un queryset, une pierre tombale par ligne ; `update_rows` est un `update` de queryset qui enregistre ses lignes une à une ;"
+msgid "`soft_delete` and `soft_delete_all` write the deletion of one row or of a queryset, a tombstone per row; `update_rows` is a queryset `update` that reads its rows once, then records them one by one;"
+msgstr "`soft_delete` et `soft_delete_all` écrivent la suppression d'une ligne ou d'un queryset, une pierre tombale par ligne ; `update_rows` est un `update` de queryset qui lit ses lignes une fois, puis les enregistre une à une ;"
 
 msgid "`set_links` writes a set of links (the rooms and the compatible items of an article). Each element is a row of a link table whose id is `uuid5(home, \"<entity>:<owner id>:<other id>\")`: adding one is a `put` of `<owner>_id` and `<other>_id` (a `restore` when it was removed before), removing one is a `delete`."
 msgstr "`set_links` écrit un ensemble de liens (les pièces et les éléments compatibles d'un article). Chaque élément est une ligne d'une table de liaison dont l'identifiant est `uuid5(home, \"<entité>:<identifiant du propriétaire>:<identifiant de l'autre>\")` : en ajouter un est un `put` de `<propriétaire>_id` et `<autre>_id` (un `restore` s'il avait été retiré avant), en retirer un est un `delete`."
+
+msgid "What the two applications send is registered in `stock.syncing` and `reports.syncing`: their `created_at`, and a file by the name of the stored file."
+msgstr "Ce qu'envoient les deux applications est déclaré dans `stock.syncing` et `reports.syncing` : leur `created_at`, et un fichier par le nom du fichier stocké."
 
 msgid "Values are those of the protocol: decimals as strings, dates `YYYY-MM-DD`, instants as clock strings, foreign keys by their column name (`article_id`). A movement does not carry its effect (`delta`), which is derived on read. A file field holds the name of the stored file, and the columns derived from a file (its type, its size, its thumbnail) are not fields: the lot of the files maps the name to the file reference of the protocol."
 msgstr "Les valeurs sont celles du protocole : décimaux en chaînes, dates `AAAA-MM-JJ`, instants en chaînes d'horloge, clés étrangères par le nom de leur colonne (`article_id`). Un mouvement ne porte pas son effet (`delta`), dérivé à la lecture. Un champ de fichier contient le nom du fichier stocké, et les colonnes dérivées d'un fichier (son type, sa taille, sa miniature) ne sont pas des champs : le lot des fichiers fera correspondre le nom à la référence de fichier du protocole."
 
 msgid "A row that goes for good (the retention purge, the erasure of a home, the deletion of an account) leaves nothing behind: `stock.cascades` and `reports.cascades` remove the clocks of the children that have no foreign key to their row (suppliers, movements, link rows) and the files on the disk, and record the reference that a report or a movement loses (`SET_NULL`) as a change."
 msgstr "Une ligne qui disparaît pour de bon (la purge de rétention, l'effacement d'un logement, la suppression d'un compte) ne laisse rien derrière elle : `stock.cascades` et `reports.cascades` retirent les horloges des enfants qui n'ont pas de clé étrangère vers leur ligne (fournisseurs, mouvements, lignes de liaison) et les fichiers sur le disque, et enregistrent comme un changement la référence qu'un signalement ou un mouvement perd (`SET_NULL`)."
+
+msgid "Deterministic ids"
+msgstr "Identifiants déterministes"
+
+msgid "The rows that have a uniqueness rule get the ids of mobile ADR 0003, so that the web and a phone that make the same row make it under one id, whose fields then merge ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md), need 2). `housecairn.sync.ids` computes them: a UUID version 5 in the namespace of the home, from a name in UTF-8, ids in their lower-case canonical text, the year in four decimal digits."
+msgstr "Les lignes qui ont une règle d'unicité reçoivent les identifiants de l'ADR 0003 mobile, pour que le web et un téléphone qui font la même ligne la fassent sous un seul identifiant, dont les champs se fusionnent ensuite ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md), besoin 2). `housecairn.sync.ids` les calcule : un UUID version 5 dans l'espace de noms du logement, à partir d'un nom en UTF-8, les identifiants dans leur texte canonique en minuscules, l'année sur quatre chiffres décimaux."
+
+msgid "Row"
+msgstr "Ligne"
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Written by"
+msgstr "Écrite par"
+
+msgid "successor of an occurrence"
+msgstr "occurrence qui suit une occurrence"
+
+msgid "`next:<occurrence>`"
+msgstr "`next:<occurrence>`"
+
+msgid "`tasks.services._spawn_next`"
+msgstr "`tasks.services._spawn_next`"
+
+msgid "material line of a task"
+msgstr "ligne de matériel d'une tâche"
+
+msgid "`material:<task>:<article>`"
+msgstr "`material:<task>:<article>`"
+
+msgid "`tasks.materials.add_material`"
+msgstr "`tasks.materials.add_material`"
+
+msgid "draw of a material"
+msgstr "tirage d'un matériel"
+
+msgid "`draw:<occurrence>:<article>`"
+msgstr "`draw:<occurrence>:<article>`"
+
+msgid "`tasks.materials.draw_for_done`"
+msgstr "`tasks.materials.draw_for_done`"
+
+msgid "annual envelope"
+msgstr "enveloppe annuelle"
+
+msgid "`envelope:<year>`"
+msgstr "`envelope:<year>`"
+
+msgid "`projects.services.set_envelope`"
+msgstr "`projects.services.set_envelope`"
+
+msgid "row of a link table"
+msgstr "ligne d'une table de liaison"
+
+msgid "`<entity type>:<owner>:<other>`"
+msgstr "`<entity type>:<owner>:<other>`"
+
+msgid "the change log of the link"
+msgstr "le journal du lien"
+
+msgid "Because the id names the row, a row of that id may exist already: an undo deletes the successor and the draws of a closing, and removing a material deletes its line. `sync.rows.create_or_revive` then brings the row back from its tombstone (a `restore`, then a `put` of the fields that changed) instead of inserting a second one. A restore as a copy, which gives every row a new id ([ADR 0069](../adr/0069-restore-as-a-copy-with-new-identifiers.md)), names these rows again from the new ids of their parents, the chain of successors from its start."
+msgstr "Comme l'identifiant nomme la ligne, une ligne de cet identifiant peut déjà exister : une annulation supprime l'occurrence suivante et les tirages d'une clôture, et retirer un matériel supprime sa ligne. `sync.rows.create_or_revive` ramène alors la ligne de sa pierre tombale (un `restore`, puis un `put` des champs qui ont changé) au lieu d'en insérer une seconde. Une restauration en copie, qui donne un nouvel identifiant à chaque ligne ([ADR 0069](../adr/0069-restore-as-a-copy-with-new-identifiers.md)), nomme de nouveau ces lignes à partir des nouveaux identifiants de leurs parents, la chaîne des occurrences depuis son début."
+
+msgid "The rows written before these ids keep their random id: none was ever sent to a phone, and a phone reads them from the snapshot before it writes, so nothing is migrated. `tests/fixtures/sync_ids.json` holds vectors of every row of the table in two homes (the home, the inputs, the exact name and the id), which the mobile repository pins as it does the recurrence vectors; `tests/test_sync_ids.py` replays them against an RFC 4122 version 5 written out by hand and against the rows the web writes."
+msgstr "Les lignes écrites avant ces identifiants gardent leur identifiant aléatoire : aucune n'a jamais été envoyée à un téléphone, et un téléphone les lit dans l'instantané avant d'écrire, donc rien n'est migré. `tests/fixtures/sync_ids.json` contient des vecteurs de chaque ligne de la table dans deux logements (le logement, les entrées, le nom exact et l'identifiant), que le dépôt mobile épingle comme il le fait des vecteurs de récurrence ; `tests/test_sync_ids.py` les rejoue contre un UUID version 5 de la RFC 4122 écrit à la main et contre les lignes qu'écrit le web."
 
 msgid "The guard test"
 msgstr "Le test garde-fou"
@@ -231,23 +300,23 @@ msgstr "M3e"
 msgid "project, budget line, quote, file, link, task of a project, annual envelope, rooms of a project"
 msgstr "projet, ligne de budget, devis, fichier, lien, tâche d'un projet, enveloppe annuelle, pièces d'un projet"
 
-msgid "**Projects.** The services of `housecairn.projects` call `housecairn.projects.changelog`, which compares the row with what the database held before the write and records the fields whose value changed. A change carries the columns of the model, a foreign key by its column name (`project_id`); it leaves out the times the server keeps, where the reading of a link's page stands (`preview_state`, not data of the home, as in the export) and the stored files of a `projects.projectfile`, whose references the lot of the files maps. Taking a task out of a project deletes its link for good, so that the task may join another project, and leaves a tombstone first; so does deleting a project for the links to its tasks."
-msgstr "**Projets.** Les services de `housecairn.projects` appellent `housecairn.projects.changelog`, qui compare la ligne à ce que la base contenait avant l'écriture et enregistre les champs dont la valeur a changé. Un changement porte les colonnes du modèle, une clé étrangère par son nom de colonne (`project_id`) ; il laisse de côté les instants que le serveur tient, l'état de la lecture de la page d'un lien (`preview_state`, qui n'est pas une donnée du logement, comme dans l'export) et les fichiers stockés d'un `projects.projectfile`, dont le lot des fichiers fait correspondre les références. Sortir une tâche d'un projet supprime son lien pour de bon, pour que la tâche puisse rejoindre un autre projet, et laisse d'abord une pierre tombale ; supprimer un projet fait de même pour les liens vers ses tâches."
-
-msgid "**Link tables.** A row of a link table has no id a phone could share: its change is recorded under `uuid5(home, t + \":\" + owner + \":\" + other)`, as ADR 0077 names it (`housecairn.sync.links`). Linking two rows again restores the row from its tombstone."
-msgstr "**Tables de liaison.** Une ligne d'une table de liaison n'a pas d'identifiant qu'un téléphone pourrait partager : son changement est enregistré sous `uuid5(home, t + \":\" + owner + \":\" + other)`, comme l'ADR 0077 la nomme (`housecairn.sync.links`). Relier de nouveau deux lignes restaure la ligne depuis sa pierre tombale."
-
-msgid "**Restore.** A restore records the rows it inserts itself (`sync.rows.record_created`), the rows of the projects included; the rows of a link table have no row of their own there. The projects section of the export therefore gives `on_written`, which a restore, as a copy or not, calls with the rows of the section once they and their links are written, in its transaction: the application records the links under their new ids."
-msgstr "**Restauration.** Une restauration enregistre elle-même les lignes qu'elle insère (`sync.rows.record_created`), celles des projets comprises ; les lignes d'une table de liaison n'ont pas de ligne propre à cet endroit. La section des projets de l'export donne donc `on_written`, qu'une restauration, en copie ou non, appelle avec les lignes de la section une fois celles-ci et leurs liaisons écrites, dans sa transaction : l'application enregistre les liaisons sous leurs nouveaux identifiants."
-
-msgid "contractor, task, task material, occurrence, material draw, attachment"
-msgstr "intervenant, tâche, matériel d'une tâche, occurrence, tirage de matériel, pièce jointe"
-
-msgid "**Tasks.** Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. An attachment sends its file as `file`, a reference with its size, type and dimensions, as a photo does. Deleting an account takes it off the tasks it is assigned and the occurrences it closed, with a change for each, where the database would empty them without one."
-msgstr "**Tâches.** Annuler une clôture supprime l'occurrence qui suivait avec une pierre tombale au lieu de l'effacer, et la détache de l'occurrence qu'elle suivait, pour que la clôture puisse être refaite. Une pièce jointe envoie son fichier sous `file`, une référence avec sa taille, son type et ses dimensions, comme une photo. Supprimer un compte le retire des tâches qui lui sont attribuées et des occurrences qu'il a clôturées, avec un changement pour chacune, là où la base les viderait sans aucun."
-
 msgid "`tasks`"
 msgstr "`tasks`"
 
 msgid "M3c"
 msgstr "M3c"
+
+msgid "contractor, task, task material, occurrence, material draw, attachment"
+msgstr "intervenant, tâche, matériel d'une tâche, occurrence, tirage de matériel, pièce jointe"
+
+msgid "**Projects.** The services of `housecairn.projects` call `housecairn.projects.changelog`, which compares the row with what the database held before the write and records the fields whose value changed. A change carries the columns of the model, a foreign key by its column name (`project_id`); it leaves out the times the server keeps, where the reading of a link's page stands (`preview_state`, not data of the home, as in the export) and the stored files of a `projects.projectfile`, whose references the lot of the files maps. Taking a task out of a project deletes its link for good, so that the task may join another project, and leaves a tombstone first; so does deleting a project for the links to its tasks."
+msgstr "**Projets.** Les services de `housecairn.projects` appellent `housecairn.projects.changelog`, qui compare la ligne à ce que la base contenait avant l'écriture et enregistre les champs dont la valeur a changé. Un changement porte les colonnes du modèle, une clé étrangère par son nom de colonne (`project_id`) ; il laisse de côté les instants que le serveur tient, l'état de la lecture de la page d'un lien (`preview_state`, qui n'est pas une donnée du logement, comme dans l'export) et les fichiers stockés d'un `projects.projectfile`, dont le lot des fichiers fait correspondre les références. Sortir une tâche d'un projet supprime son lien pour de bon, pour que la tâche puisse rejoindre un autre projet, et laisse d'abord une pierre tombale ; supprimer un projet fait de même pour les liens vers ses tâches."
+
+msgid "**Link tables.** A row of a link table has no id a phone could share: its change is recorded under `uuid5(home, t + \":\" + owner + \":\" + other)`, as ADR 0077 names it (`housecairn.sync.rows.link_row_id`). Linking two rows again restores the row from its tombstone."
+msgstr "**Tables de liaison.** Une ligne d'une table de liaison n'a pas d'identifiant qu'un téléphone pourrait partager : son changement est enregistré sous `uuid5(home, t + \":\" + owner + \":\" + other)`, comme l'ADR 0077 la nomme (`housecairn.sync.rows.link_row_id`). Relier de nouveau deux lignes restaure la ligne depuis sa pierre tombale."
+
+msgid "**Restore.** A restore records the rows it inserts itself (`sync.rows.record_created`), the rows of the projects included; the rows of a link table have no row of their own there. The projects section of the export therefore gives `on_written`, which a restore, as a copy or not, calls with the rows of the section once they and their links are written, in its transaction: the application records the links under their new ids."
+msgstr "**Restauration.** Une restauration enregistre elle-même les lignes qu'elle insère (`sync.rows.record_created`), celles des projets comprises ; les lignes d'une table de liaison n'ont pas de ligne propre à cet endroit. La section des projets de l'export donne donc `on_written`, qu'une restauration, en copie ou non, appelle avec les lignes de la section une fois celles-ci et leurs liaisons écrites, dans sa transaction : l'application enregistre les liaisons sous leurs nouveaux identifiants."
+
+msgid "**Tasks.** Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. An attachment sends its file as `file`, a reference with its size, type and dimensions, as a photo does. Deleting an account takes it off the tasks it is assigned and the occurrences it closed, with a change for each, where the database would empty them without one."
+msgstr "**Tâches.** Annuler une clôture supprime l'occurrence qui suivait avec une pierre tombale au lieu de l'effacer, et la détache de l'occurrence qu'elle suivait, pour que la clôture puisse être refaite. Une pièce jointe envoie son fichier sous `file`, une référence avec sa taille, son type et ses dimensions, comme une photo. Supprimer un compte le retire des tâches qui lui sont attribuées et des occurrences qu'il a clôturées, avec un changement pour chacune, là où la base les viderait sans aucun."
