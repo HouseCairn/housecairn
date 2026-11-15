@@ -35,6 +35,8 @@ from housecairn.sync.models import Change, HomeHead, RowClocks
 # The limits of a push (docs/adr/0077, need 11).
 MAX_OPS = 500
 MAX_BODY_BYTES = 1024 * 1024
+# How deep a value of a field may nest lists and objects (the fields object itself is 0).
+MAX_DEPTH = 32
 # The lowest schema version that writes: a phone below it reads but does not write.
 MIN_SV = 1
 
@@ -125,17 +127,29 @@ def _text_ok(index: int, value: str) -> None:
         raise MalformedError(index, _("A text is not valid Unicode.")) from None
 
 
-def _no_nul(index: int, value: Any, depth: int = 0) -> None:
-    """Every text of the fields of an operation, keys included, as `_text_ok` wants it."""
-    if isinstance(value, str):
-        _text_ok(index, value)
-    elif isinstance(value, dict):
-        for key, item in value.items():
-            _no_nul(index, key, depth + 1)
-            _no_nul(index, item, depth + 1)
-    elif isinstance(value, list):
-        for item in value:
-            _no_nul(index, item, depth + 1)
+def _check_values(index: int, fields: dict[str, Any]) -> None:
+    """Every text of the fields of an operation, keys included, as `_text_ok` wants it, and
+    values nested at most `MAX_DEPTH` deep (a JSON column and a field kept in `extra` alike).
+
+    Walked with a stack, not by recursion: a value nested a thousand deep is a 400, not a
+    `RecursionError`.
+    """
+    stack: list[tuple[Any, int]] = [(fields, 0)]
+    while stack:
+        value, depth = stack.pop()
+        if isinstance(value, str):
+            _text_ok(index, value)
+        elif isinstance(value, dict | list):
+            if depth > MAX_DEPTH:
+                raise MalformedError(
+                    index, _("A value is nested more than %(depth)s deep.") % {"depth": MAX_DEPTH}
+                )
+            if isinstance(value, dict):
+                for key, item in value.items():
+                    stack.append((key, depth))
+                    stack.append((item, depth + 1))
+            else:
+                stack.extend((item, depth + 1) for item in value)
 
 
 def parse(index: int, raw: Any) -> Operation:
@@ -167,7 +181,7 @@ def parse(index: int, raw: Any) -> Operation:
             raise MalformedError(index, _("A field is named in lower case, at most 64 characters."))
         if name == changes.DELETED_AT:
             raise MalformedError(index, _("deleted_at is written by a delete or a restore."))
-    _no_nul(index, fields)
+    _check_values(index, fields)
     return Operation(index, entity, home_id, row_id, kind, str(made), fields)
 
 

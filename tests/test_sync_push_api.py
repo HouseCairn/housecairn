@@ -396,6 +396,46 @@ class TestBody:
         assert Client().get(f"{base}/changes", secure=True, **headers).status_code == 200
         assert Client().get(f"{base}/snapshot", secure=True, **headers).status_code == 200
 
+    @pytest.mark.parametrize("depth", [33, 905, 2000, 5000])
+    @pytest.mark.parametrize("column", ["moisture_goal", "links"])
+    def test_a_value_nested_too_deep_is_400_not_500(
+        self, phone: Connected, alice_home: Home, room: Room, depth: int, column: str
+    ) -> None:
+        """Mutant: a recursive walk of the values fails with RecursionError (500) near 905
+        levels; without the bound, a JSON column or `extra` keeps any depth."""
+        nested = "[" * depth + "]" * depth
+        entity, fields = (
+            ("rooms.room", '{"name":"R","moisture_goal":%s}')
+            if column == "moisture_goal"
+            else ("rooms.item", '{"room_id":"' + str(room.pk) + '","name":"Boiler","links":%s}')
+        )
+        good = json.dumps(op(alice_home.pk, "rooms.room", uuid.uuid4(), {"name": "First"}))
+        wrong = json.dumps(op(alice_home.pk, entity, uuid.uuid4(), {})).replace(
+            '"f": {}', '"f": ' + fields % nested
+        )
+        raw = ('{"push":1,"sv":1,"device":"%s","ops":[%s,%s]}' % (DEVICE, good, wrong)).encode()
+        answer = send(phone.access, alice_home.pk, raw=raw)
+        assert answer.status_code == 400, answer.content
+        assert answer.json()["code"] == "malformed"
+        assert answer.json()["index"] == 1
+        assert not Push.objects.exists()
+
+    def test_a_value_nested_to_the_bound_is_kept(
+        self, phone: Connected, alice_home: Home
+    ) -> None:
+        nested: Any = []
+        for _level in range(pushing.MAX_DEPTH - 1):
+            nested = [nested]
+        row_id = uuid.uuid4()
+        answer = send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", row_id, {"name": "R", "moisture_goal": nested})],
+        )
+        assert result_of(answer)["status"] == "applied"
+        clocks = RowClocks.objects.get(entity="rooms.room", row_id=row_id)
+        assert clocks.extra["moisture_goal"][0] == nested
+
     def test_bad_values_of_every_kind_are_400(
         self, phone: Connected, alice_home: Home, room: Room
     ) -> None:
