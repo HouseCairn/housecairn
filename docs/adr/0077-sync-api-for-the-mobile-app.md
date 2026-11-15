@@ -8,7 +8,10 @@
   The reading routes are built by lot M4, which gives two keys the first shapes lacked: the
   `device` of each change of the feed, which the per-field rule needs to break a tie (as the
   relay's signature gives it), and the `members` of a home in `GET /sync/homes/` and in the
-  snapshot, which need 9 asks for.
+  snapshot, which need 9 asks for. Lot M5a builds the push, with three additions: the body names
+  the phone's `device` (the connection keeps the one of its first push, and `409` `wrong_device`
+  refuses another), a malformed push is `400` with the code `malformed`, and a field a phone may
+  not write (a column of the server, a derived field) is `rejected` with `forbidden`.
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and

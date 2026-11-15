@@ -24,6 +24,7 @@ from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
+from django.utils.translation import gettext as _
 
 from housecairn.accounts.models import User
 from housecairn.homes.models import Home, Membership, Role
@@ -104,14 +105,16 @@ def _uuid(index: int, value: Any, what: str) -> uuid.UUID:
         else:
             if str(parsed) == value.lower():
                 return parsed
-    raise MalformedError(index, f"{what} is a UUID in its canonical text form.")
+    raise MalformedError(
+        index, _("%(name)s is a UUID in its canonical text form.") % {"name": what}
+    )
 
 
 def _no_nul(index: int, value: Any, depth: int = 0) -> None:
     """A NUL character is refused by PostgreSQL in text and JSON: never stored."""
     if isinstance(value, str):
         if "\x00" in value:
-            raise MalformedError(index, "A text holds a NUL character.")
+            raise MalformedError(index, _("A text holds a NUL character."))
     elif isinstance(value, dict):
         for key, item in value.items():
             _no_nul(index, key, depth + 1)
@@ -124,32 +127,32 @@ def _no_nul(index: int, value: Any, depth: int = 0) -> None:
 def parse(index: int, raw: Any) -> Operation:
     """An operation of the protocol (section 2.2), checked for its form only."""
     if not isinstance(raw, dict):
-        raise MalformedError(index, "An operation is a JSON object.")
+        raise MalformedError(index, _("An operation is a JSON object."))
     entity = raw.get("t")
     if not isinstance(entity, str) or _ENTITY.fullmatch(entity) is None or len(entity) > 64:
-        raise MalformedError(index, "t is an entity type, <app>.<model> in lower case.")
+        raise MalformedError(index, _("t is an entity type, <app>.<model> in lower case."))
     home_id = _uuid(index, raw.get("h"), "h")
     row_id = _uuid(index, raw.get("id"), "id")
     kind = raw.get("k")
     if kind not in KINDS:
-        raise MalformedError(index, "k is put, delete or restore.")
+        raise MalformedError(index, _("k is put, delete or restore."))
     made = raw.get("c")
     try:
         clock.parse_clock(made if isinstance(made, str) else "")
     except ValueError:
-        raise MalformedError(index, "c is a clock, 16 lower-case hexadecimal digits.") from None
+        raise MalformedError(index, _("c is a clock, 16 lower-case hexadecimal digits.")) from None
     fields = raw.get("f")
     if kind == changes.PUT:
         if not isinstance(fields, dict) or not fields:
-            raise MalformedError(index, "A put sets at least one field in f.")
+            raise MalformedError(index, _("A put sets at least one field in f."))
     elif fields not in (None, {}):
-        raise MalformedError(index, "A delete or a restore sets no field.")
+        raise MalformedError(index, _("A delete or a restore sets no field."))
     fields = dict(fields or {})
     for name in fields:
         if not isinstance(name, str) or _FIELD.fullmatch(name) is None:
-            raise MalformedError(index, "A field is named in lower case, at most 64 characters.")
+            raise MalformedError(index, _("A field is named in lower case, at most 64 characters."))
         if name == changes.DELETED_AT:
-            raise MalformedError(index, "deleted_at is written by a delete or a restore.")
+            raise MalformedError(index, _("deleted_at is written by a delete or a restore."))
     _no_nul(index, fields)
     return Operation(index, entity, home_id, row_id, kind, str(made), fields)
 
@@ -162,13 +165,13 @@ def _instant(index: int, value: Any) -> datetime.datetime:
     try:
         ms = clock.physical_ms(clock.parse_clock(value))
     except ValueError:
-        raise MalformedError(index, "An instant is an HLC, 16 hexadecimal digits.") from None
+        raise MalformedError(index, _("An instant is an HLC, 16 hexadecimal digits.")) from None
     try:
         return datetime.datetime(1970, 1, 1, tzinfo=datetime.UTC) + datetime.timedelta(
             milliseconds=ms
         )
     except OverflowError:
-        raise MalformedError(index, "An instant is beyond the dates the server keeps.") from None
+        raise MalformedError(index, _("An instant is beyond the dates the server keeps.")) from None
 
 
 def decode(index: int, field: models.Field[Any, Any], value: Any) -> Any:
@@ -184,47 +187,55 @@ def decode(index: int, field: models.Field[Any, Any], value: Any) -> Any:
             return None
         if field.empty_strings_allowed and isinstance(field, models.CharField | models.TextField):
             return ""
-        raise MalformedError(index, f"{name} cannot be empty.")
+        raise MalformedError(index, _("%(name)s cannot be empty.") % {"name": name})
     if isinstance(field, models.ForeignKey):
         return _uuid(index, value, name)
     if isinstance(field, models.BooleanField):
         if not isinstance(value, bool):
-            raise MalformedError(index, f"{name} is true or false.")
+            raise MalformedError(index, _("%(name)s is true or false.") % {"name": name})
         return value
     if isinstance(field, models.DecimalField):
         if not isinstance(value, str):
-            raise MalformedError(index, f"{name} is an amount, a decimal string.")
+            raise MalformedError(
+                index, _("%(name)s is an amount, a decimal string.") % {"name": name}
+            )
         try:
             python: Any = decimal.Decimal(value)
         except decimal.InvalidOperation:
-            raise MalformedError(index, f"{name} is an amount, a decimal string.") from None
+            raise MalformedError(
+                index, _("%(name)s is an amount, a decimal string.") % {"name": name}
+            ) from None
         if not python.is_finite():  # NaN cannot be compared by the validators of the field
-            raise MalformedError(index, f"{name} is an amount, a decimal string.")
+            raise MalformedError(
+                index, _("%(name)s is an amount, a decimal string.") % {"name": name}
+            )
     elif isinstance(field, models.DateTimeField):
         python = _instant(index, value)
     elif isinstance(field, models.DateField):
         if not isinstance(value, str) or _DATE.fullmatch(value) is None:
-            raise MalformedError(index, f"{name} is a date, YYYY-MM-DD.")
+            raise MalformedError(index, _("%(name)s is a date, YYYY-MM-DD.") % {"name": name})
         try:
             python = datetime.date.fromisoformat(value)
         except ValueError:
-            raise MalformedError(index, f"{name} is a date, YYYY-MM-DD.") from None
+            raise MalformedError(
+                index, _("%(name)s is a date, YYYY-MM-DD.") % {"name": name}
+            ) from None
     elif isinstance(field, models.IntegerField):
         if isinstance(value, bool) or not isinstance(value, int):
-            raise MalformedError(index, f"{name} is a whole number.")
+            raise MalformedError(index, _("%(name)s is a whole number.") % {"name": name})
         python = value
     elif isinstance(field, models.JSONField):
         python = value
     elif isinstance(field, models.CharField | models.TextField):
         if not isinstance(value, str):
-            raise MalformedError(index, f"{name} is a text.")
+            raise MalformedError(index, _("%(name)s is a text.") % {"name": name})
         python = value
     else:  # pragma: no cover - every column of the rows is one of the kinds above
-        raise MalformedError(index, f"{name} cannot be written by a push.")
+        raise MalformedError(index, _("%(name)s cannot be written by a push.") % {"name": name})
     try:
         field.run_validators(python)
     except (ValidationError, decimal.InvalidOperation):
-        raise MalformedError(index, f"{name} is not a valid value.") from None
+        raise MalformedError(index, _("%(name)s is not a valid value.") % {"name": name}) from None
     return python
 
 
@@ -309,7 +320,7 @@ def apply(home: Home, pusher: Pusher, raw_ops: Sequence[Any]) -> dict[str, Any]:
                 result = {"i": op.index, "status": REJECTED, "code": rejected.code}
             except IntegrityError:
                 raise MalformedError(
-                    op.index, "This operation breaks a rule of the data."
+                    op.index, _("This operation breaks a rule of the data.")
                 ) from None
             results.append(result)
         head = HomeHead.objects.filter(home_id=home.pk).values_list("pos", flat=True).first()
@@ -391,7 +402,9 @@ def _apply_row(
     if stored is None:
         missing = [name for name in _required(model, columns) if values.get(name) is None]
         if missing:
-            raise MalformedError(op.index, f"A new row needs {', '.join(sorted(missing))}.")
+            raise MalformedError(
+                op.index, _("A new row needs %(fields)s.") % {"fields": ", ".join(sorted(missing))}
+            )
     _check_references(home, columns, values)
     recorded = sync_rows.apply_stamped(
         model, home.pk, op.row_id, changes.PUT, logged, values, stamp=stamp, known=columns.writable
@@ -486,7 +499,7 @@ def _apply_link(home: Home, op: Operation, stamp: tuple[str, bytes]) -> dict[str
     if op.kind == changes.PUT:
         unknown_names = set(op.fields) - set(known)
         if any(name not in op.fields for name in known):
-            raise MalformedError(op.index, "A link names both of its rows.")
+            raise MalformedError(op.index, _("A link names both of its rows."))
         owner = _uuid(op.index, op.fields[link.owner_column], link.owner_column)
         other = _uuid(op.index, op.fields[link.other_column], link.other_column)
         if sync_rows.link_row_id(home.pk, link.through, owner, other) != op.row_id:
