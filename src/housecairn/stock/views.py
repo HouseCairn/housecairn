@@ -16,6 +16,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from housecairn.core import navigation
+from housecairn.core.autosave import AutosaveMixin
 from housecairn.core.form_errors import banner_messages
 from housecairn.homes import current
 from housecairn.homes import services as home_services
@@ -164,7 +165,7 @@ class ArticleCreateView(ArticleFormMixin):
         )
 
 
-class ArticleEditView(ArticleFormMixin):
+class ArticleEditView(AutosaveMixin, ArticleFormMixin):
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["instance"] = self.get_article()

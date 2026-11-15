@@ -40,6 +40,19 @@ wrote, 16 bytes in base64url without padding. The server writes the changes made
 as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference named by
 the id of its row, never by the name of the file the server stores.
 
+A field that holds a code of a list takes one of the codes below; a code a phone does not know
+yet is kept and shown as it is, never refused:
+
+- `rooms.item.warranty_duration_unit`: `month` or `year` (with `warranty_duration`, from 1 to
+  99); `rooms.item.warranty_provider`: `manufacturer`, `shop`, or empty. `warranty_ends_on` is
+  worked out from `warranty_starts_on`, else `purchased_on`, plus the duration, the same date
+  that many months or years later (the last day of a shorter month); without a duration or a
+  start, it is the date typed. A phone that changes one of these fields sends the end it works
+  out the same way.
+- `stock.article.unit`: `piece`, `litre`, `millilitre`, `metre`, `kilogram`, `roll`, `box`,
+  `other` (with `unit_other`), or empty. There is no conversion between units: a quantity is
+  in the unit of its item.
+
 ## The homes
 
 `GET /api/v1/sync/homes/`

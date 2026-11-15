@@ -1,0 +1,41 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Equipment"
+msgstr "Équipements"
+
+msgid "Every item of a home, all rooms together, at `/h/<home id>/items/`. It is the **Equipment** tab of **Rooms** in the navigation, between **Rooms** and **Stock**. The items are listed by room, in the order of the rooms, then by name. Each row shows the name of the item, its room and its brand, its next task and its manufacturer's warranty; a row opens the [item](item.md)."
+msgstr "Tous les éléments d'un logement, toutes pièces confondues, à `/h/<home id>/items/`. C'est l'onglet **Équipements** de **Pièces** dans la navigation, entre **Pièces** et **Matériel**. Les éléments sont listés par pièce, dans l'ordre des pièces, puis par nom. Chaque ligne montre le nom de l'élément, sa pièce et sa marque, sa prochaine tâche et sa garantie constructeur ; une ligne ouvre l'[élément](item.md)."
+
+msgid "**Next** is the soonest open task of the item, a late one first, with its date; *No task to come* when it has none."
+msgstr "**Prochaine** est la tâche ouverte la plus proche de l'élément, une tâche en retard d'abord, avec sa date ; *Aucune tâche à venir* quand il n'en a pas."
+
+msgid "The label of the warranty gives its end: *warranty until* while it runs, *warranty ended* once it is over. An item with no end of warranty has no label."
+msgstr "L'étiquette de la garantie donne sa fin : *garantie jusqu'au* tant qu'elle court, *garantie terminée le* une fois finie. Un élément sans fin de garantie n'a pas d'étiquette."
+
+msgid "The search field looks for the text in the name, the brand, the model and the serial number, ignoring case: `/h/<home id>/items/?q=<text>`."
+msgstr "Le champ de recherche cherche le texte dans le nom, la marque, le modèle et le numéro de série, sans tenir compte de la casse : `/h/<home id>/items/?q=<text>`."
+
+msgid "**Room** keeps the items of one room: `/h/<home id>/items/?room=<room id>`. The two filters add up; **Search** applies both."
+msgstr "**Pièce** garde les éléments d'une pièce : `/h/<home id>/items/?room=<room id>`. Les deux filtres s'additionnent ; **Rechercher** applique les deux."
+
+msgid "Items are added from the page of their [room](room.md). Read-only members see the same list."
+msgstr "Les éléments s'ajoutent depuis la page de leur [pièce](room.md). Les membres en lecture seule voient la même liste."
+

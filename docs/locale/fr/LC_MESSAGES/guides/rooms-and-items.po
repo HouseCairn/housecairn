@@ -39,8 +39,11 @@ msgstr "Sur la page d'une pièce, **Modifier la mémoire** garde ce que vous che
 msgid "Add the items"
 msgstr "Ajouter les éléments"
 
-msgid "**Add an item** on the page of a room. Note the brand, the model, the serial number, the installation date and the end of the warranty, the maintenance contract (who services it, chosen among the contractors of the home or added on the spot, and its number) and a link to it, and any link worth keeping, such as the manual online. The item page shows a label that tells whether the warranty is still running."
-msgstr "**Ajouter un élément** sur la page d'une pièce. Notez la marque, le modèle, le numéro de série, la date de pose et la fin de la garantie, le contrat d'entretien (qui l'assure, choisi parmi les intervenants du logement ou ajouté sur place, et son numéro) et un lien vers celui-ci, et tout lien qui mérite d'être gardé, comme la notice en ligne. La page de l'élément affiche une étiquette qui indique si la garantie court encore."
+msgid "**Add an item** on the page of a room. Note the brand, the model, the serial number, the purchase and installation dates, the warranty, the maintenance contract (who services it, chosen among the contractors of the home or added on the spot, and its number) and a link to it, and any link worth keeping, such as the manual online. The item page shows a label that tells whether the warranty is still running."
+msgstr "**Ajouter un élément** sur la page d'une pièce. Notez la marque, le modèle, le numéro de série, les dates d'achat et de pose, la garantie, le contrat d'entretien (qui l'assure, choisi parmi les intervenants du logement ou ajouté sur place, et son numéro) et un lien vers celui-ci, et tout lien qui mérite d'être gardé, comme la notice en ligne. La page de l'élément affiche une étiquette qui indique si la garantie court encore."
+
+msgid "The **manufacturer's warranty** is apart from the maintenance contract: its duration, in months or years, who gives it (the manufacturer or the shop, with its name) and the day it starts, the purchase date when you leave it empty. Housecairn works out the day it ends and shows it; an item noted before with only an end date keeps that date. **Warranties ending soon**, on [My home](../screens/my-home.md), lists the items whose warranty ends within 60 days."
+msgstr "La **garantie constructeur** est distincte du contrat d'entretien : sa durée, en mois ou en années, qui la donne (le fabricant ou le magasin, avec son nom) et le jour où elle commence, la date d'achat si vous le laissez vide. Housecairn calcule le jour où elle se termine et l'affiche ; un élément noté avant avec seulement une date de fin garde cette date. **Garanties qui finissent**, sur [Ma maison](../screens/my-home.md), liste les éléments dont la garantie se termine dans les 60 jours."
 
 msgid "If you put an item in the wrong room, edit it and choose another room: the item moves with its photos."
 msgstr "Si un élément est dans la mauvaise pièce, modifiez-le et choisissez une autre pièce : l'élément se déplace avec ses photos."
@@ -62,3 +65,4 @@ msgstr "Le champ de recherche de la liste des pièces trouve une pièce ou un é
 
 msgid "The same data is available to scripts and integrations through the [API](../api/index.md): rooms, items and photos, with the `read` and `write` scopes of an API token."
 msgstr "Les mêmes données sont accessibles aux scripts et aux intégrations par l'[API](../api/index.md) : pièces, éléments et photos, avec les portées `read` et `write` d'un jeton d'API."
+

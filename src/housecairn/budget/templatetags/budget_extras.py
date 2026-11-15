@@ -40,7 +40,7 @@ def occurrence_cost(occurrence: Occurrence, home: Any) -> dict[str, Any]:
     estimate = (
         None
         if all(part is None for part in parts) and plan.priced == 0
-        else sum((p or ZERO for p in parts), plan.amount)
+        else services.material_of(task.material_budget, plan) + (task.labour_budget or ZERO)
     )
     return {"estimate": estimate, "home": home}
 

@@ -21,8 +21,8 @@ msgstr ""
 msgid "Rooms"
 msgstr "Pièces"
 
-msgid "The rooms of a home, at `/h/<home id>/rooms/`. **Rooms** in the navigation opens it directly (`/rooms/`); with several homes, on the [current home](my-home.md#the-current-home). Each row shows the name of the room, its type and how many items it holds; a row opens the [room](room.md)."
-msgstr "Les pièces d'un logement, sur `/h/<home id>/rooms/`. **Pièces** dans la navigation l'ouvre directement (`/rooms/`) ; avec plusieurs logements, sur le [logement courant](my-home.md#the-current-home). Chaque ligne montre le nom de la pièce, son type et le nombre d'éléments qu'elle contient ; une ligne ouvre la [pièce](room.md)."
+msgid "The rooms of a home, at `/h/<home id>/rooms/`. **Rooms** in the navigation opens it directly (`/rooms/`); with several homes, on the [current home](my-home.md#the-current-home). Each row shows the name of the room, its type and how many items it holds; a row opens the [room](room.md). The tabs **Equipment** and **Stock** list [every item of the home](equipment.md) and its [stock](stock.md)."
+msgstr "Les pièces d'un logement, sur `/h/<home id>/rooms/`. **Pièces** dans la navigation l'ouvre directement (`/rooms/`) ; avec plusieurs logements, sur le [logement courant](my-home.md#the-current-home). Chaque ligne montre le nom de la pièce, son type et le nombre d'éléments qu'elle contient ; une ligne ouvre la [pièce](room.md). Les onglets **Équipements** et **Matériel** listent [tous les éléments du logement](equipment.md) et son [matériel](stock.md)."
 
 msgid "**Add a room** opens the [room form](room-form.md). Only the name is required."
 msgstr "**Ajouter une pièce** ouvre le [formulaire de la pièce](room-form.md). Seul le nom est obligatoire."

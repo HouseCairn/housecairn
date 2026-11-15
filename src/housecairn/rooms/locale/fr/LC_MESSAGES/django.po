@@ -72,6 +72,18 @@ msgstr "Liens"
 msgid "One per line: the address, then a label if you like."
 msgstr "Un par ligne : l'adresse, puis une étiquette si vous le souhaitez."
 
+msgid "The warranty of the manufacturer or of the shop, in months or years."
+msgstr "La garantie du fabricant ou du magasin, en mois ou en années."
+
+msgid "Example: Acme, or the shop where you bought it."
+msgstr "Exemple : Acme, ou le magasin où vous l'avez acheté."
+
+msgid "Empty: from the purchase date."
+msgstr "Vide : à partir de la date d'achat."
+
+msgid "Worked out from the start and the duration. Type it only when you do not know them."
+msgstr "Calculée à partir du départ et de la durée. Ne la saisissez que si vous ne les connaissez pas."
+
 msgid "Photo"
 msgstr "Photo"
 
@@ -187,6 +199,18 @@ msgstr "Équipement"
 msgid "Surface"
 msgstr "Surface"
 
+msgid "months"
+msgstr "mois"
+
+msgid "years"
+msgstr "ans"
+
+msgid "The manufacturer"
+msgstr "Le fabricant"
+
+msgid "The shop"
+msgstr "Le magasin"
+
 msgid "brand"
 msgstr "marque"
 
@@ -196,8 +220,26 @@ msgstr "modèle"
 msgid "serial number"
 msgstr "numéro de série"
 
+msgid "purchased on"
+msgstr "acheté le"
+
 msgid "installed on"
 msgstr "posé le"
+
+msgid "warranty: duration"
+msgstr "garantie : durée"
+
+msgid "warranty: in"
+msgstr "garantie : en"
+
+msgid "warranty: given by"
+msgstr "garantie : donnée par"
+
+msgid "warranty: name of the manufacturer or shop"
+msgstr "garantie : nom du fabricant ou du magasin"
+
+msgid "warranty: starts on"
+msgstr "garantie : départ le"
 
 msgid "warranty ends on"
 msgstr "fin de garantie"
@@ -325,6 +367,30 @@ msgstr "Supprimer"
 msgid "this photo"
 msgstr "cette photo"
 
+#, python-format
+msgid "ended on %(date)s"
+msgstr "terminée le %(date)s"
+
+#, python-format
+msgid "until %(date)s"
+msgstr "jusqu'au %(date)s"
+
+#, python-format
+msgid "%(counter)s month"
+msgid_plural "%(counter)s months"
+msgstr[0] "%(counter)s mois"
+msgstr[1] "%(counter)s mois"
+
+#, python-format
+msgid "%(counter)s year"
+msgid_plural "%(counter)s years"
+msgstr[0] "%(counter)s an"
+msgstr[1] "%(counter)s ans"
+
+#, python-format
+msgid "from %(date)s"
+msgstr "depuis le %(date)s"
+
 msgid "Choose the home whose rooms you want to open."
 msgstr "Choisissez le logement dont vous voulez ouvrir les pièces."
 
@@ -347,19 +413,14 @@ msgstr "Marque, modèle"
 msgid "Serial number"
 msgstr "Numéro de série"
 
+msgid "Purchased on"
+msgstr "Acheté le"
+
 msgid "Installed on"
 msgstr "Posé le"
 
-msgid "Warranty"
-msgstr "Garantie"
-
-#, python-format
-msgid "ended on %(date)s"
-msgstr "terminée le %(date)s"
-
-#, python-format
-msgid "until %(date)s"
-msgstr "jusqu'au %(date)s"
+msgid "Manufacturer's warranty"
+msgstr "Garantie constructeur"
 
 msgid "Maintenance contract"
 msgstr "Contrat d'entretien"
@@ -403,6 +464,16 @@ msgstr "Journal d'entretien"
 msgid "Add an item"
 msgstr "Ajouter un élément"
 
+msgid "Duration"
+msgstr "Durée"
+
+msgid "Unit"
+msgstr "Unité"
+
+#, python-format
+msgid "Ends on %(date)s."
+msgstr "Se termine le %(date)s."
+
 msgid "New contractor"
 msgstr "Nouvel intervenant"
 
@@ -417,6 +488,39 @@ msgstr "Ajouter l'élément"
 
 msgid "Delete the item"
 msgstr "Supprimer l'élément"
+
+msgctxt "tab"
+msgid "Equipment"
+msgstr "Équipements"
+
+msgid "Search by name, brand, model or serial number"
+msgstr "Rechercher par nom, marque, modèle ou numéro de série"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Every room"
+msgstr "Toutes les pièces"
+
+msgid "Next:"
+msgstr "Prochaine :"
+
+msgid "No task to come"
+msgstr "Aucune tâche à venir"
+
+#, python-format
+msgid "warranty ended %(date)s"
+msgstr "garantie terminée le %(date)s"
+
+#, python-format
+msgid "warranty until %(date)s"
+msgstr "garantie jusqu'au %(date)s"
+
+msgid "No item yet. Add one from the page of a room."
+msgstr "Aucun élément pour l'instant. Ajoutez-en un depuis la page d'une pièce."
+
+msgid "No item matches."
+msgstr "Aucun élément ne correspond."
 
 msgid "Upload"
 msgstr "Envoyer"
@@ -485,10 +589,6 @@ msgstr "Aucune photo dans cette catégorie."
 msgid "Items"
 msgstr "Éléments"
 
-#, python-format
-msgid "warranty until %(date)s"
-msgstr "garantie jusqu'au %(date)s"
-
 msgid "No item in this room yet."
 msgstr "Aucun élément dans cette pièce pour l'instant."
 
@@ -503,9 +603,6 @@ msgstr "Supprimer la pièce"
 
 msgid "Search rooms and items"
 msgstr "Rechercher des pièces et des éléments"
-
-msgid "Search"
-msgstr "Rechercher"
 
 #, python-format
 msgid "Move %(name)s up"

@@ -3,7 +3,8 @@
 The rooms of a home, at `/h/<home id>/rooms/`. **Rooms** in the navigation
 opens it directly (`/rooms/`); with several homes, on the
 [current home](my-home.md#the-current-home). Each row shows the name of the room, its type and
-how many items it holds; a row opens the [room](room.md).
+how many items it holds; a row opens the [room](room.md). The tabs **Equipment** and **Stock**
+list [every item of the home](equipment.md) and its [stock](stock.md).
 
 - **Add a room** opens the [room form](room-form.md). Only the name is
   required.

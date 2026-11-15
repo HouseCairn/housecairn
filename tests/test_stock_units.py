@@ -31,6 +31,7 @@ class TestTheList:
         assert [value for value, _label in Unit.choices] == [
             "piece",
             "litre",
+            "millilitre",
             "metre",
             "kilogram",
             "roll",
@@ -51,6 +52,20 @@ class TestTheList:
             assert unit_text("litre", "", D("0.5")) == "litre"
             assert unit_text("litre", "", D("2")) == "litres"
             assert unit_text("box", "", D("2")) == "boîtes"
+
+    def test_a_millilitre_reads_ml_in_both_languages(self) -> None:
+        for language in ("en", "fr"):
+            with translation.override(language):
+                assert unit_text("millilitre", "", D("1")) == "mL"
+                assert unit_text("millilitre", "", D("250")) == "mL"
+        with translation.override("fr"):
+            assert Unit.MILLILITRE.label == "Millilitre (mL)"
+
+    def test_a_millilitre_is_kept_and_read_back(self, alice: User, alice_home: Home) -> None:
+        article = services.create_article(alice, alice_home, name="Descaler", unit="millilitre")
+        article.refresh_from_db()
+        assert article.unit == "millilitre"
+        assert article.unit_for(D("500")) == "mL"
 
     def test_other_says_its_own(self) -> None:
         assert unit_text("other", "bag", D("3")) == "bag"

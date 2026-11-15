@@ -987,3 +987,25 @@ input.setting-locked {
 .device-offer-body p {
   margin: 0 0 var(--hc-space-2);
 }
+
+/* A sheet saved field by field (core/autosave.py): a quiet status under the button, the error
+   of a field right under it. */
+.autosave-status {
+  min-height: 1.5em;
+  margin: var(--hc-space-2) 0 0;
+  color: var(--hc-color-text-muted);
+}
+
+.autosave-status .autosave-failed,
+.autosave-error {
+  color: var(--hc-color-danger);
+}
+
+.autosave-error {
+  display: block;
+  margin-top: var(--hc-space-1);
+}
+
+.autosave-error[hidden] {
+  display: none;
+}

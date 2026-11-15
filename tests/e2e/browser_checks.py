@@ -571,7 +571,7 @@ def new_records_and_materials(browser: Browser, base: str) -> None:
             name_box = _box(page, "#id_new_room_name")
             say(f"{label}: new room name {name_box['width']:.0f} px wide")
             _open_section(page, "#id_materials-0-article")
-            check(_lines(page) == 3, f"{label}: three lines to begin with")
+            check(_lines(page) == 1, f"{label}: one line to begin with")
             check(
                 _shown(page, "#id_materials-0-new_article_name") is not script,
                 f"{label}: the new stock item's fields hidden iff script",
@@ -579,11 +579,15 @@ def new_records_and_materials(browser: Browser, base: str) -> None:
             select = _box(page, "#id_materials-0-article")
             say(f"{label}: stock item select {select['width']:.0f} px wide")
             if script:
-                check(not _shown(page, "[data-material-more]"), f"{label}: no Add lines button")
+                check(not _shown(page, "[data-material-more]"), f"{label}: no Add a line button")
                 check(_shown(page, "[data-material-add]"), f"{label}: the + button")
                 check(_shown(page, "[data-material-remove]"), f"{label}: the - button")
                 page.click("[data-material-add]")
-                check(_lines(page) == 4, f"{label}: + adds a line")
+                check(_lines(page) == 2, f"{label}: + adds a line")
+                page.click("[data-material-add]")
+                page.click("[data-material-add]")
+                page.click("[data-material-add]")
+                check(_lines(page) == 4, f"{label}: + adds a line each time")
                 check(
                     page.locator("#id_materials-3-article").count() == 1,
                     f"{label}: the new line is numbered 3",
@@ -626,17 +630,17 @@ def new_records_and_materials(browser: Browser, base: str) -> None:
                     f"{label}: - frees a place and clears the notice",
                 )
             else:
-                check(_shown(page, "[data-material-more]"), f"{label}: the Add lines button")
+                check(_shown(page, "[data-material-more]"), f"{label}: the Add a line button")
                 check(not _shown(page, "[data-material-add]"), f"{label}: no + without script")
                 page.fill("#id_title", "Essai lignes")
-                page.select_option("#id_materials-1-article", "new")
-                page.fill("#id_materials-1-new_article_name", "Ruban")
+                page.select_option("#id_materials-0-article", "new")
+                page.fill("#id_materials-0-new_article_name", "Ruban")
                 page.click("[data-material-more]")
                 page.wait_for_selector("form[data-task-form]")
-                check(_lines(page) == 6, f"{label}: three more lines after Add lines")
+                check(_lines(page) == 2, f"{label}: one more line after Add a line")
                 check(
                     page.input_value("#id_title") == "Essai lignes"
-                    and page.input_value("#id_materials-1-new_article_name") == "Ruban",
+                    and page.input_value("#id_materials-0-new_article_name") == "Ruban",
                     f"{label}: what was typed is kept",
                 )
                 check(page.locator(".errorlist").count() == 0, f"{label}: no error shown")

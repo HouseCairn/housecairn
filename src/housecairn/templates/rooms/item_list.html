@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n tabs navigation dates %}
+{% block head_title %}{% translate "Equipment" context "tab" %}{% endblock head_title %}
+{% block content %}
+  <h1>{% translate "Equipment" context "tab" %}</h1>
+  {% tab_bar "rooms" %}
+  <form method="get" class="search-form" role="search">
+    <label for="items-q">{% translate "Search by name, brand, model or serial number" %}</label>
+    <div class="search-row">
+      <input id="items-q" type="search" name="q" value="{{ query }}" maxlength="120" autocomplete="off">
+      <button type="submit" class="button-secondary">{% translate "Search" %}</button>
+    </div>
+    <p>
+      <label for="items-room">{% translate "Room" %}</label>
+      <select id="items-room" name="room">
+        <option value="">{% translate "Every room" %}</option>
+        {% for each in rooms %}<option value="{{ each.id }}"{% if each == room %} selected{% endif %}>{{ each.name }}</option>{% endfor %}
+      </select>
+    </p>
+  </form>
+  {% if rows %}
+    <ul class="card-list" data-item-list>
+      {% for row in rows %}
+        <li>
+          <a class="row" href="{% url_with_next 'rooms:item-detail' home_id=home.id item_id=row.item.id %}">
+            <span class="row-body">
+              <span class="row-title">{{ row.item.name }}</span>
+              <span class="row-text">{{ row.item.room.name }}{% if row.item.brand %} · {{ row.item.brand }}{% endif %}</span>
+              <span class="row-text" data-next-task>{% if row.next_task %}{% translate "Next:" %} {{ row.next_task.task.title }}{% if row.next_task.due_on %} · {{ row.next_task.due_on|day }}{% endif %}{% else %}{% translate "No task to come" %}{% endif %}</span>
+            </span>
+            {% if row.item.warranty_ends_on %}{% if row.warranty == "expired" %}<span class="pill pill-danger" data-warranty>{% blocktranslate with date=row.item.warranty_ends_on|day %}warranty ended {{ date }}{% endblocktranslate %}</span>{% else %}<span class="pill pill-sand" data-warranty>{% blocktranslate with date=row.item.warranty_ends_on|day %}warranty until {{ date }}{% endblocktranslate %}</span>{% endif %}{% endif %}
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% elif everything %}
+    <p class="empty">{% translate "No item yet. Add one from the page of a room." %}</p>
+  {% else %}
+    <p class="empty">{% translate "No item matches." %}</p>
+  {% endif %}
+{% endblock content %}

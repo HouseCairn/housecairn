@@ -50,7 +50,13 @@ ITEM_FIELDS = frozenset(
         "brand",
         "model",
         "serial_number",
+        "purchased_on",
         "installed_on",
+        "warranty_duration",
+        "warranty_duration_unit",
+        "warranty_provider",
+        "warranty_provider_name",
+        "warranty_starts_on",
         "warranty_ends_on",
         "contract_contractor",
         "contract_number",
@@ -105,6 +111,46 @@ def rooms_of(home: Home) -> models.QuerySet[Room]:
 
 def items_of(home: Home) -> models.QuerySet[Item]:
     return Item.objects.filter(home=home).select_related("room", "contract_contractor")
+
+
+@dataclass(frozen=True)
+class ItemRow:
+    """An item of the list of all items: its warranty and its next task (open, the soonest)."""
+
+    item: Item
+    warranty: str
+    next_task: Any  # tasks.Occurrence | None
+
+
+def item_rows(
+    home: Home, *, room: Room | None = None, query: str = "", today: Any = None
+) -> list[ItemRow]:
+    """Every item of the home, all rooms together, by room then name; filtered by room and text.
+
+    The text is looked for in the name, the brand, the model and the serial number, whatever its
+    case. The next task is the soonest open occurrence of a task of the item, late ones first.
+    """
+    from housecairn.tasks import services as tasks_services
+
+    day = today or tasks_services.today()
+    items = items_of(home).order_by("room__position", "room__name", "name", "id")
+    if room is not None:
+        items = items.filter(room=room)
+    query = query.strip()
+    if query:
+        items = items.filter(
+            models.Q(name__icontains=query)
+            | models.Q(brand__icontains=query)
+            | models.Q(model__icontains=query)
+            | models.Q(serial_number__icontains=query)
+        )
+    rows = list(items[: SEARCH_LIMIT * 4])
+    nexts: dict[Any, Any] = {}
+    for occurrence in tasks_services.open_occurrences(home, day=day).filter(
+        task__item__in=[i.pk for i in rows]
+    ):
+        nexts.setdefault(occurrence.task.item_id, occurrence)
+    return [ItemRow(i, i.warranty_state(day), nexts.get(i.pk)) for i in rows]
 
 
 def brands_of(home: Home) -> list[str]:
@@ -236,6 +282,16 @@ def move_room(actor: AnyUser, room: Room, direction: str) -> None:
 # ---------- items ----------
 
 
+def _end_the_warranty(item: Item) -> None:
+    """With a duration and a start, the end of the warranty is worked out (docs/adr/0080).
+
+    Without them the end typed stays, so an item made before the duration keeps its date.
+    """
+    end = item.computed_warranty_end()
+    if end is not None:
+        item.warranty_ends_on = end
+
+
 def _check_same_home(room: Room, home: Home) -> None:
     if room.home_id != home.id:
         raise ValidationError({"room": _("This room is not in this home.")})
@@ -246,6 +302,7 @@ def create_item(actor: AnyUser, room: Room, **fields: Any) -> Item:
     _require_write(actor, room.home)
     item = Item(home=room.home, room=room)
     _apply(item, ITEM_FIELDS, fields)
+    _end_the_warranty(item)
     item.full_clean()
     sync_rows.save(item)
     audit.record_object("item.created", actor=actor, home_id=item.home_id, title=item.name)
@@ -260,6 +317,7 @@ def update_item(actor: AnyUser, item: Item, *, room: Room | None = None, **chang
     if room is not None:
         _check_same_home(room, item.home)
         item.room = room
+    _end_the_warranty(item)
     item.full_clean()
     sync_rows.save(item)
     audit.record_object(

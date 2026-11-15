@@ -174,7 +174,11 @@ class TaskForm(forms.ModelForm[Task]):
     new_contractor_trade_other = _NEW_CONTRACTOR["new_contractor_trade_other"]
     # Amounts are typed the way the person writes them, as in projects (docs/adr/0051).
     labour_budget = MoneyField(label=_("Labour budget"), required=False)
-    material_budget = MoneyField(label=_("Material budget"), required=False)
+    material_budget = MoneyField(
+        label=_("Material budget"),
+        required=False,
+        help_text=_("Only without priced stock items: with them, it is calculated from the stock."),
+    )
     uploads = MultipleFileField(
         label=_("Photos and files"),
         required=False,

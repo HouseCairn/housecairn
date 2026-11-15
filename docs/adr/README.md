@@ -78,3 +78,6 @@ later record supersedes it.
 | [0077](0077-sync-api-for-the-mobile-app.md) | A sync API for the mobile app: the operations of its protocol, per home | 2026-11-14 |
 | [0078](0078-oauth-2-with-pkce-for-the-mobile-app.md) | The mobile app signs in with OAuth 2 and PKCE: one connection per phone, revocable | 2026-11-14 |
 | [0079](0079-lots-of-the-server-mode-of-the-mobile-app.md) | Lots of the server mode of the mobile app: archiving, OAuth, then the sync API | 2026-11-14 |
+| [0080](0080-manufacturers-warranty-of-an-item.md) | The manufacturer's warranty of an item, apart from its maintenance contract | 2026-11-15 |
+| [0081](0081-materials-of-a-task-calculated-from-its-stock.md) | The materials of a task are calculated from its priced stock items | 2026-11-15 |
+| [0082](0082-sheets-saved-field-by-field.md) | The sheets of records are saved field by field, through their own form | 2026-11-15 |

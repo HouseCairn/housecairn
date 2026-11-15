@@ -26,9 +26,16 @@ the chips above it keep one category.
 ## Add the items
 
 **Add an item** on the page of a room. Note the brand, the model, the serial
-number, the installation date and the end of the warranty, the maintenance contract
+number, the purchase and installation dates, the warranty, the maintenance contract
 (who services it, chosen among the contractors of the home or added on the spot, and its number) and a link to it, and any link worth keeping, such as the manual online. The item
 page shows a label that tells whether the warranty is still running.
+
+The **manufacturer's warranty** is apart from the maintenance contract: its duration, in
+months or years, who gives it (the manufacturer or the shop, with its name) and the day it
+starts, the purchase date when you leave it empty. Housecairn works out the day it ends and
+shows it; an item noted before with only an end date keeps that date. **Warranties ending
+soon**, on [My home](../screens/my-home.md), lists the items whose warranty ends within 60
+days.
 
 If you put an item in the wrong room, edit it and choose another room: the item
 moves with its photos.

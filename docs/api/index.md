@@ -143,7 +143,7 @@ web interface: every request only sees the homes of its user
   returns it. Articles are filtered with `q` (name, manufacturer reference or supplier)
   and `low=true`, and `room` for those that concern a room; suppliers and movements with
   `article`, movements also with `kind`. `unit` is a code of the list (`piece`, `litre`,
-  `metre`, `kilogram`, `roll`, `box`, `other`) with `unit_other` for `other`, and `rooms`
+  `millilitre`, `metre`, `kilogram`, `roll`, `box`, `other`) with `unit_other` for `other`, and `rooms`
   takes room identifiers of the same home. The materials of the tasks are
   `.../task-materials/` (`task`, `article`, `quantity`; filtered by `task` and `article`),
   also listed, read-only, in `materials` on a task

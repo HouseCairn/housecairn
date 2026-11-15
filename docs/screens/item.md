@@ -3,8 +3,9 @@
 One piece of equipment or one surface (a wall, a floor), at
 `/h/<home id>/items/<item id>/`.
 
-The page shows what you noted: brand and model, serial number, installation
-date, the warranty (a label tells whether it is still running), the maintenance
+The page shows what you noted: brand and model, serial number, purchase and installation
+dates, the manufacturer's warranty (a label with its end tells whether it is still running,
+then its duration, its start and who gives it), the maintenance
 contract (its provider is a link to the [sheet](contractor.md) of the contractor, then the
 number and the link of the contract), notes, then the links and the photos of the item. Only
 what is filled in is shown. **Edit the item** opens the [item form](item-form.md).
