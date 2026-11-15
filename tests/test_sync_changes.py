@@ -182,13 +182,13 @@ def test_a_stamp_a_week_ahead_does_not_move_the_clock_of_the_home(alice_home: Ho
 
 
 def test_a_losing_write_still_moves_the_clock_of_the_home(alice_home: Home) -> None:
+    """A field that reads as a later `updated_at` beats the write; the server has read its clock."""
     row = uuid.uuid4()
-    put(alice_home, row, {"name": "a"}, stamp=stamp_at(WALL + 1_000))
-    lost = put(alice_home, row, {"name": "b"}, stamp=stamp_at(WALL + 500))
+    updated = datetime.datetime.fromtimestamp((WALL + 100_000) / 1000, tz=datetime.UTC)
+    lost = put(alice_home, row, {"name": "b"}, stamp=stamp_at(WALL + 500), updated_at=updated)
     assert lost.change is None
-    assert clock.parse_clock(HomeHead.objects.get(home=alice_home).clock) > clock.make_clock(
-        WALL + 1_000, 0
-    )
+    saved = clock.parse_clock(HomeHead.objects.get(home=alice_home).clock)
+    assert saved > clock.make_clock(WALL + 500, 0)
 
 
 def test_a_field_with_no_clock_reads_as_the_updated_at_of_its_row(alice_home: Home) -> None:
@@ -269,6 +269,16 @@ def test_a_deletion_is_a_change_that_writes_deleted_at(alice_home: Home) -> None
     assert state.tombstoned_at is not None
 
 
+def test_a_deletion_is_never_an_unknown_field(alice_home: Home) -> None:
+    row = uuid.uuid4()
+    changes.record_change(
+        alice_home, ENTITY, row, changes.DELETE, stamp=stamp_at(WALL + 10), known={"name"}
+    )
+    state = RowClocks.objects.get(home=alice_home, entity=ENTITY, row_id=row)
+    assert "deleted_at" in state.clocks
+    assert state.extra == {}
+
+
 def test_a_restoration_clears_the_tombstone_only_with_a_later_clock(alice_home: Home) -> None:
     row = uuid.uuid4()
     changes.record_change(alice_home, ENTITY, row, changes.DELETE, stamp=stamp_at(WALL + 10))
@@ -307,6 +317,7 @@ def test_a_deletion_that_loses_leaves_the_row_alive(alice_home: Home) -> None:
     "arguments",
     [
         {"kind": "erase"},
+        {"kind": "erase", "fields": None},
         {"entity": "Room"},
         {"entity": "rooms.Room"},
         {"entity": "rooms."},
@@ -353,6 +364,37 @@ def test_the_row_of_the_home_is_locked_before_the_position_is_read(alice_home: H
     assert lock < first_head
     if connection.features.has_select_for_update:
         assert "FOR UPDATE" in sql[lock]
+
+
+def test_the_row_of_the_home_is_locked_for_update(alice_home: Home) -> None:
+    from unittest import mock
+
+    from django.db.models import QuerySet
+
+    original = QuerySet.select_for_update
+    with mock.patch.object(
+        QuerySet, "select_for_update", autospec=True, side_effect=original
+    ) as spy:
+        put(alice_home, uuid.uuid4(), {"name": "x"})
+    homes = [c for c in spy.call_args_list if c.args[0].model is Home]
+    assert len(homes) == 1
+
+
+def test_two_changes_cannot_share_a_position_in_a_home(alice_home: Home) -> None:
+    from django.db import IntegrityError
+
+    done = put(alice_home, uuid.uuid4(), {"name": "x"})
+    assert done.change is not None
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Change.objects.create(
+            home=alice_home,
+            pos=done.change.pos,
+            entity=ENTITY,
+            row_id=uuid.uuid4(),
+            kind="put",
+            clock="0" * 16,
+            device=bytes(16),
+        )
 
 
 def test_the_server_device_is_made_once_and_kept() -> None:
