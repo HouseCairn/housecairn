@@ -100,7 +100,7 @@ def record_change(
         raise ValueError("A deletion or a restoration carries no field.")
     if fields and DELETED_AT in fields:
         raise ValueError("`deleted_at` is written by a deletion or a restoration, not as a field.")
-    written = {DELETED_AT: None} if kind != PUT else dict(fields or {})
+    written: dict[str, Any] = {DELETED_AT: None} if kind != PUT else dict(fields or {})
     if not written:
         raise ValueError("A change writes at least one field.")
     now_ms = clock.wall_ms() if wall is None else wall
