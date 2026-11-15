@@ -431,7 +431,49 @@
                       "type": "string",
                       "maxLength": 120
                     },
+                    "purchased_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
                     "installed_on": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date"
+                    },
+                    "warranty_duration": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "warranty_duration_unit": {
+                      "type": "string",
+                      "maxLength": 8,
+                      "enum": [
+                        "",
+                        "month",
+                        "year"
+                      ]
+                    },
+                    "warranty_provider": {
+                      "type": "string",
+                      "maxLength": 16,
+                      "enum": [
+                        "",
+                        "manufacturer",
+                        "shop"
+                      ]
+                    },
+                    "warranty_provider_name": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "warranty_starts_on": {
                       "type": [
                         "string",
                         "null"
@@ -478,10 +520,16 @@
                     "model",
                     "name",
                     "notes",
+                    "purchased_on",
                     "room",
                     "serial_number",
                     "updated_at",
-                    "warranty_ends_on"
+                    "warranty_duration",
+                    "warranty_duration_unit",
+                    "warranty_ends_on",
+                    "warranty_provider",
+                    "warranty_provider_name",
+                    "warranty_starts_on"
                   ],
                   "additionalProperties": false
                 }

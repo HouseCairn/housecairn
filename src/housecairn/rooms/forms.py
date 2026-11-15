@@ -12,6 +12,7 @@ from housecairn.rooms.models import (
     PhotoCategory,
     Room,
     RoomKind,
+    WarrantyUnit,
     validate_links,
 )
 from housecairn.stock.models import Article
@@ -173,7 +174,13 @@ class ItemForm(forms.ModelForm[Item]):
             "brand",
             "model",
             "serial_number",
+            "purchased_on",
             "installed_on",
+            "warranty_duration",
+            "warranty_duration_unit",
+            "warranty_provider",
+            "warranty_provider_name",
+            "warranty_starts_on",
             "warranty_ends_on",
             "contract_contractor",
             "contract_number",
@@ -182,9 +189,19 @@ class ItemForm(forms.ModelForm[Item]):
             "notes",
         ]
         widgets = {
+            "purchased_on": _DATE,
             "installed_on": _DATE,
+            "warranty_starts_on": _DATE,
             "warranty_ends_on": _DATE,
             "notes": forms.Textarea(attrs={"rows": 4}),
+        }
+        help_texts = {
+            "warranty_duration": _("The warranty of the manufacturer or of the shop, in months or years."),
+            "warranty_provider_name": _("Example: Acme, or the shop where you bought it."),
+            "warranty_starts_on": _("Empty: from the purchase date."),
+            "warranty_ends_on": _(
+                "Worked out from the start and the duration. Type it only when you do not know them."
+            ),
         }
 
     field_order = [
@@ -194,7 +211,13 @@ class ItemForm(forms.ModelForm[Item]):
         "brand",
         "model",
         "serial_number",
+        "purchased_on",
         "installed_on",
+        "warranty_duration",
+        "warranty_duration_unit",
+        "warranty_provider",
+        "warranty_provider_name",
+        "warranty_starts_on",
         "warranty_ends_on",
         "contract_contractor",
         "new_contractor_name",
@@ -219,12 +242,18 @@ class ItemForm(forms.ModelForm[Item]):
         room_field = self.fields["room"]
         assert isinstance(room_field, forms.ModelChoiceField)  # noqa: S101 - narrows the type
         room_field.queryset = rooms
+        unit = self.fields["warranty_duration_unit"]
+        assert isinstance(unit, forms.ChoiceField)  # noqa: S101 - narrows the type
+        unit.choices = WarrantyUnit.choices  # no dash: a duration is in months or years
+        unit.required = False
         if self.instance.pk:
             self.initial["links"] = links_to_text(self.instance.links)
 
     def clean(self) -> dict[str, Any]:
         data: dict[str, Any] = super().clean() or {}
         clean_new_contractor(self, data, self.home, field="contract_contractor")
+        if not data.get("warranty_duration_unit"):
+            data["warranty_duration_unit"] = WarrantyUnit.YEAR
         return data
 
     def clean_links(self) -> list[dict[str, str]]:

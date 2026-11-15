@@ -4,7 +4,9 @@ import datetime
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxLengthValidator, URLValidator
+from dateutil.relativedelta import relativedelta
+from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -121,6 +123,35 @@ class ItemKind(models.TextChoices):
     SURFACE = "surface", _("Surface")
 
 
+class WarrantyUnit(models.TextChoices):
+    MONTH = "month", _("months")
+    YEAR = "year", _("years")
+
+
+class WarrantyProvider(models.TextChoices):
+    """Who gives the warranty of an item (docs/adr/0080)."""
+
+    MANUFACTURER = "manufacturer", _("The manufacturer")
+    SHOP = "shop", _("The shop")
+
+
+# A warranty of more than 99 months or years is a typing error.
+MAX_WARRANTY_DURATION = 99
+
+
+def warranty_end(start: datetime.date | None, duration: int | None, unit: str) -> datetime.date | None:
+    """The day a warranty of `duration` months or years from `start` ends; None without one.
+
+    The same date that many months or years later, the last day of the month when that month is
+    shorter (31 January plus one month ends on 28 or 29 February).
+    """
+    if start is None or not duration or unit not in WarrantyUnit.values:
+        return None
+    if unit == WarrantyUnit.YEAR:
+        return start + relativedelta(years=duration)
+    return start + relativedelta(months=duration)
+
+
 class Item(HomeOwnedModel):
     """A piece of equipment or a surface (a wall, a floor) in a room."""
 
@@ -132,7 +163,31 @@ class Item(HomeOwnedModel):
     brand = models.CharField(_("brand"), max_length=120, blank=True)
     model = models.CharField(_("model"), max_length=120, blank=True)
     serial_number = models.CharField(_("serial number"), max_length=120, blank=True)
+    purchased_on = models.DateField(_("purchased on"), null=True, blank=True)
     installed_on = models.DateField(_("installed on"), null=True, blank=True)
+    # The warranty of the maker or of the shop, apart from the maintenance contract
+    # (docs/adr/0080). With a duration, its end is worked out from its start, or from the
+    # purchase date; without one, the end typed is kept as it is (the items made before).
+    warranty_duration = models.PositiveSmallIntegerField(
+        _("warranty: duration"),
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(MAX_WARRANTY_DURATION)],
+    )
+    warranty_duration_unit = models.CharField(
+        _("warranty: in"),
+        max_length=8,
+        choices=WarrantyUnit.choices,
+        blank=True,
+        default=WarrantyUnit.YEAR,
+    )
+    warranty_provider = models.CharField(
+        _("warranty: given by"), max_length=16, choices=WarrantyProvider.choices, blank=True
+    )
+    warranty_provider_name = models.CharField(
+        _("warranty: name of the manufacturer or shop"), max_length=120, blank=True
+    )
+    warranty_starts_on = models.DateField(_("warranty: starts on"), null=True, blank=True)
     warranty_ends_on = models.DateField(_("warranty ends on"), null=True, blank=True)
     # Who services it: one of the contractors of the home (docs/adr/0058). Deleting the
     # contractor clears the link (`tasks.services.delete_contractor`), the number and the
@@ -178,6 +233,17 @@ class Item(HomeOwnedModel):
             raise ValidationError(
                 {"contract_contractor": _("This contractor is not in this home.")}
             )
+
+    @property
+    def warranty_start(self) -> datetime.date | None:
+        """The start of the warranty: the date given, else the purchase date."""
+        return self.warranty_starts_on or self.purchased_on
+
+    def computed_warranty_end(self) -> datetime.date | None:
+        """The end worked out from the start and the duration, or None when one is missing."""
+        return warranty_end(
+            self.warranty_start, self.warranty_duration, self.warranty_duration_unit
+        )
 
     def warranty_state(self, today: datetime.date) -> str:
         """`none`, `active` or `expired`, at the date `today`."""

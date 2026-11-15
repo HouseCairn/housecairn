@@ -15,9 +15,26 @@
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {% for field in form %}
-      {% if field.name == "new_contractor_name" or field.name == "new_contractor_trade" or field.name == "new_contractor_trade_other" %}
+      {% if field.name == "new_contractor_name" or field.name == "new_contractor_trade" or field.name == "new_contractor_trade_other" or field.name|slice:":9" == "warranty_" %}
       {% else %}
         {% include "tasks/_field.html" %}
+      {% endif %}
+      {% if field.name == "installed_on" %}
+        {# The warranty of the maker or of the shop, apart from the maintenance contract (docs/adr/0080). #}
+        <fieldset class="add-in-place">
+          <legend>{% translate "Manufacturer's warranty" %}</legend>
+          <p>
+            {{ form.warranty_duration.errors }}{{ form.warranty_duration_unit.errors }}
+            <label for="{{ form.warranty_duration.id_for_label }}">{% translate "Duration" %}</label>
+            <span class="field-pair">{{ form.warranty_duration }}<label class="sr-only" for="{{ form.warranty_duration_unit.id_for_label }}">{% translate "Unit" %}</label>{{ form.warranty_duration_unit }}</span>
+            <span class="helptext">{{ form.warranty_duration.help_text }}</span>
+          </p>
+          {% include "tasks/_field.html" with field=form.warranty_provider %}
+          {% include "tasks/_field.html" with field=form.warranty_provider_name %}
+          {% include "tasks/_field.html" with field=form.warranty_starts_on %}
+          {% include "tasks/_field.html" with field=form.warranty_ends_on %}
+          {% if item.warranty_ends_on %}<p class="small" data-warranty-end>{% load dates %}{% blocktranslate with date=item.warranty_ends_on|day %}Ends on {{ date }}.{% endblocktranslate %}</p>{% endif %}
+        </fieldset>
       {% endif %}
       {% if field.name == "contract_contractor" %}
         {# Added in place: shown with the choice "Add a contractor…"; without script always shown, and read only with that choice. #}

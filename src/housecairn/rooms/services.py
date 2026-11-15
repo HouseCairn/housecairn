@@ -50,7 +50,13 @@ ITEM_FIELDS = frozenset(
         "brand",
         "model",
         "serial_number",
+        "purchased_on",
         "installed_on",
+        "warranty_duration",
+        "warranty_duration_unit",
+        "warranty_provider",
+        "warranty_provider_name",
+        "warranty_starts_on",
         "warranty_ends_on",
         "contract_contractor",
         "contract_number",
@@ -236,6 +242,16 @@ def move_room(actor: AnyUser, room: Room, direction: str) -> None:
 # ---------- items ----------
 
 
+def _end_the_warranty(item: Item) -> None:
+    """With a duration and a start, the end of the warranty is worked out (docs/adr/0080).
+
+    Without them the end typed stays, so an item made before the duration keeps its date.
+    """
+    end = item.computed_warranty_end()
+    if end is not None:
+        item.warranty_ends_on = end
+
+
 def _check_same_home(room: Room, home: Home) -> None:
     if room.home_id != home.id:
         raise ValidationError({"room": _("This room is not in this home.")})
@@ -246,6 +262,7 @@ def create_item(actor: AnyUser, room: Room, **fields: Any) -> Item:
     _require_write(actor, room.home)
     item = Item(home=room.home, room=room)
     _apply(item, ITEM_FIELDS, fields)
+    _end_the_warranty(item)
     item.full_clean()
     sync_rows.save(item)
     audit.record_object("item.created", actor=actor, home_id=item.home_id, title=item.name)
@@ -260,6 +277,7 @@ def update_item(actor: AnyUser, item: Item, *, room: Room | None = None, **chang
     if room is not None:
         _check_same_home(room, item.home)
         item.room = room
+    _end_the_warranty(item)
     item.full_clean()
     sync_rows.save(item)
     audit.record_object(

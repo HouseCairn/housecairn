@@ -60,11 +60,17 @@ msgstr "Modèle, numéro de série"
 msgid "Free text, 120 characters at most each."
 msgstr "Texte libre, 120 caractères au plus chacun."
 
-msgid "Installed on, warranty ends on"
-msgstr "Posé le, fin de garantie"
+msgid "Purchased on, installed on"
+msgstr "Acheté le, posé le"
 
 msgid "Dates."
 msgstr "Dates."
+
+msgid "Manufacturer's warranty"
+msgstr "Garantie constructeur"
+
+msgid "Apart from the maintenance contract. **Duration**: a number from 1 to 99, in months or years (years when nothing is chosen). **Given by**: the manufacturer or the shop, and its name. **Starts on**: empty, from the purchase date. **Ends on** is worked out from the start and the duration when both are known, and shown under the fields; type it only when you do not know them."
+msgstr "Distincte du contrat d'entretien. **Durée** : un nombre de 1 à 99, en mois ou en années (en années si rien n'est choisi). **Donnée par** : le fabricant ou le magasin, et son nom. **Départ le** : vide, à partir de la date d'achat. **Fin** se calcule à partir du départ et de la durée quand les deux sont connus, et s'affiche sous les champs ; ne la saisissez que si vous ne les connaissez pas."
 
 msgid "Maintenance contract: provider"
 msgstr "Contrat d'entretien : prestataire"
@@ -107,3 +113,7 @@ msgstr "Le lien du haut et le formulaire une fois envoyé ramènent à l'écran 
 
 #~ msgid "Who services it, 200 characters at most."
 #~ msgstr "Qui l'assure, 200 caractères au plus."
+
+#~ msgid "Installed on, warranty ends on"
+#~ msgstr "Posé le, fin de garantie"
+
