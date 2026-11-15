@@ -36,6 +36,8 @@ LABELS: dict[str, Promise] = {
     "task.created": _("Task added: %(title)s"),
     "task.updated": _("Task changed: %(title)s"),
     "task.deleted": _("Task deleted: %(title)s"),
+    "occurrence.done": _("Task marked done from a phone: %(title)s"),
+    "occurrence.skipped": _("Task skipped from a phone: %(title)s"),
     "photo.added": _("Photo added to %(title)s"),
     "photo.deleted": _("Photo deleted from %(title)s"),
     "attachment.added": _("File added to the task %(title)s"),

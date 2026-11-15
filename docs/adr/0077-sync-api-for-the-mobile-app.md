@@ -13,6 +13,10 @@
   refuses another), a malformed push is `400` with the code `malformed`, and a field a phone may
   not write (a column of the server, a derived field) is `rejected` with `forbidden`. Its review
   led to the [decisions of 2026-11-15](#decisions-of-2026-11-15-after-the-review-of-the-push).
+  Lot M5b builds the repair rules and the effects of needs 6 and 7 with the six answers of
+  [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md#decisions-of-2026-11-15-for-lot-m5b),
+  one of which departs from need 6: a rule of the data no repair rule covers still makes the
+  push `400` `malformed`.
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and

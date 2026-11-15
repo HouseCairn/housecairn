@@ -1,0 +1,1583 @@
+{
+  "version": 1,
+  "about": "Repair vectors of the rules of mobile ADR 0003 across rows, as a Housecairn server applies them (docs/adr/0077 needs 6 and 7, docs/adr/0079 M5b). Each case applies the operations of `before` in their order, then the pushes of `pushes` in every order, each push as one request of its device; every order gives the fields of `expect.rows` (as the snapshot gives them), the rows of `expect.deleted` deleted, the stock of each article of `expect.stock` (the sum of the effects of its movements) and the number of audit entries of each action of `expect.audit`. Names starting with `$` are ids: `$home` the home, those of `ids` the deterministic ids of mobile ADR 0003 (`[\"next\", occurrence]`, `[\"material\", task, article]`, `[\"draw\", occurrence, article]`), any other a new random UUID. Clocks are on 2026-01-01 from 12:00 UTC, in the past of any server; the clock of a repair is the server's.",
+  "devices": {
+    "a": "EREREREREREREREREREREQ",
+    "b": "7u7u7u7u7u7u7u7u7u7u7g"
+  },
+  "cases": [
+    {
+      "name": "closed_on_one_phone_postponed_on_the_other",
+      "rule": "two open occurrences: the one that follows stays open",
+      "about": "Phone a closes $o1 and makes its successor; phone b, later, postpones $o1. Both are open: $next1 follows $o1 and stays open, $o1 is closed as done since it has a done date.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796dddd00000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": ""
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-12",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b7970e3400000",
+              "f": {
+                "postponed_from": "2026-01-10",
+                "due_on": "2026-01-20",
+                "status": "postponed"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$o1": {
+            "status": "done",
+            "completed_on": "2026-01-12",
+            "due_on": "2026-01-20"
+          },
+          "$next1": {
+            "status": "planned",
+            "due_on": "2026-02-12",
+            "deleted_at": null
+          }
+        },
+        "audit": {
+          "occurrence.done": 1
+        }
+      }
+    },
+    {
+      "name": "two_open_without_follows_the_last_made_stays_open",
+      "rule": "two open occurrences: the one made last stays open",
+      "about": "Two phones each give the task an open occurrence, none following the other: the one whose task_id has the later clock stays open, the other is skipped.",
+      "ids": {},
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Paint the hall",
+                "repeat_mode": "once"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$x",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-01",
+                "status": "planned"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$y",
+              "k": "put",
+              "c": "019b7970e3400000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-02",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$x": {
+            "status": "skipped"
+          },
+          "$y": {
+            "status": "planned"
+          }
+        },
+        "audit": {
+          "occurrence.skipped": 1
+        }
+      }
+    },
+    {
+      "name": "the_one_closed_by_the_rule_is_done_when_marked_done",
+      "rule": "two open occurrences: closed as done if marked done",
+      "about": "$x is open; phone b adds $y, open, made later; phone a gives $x a done date: $x is closed as done, whether the date arrives before or after the rule closed it.",
+      "ids": {},
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Paint the hall",
+                "repeat_mode": "once"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$x",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-01",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$y",
+              "k": "put",
+              "c": "019b7970e3400000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-02",
+                "status": "planned"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$x",
+              "k": "put",
+              "c": "019b797269e00000",
+              "f": {
+                "completed_on": "2026-03-01"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$x": {
+            "status": "done",
+            "completed_on": "2026-03-01"
+          },
+          "$y": {
+            "status": "planned"
+          }
+        }
+      }
+    },
+    {
+      "name": "a_chain_keeps_its_last_open",
+      "rule": "two open occurrences: the one that follows stays open",
+      "about": "$o2 follows $o1 and $o3 follows $o2; $o1 is open, $o2 closed. One phone opens $o2 again, the other adds $o3, open: only $o3 stays open, whatever the order; the others, without a done date, are skipped.",
+      "ids": {},
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796dddd00000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o2",
+              "k": "put",
+              "c": "019b796de1b80000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-01",
+                "status": "skipped",
+                "follows_id": "$o1"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o2",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status": "planned"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o3",
+              "k": "put",
+              "c": "019b7970e3400000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-01",
+                "status": "planned",
+                "follows_id": "$o2"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$o1": {
+            "status": "skipped",
+            "due_on": "2026-01-10"
+          },
+          "$o2": {
+            "status": "skipped",
+            "due_on": "2026-02-01"
+          },
+          "$o3": {
+            "status": "planned",
+            "due_on": "2026-03-01"
+          }
+        }
+      }
+    },
+    {
+      "name": "an_undo_whose_successor_was_edited_is_reverted",
+      "rule": "an undo whose successor was edited is reverted",
+      "about": "Phone a closed $o1 (its draw and exit included), then takes it back: the successor is deleted, the draw deleted, the cartridges given back. Phone b had postponed the successor meanwhile. The edit wins: the successor comes back, $o1 is done again with its date and note, its draw comes back and the server takes the cartridges again, so the stock is 5 - 2 + 2 - 2.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ],
+        "$line": [
+          "material",
+          "$task",
+          "$article"
+        ],
+        "$draw1": [
+          "draw",
+          "$o1",
+          "$article"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.article",
+              "h": "$home",
+              "id": "$article",
+              "k": "put",
+              "c": "019b796de1b80000",
+              "f": {
+                "name": "Filter cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$stocked",
+              "k": "put",
+              "c": "019b796de5a00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "5.00",
+                "occurred_on": "2026-01-01"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.taskmaterial",
+              "h": "$home",
+              "id": "$line",
+              "k": "put",
+              "c": "019b796de9880000",
+              "f": {
+                "task_id": "$task",
+                "article_id": "$article",
+                "quantity": "2.00"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796ded700000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": "New cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-12",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$taken",
+              "k": "put",
+              "c": "019b796f64700000",
+              "f": {
+                "article_id": "$article",
+                "kind": "exit",
+                "quantity": "2.00",
+                "occurrence_id": "$o1",
+                "occurred_on": "2026-01-12"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.materialdraw",
+              "h": "$home",
+              "id": "$draw1",
+              "k": "put",
+              "c": "019b796f68580000",
+              "f": {
+                "occurrence_id": "$o1",
+                "article_id": "$article",
+                "wanted": "2.00",
+                "drawn": "2.00"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "delete",
+              "c": "019b797577200000"
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.materialdraw",
+              "h": "$home",
+              "id": "$draw1",
+              "k": "delete",
+              "c": "019b79757b080000"
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$back",
+              "k": "put",
+              "c": "019b79757ef00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "2.00",
+                "occurrence_id": "$o1",
+                "occurred_on": "2026-01-13"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b797582d80000",
+              "f": {
+                "status": "planned",
+                "status_before": "",
+                "completed_on": null,
+                "completion_note": ""
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b7973f0800000",
+              "f": {
+                "status": "postponed",
+                "postponed_from": "2026-02-12",
+                "due_on": "2026-02-20"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$o1": {
+            "status": "done",
+            "status_before": "planned",
+            "completed_on": "2026-01-12",
+            "completion_note": "New cartridge"
+          },
+          "$next1": {
+            "status": "postponed",
+            "due_on": "2026-02-20",
+            "deleted_at": null
+          },
+          "$draw1": {
+            "drawn": "2.00",
+            "deleted_at": null
+          }
+        },
+        "stock": {
+          "$article": "3.00"
+        },
+        "audit": {
+          "occurrence.done": 1
+        }
+      }
+    },
+    {
+      "name": "an_undo_of_an_untouched_successor_stands",
+      "rule": "an undo whose successor was not edited stands",
+      "about": "The same undo, and phone b only renamed the task: the undo stands and the stock is back to 5.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ],
+        "$line": [
+          "material",
+          "$task",
+          "$article"
+        ],
+        "$draw1": [
+          "draw",
+          "$o1",
+          "$article"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.article",
+              "h": "$home",
+              "id": "$article",
+              "k": "put",
+              "c": "019b796de1b80000",
+              "f": {
+                "name": "Filter cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$stocked",
+              "k": "put",
+              "c": "019b796de5a00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "5.00",
+                "occurred_on": "2026-01-01"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.taskmaterial",
+              "h": "$home",
+              "id": "$line",
+              "k": "put",
+              "c": "019b796de9880000",
+              "f": {
+                "task_id": "$task",
+                "article_id": "$article",
+                "quantity": "2.00"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796ded700000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": "New cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-12",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$taken",
+              "k": "put",
+              "c": "019b796f64700000",
+              "f": {
+                "article_id": "$article",
+                "kind": "exit",
+                "quantity": "2.00",
+                "occurrence_id": "$o1",
+                "occurred_on": "2026-01-12"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.materialdraw",
+              "h": "$home",
+              "id": "$draw1",
+              "k": "put",
+              "c": "019b796f68580000",
+              "f": {
+                "occurrence_id": "$o1",
+                "article_id": "$article",
+                "wanted": "2.00",
+                "drawn": "2.00"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "delete",
+              "c": "019b797577200000"
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.materialdraw",
+              "h": "$home",
+              "id": "$draw1",
+              "k": "delete",
+              "c": "019b79757b080000"
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$back",
+              "k": "put",
+              "c": "019b79757ef00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "2.00",
+                "occurrence_id": "$o1",
+                "occurred_on": "2026-01-13"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b797582d80000",
+              "f": {
+                "status": "planned",
+                "status_before": "",
+                "completed_on": null,
+                "completion_note": ""
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b7973f0800000",
+              "f": {
+                "title": "Change the filter"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$o1": {
+            "status": "planned",
+            "completed_on": null
+          },
+          "$draw1": {
+            "drawn": "2.00"
+          }
+        },
+        "deleted": [
+          "$next1",
+          "$draw1"
+        ],
+        "stock": {
+          "$article": "5.00"
+        }
+      }
+    },
+    {
+      "name": "the_date_of_a_successor_is_the_one_of_recurrence",
+      "rule": "the successor's date is the one recurrence gives",
+      "about": "A phone closes $o1 on 2026-01-12 and gives the successor a date the rule of the task does not give: it is repaired to a month after the done date.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796dddd00000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": ""
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-01",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$next1": {
+            "due_on": "2026-02-12"
+          }
+        }
+      }
+    },
+    {
+      "name": "a_skip_counts_from_the_day_of_its_clock",
+      "rule": "the successor's date is the one recurrence gives",
+      "about": "A skip has no done date: the day of the clock of its status (2026-01-01, 12:00 UTC plus 100 s) is the day the rule counts from.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796dddd00000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "skipped"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-03-01",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$next1": {
+            "due_on": "2026-02-01"
+          }
+        },
+        "audit": {
+          "occurrence.skipped": 1
+        }
+      }
+    },
+    {
+      "name": "done_takes_the_draws_no_phone_pushed",
+      "rule": "stock follows done",
+      "about": "A phone closes $o1 without pushing draws: the server takes the material of the task from the stock, once, under the id of the draw.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ],
+        "$line": [
+          "material",
+          "$task",
+          "$article"
+        ],
+        "$draw1": [
+          "draw",
+          "$o1",
+          "$article"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.article",
+              "h": "$home",
+              "id": "$article",
+              "k": "put",
+              "c": "019b796de1b80000",
+              "f": {
+                "name": "Filter cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$stocked",
+              "k": "put",
+              "c": "019b796de5a00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "5.00",
+                "occurred_on": "2026-01-01"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.taskmaterial",
+              "h": "$home",
+              "id": "$line",
+              "k": "put",
+              "c": "019b796de9880000",
+              "f": {
+                "task_id": "$task",
+                "article_id": "$article",
+                "quantity": "2.00"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796ded700000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": ""
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-12",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b7970e3400000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": ""
+              }
+            }
+          },
+          {
+            "device": "b",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b7970e7280000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-12",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "rows": {
+          "$draw1": {
+            "wanted": "2.00",
+            "drawn": "2.00",
+            "deleted_at": null
+          }
+        },
+        "stock": {
+          "$article": "3.00"
+        },
+        "audit": {
+          "occurrence.done": 1
+        }
+      }
+    },
+    {
+      "name": "a_pushed_draw_is_not_taken_again",
+      "rule": "stock follows done",
+      "about": "A phone closes $o1 with its draw and exit: the server takes nothing more.",
+      "ids": {
+        "$next1": [
+          "next",
+          "$o1"
+        ],
+        "$line": [
+          "material",
+          "$task",
+          "$article"
+        ],
+        "$draw1": [
+          "draw",
+          "$o1",
+          "$article"
+        ]
+      },
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Clean the filter",
+                "repeat_mode": "after_last",
+                "repeat_unit": "month",
+                "repeat_interval": 1
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.article",
+              "h": "$home",
+              "id": "$article",
+              "k": "put",
+              "c": "019b796de1b80000",
+              "f": {
+                "name": "Filter cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$stocked",
+              "k": "put",
+              "c": "019b796de5a00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "5.00",
+                "occurred_on": "2026-01-01"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.taskmaterial",
+              "h": "$home",
+              "id": "$line",
+              "k": "put",
+              "c": "019b796de9880000",
+              "f": {
+                "task_id": "$task",
+                "article_id": "$article",
+                "quantity": "2.00"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796ded700000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-01-10",
+                "status": "planned"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$o1",
+              "k": "put",
+              "c": "019b796f5ca00000",
+              "f": {
+                "status_before": "planned",
+                "status": "done",
+                "completed_on": "2026-01-12",
+                "completion_note": "New cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.occurrence",
+              "h": "$home",
+              "id": "$next1",
+              "k": "put",
+              "c": "019b796f60880000",
+              "f": {
+                "task_id": "$task",
+                "due_on": "2026-02-12",
+                "status": "planned",
+                "status_before": "",
+                "postponed_from": null,
+                "completed_on": null,
+                "completion_note": "",
+                "follows_id": "$o1"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$taken",
+              "k": "put",
+              "c": "019b796f64700000",
+              "f": {
+                "article_id": "$article",
+                "kind": "exit",
+                "quantity": "2.00",
+                "occurrence_id": "$o1",
+                "occurred_on": "2026-01-12"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.materialdraw",
+              "h": "$home",
+              "id": "$draw1",
+              "k": "put",
+              "c": "019b796f68580000",
+              "f": {
+                "occurrence_id": "$o1",
+                "article_id": "$article",
+                "wanted": "2.00",
+                "drawn": "2.00"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "stock": {
+          "$article": "3.00"
+        },
+        "audit": {
+          "occurrence.done": 1
+        }
+      }
+    },
+    {
+      "name": "an_inventory_counts_after_the_movements_before_it",
+      "rule": "the effect of an inventory is the count minus the stock before it",
+      "about": "An exit made earlier arrives after an inventory: the inventory still makes the stock its count, since the exit is before it by its clock.",
+      "ids": {},
+      "before": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "tasks.task",
+              "h": "$home",
+              "id": "$task",
+              "k": "put",
+              "c": "019b796dd9e80000",
+              "f": {
+                "title": "Paint the hall",
+                "repeat_mode": "once"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.article",
+              "h": "$home",
+              "id": "$article",
+              "k": "put",
+              "c": "019b796de1b80000",
+              "f": {
+                "name": "Filter cartridge"
+              }
+            }
+          },
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$stocked",
+              "k": "put",
+              "c": "019b796de5a00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "entry",
+                "quantity": "5.00",
+                "occurred_on": "2026-01-01"
+              }
+            }
+          }
+        ]
+      ],
+      "pushes": [
+        [
+          {
+            "device": "a",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$count",
+              "k": "put",
+              "c": "019b797269e00000",
+              "f": {
+                "article_id": "$article",
+                "kind": "inventory",
+                "quantity": "4.00",
+                "occurred_on": "2026-01-03"
+              }
+            }
+          }
+        ],
+        [
+          {
+            "device": "b",
+            "op": {
+              "t": "stock.movement",
+              "h": "$home",
+              "id": "$used",
+              "k": "put",
+              "c": "019b7970e3400000",
+              "f": {
+                "article_id": "$article",
+                "kind": "exit",
+                "quantity": "3.00",
+                "occurred_on": "2026-01-02"
+              }
+            }
+          }
+        ]
+      ],
+      "expect": {
+        "stock": {
+          "$article": "4.00"
+        }
+      }
+    }
+  ]
+}

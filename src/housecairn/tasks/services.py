@@ -383,6 +383,11 @@ def _visible_from(task: Task, due_on: datetime.date | None) -> datetime.date | N
         return datetime.date.min
 
 
+# The day an occurrence starts to show, as every write of the web computes it; the sync push
+# computes it the same way for the rows a phone writes (docs/adr/0077, need 7).
+visible_from_of = _visible_from
+
+
 def _check_due(task: Task, due_on: datetime.date | None) -> None:
     if due_on is None and task.repeat_mode == RepeatMode.FIXED:
         raise ValidationError({"due_on": _("A task that repeats on a fixed date needs a date.")})

@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Sync API, rules across rows.** What a phone pushes is checked against the rules of the tasks, as the web applies them ([Sync API](../../../api/sync.md)): a task never keeps two open occurrences, an undo taken on a phone while someone else postponed the next occurrence gives way to that edit, the next date of a task done on a phone is the one its repeat rule gives, and the stock follows a task marked done on a phone once. The home's activity log lists the tasks marked done or skipped from a phone, with the person who did it."
+msgstr "**API de synchronisation, règles entre lignes.** Ce qu'un téléphone envoie est vérifié par rapport aux règles des tâches, comme le web les applique ([API de synchronisation](../../../api/sync.md)) : une tâche ne garde jamais deux occurrences ouvertes, une annulation faite sur un téléphone pendant que quelqu'un d'autre reportait l'occurrence suivante cède devant cette modification, la date suivante d'une tâche faite sur un téléphone est celle que donne sa règle de répétition, et le stock suit une seule fois une tâche marquée faite sur un téléphone. Le journal d'activité du logement liste les tâches marquées faites ou ignorées depuis un téléphone, avec la personne qui l'a fait."
+

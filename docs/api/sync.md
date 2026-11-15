@@ -181,6 +181,31 @@ the phone. The server writes who acted, whatever the operation says: `completed_
 `closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no
 later operation changes. `assignee_id` may name any member of the home.
 
+**Rules across rows are repaired, not refused.** Once the operations are applied, in the same
+transaction, the server runs the rules the phone runs (mobile ADR 0003), each repair a change of
+its own with the server's clock, which the feed then gives:
+
+- **Two open occurrences of one task**: the one that follows the other (through `follows_id`)
+  stays open, else the one whose `task_id` has the later clock, then the greater device id, then
+  the greater id. The other is closed as `done` if it has a `completed_on`, else `skipped`.
+- **An undo whose successor was edited elsewhere** (postponed, closed, given a note, a cost or a
+  photo) is reverted: the successor comes back, the occurrence is closed again with the values it
+  had before the undo, its draws come back, and the server takes their quantity from the stock
+  again, once.
+- **The date of a successor**: a `put` that sets `follows_id` and `due_on`, the successor of a
+  closing, gets the date the rule of the task gives, counted from `completed_on`, or, for a skip,
+  from the day of the clock of its `status` in the time zone of the instance.
+
+The server also computes what is derived: `visible_from` of the occurrences, the months of the
+tasks on a predefined season when `hemisphere` changes, and the effect of each stock movement on
+the stock, in the order of the clocks (an inventory makes the stock its count). It runs once what
+the web runs on a closing: an audit entry for each occurrence that becomes done or skipped, in
+the name of the account of the phone; and for one that becomes done, the draws of its materials
+that the push did not carry (a phone sends a closing in one push, with its draws and exits). An
+undo pushed is data only: the server writes nothing more for it. Other rules of the data (two
+material lines of one article, two occurrences that follow the same one, a draw above what it
+wanted) have no repair: the push is `400` with `malformed`.
+
 ```json
 {
   "head": 44,
@@ -201,6 +226,7 @@ Each operation gets one result, with its index `i`:
 | --- | --- |
 | `applied` | Written, perhaps with some fields lost. |
 | `ignored` | Nothing written: every field lost, or the same operation was applied before. |
+| `repaired` | Written, then changed by a repair rule: the changes of the repair follow in the feed. |
 | `rejected` | Not written, with a `code` the app shows on the row without blocking the rest of the push. |
 
 - `lost`: for each field that lost, the value, the clock and the device of the write that won.
