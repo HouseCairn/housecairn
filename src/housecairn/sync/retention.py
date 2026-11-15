@@ -153,6 +153,8 @@ def _emptied(
                 kind = type(row)
                 if (
                     not issubclass(kind, BaseModel)
+                    # A row of no home (an account, a setting of the instance) has no log.
+                    or not (kind._meta.label == "homes.Home" or hasattr(row, "home_id"))
                     or (kind, row.pk) in gone
                     or field.attname not in sync_rows.raw_values(row, {field.attname})
                 ):
