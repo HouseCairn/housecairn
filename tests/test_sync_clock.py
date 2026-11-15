@@ -29,6 +29,9 @@ clocks = st.builds(lambda ms, c: (ms << 16) | c, instants, counters)
 roomy = st.builds(lambda ms, c: (ms << 16) | c, st.integers(0, MAX_MS - 1), counters)
 devices = st.binary(min_size=16, max_size=16)
 walls = st.integers(min_value=0, max_value=MAX_MS - 1)
+# A wall clock with room to be read ahead by up to 10**9 ms (more than the 24 h of drift
+# the tests add) and still stay a 64-bit clock once shifted.
+roomy_walls = st.integers(min_value=0, max_value=MAX_MS - 1 - 10**9)
 
 
 def kulkarni_send(last: int, wall: int) -> int:
@@ -176,7 +179,12 @@ def test_a_received_clock_is_after_both_clocks_unless_it_is_too_far_ahead(
         assert made > remote
 
 
-@given(last=roomy, wall=walls, ahead=st.integers(clock.DRIFT_LIMIT_MS + 1, 10**9), c=counters)
+@given(
+    last=roomy,
+    wall=roomy_walls,
+    ahead=st.integers(clock.DRIFT_LIMIT_MS + 1, 10**9),
+    c=counters,
+)
 def test_a_clock_more_than_a_day_ahead_is_not_adopted(
     last: int, wall: int, ahead: int, c: int
 ) -> None:
@@ -185,7 +193,7 @@ def test_a_clock_more_than_a_day_ahead_is_not_adopted(
     assert clock.receive(last, remote, wall) == clock.tick(last, wall)
 
 
-@given(last=roomy, wall=walls, ahead=st.integers(0, clock.DRIFT_LIMIT_MS), c=counters)
+@given(last=roomy, wall=roomy_walls, ahead=st.integers(0, clock.DRIFT_LIMIT_MS), c=counters)
 def test_a_clock_up_to_a_day_ahead_is_adopted(last: int, wall: int, ahead: int, c: int) -> None:
     remote = ((wall + ahead) << 16) | c
     assert clock.receive(last, remote, wall) > remote
