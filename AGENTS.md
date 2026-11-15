@@ -32,9 +32,10 @@ Each is explained where it is linked.
   per app; never commit a `.mo` file
   ([CONTRIBUTING.md](CONTRIBUTING.md#local-development)).
 - No screenshots, in the documentation or in CI
-  ([CONTRIBUTING.md](CONTRIBUTING.md#documentation)). Exception: the images of the
-  README (`docs/assets/readme-*.png`) are allowed. They are taken by hand on a local
-  instance with made-up data, never in CI, and no page of the documentation uses them.
+  ([CONTRIBUTING.md](CONTRIBUTING.md#documentation)). Exceptions: the images of the
+  README (`docs/assets/readme-*.png`) and of the Examples page (`docs/assets/examples/`).
+  They are taken by hand on a local instance with the demo home, never in CI; no other
+  page of the documentation uses them.
 - A test added for a fix or a feature must fail on the code without the change
   ([Pull requests](CONTRIBUTING.md#pull-requests)). Run the checks listed in
   [CONTRIBUTING.md](CONTRIBUTING.md#local-development) and report only what you ran.

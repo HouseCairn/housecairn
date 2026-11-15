@@ -1,0 +1,77 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Examples"
+msgstr "Exemples"
+
+msgid "Two jobs from the fictional demo home, from start to end. You can follow them on the [public demo](../administration/demo.md) or on your own instance with `manage.py load_demo_data`."
+msgstr "Deux travaux du logement fictif de démonstration, du début à la fin. Vous pouvez les suivre sur la [démo publique](../administration/demo.md) ou sur votre propre instance avec `manage.py load_demo_data`."
+
+msgid "Descale the espresso machine"
+msgstr "Détartrer la machine expresso"
+
+msgid "A small job that comes back every three months and uses a part each time."
+msgstr "Un petit travail qui revient tous les trois mois et consomme une pièce à chaque fois."
+
+msgid "**The task.** *Descaling*, repeated three months after the last time."
+msgstr "**La tâche.** *Détartrage*, répétée trois mois après la dernière fois."
+
+msgid "**The equipment.** The task belongs to the *Espresso machine* of the kitchen, and the page of the machine lists it."
+msgstr "**L'équipement.** La tâche est rattachée à la *Machine expresso* de la cuisine, et la page de la machine la liste."
+
+msgid "**The part.** The task lists one *Water filter*, a stock item at 7.90 each. Marking the task **Done** takes one filter from the stock."
+msgstr "**La fourniture.** La tâche demande un *Filtre à eau*, un article en stock à 7,90 l'unité. Marquer la tâche **Fait** prend un filtre dans le stock."
+
+msgid "**The cost.** The budget plans 7.90 each time, four times a year: the task shows **Cost a year** 31.60, and **Budget**, **Maintenance** lists it with the same figure."
+msgstr "**Le coût.** Le budget prévoit 7,90 à chaque fois, quatre fois par an : la tâche affiche **Coût par an** 31,60, et **Budget**, **Entretien** la liste avec le même chiffre."
+
+msgid "**The stock.** Two filters were bought; after one Done there is one left, the threshold of the item, and the stock list marks it **Low** before it runs out."
+msgstr "**Le stock.** Deux filtres ont été achetés ; après un Fait, il en reste un, le seuil de l'article, et la liste du matériel le marque **Basse** avant qu'il ne manque."
+
+msgid "The Descaling task after it was done once: due again in three months, in the kitchen, on the espresso machine. Cost section with 7.90 each time, all of it from the stock, and 31.60 a year. Materials section with one water filter needed and one left in stock."
+msgstr "La tâche Détartrage après un premier Fait : à refaire dans trois mois, dans la cuisine, sur la machine expresso. Section Coût avec 7,90 par fois, entièrement en articles du stock, et 31,60 par an. Section Fournitures avec un filtre à eau demandé et un seul encore en stock."
+
+msgid "The [stock guide](stock.md) and the [budget guide](budget.md) explain each step."
+msgstr "Le [guide du matériel](stock.md) et le [guide du budget](budget.md) détaillent chaque étape."
+
+msgid "Redo the bathroom"
+msgstr "Refaire la salle de bain"
+
+msgid "A project with an end, in the same home."
+msgstr "Un projet qui a une fin, dans le même logement."
+
+msgid "**Its tasks.** *Choose the tiles* and *Remove the old bathtub*, each with a date, show on Today like any other task."
+msgstr "**Ses tâches.** *Choisir le carrelage* et *Déposer l'ancienne baignoire*, chacune avec une date, apparaissent dans Aujourd'hui comme toute autre tâche."
+
+msgid "**Two quotes compared.** Two plumbers sent a quote; the one at 2,850 is accepted on the *Plumber (shower)* budget line, the other one, at 3,400, stays received."
+msgstr "**Deux devis comparés.** Deux plombiers ont envoyé un devis ; celui à 2 850 est accepté sur la ligne de budget *Plombier (douche)*, l'autre, à 3 400, reste reçu."
+
+msgid "**Inspiration links.** Two pages kept on the project, with their titles."
+msgstr "**Liens d'inspiration.** Deux pages gardées sur le projet, avec leur titre."
+
+msgid "**The envelope of the year.** 6,000 for all the projects and the upkeep of the year."
+msgstr "**L'enveloppe de l'année.** 6 000 pour tous les projets et l'entretien de l'année."
+
+msgid "**Planned, committed, paid.** The project plans 4,200 on two lines; the accepted quote commits 2,850 and 480 of tiles are paid."
+msgstr "**Prévu, engagé, payé.** Le projet prévoit 4 200 sur deux lignes ; le devis accepté engage 2 850 et 480 de carrelage sont payés."
+
+msgid "The [projects guide](projects.md) and the [budget guide](budget.md) explain each step."
+msgstr "Le [guide des projets](projects.md) et le [guide du budget](budget.md) détaillent chaque étape."
+
