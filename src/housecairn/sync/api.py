@@ -392,8 +392,8 @@ _RESULT = inline_serializer(
         "code": serializers.CharField(
             required=False,
             help_text=(
-                "With `rejected`: forbidden, unknown_type, invalid_reference, wrong_home or "
-                "id_taken."
+                "With `rejected`: forbidden, unknown_type, invalid_reference, wrong_home, "
+                "id_taken or clock_ahead (a clock more than 24 hours ahead of the server's)."
             ),
         ),
         "lost": serializers.DictField(

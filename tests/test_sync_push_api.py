@@ -1022,6 +1022,43 @@ class TestCodes:
         assert not Room.objects.filter(home=bob_home).exists()
         assert Home.objects.get(pk=bob_home.pk).name == "Flat"
 
+    def test_clock_ahead_more_than_24_hours_and_the_rest_of_the_push_applies(
+        self, phone: Connected, alice_home: Home, room: Room
+    ) -> None:
+        """Mutant: a clock far ahead accepted: it wins the field for good (next test)."""
+        day = clock.DRIFT_LIMIT_MS
+        ops = [
+            op(alice_home.pk, "rooms.room", room.pk, {"name": "Future"}, c=stamp(day + 3_600_000)),
+            op(alice_home.pk, "rooms.room", room.pk, k="delete", c="ffffffffffffffff"),
+            op(alice_home.pk, "rooms.room", uuid.uuid4(), {"name": "Hall"}),
+        ]
+        answer = send(phone.access, alice_home.pk, ops)
+        results = answer.json()["results"]
+        assert [r.get("code") for r in results] == ["clock_ahead", "clock_ahead", None]
+        assert results[2]["status"] == "applied"
+        stored = Room.all_objects.get(pk=room.pk)
+        assert (stored.name, stored.deleted_at) == ("Kitchen", None)
+        assert not Change.objects.filter(row_id=room.pk, fields__name="Future").exists()
+
+    @pytest.mark.parametrize("ahead_ms", [23 * 3_600_000, 25 * 3_600_000])
+    def test_a_web_edit_after_a_clock_ahead_is_the_same_in_the_row_and_the_feed(
+        self, phone: Connected, alice: User, alice_home: Home, room: Room, ahead_ms: int
+    ) -> None:
+        """The case of the review: a clock in year 4199 kept the field, a web edit then wrote
+        the column while the feed kept the phone's value. Within 24 hours the server's clock
+        follows the phone's, beyond it the clock is refused: either way the web wins."""
+        send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", room.pk, {"name": "Phone"}, c=stamp(ahead_ms))],
+        )
+        room_services.update_room(alice, Room.objects.get(pk=room.pk), name="Web edit")
+        assert Room.objects.get(pk=room.pk).name == "Web edit"
+        line = snapshot_line(alice_home, room.pk)
+        assert line["f"]["name"][0] == "Web edit"
+        last = Change.objects.filter(row_id=room.pk, fields__has_key="name").order_by("-pos")[0]
+        assert last.fields["name"] == "Web edit"
+
     def test_invalid_reference_to_a_row_of_another_home(
         self, phone: Connected, alice_home: Home, bob: User, bob_home: Home
     ) -> None:

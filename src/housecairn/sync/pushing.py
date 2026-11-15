@@ -49,6 +49,7 @@ UNKNOWN_TYPE = "unknown_type"
 INVALID_REFERENCE = "invalid_reference"
 WRONG_HOME = "wrong_home"
 ID_TAKEN = "id_taken"
+CLOCK_AHEAD = "clock_ahead"
 
 KINDS = (changes.PUT, changes.DELETE, changes.RESTORE)
 ARCHIVED_AT = "archived_at"
@@ -367,6 +368,11 @@ def _apply_one(
         raise _RejectedError(UNKNOWN_TYPE)  # `family.*` included: a server has no such rows
     if op.home_id != home.pk or (op.entity == "homes.home" and op.row_id != home.pk):
         raise _RejectedError(WRONG_HOME)
+    if clock.physical_ms(clock.parse_clock(op.clock)) > clock.wall_ms() + clock.DRIFT_LIMIT_MS:
+        # A clock more than 24 hours ahead of the server's: kept, it would beat every later
+        # write of the field, the web's included, which the server's clock does not follow
+        # past 24 hours (`clock.receive`): the row and the feed would then disagree.
+        raise _RejectedError(CLOCK_AHEAD)
     held = holders.get(op.row_id, set())
     if held - {(op.entity, home.pk)}:
         raise _RejectedError(ID_TAKEN)  # in another home or another table: it says not where

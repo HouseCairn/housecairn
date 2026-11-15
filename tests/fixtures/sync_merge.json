@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "about": "Merge vectors of the per-field rule of mobile ADR 0003, as a Housecairn server applies them (docs/adr/0077). Each case is a set of operations of the mobile protocol (section 2.2) on one row `$row` of `rooms.room` in the home `$home`, each with the device that wrote it; applied in every order, they give the fields of `expect`. Clocks are in 2100 so that they beat every clock of a test database. A phone pins this file and replays it.",
+  "about": "Merge vectors of the per-field rule of mobile ADR 0003, as a Housecairn server applies them (docs/adr/0077). Each case is a set of operations of the mobile protocol (section 2.2) on one row `$row` of `rooms.room` in the home `$home`, each with the device that wrote it; applied in every order, they give the fields of `expect`. `$row` is new to the server: it has no row of that id before the first operation, so a delete or a restore may come before the put that makes the row. Clocks are on 2026-01-01, in the past of any server: a server refuses a clock more than 24 hours ahead of its own (`clock_ahead`). A phone pins this file and replays it.",
   "devices": {
     "a": "EREREREREREREREREREREQ",
     "b": "7u7u7u7u7u7u7u7u7u7u7g"
@@ -17,7 +17,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8010000",
+            "c": "019b76daa8010000",
             "f": {
               "name": "Early"
             }
@@ -30,7 +30,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8020000",
+            "c": "019b76daa8020000",
             "f": {
               "name": "Late"
             }
@@ -52,7 +52,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8050001",
+            "c": "019b76daa8050001",
             "f": {
               "name": "First"
             }
@@ -65,7 +65,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8050002",
+            "c": "019b76daa8050002",
             "f": {
               "name": "Second"
             }
@@ -87,7 +87,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8010000",
+            "c": "019b76daa8010000",
             "f": {
               "name": "Named by a"
             }
@@ -100,7 +100,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8020000",
+            "c": "019b76daa8020000",
             "f": {
               "notes": "Notes by b"
             }
@@ -113,7 +113,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8030000",
+            "c": "019b76daa8030000",
             "f": {
               "position": 4
             }
@@ -137,7 +137,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8070000",
+            "c": "019b76daa8070000",
             "f": {
               "name": "From a"
             }
@@ -150,7 +150,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8070000",
+            "c": "019b76daa8070000",
             "f": {
               "name": "From b"
             }
@@ -172,7 +172,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8030000",
+            "c": "019b76daa8030000",
             "f": {
               "name": "Once"
             }
@@ -185,7 +185,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8030000",
+            "c": "019b76daa8030000",
             "f": {
               "name": "Once"
             }
@@ -207,7 +207,7 @@
             "h": "$home",
             "id": "$row",
             "k": "delete",
-            "c": "03bb2cc3d8020000"
+            "c": "019b76daa8020000"
           }
         },
         {
@@ -217,7 +217,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8030000",
+            "c": "019b76daa8030000",
             "f": {
               "name": "Edited"
             }
@@ -225,7 +225,7 @@
         }
       ],
       "expect": {
-        "deleted_at": "03bb2cc3d8020000",
+        "deleted_at": "019b76daa8020000",
         "name": "Edited"
       }
     },
@@ -240,7 +240,7 @@
             "h": "$home",
             "id": "$row",
             "k": "delete",
-            "c": "03bb2cc3d8020000"
+            "c": "019b76daa8020000"
           }
         },
         {
@@ -250,7 +250,7 @@
             "h": "$home",
             "id": "$row",
             "k": "restore",
-            "c": "03bb2cc3d8040000"
+            "c": "019b76daa8040000"
           }
         }
       ],
@@ -269,7 +269,7 @@
             "h": "$home",
             "id": "$row",
             "k": "delete",
-            "c": "03bb2cc3d8040000"
+            "c": "019b76daa8040000"
           }
         },
         {
@@ -279,12 +279,12 @@
             "h": "$home",
             "id": "$row",
             "k": "restore",
-            "c": "03bb2cc3d8020000"
+            "c": "019b76daa8020000"
           }
         }
       ],
       "expect": {
-        "deleted_at": "03bb2cc3d8040000"
+        "deleted_at": "019b76daa8040000"
       }
     },
     {
@@ -298,7 +298,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8010000",
+            "c": "019b76daa8010000",
             "f": {
               "moisture_goal": "40-60"
             }
@@ -311,7 +311,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8020000",
+            "c": "019b76daa8020000",
             "f": {
               "moisture_goal": "45-55"
             }
@@ -333,7 +333,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8010000",
+            "c": "019b76daa8010000",
             "f": {
               "notes": "Older text"
             }
@@ -346,7 +346,7 @@
             "h": "$home",
             "id": "$row",
             "k": "put",
-            "c": "03bb2cc3d8090000",
+            "c": "019b76daa8090000",
             "f": {
               "notes": "Newer text"
             }
