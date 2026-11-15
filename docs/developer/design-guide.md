@@ -25,7 +25,7 @@ Where the rules come from:
 The anatomy of a screen that the web and the mobile app share (the record page and its
 actions, label-value rows, the header, forms, filters, empty, loading and error states, More),
 the glossary of the shared terms and the platform adaptations of the app are in
-[`design/patterns.md`](../../design/patterns.md). A screen follows it as it follows this guide.
+`design/patterns.md` in the repository. A screen follows it as it follows this guide.
 
 The navigation described here is built: every finding of the audit (NAV-01 to NAV-16)
 has its change merged. A screen that still differs from it is a bug to fix. A change
