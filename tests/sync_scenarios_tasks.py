@@ -1,11 +1,13 @@
 """Scenarios of the guard of the change log for the app `tasks` (lot M3c, docs/adr/0079)."""
 
 import datetime
+import uuid
 from collections.abc import Callable
 from decimal import Decimal
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from housecairn.accounts import services as account_services
 from housecairn.accounts.models import User
 from housecairn.homes.models import Home, Membership, Role
 from housecairn.stock.models import Article
@@ -85,6 +87,17 @@ def occurrence_save(home: Home) -> None:
     services.skip(_owner(home), _occurrence(_task(home)))
 
 
+def occurrence_queryset_update(home: Home) -> None:
+    """Deleting an account takes it off the occurrences it closed, by a queryset update."""
+    member = User.objects.create_user(email=f"{uuid.uuid4().hex}@example.com", password=None)
+    Membership.objects.create(home=home, user=member, role=Role.MEMBER)
+    occurrence = _occurrence(_task(home, assignee=member))
+    Occurrence.all_objects.filter(pk=occurrence.pk).update(
+        status=Status.DONE, completed_on=DAY, completed_by=member
+    )
+    account_services.delete_account(member)
+
+
 def occurrence_soft_delete(home: Home) -> None:
     """Deleting a task soft-deletes its occurrences by a queryset."""
     services.delete_task(_owner(home), _task(home))
@@ -135,6 +148,7 @@ SCENARIOS: dict[tuple[str, str], Scenario] = {
     ("tasks.TaskMaterial", "save"): material_save,
     ("tasks.TaskMaterial", "soft_delete"): material_soft_delete,
     ("tasks.Occurrence", "save"): occurrence_save,
+    ("tasks.Occurrence", "queryset_update"): occurrence_queryset_update,
     ("tasks.Occurrence", "soft_delete"): occurrence_soft_delete,
     ("tasks.MaterialDraw", "save"): draw_save,
     ("tasks.MaterialDraw", "soft_delete"): draw_soft_delete,
@@ -165,7 +179,6 @@ NOT_APPLICABLE: dict[tuple[str, str], str] = {
         for label in (
             "tasks.Contractor",
             "tasks.TaskMaterial",
-            "tasks.Occurrence",
             "tasks.MaterialDraw",
             "tasks.Attachment",
         )

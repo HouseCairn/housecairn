@@ -20,6 +20,7 @@ from django.urls import reverse
 
 from housecairn.accounts.models import User
 from housecairn.homes.models import Home
+from housecairn.rooms.models import Item
 from housecairn.stock.models import Article
 from housecairn.sync import retention, rows
 from housecairn.sync.models import Change, RowClocks
@@ -87,6 +88,20 @@ def test_deleting_a_contractor_takes_it_off_its_tasks_with_a_change(
     assert last_change(plain_task).fields == {"contractor_id": None}
     assert last_change(contractor).kind == "delete"
     assert RowClocks.objects.get(row_id=contractor.pk).tombstoned_at is not None
+
+
+def test_deleting_a_contractor_takes_it_off_the_item_contracts_with_a_change(
+    alice: User, alice_home: Home, owner_item: Item
+) -> None:
+    contractor = services.create_contractor(alice, alice_home, name="Boilers Ltd")
+    Item.all_objects.filter(pk=owner_item.pk).update(
+        contract_contractor=contractor, contract_number="C-42"
+    )
+    services.delete_contractor(alice, contractor)
+    owner_item.refresh_from_db()
+    assert owner_item.contract_contractor_id is None
+    assert owner_item.contract_number == "C-42"
+    assert last_change(owner_item).fields == {"contract_contractor_id": None}
 
 
 # ---------- tasks ----------
@@ -221,7 +236,8 @@ def test_a_rule_given_to_a_task_done_for_good_records_its_start_and_its_occurren
     assert reopened is not None
     # A month after the last closing, the day it was done.
     assert task.series_start == reopened.due_on
-    assert reopened.due_on is not None and reopened.due_on > frozen_today
+    assert reopened.due_on is not None
+    assert reopened.due_on > frozen_today
     # The edit puts the rule, then the reopening puts the start counted from the last closing.
     assert last_change(task).fields == {"series_start": task.series_start.isoformat()}
     created = last_change(reopened)
@@ -243,6 +259,32 @@ def test_a_date_given_to_a_task_done_for_good_records_its_new_occurrence(
     created = last_change(reopened)
     assert created.fields["follows_id"] == str(done_for_good.pk)
     assert created.fields["due_on"] == day.isoformat()
+
+
+def test_deleting_an_account_takes_it_off_the_tasks_of_its_homes_with_a_change(
+    alice: User, bob: User, alice_home: Home, frozen_today: datetime.date
+) -> None:
+    from housecairn.accounts import services as account_services
+    from housecairn.homes.models import Membership, Role
+
+    Membership.objects.create(home=alice_home, user=bob, role=Role.MEMBER)
+    task = services.create_task(
+        alice, alice_home, title="Sweep the chimney", assignee=bob, due_on=frozen_today
+    )
+    closing = services.complete(bob, Occurrence.objects.get(task=task))
+    done = closing.occurrence
+    other = services.create_task(alice, alice_home, title="Oil the hinges", assignee=alice)
+    before = Change.objects.count()
+    account_services.delete_account(bob)
+    task.refresh_from_db()
+    done.refresh_from_db()
+    assert task.assignee_id is None
+    assert done.completed_by_id is None
+    assert [c.fields for c in changes_of(task)][-1] == {"assignee_id": None}
+    assert [c.fields for c in changes_of(done)][-1] == {"completed_by_id": None}
+    # One change per row the deletion empties, and none for a row that does not name it.
+    assert Change.objects.count() - before == 2
+    assert len(changes_of(other)) == 1
 
 
 def test_postponing_records_the_new_date(
@@ -360,7 +402,7 @@ def test_a_copy_records_every_row_of_its_tasks(
 
 
 def _with_deleted_task(data: bytes) -> bytes:
-    """The archive with `deleted_at` forged on its task, its manifest agreeing (a careful forger)."""
+    """The archive with `deleted_at` forged on its task, and a manifest that agrees with it."""
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         files = {name: archive.read(name) for name in archive.namelist()}
     document = json.loads(files["data/tasks.json"])

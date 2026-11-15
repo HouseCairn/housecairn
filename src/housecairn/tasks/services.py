@@ -488,6 +488,21 @@ def _reopen(task: Task, due_on: datetime.date | None) -> None:
     changelog.record_created([reopened])
 
 
+def forget_person(user: User) -> int:
+    """Take an account that is being deleted off the tasks and occurrences that name it.
+
+    The database would empty these references (`SET_NULL`) without a change; done here, each
+    row records it, so that a phone does not keep a person who no longer exists
+    (docs/adr/0077). The number of rows written.
+    """
+    with transaction.atomic():
+        count = changelog.update_queryset(Task.all_objects.filter(assignee=user), assignee=None)
+        count += changelog.update_queryset(
+            Occurrence.all_objects.filter(completed_by=user), completed_by=None
+        )
+    return count
+
+
 @transaction.atomic
 def delete_task(actor: AnyUser, task: Task) -> None:
     """Soft-delete the task with its occurrences and attachments."""
