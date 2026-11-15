@@ -71,6 +71,7 @@ HouseCairn starts with all of them as they are.
 | `HOUSECAIRN_SETUP_SCREEN` | `true`: the first-account screen is on | [First start](../getting-started/first-start.md) |
 | `HOUSECAIRN_NOTIFICATIONS_ENABLED`, `HOUSECAIRN_NOTIFICATIONS_INTERVAL`, `HOUSECAIRN_NOTIFICATIONS_PRIVATE_NETWORKS`, `HOUSECAIRN_WEBPUSH_ENABLED`, `HOUSECAIRN_WEBPUSH_DISCREET` | empty: notifications off | [Notifications](../guides/notifications.md) |
 | `HOUSECAIRN_LINK_PREVIEW_ENABLED` | empty: off | [Projects](../guides/projects.md) |
+| `HOUSECAIRN_BARCODE_LOOKUP_ONLINE` | empty: off | [Barcodes](barcodes.md) |
 | `HOUSECAIRN_DEMO` | empty: a normal instance | [Demonstration instance](demo.md) |
 | `HOUSECAIRN_RATELIMIT_*` (eleven variables) | empty: the default limits | [Rate limits](rate-limits.md) |
 | `HOUSECAIRN_CACHE_URL` | `locmemcache://housecairn` | [Rate limits](rate-limits.md) |

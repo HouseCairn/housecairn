@@ -413,6 +413,9 @@ msgstr "Marque, modèle"
 msgid "Serial number"
 msgstr "Numéro de série"
 
+msgid "Barcode (EAN)"
+msgstr "Code-barres (EAN)"
+
 msgid "Purchased on"
 msgstr "Acheté le"
 

@@ -13,12 +13,14 @@
       {% if article.threshold is not None %}<div><dt>{% translate "Threshold" %}</dt><dd>{{ article.threshold|floatformat:"-2" }}</dd></div>{% endif %}
       {% if article.unit_price is not None %}<div><dt>{% translate "Unit price" %}</dt><dd>{{ article.unit_price|money:home.currency }}</dd></div>{% endif %}
       {% if article.manufacturer_reference %}<div><dt>{% translate "Manufacturer reference" %}</dt><dd class="mono">{{ article.manufacturer_reference }}</dd></div>{% endif %}
+      {% if article.ean %}<div><dt>{% translate "Barcode (EAN)" %}</dt><dd class="mono">{{ article.ean }}</dd></div>{% endif %}
       {% if article.dimensions %}<div><dt>{% translate "Dimensions" %}</dt><dd>{{ article.dimensions }}</dd></div>{% endif %}
       {% if article.storage_location %}<div><dt>{% translate "Storage location" %}</dt><dd>{{ article.storage_location }}</dd></div>{% endif %}
       {% if article.notes %}<div><dt>{% translate "Notes" %}</dt><dd class="prose">{{ article.notes|linebreaksbr }}</dd></div>{% endif %}
     </dl>
     {% if article.label %}
       <p><img class="stock-label" src="{% url 'stock:label' home_id=home.id article_id=article.id %}" alt="{% blocktranslate with name=article.name %}Label of {{ name }}{% endblocktranslate %}" loading="lazy" decoding="async"></p>
+      {% if article.label_attribution %}<p class="small photo-attribution">{% include "barcodes/_attribution.html" with source=article.label_attribution.source source_url=article.label_attribution.source_url license=article.label_attribution.license license_url=article.label_attribution.license_url author=article.label_attribution.author %}</p>{% endif %}
     {% endif %}
     {% if can_write %}
       <div class="button-row">

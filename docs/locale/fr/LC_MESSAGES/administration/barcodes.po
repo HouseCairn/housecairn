@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Barcodes"
+msgstr "Codes-barres"
+
+msgid "A stock item and an item of a room keep their barcode (EAN): it is typed, or scanned with the camera of the phone or the computer. Scanning a code can also fill in the empty fields of the form (name, brand, category) and bring a photo of the product, from open databases. That lookup is **off by default**: an instance that does not turn it on keeps the codes typed and calls nobody. The choices are in [ADR 0083](../adr/0083-barcode-lookup.md)."
+msgstr "Un article du matériel et un élément d'une pièce gardent leur code-barres (EAN) : il est saisi, ou scanné avec la caméra du téléphone ou de l'ordinateur. Scanner un code peut aussi remplir les champs vides du formulaire (nom, marque, catégorie) et apporter une photo du produit, depuis des bases ouvertes. Cette recherche est **désactivée par défaut** : une instance qui ne l'active pas garde les codes saisis et n'appelle personne. Les choix sont dans l'[ADR 0083](../adr/0083-barcode-lookup.md)."
+
+msgid "Setting"
+msgstr "Réglage"
+
+msgid "Default"
+msgstr "Par défaut"
+
+msgid "What leaves the server"
+msgstr "Ce qui sort du serveur"
+
+msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+
+msgid "`false`"
+msgstr "`false`"
+
+msgid "The code, and nothing else."
+msgstr "Le code, et rien d'autre."
+
+msgid "The setting is also in **Settings of the instance**, section **Barcodes**. When an administrator scans a code while the lookup is off, the answer offers a link to turn it on."
+msgstr "Le réglage est aussi dans les **réglages de l'instance**, section **Codes-barres**. Quand un administrateur scanne un code alors que la recherche est désactivée, la réponse propose un lien pour l'activer."
+
+msgid "The online lookup"
+msgstr "La recherche en ligne"
+
+msgid "The worker asks [Open Products Facts](https://world.openproductsfacts.org), then [Open Food Facts](https://world.openfoodfacts.org), in the background; the first that knows the code answers."
+msgstr "Le worker interroge [Open Products Facts](https://world.openproductsfacts.org), puis [Open Food Facts](https://world.openfoodfacts.org), en arrière-plan ; la première qui connaît le code répond."
+
+msgid "**Only the code is sent**, in the address of the request, with the `User-Agent` `HouseCairn/<version> (+https://github.com/HouseCairn/housecairn)` that those databases ask for. No name, no home, no account, no cookie."
+msgstr "**Seul le code est envoyé**, dans l'adresse de la requête, avec le `User-Agent` `HouseCairn/<version> (+https://github.com/HouseCairn/housecairn)` que ces bases demandent. Aucun nom, aucun foyer, aucun compte, aucun cookie."
+
+msgid "The same protections as the preview of links: public addresses only, every redirect checked, short timeouts, bounded answers."
+msgstr "Les mêmes protections que l'aperçu des liens : adresses publiques seulement, chaque redirection vérifiée, délais courts, réponses bornées."
+
+msgid "The answers are kept in a cache of the instance, one per code, for 30 days (1 day for a code not found): a code scanned twice is asked once."
+msgstr "Les réponses sont gardées dans un cache de l'instance, une par code, pendant 30 jours (1 jour pour un code introuvable) : un code scanné deux fois n'est demandé qu'une fois."
+
+msgid "At most 10 lookups a minute per person and 30 per home, under the 15 a minute those databases allow per address."
+msgstr "Au plus 10 recherches par minute et par personne, et 30 par foyer, sous les 15 par minute que ces bases permettent par adresse."
+
+msgid "Off on a [demonstration instance](demo.md), whatever the setting says."
+msgstr "Désactivée sur une [instance de démonstration](demo.md), quel que soit le réglage."
+
+msgid "Photos and their licence"
+msgstr "Les photos et leur licence"
+
+msgid "The data of Open Products Facts and Open Food Facts is under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), their photos under the [Creative Commons Attribution-ShareAlike 3.0](https://creativecommons.org/licenses/by-sa/3.0/) licence. When a person keeps a photo, HouseCairn downloads it, re-encodes it without its metadata like any photo, and stores its **attribution** with it: the source, the page of the product, the licence and, when the source gives it, its author. The attribution is shown under the photo. A photo is only added to an item that has none, or as the label of a stock item that has none: a photo taken by a member is never replaced."
+msgstr "Les données d'Open Products Facts et d'Open Food Facts sont sous [licence ouverte de base de données (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/), leurs photos sous licence [Creative Commons Attribution - Partage dans les mêmes conditions 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Quand une personne garde une photo, HouseCairn la télécharge, la réencode sans ses métadonnées comme toute photo, et garde avec elle son **attribution** : la source, la page du produit, la licence et, quand la source le donne, son auteur. L'attribution est affichée sous la photo. Une photo n'est ajoutée qu'à un élément qui n'en a pas, ou comme étiquette d'un article qui n'en a pas : une photo prise par un membre n'est jamais remplacée."
+
+msgid "The About page names these sources and their licences. HouseCairn ships none of their data, so nothing changes in its `NOTICE`."
+msgstr "La page À propos nomme ces sources et leurs licences. HouseCairn ne livre aucune de leurs données, donc rien ne change dans son `NOTICE`."

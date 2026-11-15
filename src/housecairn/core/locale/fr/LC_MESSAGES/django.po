@@ -499,6 +499,17 @@ msgstr "Code source et signalement de sécurité sur GitHub."
 msgid "Developed with an AI agent, under human review."
 msgstr "Développé avec un agent IA, sous revue humaine."
 
+msgid "Open data"
+msgstr "Données ouvertes"
+
+#, python-format
+msgid "The barcode lookup reads open databases, when the administrator turns it on: <a href=\"%(opf)s\" rel=\"noopener noreferrer\">Open Products Facts</a>, then <a href=\"%(off)s\" rel=\"noopener noreferrer\">Open Food Facts</a>. Their data is available under the <a href=\"%(odbl)s\" rel=\"license noopener noreferrer\">Open Database License (ODbL)</a>."
+msgstr "La recherche par code-barres lit des bases de données ouvertes, quand l'administrateur l'active : <a href=\"%(opf)s\" rel=\"noopener noreferrer\">Open Products Facts</a>, puis <a href=\"%(off)s\" rel=\"noopener noreferrer\">Open Food Facts</a>. Leurs données sont disponibles sous la <a href=\"%(odbl)s\" rel=\"license noopener noreferrer\">licence ouverte de base de données (ODbL)</a>."
+
+#, python-format
+msgid "The photos of Open Products Facts and Open Food Facts are under the <a href=\"%(ccbysa)s\" rel=\"license noopener noreferrer\">Creative Commons Attribution-ShareAlike 3.0</a> licence: each one is shown with its source and its author."
+msgstr "Les photos d'Open Products Facts et d'Open Food Facts sont sous licence <a href=\"%(ccbysa)s\" rel=\"license noopener noreferrer\">Creative Commons Attribution - Partage dans les mêmes conditions 3.0</a> : chacune est affichée avec sa source et son auteur."
+
 msgid "Links"
 msgstr "Liens"
 

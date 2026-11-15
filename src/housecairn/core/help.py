@@ -122,6 +122,9 @@ HELP_PAGES: dict[str, str] = {
     "projects:link-add": "screens/project/",
     "projects:link-delete": "screens/project/",
     "projects:link-status": "screens/project/",
+    # The answer to a scanned barcode, under the field of a stock item or an item (ADR 0083).
+    "barcodes:lookup": "administration/barcodes/",
+    "barcodes:photo": "administration/barcodes/",
     "projects:file-add": "screens/project/",
     "projects:file": "screens/project/",
     "projects:file-thumbnail": "screens/project/",

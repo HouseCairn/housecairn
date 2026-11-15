@@ -205,6 +205,9 @@ msgstr "Notifications"
 msgid "Projects"
 msgstr "Projets"
 
+msgid "Barcodes"
+msgstr "Codes-barres"
+
 msgid "Mobile app"
 msgstr "Application mobile"
 
@@ -234,6 +237,9 @@ msgstr "Enregistrer les réglages des notifications"
 
 msgid "Save the project settings"
 msgstr "Enregistrer les réglages des projets"
+
+msgid "Save the barcode settings"
+msgstr "Enregistrer les réglages des codes-barres"
 
 msgid "Save the mobile app setting"
 msgstr "Enregistrer le réglage de l'application mobile"

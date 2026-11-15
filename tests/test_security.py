@@ -244,7 +244,7 @@ class TestRateLimitCache:
         assert result.stdout.strip().splitlines()[-1] == "v", result.stderr
 
 
-PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+PERMISSIONS_POLICY = "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
 
 
 @pytest.mark.django_db
@@ -273,9 +273,11 @@ class TestPermissionsPolicy:
         assert response["Permissions-Policy"] == PERMISSIONS_POLICY
 
     def test_the_application_asks_for_none_of_these_features(self) -> None:
-        # No script asks the browser for the camera or the location. (The `capture`
-        # attribute of a file input is not covered by `camera=()`: it is not checked.)
+        # No script asks the browser for the location, and only the Scan button of a barcode
+        # field asks for the camera (docs/adr/0083), allowed to the application's own pages.
         for path in (SRC / "static" / "js").rglob("*.js"):
             text = path.read_text(encoding="utf-8")
-            assert "getUserMedia" not in text, path
+            if path.name != "barcode-scan.js":
+                assert "getUserMedia" not in text, path
             assert "geolocation" not in text, path
+            assert "audio: true" not in text, path

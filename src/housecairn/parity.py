@@ -167,6 +167,8 @@ PARITY: dict[str, tuple[str, ...]] = {
     "projects:link-add": ("api-v1:home-project-link-list",),
     "projects:link-delete": ("api-v1:home-project-link-detail",),
     "projects:link-status": ("api-v1:home-project-link-detail",),
+    "barcodes:lookup": ("api-v1:home-barcode-lookup", "api-v1:home-barcode"),
+    "barcodes:photo": ("api-v1:home-barcode-photo",),
     "projects:file-add": ("api-v1:home-project-file-list",),
     "projects:file": ("api-v1:home-project-file-content",),
     "projects:file-thumbnail": ("api-v1:home-project-file-thumbnail",),

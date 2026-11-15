@@ -378,6 +378,8 @@ def test_local_and_non_web_files_pass(tmp_path: Path) -> None:
     _write(tmp_path, "templates/base.html", '<a href="/homes/">Homes</a>\n')
     _write(tmp_path, "static/vendor/LICENSE", "See https://example.com/license\n")
     _write(tmp_path, "static/vendor/README.md", "From https://example.com/\n")
+    # An XML namespace name, set on an element a script builds, is never fetched.
+    _write(tmp_path, "static/vendor/lib.js", 'var NS="http://www.w3.org/2000/svg";\n')
     assert check_external_urls.offenders(tmp_path) == []
     assert check_external_urls.main([str(tmp_path)]) == 0
 

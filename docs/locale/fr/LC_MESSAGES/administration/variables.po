@@ -318,6 +318,12 @@ msgstr "`HOUSECAIRN_LINK_PREVIEW_ENABLED`"
 msgid "Read the title and the picture of a page when a link is added to a project. Off, nothing is read. The server only calls public addresses. Also in the interface. See [Projects](../guides/projects.md)."
 msgstr "Lit le titre et l'image d'une page quand un lien est ajouté à un projet. Désactivé, rien n'est lu. Le serveur n'appelle que des adresses publiques. Aussi dans l'interface. Voir [Projets](../guides/projects.md)."
 
+msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+
+msgid "Ask Open Products Facts, then Open Food Facts, what a scanned barcode is. Only the code is sent. Also in the interface. See [Barcodes](barcodes.md)."
+msgstr "Demander à Open Products Facts, puis à Open Food Facts, ce qu'est un code-barres scanné. Seul le code est envoyé. Aussi dans l'interface. Voir [Codes-barres](barcodes.md)."
+
 msgid "`HOUSECAIRN_DOCS_URL`"
 msgstr "`HOUSECAIRN_DOCS_URL`"
 
@@ -407,4 +413,3 @@ msgstr "Un serveur PostgreSQL existant convient aussi : pointez `DATABASE_URL` v
 
 #~ msgid "Set it only to manage the key yourself."
 #~ msgstr "À définir seulement pour gérer la clé vous-même."
-

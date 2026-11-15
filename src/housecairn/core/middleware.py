@@ -15,9 +15,10 @@ from django.utils.translation import gettext as _
 
 from housecairn.core import navigation
 
-# Browser features the application never uses. Photos are sent through a file field,
-# which needs no camera permission; nothing reads a position, takes payments or talks to USB.
-PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+# Browser features the application never uses, and the camera for its own pages only: the Scan
+# button of a barcode field reads it (docs/adr/0083). Photos are sent through a file field; nothing
+# records sound, reads a position, takes payments or talks to USB.
+PERMISSIONS_POLICY = "camera=(self), microphone=(), geolocation=(), payment=(), usb=()"
 
 
 class PermissionsPolicyMiddleware:

@@ -9,6 +9,7 @@
     <dl class="facts">
       {% if item.brand or item.model %}<div><dt>{% translate "Brand, model" %}</dt><dd>{{ item.brand }}{% if item.brand and item.model %} · {% endif %}{{ item.model }}</dd></div>{% endif %}
       {% if item.serial_number %}<div><dt>{% translate "Serial number" %}</dt><dd class="mono">{{ item.serial_number }}</dd></div>{% endif %}
+      {% if item.ean %}<div><dt>{% translate "Barcode (EAN)" %}</dt><dd class="mono">{{ item.ean }}</dd></div>{% endif %}
       {% if item.purchased_on %}<div><dt>{% translate "Purchased on" %}</dt><dd>{{ item.purchased_on|day }}</dd></div>{% endif %}
       {% if item.installed_on %}<div><dt>{% translate "Installed on" %}</dt><dd>{{ item.installed_on|day }}</dd></div>{% endif %}
       {% if item.warranty_ends_on or item.warranty_duration %}

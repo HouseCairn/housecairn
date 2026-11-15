@@ -69,6 +69,7 @@ time zone and the name of the instance included.
 | Discreet notifications on the device | `HOUSECAIRN_WEBPUSH_DISCREET` | Notifications | `true` | At once |
 | Preview of inspiration links | `HOUSECAIRN_LINK_PREVIEW_ENABLED` | Projects | `false` | At once |
 | Mobile app | `HOUSECAIRN_MOBILE_APP_ENABLED` | Mobile app | `true` | At once |
+| Online lookup of barcodes | `HOUSECAIRN_BARCODE_LOOKUP_ONLINE` | Barcodes | `false` | At once |
 % settings-table:end
 
 The start-up checks (`manage.py check`, which `migrate` runs too) read the variables and the

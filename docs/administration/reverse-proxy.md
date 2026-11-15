@@ -184,8 +184,9 @@ first address that is not a trusted proxy, so the client's own entries do not
 count.
 
 HouseCairn sets its own security headers (Content Security Policy, HSTS,
-`X-Frame-Options`, and a `Permissions-Policy` that switches off camera, microphone,
-location, payment and USB); the proxy does not need to add them.
+`X-Frame-Options`, and a `Permissions-Policy` that switches off microphone, location,
+payment and USB, and allows the camera to the pages of the instance only, for the Scan button of
+a barcode field); the proxy does not need to add them.
 
 ## Logs and the calendar feed address
 

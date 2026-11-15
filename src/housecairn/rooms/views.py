@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
+from housecairn.barcodes import photos as barcode_photos
 from housecairn.core import navigation
 from housecairn.core.autosave import AutosaveMixin
 from housecairn.homes import current
@@ -286,6 +287,7 @@ class ItemCreateView(ItemFormMixin):
         except ValidationError as exc:
             _errors(form, exc)
             return self.form_invalid(form)
+        barcode_photos.keep(self.request, item, item.ean)
         return redirect(
             navigation.after_create(
                 self.request,
@@ -361,6 +363,7 @@ class ItemEditView(AutosaveMixin, ItemFormMixin):
         except ValidationError as exc:
             _errors(form, exc)
             return self.form_invalid(form)
+        barcode_photos.keep(self.request, item, item.ean)
         messages.success(self.request, _("Item saved."))
         return redirect(
             navigation.back_url(

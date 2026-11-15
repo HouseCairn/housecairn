@@ -79,6 +79,7 @@ NOT_OF_A_HOME = {
     "sync.ErasedHome": "that a home was erased, which outlives the home (docs/adr/0077)",
     "sync.ErasedHomeConnection": "the apps told of an erased home, kept with it (docs/adr/0077)",
     "sync.Push": "the pushes of a connected phone, kept 30 days (docs/adr/0077)",
+    "barcodes.BarcodeLookup": "the cache of the online barcode lookups (docs/adr/0083)",
 }
 
 

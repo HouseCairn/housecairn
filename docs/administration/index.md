@@ -21,4 +21,5 @@ backup
 update
 hardening
 demo
+barcodes
 ```

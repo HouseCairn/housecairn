@@ -71,6 +71,8 @@ services:
       - HOUSECAIRN_WEBPUSH_DISCREET=${HOUSECAIRN_WEBPUSH_DISCREET:-}
       # Read the title and the picture of a page when a link is added to a project.
       - HOUSECAIRN_LINK_PREVIEW_ENABLED=${HOUSECAIRN_LINK_PREVIEW_ENABLED:-}
+      # Barcodes (docs/administration/barcodes.md): the online lookup.
+      - HOUSECAIRN_BARCODE_LOOKUP_ONLINE=${HOUSECAIRN_BARCODE_LOOKUP_ONLINE:-}
       # Single sign-on through any OpenID Connect provider: off while
       # OIDC_SERVER_URL is empty (docs/administration/oidc.md).
       - OIDC_SERVER_URL=${OIDC_SERVER_URL:-}

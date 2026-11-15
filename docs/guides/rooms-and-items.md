@@ -40,6 +40,20 @@ days.
 If you put an item in the wrong room, edit it and choose another room: the item
 moves with its photos.
 
+## Scan a barcode
+
+The **barcode (EAN)** field takes the 8 to 14 digits printed under the bars. Type them, or
+press **Scan** next to the field to read them with the camera of the phone or the computer.
+The code is checked (its last digit is a check digit): a code read wrong is refused. The search
+of the list of items finds a record by its code too, with or without its spaces.
+
+If the administrator of the server turned on the [barcode lookup](../administration/barcodes.md),
+a scanned code shows what the open databases know of the product: name, brand,
+category, and sometimes a photo. **Use these values** fills only the fields that are still
+empty; nothing is saved until you save the form. Tick **Keep this photo** to add the photo of
+the product to an item that has no photo yet: it is shown with its source, its author and its licence
+(CC BY-SA 3.0), as that licence asks.
+
 ## Add photos
 
 Photos can be added to a room or to an item, from a phone or a computer. HouseCairn

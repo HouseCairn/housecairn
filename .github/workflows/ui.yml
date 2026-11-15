@@ -189,6 +189,33 @@ jobs:
           for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:8006/healthz && break; sleep 1; done
           curl -fsS http://127.0.0.1:8006/healthz >/dev/null || { cat "$RUNNER_TEMP/offer-server.log"; exit 1; }
           uv run python tests/e2e/device_offer_checks.py --base http://localhost:8006
+      - name: A barcode typed by hand fills the empty fields and brings its credited photo (docs/adr/0083)
+        env:
+          DEBUG: "true"
+          HOUSECAIRN_DATA_DIR: ${{ runner.temp }}/barcode-data
+        run: |
+          mkdir -p "$HOUSECAIRN_DATA_DIR"
+          uv run python manage.py migrate --noinput
+          # The answer of the open databases is put in the cache: no request leaves the runner.
+          uv run python manage.py shell -c "
+          from io import BytesIO
+          from django.utils import timezone
+          from PIL import Image
+          from housecairn.accounts.models import User
+          from housecairn.barcodes.models import BarcodeLookup
+          from housecairn.homes import services
+          user = User.objects.create_user(email='barcode@example.com', password='correct-horse-battery-staple')
+          services.create_home(user, name='Main house')
+          picture = BytesIO()
+          Image.new('RGB', (80, 60), 'teal').save(picture, 'JPEG')
+          now = timezone.now()
+          BarcodeLookup.objects.create(code='04006381333931', state='done', started_at=now, finished_at=now, source='openproductsfacts', name='Dishwasher salt', brand='Acme', category='Salts', product_url='https://world.openproductsfacts.org/product/4006381333931', author='example-contributor', image=picture.getvalue())
+          "
+          nohup uv run python manage.py runserver 127.0.0.1:8008 --noreload > "$RUNNER_TEMP/barcode-server.log" 2>&1 &
+          # The last try decides: a server that never answers fails here, with its log.
+          for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:8008/healthz && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8008/healthz >/dev/null || { cat "$RUNNER_TEMP/barcode-server.log"; exit 1; }
+          uv run python tests/e2e/barcode_checks.py --base http://localhost:8008
 
   offline:
     # The installable application and offline reading (docs/adr/0065): the manifest, the

@@ -1,0 +1,49 @@
+{% load i18n %}{# What a scanned code is, under the barcode field (barcodes.views.LookupView, docs/adr/0083). Nothing is written until the form is saved. #}
+<div class="barcode-lookup" aria-live="polite"
+  {% if answer and answer.state == "running" and polls < polls_max %}hx-get="{% url 'barcodes:lookup' home_id=home.id %}?ean={{ answer.code|urlencode }}&amp;target={{ target }}&amp;n={{ next_poll }}" hx-trigger="load delay:2s" hx-swap="outerHTML"{% endif %}>
+  {% if invalid %}
+    <p class="small">{% translate "This code is not a valid barcode: check its digits." %}</p>
+  {% elif limited %}
+    <p class="small">{% translate "Too many codes looked up in a short time. Try again in a minute." %}</p>
+  {% elif answer %}
+    {% if answer.state == "running" %}
+      {% if polls < polls_max %}
+        <p class="small">{% translate "Looking this code up…" %}</p>
+      {% else %}
+        <p class="small">{% translate "The lookup is taking long. Scan the code again in a moment." %}</p>
+      {% endif %}
+    {% elif answer.state == "done" %}
+      <div class="card barcode-found">
+        <p class="small">{% blocktranslate with source=answer.source_label %}Found in {{ source }}. Check before you use it: only the empty fields are filled, nothing is saved until you save the form.{% endblocktranslate %}</p>
+        <dl class="facts">
+          {% if answer.name %}<div><dt>{% translate "Name" %}</dt><dd>{{ answer.name }}</dd></div>{% endif %}
+          {% if answer.brand %}<div><dt>{% translate "Brand" %}</dt><dd>{{ answer.brand }}</dd></div>{% endif %}
+          {% if answer.model %}<div><dt>{% translate "Model" %}</dt><dd>{{ answer.model }}</dd></div>{% endif %}
+          {% if answer.category %}<div><dt>{% translate "Category" %}</dt><dd>{{ answer.category }}</dd></div>{% endif %}
+        </dl>
+        {% if answer.has_photo %}
+          <figure class="barcode-photo">
+            <img src="{% url 'barcodes:photo' home_id=home.id code=answer.code %}" alt="{% translate 'Photo of the product' %}" loading="lazy" decoding="async">
+            <figcaption class="small">{% include "barcodes/_attribution.html" with source=answer.source_label source_url=answer.product_url license=answer.license license_url=license_url author=answer.author %}</figcaption>
+          </figure>
+          <label class="checkbox"><input type="checkbox" name="{{ photo_field }}" value="{{ answer.code }}" data-barcode-photo> {% translate "Keep this photo, if the sheet has none" %}</label>
+        {% else %}
+          <p class="small">{% if answer.product_url %}<a href="{{ answer.product_url }}" rel="noopener noreferrer">{{ answer.source_label }}</a>{% else %}{{ answer.source_label }}{% endif %}{% if answer.license %} · {{ answer.license }}{% endif %}</p>
+        {% endif %}
+        {% if fill %}
+          <ul hidden>{% for field, value in fill.items %}<li data-fill-field="{{ field }}" data-fill-value="{{ value }}"></li>{% endfor %}</ul>
+          <button type="button" class="button secondary" data-barcode-fill>{% translate "Use these values" %}</button>
+        {% endif %}
+      </div>
+    {% elif answer.state == "not_found" %}
+      <p class="small">{% translate "This code is in none of the open databases. Fill the sheet by hand." %}</p>
+    {% elif answer.state == "failed" %}
+      <p class="small">{% translate "The open databases could not be read. Try again later, or fill the sheet by hand." %}</p>
+    {% else %}
+      <p class="small">{% translate "The code is kept with the sheet. Looking it up in the open databases is off on this server." %}</p>
+      {% if offer_online %}
+        <p class="small"><a href="{{ settings_url }}">{% translate "Turn on the lookup of barcodes in the settings of the server" %}</a></p>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+</div>

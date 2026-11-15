@@ -24,6 +24,9 @@ msgstr "À propos"
 msgid "The version of the instance, the licence (AGPL-3.0), a link to the source code and security reports, and the statement that HouseCairn is developed with an AI agent under human review. It is at `/about/` and does not need an account."
 msgstr "La version de l'instance, la licence (AGPL-3.0), un lien vers le code source et le signalement de sécurité, et la mention que HouseCairn est développé avec un agent IA, sous revue humaine. La page est à l'adresse `/about/` et ne demande pas de compte."
 
+msgid "Under **Open data**, the open databases the [barcode lookup](../administration/barcodes.md) reads (Open Products Facts, then Open Food Facts) and their licences: the Open Database License (ODbL) for their data, Creative Commons Attribution-ShareAlike 3.0 for the photos."
+msgstr "Sous **Données ouvertes**, les bases ouvertes que lit la [recherche par code-barres](../administration/barcodes.md) (Open Products Facts, puis Open Food Facts) et leurs licences : la licence ODbL pour leurs données, Creative Commons Attribution - Partage dans les mêmes conditions 3.0 pour les photos."
+
 msgid "Under **Links**, a row of icons with their label leads to the project website, the documentation, the application code, the Home Assistant app, the Home Assistant integration and the mobile application, each on its own site. The **iOS** and **Android** icons are marked **Coming soon** and are not links: the mobile application is not published in a store yet. The icons are drawn in the page; nothing is loaded from those sites until you follow a link."
 msgstr "Sous **Liens**, une rangée d'icônes avec leur libellé mène au site du projet, à la documentation, au code de l'application, au module Home Assistant, à l'intégration Home Assistant et à l'application mobile, chacun sur son propre site. Les icônes **iOS** et **Android** sont marquées **Bientôt** et ne sont pas des liens : l'application mobile n'est pas encore publiée dans une boutique. Les icônes sont dessinées dans la page ; rien n'est chargé depuis ces sites tant que vous ne suivez pas un lien."
 
@@ -32,4 +35,3 @@ msgstr "Une fois connecté, le lien du haut ramène à [Plus](more.md), sur tél
 
 #~ msgid "The About page, on a computer."
 #~ msgstr "La page À propos, sur ordinateur."
-

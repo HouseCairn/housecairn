@@ -123,3 +123,10 @@ hr {
 .skip-link:focus {
   top: var(--hc-space-2);
 }
+
+/* Scan button of a barcode field and its camera (docs/adr/0083). */
+.barcode-scan-button { margin-inline-start: var(--hc-space-2); }
+dialog.barcode-scan { max-inline-size: min(36rem, 100%); }
+dialog.barcode-scan video { inline-size: 100%; block-size: auto; }
+.barcode-lookup-box:empty { display: none; }
+.barcode-photo img { max-inline-size: 12rem; block-size: auto; }

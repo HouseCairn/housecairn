@@ -50,6 +50,7 @@ ITEM_FIELDS = frozenset(
         "brand",
         "model",
         "serial_number",
+        "ean",
         "purchased_on",
         "installed_on",
         "warranty_duration",
@@ -66,6 +67,16 @@ ITEM_FIELDS = frozenset(
     }
 )
 SEARCH_LIMIT = 50
+
+
+def _ean_matches(query: str) -> models.Q:
+    """A code typed with or without its spaces, and a UPC-A found by its EAN-13 (docs/adr/0083)."""
+    from housecairn.barcodes import gtin
+
+    code = gtin.clean(query)
+    if not code.isdigit():
+        return models.Q(pk__in=[])
+    return models.Q(ean__in=sorted(gtin.variants(code))) | models.Q(ean__contains=code)
 
 
 def _require_write(actor: AnyUser, home: Home) -> None:
@@ -127,8 +138,9 @@ def item_rows(
 ) -> list[ItemRow]:
     """Every item of the home, all rooms together, by room then name; filtered by room and text.
 
-    The text is looked for in the name, the brand, the model and the serial number, whatever its
-    case. The next task is the soonest open occurrence of a task of the item, late ones first.
+    The text is looked for in the name, the brand, the model, the serial number and the barcode
+    (with or without its spaces), whatever its case. The next task is the soonest open
+    occurrence of a task of the item, late ones first.
     """
     from housecairn.tasks import services as tasks_services
 
@@ -143,6 +155,7 @@ def item_rows(
             | models.Q(brand__icontains=query)
             | models.Q(model__icontains=query)
             | models.Q(serial_number__icontains=query)
+            | _ean_matches(query)
         )
     rows = list(items[: SEARCH_LIMIT * 4])
     nexts: dict[Any, Any] = {}
@@ -178,12 +191,17 @@ class SearchResult:
 
 
 def search(home: Home, query: str) -> SearchResult:
-    """Rooms and items of the home whose name contains `query` (case-insensitive)."""
+    """Rooms and items of the home whose name contains `query` (case-insensitive), items by
+    their barcode too."""
     query = query.strip()
     if not query:
         return SearchResult([], [])
     rooms = rooms_of(home).filter(name__icontains=query)[:SEARCH_LIMIT]
-    items = items_of(home).filter(name__icontains=query).order_by("name", "id")[:SEARCH_LIMIT]
+    items = (
+        items_of(home)
+        .filter(models.Q(name__icontains=query) | _ean_matches(query))
+        .order_by("name", "id")[:SEARCH_LIMIT]
+    )
     return SearchResult(list(rooms), list(items))
 
 
@@ -365,11 +383,13 @@ def add_photo(
     item: Item | None = None,
     caption: str = "",
     category: str = PhotoCategory.GENERAL,
+    attribution: dict[str, str] | None = None,
 ) -> Photo:
     """Attach a photo to a room or an item (exactly one of the two).
 
     The upload is decoded and written again (`images.process`); the name sent with
-    it is dropped and the stored names come from identifiers.
+    it is dropped and the stored names come from identifiers. `attribution` credits a photo
+    that came from an open database (docs/adr/0083).
     """
     if (room is None) == (item is None):
         raise ValueError("A photo belongs to a room or to an item, not both, not neither.")
@@ -388,6 +408,7 @@ def add_photo(
         item=item,
         caption=without_control_characters(caption),
         category=category,
+        attribution=dict(attribution or {}),
         content_type=processed.content_type,
         size_bytes=len(processed.data),
         width=processed.width,

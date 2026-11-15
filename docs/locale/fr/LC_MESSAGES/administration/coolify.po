@@ -186,6 +186,12 @@ msgstr "vide : désactivé"
 msgid "[Projects](../guides/projects.md)"
 msgstr "[Projets et devis](../guides/projects.md)"
 
+msgid "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+msgstr "`HOUSECAIRN_BARCODE_LOOKUP_ONLINE`"
+
+msgid "[Barcodes](barcodes.md)"
+msgstr "[Codes-barres](barcodes.md)"
+
 msgid "`HOUSECAIRN_DEMO`"
 msgstr "`HOUSECAIRN_DEMO`"
 
@@ -311,4 +317,3 @@ msgstr "**Aucun port publié** : n'ajoutez pas `ports:` pour joindre le conteneu
 
 msgid "This page follows Coolify's documentation of Docker Compose. The file is validated by the repository's CI (`docker compose config` with the variables Coolify sets), but not by a deployment on a real Coolify server: try it on a test instance before you rely on it."
 msgstr "Cette page suit la documentation de Coolify sur Docker Compose. Le fichier est validé par la CI du dépôt (`docker compose config` avec les variables que pose Coolify), mais pas par un déploiement sur un vrai serveur Coolify : essayez-le sur une instance de test avant de vous y fier."
-
