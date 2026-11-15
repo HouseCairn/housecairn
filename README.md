@@ -2,9 +2,14 @@
 
 # HouseCairn
 
-Self-hosted planner for home maintenance and renovation work, for the people
-who live in the house: what needs doing, in which room, when, with what and for
-how much.
+**Plan your home's maintenance and renovation work, room by room.**
+
+HouseCairn keeps the list of everything your house needs, from recurring upkeep
+such as the smoke detector battery to projects such as repainting the living
+room. For each job it knows the room, the date, the supplies and the planned
+cost, and anyone in the household marks it done in one tap. It is free software
+that you host yourself, works on its own, and connects to Home Assistant if you
+use it.
 
 [![CI](https://github.com/HouseCairn/housecairn/actions/workflows/ci.yml/badge.svg?event=merge_group)](https://github.com/HouseCairn/housecairn/actions/workflows/ci.yml?query=event%3Amerge_group)
 [![Image](https://github.com/HouseCairn/housecairn/actions/workflows/image.yml/badge.svg?branch=main)](https://github.com/HouseCairn/housecairn/actions/workflows/image.yml?query=branch%3Amain)
@@ -30,7 +35,21 @@ how much.
        alt="An item on a phone: the gas boiler of the utility room, with its brand and model, installation date, warranty end date, a Photos section and the boiler service task.">
 </p>
 
-Documentation, in English and French: <https://docs.housecairn.app>.
+For example:
+
+- test the smoke detector every six months, without remembering the last time;
+- clean the ventilation filter every three months, with a warning when the
+  spare filters run low;
+- book the yearly boiler service, with the boiler's model and warranty at hand;
+- repaint the living room, with its quotes and its budget, planned, committed
+  and paid.
+
+It is for the people who live in a house or a flat, owners or tenants, alone or
+as a household. It is not business maintenance software (CMMS), nor a home
+automation app: it works alongside Home Assistant.
+
+Website: <https://housecairn.app>. Documentation, in English and French:
+<https://docs.housecairn.app>.
 
 ## What it does
 
@@ -110,7 +129,22 @@ default.
   and **calendar feeds** (iCalendar) for any calendar application.
 - **REST API** (`/api/v1/`), with tokens limited to chosen homes and rights:
   see [API](https://docs.housecairn.app/api/).
-- **Paperless-ngx** (documents) and **Sure** (actual spending): planned.
+- **Paperless-ngx** (documents): partial, a quote keeps the number and the link
+  of its document; nothing is read from Paperless-ngx yet. **Sure** (actual
+  spending): planned.
+
+## The HouseCairn repositories
+
+- [housecairn](https://github.com/HouseCairn/housecairn): the web application
+  (this repository).
+- [home-assistant-addons](https://github.com/HouseCairn/home-assistant-addons):
+  HouseCairn as a Home Assistant app (add-on).
+- [home-assistant-housecairn](https://github.com/HouseCairn/home-assistant-housecairn):
+  the Home Assistant integration (HACS).
+- [housecairn-mobile](https://github.com/HouseCairn/housecairn-mobile): the
+  phone app for iOS and Android, in development, not on the stores yet.
+- [website](https://github.com/HouseCairn/website): the site
+  <https://housecairn.app>.
 
 ## Project status
 
