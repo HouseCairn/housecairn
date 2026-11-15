@@ -18,7 +18,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#, fuzzy
 msgid "**Links on About.** The About screen shows a row of icons that lead to the project site, the documentation, the application code, the Home Assistant app and integration, and the mobile application. The iOS and Android icons are marked **Coming soon** and are not links until the apps are published. See [About](../../../screens/about.md)."
-msgstr "- **Liens sur À propos.** L'écran À propos affiche une rangée d'icônes qui mènent au site du projet, à la documentation, au code de l'application, au module et à l'intégration Home Assistant, et à l'application mobile. Les icônes iOS et Android sont marquées **Bientôt** et ne sont pas des liens tant que les applications ne sont pas publiées. Voir [À propos](../../../screens/about.md)."
+msgstr "**Liens sur À propos.** L'écran À propos affiche une rangée d'icônes qui mènent au site du projet, à la documentation, au code de l'application, au module et à l'intégration Home Assistant, et à l'application mobile. Les icônes iOS et Android sont marquées **Bientôt** et ne sont pas des liens tant que les applications ne sont pas publiées. Voir [À propos](../../../screens/about.md)."
 
