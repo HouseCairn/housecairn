@@ -51,7 +51,7 @@ def test_positions_follow_one_another_without_gap_in_one_home(alice_home: Home) 
     assert positions == [1, 2, 3, 4, 5, 6]
 
 
-def test_each_home_counts_its_own_positions(alice_home: Home, make_user: object) -> None:
+def test_each_home_counts_its_own_positions(alice_home: Home) -> None:
     other = Home.objects.create(name="Other")
     put(alice_home, uuid.uuid4(), {"name": "a"})
     put(alice_home, uuid.uuid4(), {"name": "b"})
