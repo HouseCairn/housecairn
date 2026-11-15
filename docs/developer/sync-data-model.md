@@ -86,6 +86,10 @@ more than 400 days ago (exactly 400 days old is kept), records in `floor` the hi
 it removed, so that a cursor below it can be answered with 410, and removes the clocks of the
 rows deleted more than 400 days ago, with those rows when they are still deleted.
 
+The rows a purged row takes with it by cascade (the quotes of a project, the rows of its link
+tables) lose their clocks too, and their files are removed from the disk once the purge is
+committed: the purge leaves no clock without its row and no file without its record.
+
 ## The guard test
 
 `tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a
@@ -93,3 +97,26 @@ covered application adds no change. A lot that covers an application adds its na
 `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft
 deletion, hard deletion) that runs the code the application really runs. An application that is
 listed without scenarios, or whose scenario writes without recording, fails.
+
+## Covered applications
+
+| Application | Lot | Rows |
+| --- | --- | --- |
+| `projects` | M3e | project, budget line, quote, file, link, task of a project, annual envelope, rooms of a project |
+
+**Projects.** The services of `housecairn.projects` call `housecairn.projects.changelog`, which
+compares the row with what the database held before the write and records the fields whose
+value changed. A change carries the columns of the model, a foreign key by its column name
+(`project_id`); it leaves out the times the server keeps, where the reading of a link's page
+stands (`preview_state`, not data of the home, as in the export) and the stored files of a
+`projects.projectfile`, whose references the lot of the files maps. Taking a task out of a
+project deletes its link for good, so that the task may join another project, and leaves a
+tombstone first; so does deleting a project for the links to its tasks.
+
+**Link tables.** A row of a link table has no id a phone could share: its change is recorded
+under `uuid5(home, t + ":" + owner + ":" + other)`, as ADR 0077 names it
+(`housecairn.sync.links`). Linking two rows again restores the row from its tombstone.
+
+**Restore.** A section of the export may give `on_written`: a restore, as a copy or not, calls
+it with the rows of the section once they and their links are written, in its transaction, and
+the application records them under their new ids.
