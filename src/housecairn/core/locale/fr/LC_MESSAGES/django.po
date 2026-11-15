@@ -12,6 +12,24 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Website"
+msgstr "Site web"
+
+msgid "Documentation"
+msgstr "Documentation"
+
+msgid "Application code"
+msgstr "Code de l'application"
+
+msgid "Home Assistant app"
+msgstr "Module Home Assistant"
+
+msgid "Home Assistant integration"
+msgstr "Intégration Home Assistant"
+
+msgid "Mobile application"
+msgstr "Application mobile"
+
 msgid "Core"
 msgstr "Cœur"
 
@@ -461,6 +479,12 @@ msgstr "Code source et signalement de sécurité sur GitHub."
 
 msgid "Developed with an AI agent, under human review."
 msgstr "Développé avec un agent IA, sous revue humaine."
+
+msgid "Links"
+msgstr "Liens"
+
+msgid "Coming soon"
+msgstr "Bientôt"
 
 msgid "Add a home"
 msgstr "Ajouter un logement"

@@ -23,7 +23,7 @@ from django.views.decorators.http import require_safe
 from django.views.defaults import bad_request as default_bad_request
 from django.views.generic import TemplateView
 
-from housecairn.core import more, offline, services
+from housecairn.core import about_links, more, offline, services
 from housecairn.core.language import shipped
 from housecairn.core.prefix import STATIC_PATH
 from housecairn.instance.config import instance_name
@@ -89,7 +89,11 @@ class AboutView(TemplateView):
             version = metadata.version("housecairn")
         except metadata.PackageNotFoundError:  # pragma: no cover - run from a bare checkout
             version = "dev"
-        context.update(version=version, source_url=settings.HOUSECAIRN_SOURCE_URL)
+        context.update(
+            version=version,
+            source_url=settings.HOUSECAIRN_SOURCE_URL,
+            about_links=about_links.links(),
+        )
         return context
 
 
