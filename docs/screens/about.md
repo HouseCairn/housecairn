@@ -4,6 +4,10 @@ The version of the instance, the licence (AGPL-3.0), a link to the source code
 and security reports, and the statement that HouseCairn is developed with an AI
 agent under human review. It is at `/about/` and does not need an account.
 
+Under **Open data**, the open databases the [barcode lookup](../administration/barcodes.md)
+reads (Nudger, Open Products Facts, Open Food Facts) and their licences: the Open Database
+License (ODbL) for their data, Creative Commons Attribution-ShareAlike 3.0 for the photos.
+
 Under **Links**, a row of icons with their label leads to the project website, the
 documentation, the application code, the Home Assistant app, the Home Assistant integration
 and the mobile application, each on its own site. The **iOS** and **Android** icons are

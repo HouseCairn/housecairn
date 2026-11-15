@@ -24,6 +24,20 @@ links are shown on the page of the stock item, and the page of a room lists the 
 items that concern it (listed on the room, compatible with one of its items, or its
 paint left over).
 
+## Scan a barcode
+
+The **barcode (EAN)** field takes the 8 to 14 digits printed under the bars. Type them, or
+press **Scan** next to the field to read them with the camera of the phone or the computer.
+The code is checked (its last digit is a check digit): a code read wrong is refused. The search
+of the stock finds a record by its code too, with or without its spaces.
+
+If the administrator of the server turned on the [barcode lookup](../administration/barcodes.md),
+a scanned code shows what the open databases know of the product: name, brand, model,
+category, and sometimes a photo. **Use these values** fills only the fields that are still
+empty; nothing is saved until you save the form. Tick **Keep this photo** to add the photo of
+the product as the label of a stock item that has none: it is shown with its source, its author and its licence
+(CC BY-SA 3.0), as that licence asks.
+
 ## Count what you have
 
 The quantity is never typed in: it is the sum of the movements. On the page of an

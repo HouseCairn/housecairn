@@ -43,6 +43,8 @@ changed in the interface; a variable that is set locks its field there. The full
 | `HOUSECAIRN_WEBPUSH_ENABLED` | `false` | Notifications on the device, by Web Push through the push service of each browser (Google, Mozilla, Apple, Microsoft). Also in the interface. See [Notifications](../guides/notifications.md#on-this-device). |
 | `HOUSECAIRN_WEBPUSH_DISCREET` | `true` | A notification on the device says only what kind of message it is, with a link: no title of a task, no name of a home. Also in the interface. |
 | `HOUSECAIRN_LINK_PREVIEW_ENABLED` | `false` | Read the title and the picture of a page when a link is added to a project. Off, nothing is read. The server only calls public addresses. Also in the interface. See [Projects](../guides/projects.md). |
+| `HOUSECAIRN_BARCODE_CATALOGUE_ENABLED` | `false` | Look a scanned barcode up in a copy of the open Nudger catalogue kept on the server, refreshed every week. No lookup leaves the server; the download takes hours and gigabytes. Also in the interface. See [Barcodes](barcodes.md). |
+| `HOUSECAIRN_BARCODE_LOOKUP_ONLINE` | `false` | When a code is not in the local catalogue, ask Open Products Facts, then Open Food Facts. Only the code is sent. Also in the interface. See [Barcodes](barcodes.md). |
 | `HOUSECAIRN_DOCS_URL` | `https://docs.housecairn.app` | Address of this documentation, used by the help link of each screen. |
 | `HOUSECAIRN_WEB_WORKERS` | `2` | Web server processes. |
 | `HOUSECAIRN_TASK_WORKERS` | `2` | Task worker processes. |
