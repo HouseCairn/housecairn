@@ -99,7 +99,7 @@ def test_a_fuzzy_documentation_entry_fails_the_check(
     monkeypatch.setattr(translations, "docs_catalogs", lambda: [path])
     monkeypatch.setattr(translations, "po_files", lambda: iter([]))
     monkeypatch.setattr(translations, "inconsistent", lambda _language: [])
-    with pytest.raises(CommandError, match="docs: .*fuzzy: 'A note'") as raised:
+    with pytest.raises(CommandError, match=r"docs: .*fuzzy: 'A note'") as raised:
         call_command("check_translations")
     assert "''" not in str(raised.value)  # the header is not reported
 

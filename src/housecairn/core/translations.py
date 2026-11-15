@@ -129,7 +129,8 @@ def fuzzy_in_docs() -> list[str]:
     """
     root = Path(settings.BASE_DIR).parents[1] / "docs" / "locale"
     return [
-        f"{path.relative_to(root)}: fuzzy: {entry.msgid[:60]!r}"
+        f"{path.relative_to(root) if path.is_relative_to(root) else path}: "
+        f"fuzzy: {entry.msgid[:60]!r}"
         for path in docs_catalogs()
         for entry in parse_po(path.read_text(encoding="utf-8"))
         if entry.fuzzy and entry.msgid

@@ -9,7 +9,8 @@ from housecairn.core import translations
 class Command(BaseCommand):
     help = (
         "Fail if a catalog has an untranslated or fuzzy string, or a string translated "
-        "differently in two catalogs, or a fuzzy string in the documentation catalogs; with --sources, also if a string of the code or "
+        "differently in two catalogs, or if a documentation catalog has a fuzzy string; "
+        "with --sources, also if a string of the code or "
         "templates is missing from the catalog of its app."
     )
 
