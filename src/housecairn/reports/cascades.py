@@ -37,7 +37,9 @@ def connect() -> None:
     """Connect the receivers; called by `ReportsConfig.ready`."""
     from django.apps import apps
 
-    pre_delete.connect(report_is_going, sender=Report, dispatch_uid="reports.report_is_going")
+    pre_delete.connect(
+        report_is_going, sender=Report, dispatch_uid="reports.report_is_going", weak=False
+    )
     targets = {
         "rooms.Room": ("room_id",),
         "rooms.Item": ("item_id",),
@@ -50,4 +52,5 @@ def connect() -> None:
             references_are_lost(*columns),
             sender=apps.get_model(label),
             dispatch_uid=f"reports.lost.{label}",
+            weak=False,
         )

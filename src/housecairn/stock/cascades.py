@@ -94,13 +94,18 @@ def connect() -> None:
     from housecairn.rooms.models import Item, Room
     from housecairn.tasks.models import Occurrence
 
-    pre_delete.connect(article_is_going, sender=Article, dispatch_uid="stock.article_is_going")
     pre_delete.connect(
-        link_target_is_going("rooms"), sender=Room, dispatch_uid="stock.room_is_going"
+        article_is_going, sender=Article, dispatch_uid="stock.article_is_going", weak=False
     )
     pre_delete.connect(
-        link_target_is_going("compatible_items"), sender=Item, dispatch_uid="stock.item_is_going"
+        link_target_is_going("rooms"), sender=Room, dispatch_uid="stock.room_is_going", weak=False
     )
     pre_delete.connect(
-        occurrence_is_going, sender=Occurrence, dispatch_uid="stock.occurrence_is_going"
+        link_target_is_going("compatible_items"),
+        sender=Item,
+        dispatch_uid="stock.item_is_going",
+        weak=False,
+    )
+    pre_delete.connect(
+        occurrence_is_going, sender=Occurrence, dispatch_uid="stock.occurrence_is_going", weak=False
     )

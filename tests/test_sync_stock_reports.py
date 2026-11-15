@@ -637,6 +637,30 @@ class TestRetention:
         Article.all_objects.filter(pk=article.pk).delete()
         assert clocks(article.home, *ALL_ENTITIES) == 0
 
+    def test_the_receivers_are_held_by_a_strong_reference(self) -> None:
+        """Signals keep weak references by default: a receiver built in a closure would vanish."""
+        import weakref
+
+        from django.db.models.signals import pre_delete
+
+        ours = [
+            (key[0], receiver)
+            for key, receiver, *_rest in pre_delete.receivers
+            if isinstance(key[0], str) and key[0].startswith(("stock.", "reports."))
+        ]
+        assert {uid for uid, _receiver in ours} >= {
+            "stock.article_is_going",
+            "stock.room_is_going",
+            "stock.item_is_going",
+            "stock.occurrence_is_going",
+            "reports.report_is_going",
+            "reports.lost.rooms.Room",
+            "reports.lost.rooms.Item",
+            "reports.lost.stock.Article",
+            "reports.lost.tasks.Task",
+        }
+        assert [uid for uid, receiver in ours if isinstance(receiver, weakref.ReferenceType)] == []
+
     def test_the_purge_forgets_the_links_of_a_room_that_is_purged(
         self, alice: User, alice_home: Home, owner_room: Room, owner_item: Item
     ) -> None:
