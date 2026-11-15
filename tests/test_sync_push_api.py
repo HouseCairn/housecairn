@@ -525,22 +525,22 @@ class TestBody:
     def test_a_write_that_breaks_a_rule_of_the_database_is_400_not_500(
         self, phone: Connected, alice: User, alice_home: Home
     ) -> None:
-        """Two open occurrences of one task: lot M5b repairs it; M5a refuses the push."""
+        """A rule no repair rule covers (docs/adr/0079, M5b): a second line of one article on a
+        task, under an id other than the deterministic one, refuses the push."""
         task = task_services.create_task(alice, alice_home, title="Filter")
+        article = stock_services.create_article(alice, alice_home, name="Filter cartridge")
+        line = {"task_id": str(task.pk), "article_id": str(article.pk), "quantity": "1.00"}
         answer = send(
             phone.access,
             alice_home.pk,
             [
-                op(
-                    alice_home.pk,
-                    "tasks.occurrence",
-                    uuid.uuid4(),
-                    {"task_id": str(task.pk), "status": "planned"},
-                )
+                op(alice_home.pk, "tasks.taskmaterial", uuid.uuid4(), line),
+                op(alice_home.pk, "tasks.taskmaterial", uuid.uuid4(), line),
             ],
         )
         assert answer.status_code == 400
-        assert answer.json()["index"] == 0
+        assert answer.json()["index"] == 1
+        assert not Task.objects.get(pk=task.pk).materials.exists()
 
 
 # ---------- the per-field rule ----------

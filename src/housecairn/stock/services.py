@@ -448,8 +448,10 @@ def _append(
     occurred_on: datetime.date | None,
     note: str = "",
     occurrence: "Occurrence | None" = None,
+    movement_id: UUID | None = None,
 ) -> Movement:
     movement = Movement(
+        **({} if movement_id is None else {"id": movement_id}),
         home=article.home,
         article=article,
         kind=kind,
@@ -543,6 +545,38 @@ def draw_for_task(
             occurrence=occurrence,
         )
     return taken
+
+
+@transaction.atomic
+def take_again_for_task(
+    actor: AnyUser,
+    article: Article,
+    quantity: Decimal,
+    *,
+    occurrence: "Occurrence",
+    movement_id: UUID,
+    occurred_on: datetime.date | None = None,
+) -> bool:
+    """Take again what an undo put back, when the undo is reverted (docs/adr/0079, M5b).
+
+    An exit of `quantity` under the id `movement_id`, which the caller derives from the undo,
+    so that a second call for the same undo writes nothing (False). As for a closing, the
+    stock may go below zero, which is shown and not changed (mobile ADR 0003).
+    """
+    _require_write(actor, article.home)
+    if quantity <= _ZERO or Movement.all_objects.filter(pk=movement_id).exists():
+        return False
+    _lock_stock(article)
+    _append(
+        article,
+        kind=MovementKind.EXIT,
+        quantity=quantity,
+        delta=-quantity,
+        occurred_on=occurred_on,
+        occurrence=occurrence,
+        movement_id=movement_id,
+    )
+    return True
 
 
 @transaction.atomic

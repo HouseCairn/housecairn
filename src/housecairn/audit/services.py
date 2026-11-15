@@ -40,13 +40,19 @@ def record(
     actor: User | AnonymousUser | None = None,
     home_id: UUID | None = None,
     target: User | None = None,
+    event_id: UUID | None = None,
     **detail: Any,
 ) -> AuditEvent:
-    """Add an entry: of the home when `home_id` is given, else of the instance."""
+    """Add an entry: of the home when `home_id` is given, else of the instance.
+
+    `event_id`: the id of the entry, for an entry written once however often its cause is
+    seen (a closing pushed by a phone, docs/adr/0077 need 7); by default a new one.
+    """
     unknown = set(detail) - ALLOWED_DETAIL
     if unknown:
         raise ValueError(f"Audit detail may not carry: {', '.join(sorted(unknown))}")
     return AuditEvent.objects.create(
+        **({} if event_id is None else {"id": event_id}),
         scope=Scope.HOME if home_id else Scope.INSTANCE,
         action=action,
         actor=actor if isinstance(actor, User) else None,

@@ -9,9 +9,10 @@ operation that is malformed makes the push a 400 with its index, and nothing is 
 Every write goes through `sync.rows` and `sync.changes`, the helpers of the change log: the
 change is recorded first, which decides the fields that win, then only those are written.
 
-Not here (lot M5b): the repair rules across rows and the effects the web runs once per new
-state. Not here either: the creation of a home (M5c) and the files (M6). A file reference in an
-operation is kept as a field the server does not know yet, in `extra`, until M6 maps it.
+Once the operations are applied, `sync.repairs` runs the repair rules across rows and the
+effects the web runs once per new state (lot M5b), in the same transaction. Not here: the
+creation of a home (M5c) and the files (M6). A file reference in an operation is kept as a
+field the server does not know yet, in `extra`, until M6 maps it.
 """
 
 import datetime
@@ -29,7 +30,7 @@ from django.utils.translation import gettext as _
 
 from housecairn.accounts.models import User
 from housecairn.homes.models import Home, Membership, Role
-from housecairn.sync import changes, clock, reading
+from housecairn.sync import changes, clock, reading, repairs
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, HomeHead, RowClocks
 
@@ -343,16 +344,20 @@ def apply(home: Home, pusher: Pusher, raw_ops: Sequence[Any]) -> dict[str, Any]:
     """Apply the operations of a push to `home`, in one transaction; the answer of the push.
 
     Raises `MalformedError` (nothing written) when an operation cannot be read, or when a write
-    breaks a rule of the database: the repair rules that would prevent it are lot M5b.
+    breaks a rule of the database that no repair rule covers (a second material line of one
+    article, two occurrences that follow the same one, a draw above what it wanted): the index
+    is that of the operation, or the last one when the rules of the end of the push meet it.
     """
     ops = [parse(index, raw) for index, raw in enumerate(raw_ops)]
     with transaction.atomic():
         holders = _holders(ops)
+        session = repairs.Session(home, pusher.user)
+        session.begin(op.row_id for op in ops if op.entity == repairs.OCCURRENCE)
         results = []
         for op in ops:
             try:
                 with transaction.atomic():
-                    result = _apply_one(home, pusher, op, holders)
+                    result = _apply_one(home, pusher, op, holders, session)
             except _RejectedError as rejected:
                 result = {"i": op.index, "status": REJECTED, "code": rejected.code}
             except IntegrityError:
@@ -360,6 +365,15 @@ def apply(home: Home, pusher: Pusher, raw_ops: Sequence[Any]) -> dict[str, Any]:
                     op.index, _("This operation breaks a rule of the data.")
                 ) from None
             results.append(result)
+        if ops:
+            try:
+                with transaction.atomic():
+                    session.finish(results, ops)
+            except IntegrityError:
+                # A rule of the data that no repair rule covers (docs/adr/0079, M5b).
+                raise MalformedError(
+                    ops[-1].index, _("This operation breaks a rule of the data.")
+                ) from None
         head = HomeHead.objects.filter(home_id=home.pk).values_list("pos", flat=True).first()
     return {"head": head or 0, "results": results}
 
@@ -369,6 +383,7 @@ def _apply_one(
     pusher: Pusher,
     op: Operation,
     holders: dict[uuid.UUID, set[tuple[str, uuid.UUID]]],
+    session: repairs.Session,
 ) -> dict[str, Any]:
     if pusher.role not in (Role.OWNER, Role.MEMBER):
         raise _RejectedError(FORBIDDEN)  # a read-only member: nothing is accepted
@@ -388,7 +403,7 @@ def _apply_one(
     if reading.is_link(op.entity):
         result = _apply_link(home, op, stamp)
     else:
-        result = _apply_row(home, pusher, op, stamp)
+        result = _apply_row(home, pusher, op, stamp, session)
     holders.setdefault(op.row_id, set()).add((op.entity, home.pk))
     return result
 
@@ -406,11 +421,12 @@ def _result(
 
 
 def _apply_row(
-    home: Home, pusher: Pusher, op: Operation, stamp: tuple[str, bytes]
+    home: Home, pusher: Pusher, op: Operation, stamp: tuple[str, bytes], session: repairs.Session
 ) -> dict[str, Any]:
     model = reading.model_of(op.entity)
     columns = columns_of(model)
     stored = model._base_manager.filter(pk=op.row_id).first()
+    settle = session.settle_for(op.entity, op.row_id)
     if op.kind != changes.PUT:
         if model is Home:
             raise _RejectedError(FORBIDDEN)  # a home is erased on the web, by an owner only
@@ -421,8 +437,18 @@ def _apply_row(
             recorded = changes.record_change(home.pk, op.entity, op.row_id, op.kind, stamp=stamp)
             return _result(op, recorded, _lost(op, model, recorded))
         recorded = sync_rows.apply_stamped(
-            model, home.pk, op.row_id, op.kind, None, {}, stamp=stamp, known=columns.writable
+            model,
+            home.pk,
+            op.row_id,
+            op.kind,
+            None,
+            {},
+            stamp=stamp,
+            known=columns.writable,
+            settle=settle,
         )
+        if recorded.change is not None:
+            session.note(op.entity, op.row_id, op.kind, op.fields, recorded.change.fields)
         return _result(op, recorded, _lost(op, model, recorded))
 
     if columns.server_owned & set(op.fields):
@@ -454,8 +480,18 @@ def _apply_row(
     _check_extra(op, {name: value for name, value in fields.items() if name not in values})
     _check_references(home, columns, values)
     recorded = sync_rows.apply_stamped(
-        model, home.pk, op.row_id, changes.PUT, logged, values, stamp=stamp, known=columns.writable
+        model,
+        home.pk,
+        op.row_id,
+        changes.PUT,
+        logged,
+        values,
+        stamp=stamp,
+        known=columns.writable,
+        settle=settle,
     )
+    if recorded.change is not None:
+        session.note(op.entity, op.row_id, op.kind, op.fields, recorded.change.fields)
     result = _result(op, recorded, _lost(op, model, recorded))
     texts = other_versions(model, fields, recorded.lost)
     if texts:

@@ -453,6 +453,7 @@ def apply_stamped(
     *,
     stamp: tuple[str, bytes],
     known: Collection[str],
+    settle: Callable[[Any, dict[str, Any], str], dict[str, Any]] | None = None,
 ) -> changes.Recorded:
     """Write a row as a phone's operation says, field by field, and record its change.
 
@@ -468,6 +469,12 @@ def apply_stamped(
 
     A `put` of a row the table does not hold creates it, with the fields that won; a `delete`
     and a `restore` need the row (the caller checks it).
+
+    `settle(stored, columns, kind)`, when given, is called once the fields that won are known
+    and before the row is written, with the row as stored (None: new) and the columns that won.
+    It returns columns written with them that no change records: a value the server derives
+    (the effect of a stock movement), or a value held for the time of the push, which the
+    repair rules settle before the push ends (`sync.repairs`).
     """
     with transaction.atomic():
         stored = model._base_manager.select_for_update().filter(pk=pk).first()
@@ -486,13 +493,20 @@ def apply_stamped(
         if recorded.change is None:
             return recorded
         won = recorded.change.fields
+        columns = {name: values[name] for name in won if name in values}
+        held = {} if settle is None else settle(stored, columns, kind)
         row: Any = stored
-        if kind == changes.DELETE:
-            row.soft_delete()
-        elif kind == changes.RESTORE:
-            row.restore()
+        if kind in (changes.DELETE, changes.RESTORE):
+            for name, value in held.items():
+                setattr(row, name, value)
+            if held:
+                row.save(update_fields=[*held, "updated_at"])
+            if kind == changes.DELETE:
+                row.soft_delete()
+            else:
+                row.restore()
         else:
-            columns = {name: values[name] for name in won if name in values}
+            columns = {**columns, **held}
             if stored is None:
                 _create_stamped(model, home_id, pk, columns, known)
             elif columns:

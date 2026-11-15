@@ -97,6 +97,18 @@ entity type is written and deleted by a push, and each write must record its cha
 file publishes the merge vectors `tests/fixtures/sync_merge.json`, the cases of the per-field
 rule applied in every order, for the mobile app to pin.
 
+Once the operations are applied, `sync/repairs.py` runs, in the same transaction, the repair
+rules of mobile ADR 0003 and the effects of a closing (ADR 0079, decisions for lot M5b). The
+database allows one open occurrence per task, so `rows.apply_stamped` takes a `settle` hook:
+an occurrence that would open a second one is written closed for the time of the push, and the
+rule decides between them at its end; a new stock movement gets its effect (`delta`), which the
+end of the push sets again in the order of the clocks. A repair is written as a change of its
+own, with the server's clock, so the phones get it from the feed; an operation whose row a
+repair changed is `repaired`. The audit entries and the exits written again after a reverted
+undo have ids made from their cause, so that seeing the cause twice writes them once. The
+vectors of the rules, `tests/fixtures/sync_repairs.json`, are applied in every order of their
+pushes (`tests/test_sync_push_repairs.py`), for the mobile app to pin.
+
 ## Clocks and conflicts
 
 A clock is a 64-bit number, `(milliseconds since 1970-01-01 UTC << 16) | counter`, written as 16

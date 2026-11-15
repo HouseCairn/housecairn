@@ -119,6 +119,14 @@ msgid "Task deleted: %(title)s"
 msgstr "Tâche supprimée : %(title)s"
 
 #, python-format
+msgid "Task marked done from a phone: %(title)s"
+msgstr "Tâche marquée faite depuis un téléphone : %(title)s"
+
+#, python-format
+msgid "Task skipped from a phone: %(title)s"
+msgstr "Tâche ignorée depuis un téléphone : %(title)s"
+
+#, python-format
 msgid "Photo added to %(title)s"
 msgstr "Photo ajoutée à %(title)s"
 

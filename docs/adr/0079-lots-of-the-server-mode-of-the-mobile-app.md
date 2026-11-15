@@ -106,6 +106,51 @@ two more points were decided with them. ADR 0077 and 0078 are written with these
    draft, which dropped them and listed them in `unknown`, is replaced.
 7. **M3 and M5 are cut now**: M3a to M3f and M5a to M5c above, one pull request each.
 
+## Decisions of 2026-11-15 for lot M5b
+
+Six points of ADR 0077 (needs 6, 7 and 9) and of mobile ADR 0003 left the rules of lot M5b open.
+They were decided on 2026-11-15, by delegation of the maintainer, before the lot was written.
+
+1. **Audit.** One entry per occurrence that becomes done or skipped in a push,
+   `occurrence.done` or `occurrence.skipped`, named after its task, the account of the
+   connection as its author. Its id is made from the occurrence and the state, so that it is
+   never written twice. A creation, an edit or a deletion pushed writes no entry. The web does
+   not audit its own closings yet (done, skip, postpone, undo in `tasks/services.py`); aligning
+   them is a card of its own, not this lot.
+2. **Stock that follows Done.** The phone pushes the exits and the draws of a closing itself, in
+   the same push. The server draws only the materials whose draw (`draw:<occurrence>:<article>`)
+   it has neither live nor deleted, as `draw_for_done` would. An undo pushed is data only: the
+   server writes nothing more for it.
+3. **Two open occurrences, neither following the other.** The one made last stays open: the
+   greater clock of its `task_id`, then the greater device id, then the greater id. The other is
+   closed as done if `completed_on` is filled, else skipped; a row the rule closed as skipped
+   becomes done when its `completed_on` arrives later. In a chain of `follows`, only the last
+   stays open.
+4. **An undo reverted.** The occurrence takes back, field by field, the value of the last write
+   whose clock is before the clock of the undo (`status`, `status_before`, `completed_on`,
+   `completion_note`, `actual_cost`, `completed_by_id`), written as a repair with the server's
+   clock, and its operations get `repaired`. The stock follows the closing so restored: the draws
+   come back, and the server writes new exits for what the undo gave back. The ledger stays
+   append-only: nothing is removed, a line is added, under an id made from the draw and the clock
+   of the undo, so that the same undo seen again takes nothing twice.
+5. **Rules of the data without a repair rule** (two material lines of one article, or two annual
+   envelopes of one year, under a random id against the deterministic one; two occurrences that
+   follow the same one; a draw above what it wanted; a quantity that is not positive) keep the
+   `400` `malformed` of M5a, with the index of the operation. This departs from ADR 0077 need 6,
+   which says a sync never meets them.
+6. **The date of a successor after a skip.** A skip has no `completed_on`; the day it counts from
+   is the day of the physical part of the clock of the `status` field, in the time zone of the
+   instance. Only a closing is checked: a `put` that sets `follows_id` and `due_on` together,
+   whose predecessor has a `status_before` (the rule of point 3 closes without one).
+
+Written with them, as ADR 0077 and mobile ADR 0003 say without a choice to make: `visible_from`
+is computed by the server on every occurrence a push writes, and on the open one of a task
+whose delay changed; a pushed `hemisphere` moves the months of the predefined seasons; a row is
+"marked done" when its merged state has a `completed_on`; and the effect (`delta`) of a pushed
+stock movement is derived as the phone derives it, an inventory making the stock its count in
+the order of the clocks, which M5a lacked (a pushed movement was refused). The vectors of these
+rules are `tests/fixtures/sync_repairs.json`, applied in every order of their pushes.
+
 ## Consequences
 
 - The server mode reaches the phones only after thirteen web pull requests and a release:
