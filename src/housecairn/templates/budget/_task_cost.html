@@ -3,7 +3,7 @@
   <h2>{% translate "Cost" %}</h2>
   <section class="card" data-task-cost>
     {% if row.has_estimate %}
-      <h3 class="cost-kind"><span class="pill pill-sand">{% translate "Planned" %}</span></h3>
+      <h3 class="cost-kind"><span class="pill pill-sand">{% translate "Planned" context "amount" %}</span></h3>
       <dl class="facts" data-planned>
         <div><dt>{% translate "Estimate each time" %}</dt><dd>{{ row.estimate|money:home.currency }}</dd></div>
         {% if row.material_from_stock %}<div><dt>{% translate "Materials, from the stock" %}</dt><dd data-materials-from-stock>{{ row.stock.amount|money:home.currency }}</dd></div>{% endif %}

@@ -177,9 +177,7 @@ class TaskForm(forms.ModelForm[Task]):
     material_budget = MoneyField(
         label=_("Material budget"),
         required=False,
-        help_text=_(
-            "Only without priced stock items: with them, it is calculated from the stock."
-        ),
+        help_text=_("Only without priced stock items: with them, it is calculated from the stock."),
     )
     uploads = MultipleFileField(
         label=_("Photos and files"),

@@ -93,7 +93,8 @@ class TestTheItemSheet:
         assert "data-autosave" in page
         assert "js/autosave.js" in page
         status = page.split('id="autosave-status"')[1].split(">")[0]
-        assert 'aria-live="polite"' in status and 'role="status"' in status
+        assert 'aria-live="polite"' in status
+        assert 'role="status"' in status
         # The button stays, for a browser without script.
         assert '<button type="submit" class="button-block">Save</button>' in page
         create = reverse(
@@ -117,7 +118,8 @@ class TestTheItemSheet:
         assert AuditEvent.objects.filter(action="item.updated").count() == 1
         # The same state sent again (a change after an input): nothing more is written.
         code, text = autosave(signed_in, url)
-        assert code == 200 and "Saved" in text
+        assert code == 200
+        assert "Saved" in text
         assert Change.objects.filter(row_id=owner_item.pk).count() == before + 1
         assert AuditEvent.objects.filter(action="item.updated").count() == 1
 
@@ -138,7 +140,7 @@ class TestTheItemSheet:
     def test_a_new_contractor_waits_for_the_button(
         self, signed_in: Client, alice_home: Home, owner_item: Item
     ) -> None:
-        code, text = autosave(
+        _code, text = autosave(
             signed_in,
             item_url(alice_home, owner_item),
             contract_contractor="new",
@@ -189,7 +191,8 @@ class TestTheOtherSheets:
     def test_a_room(self, signed_in: Client, alice_home: Home, owner_room: Room) -> None:
         url = reverse("rooms:edit", kwargs={"home_id": alice_home.id, "room_id": owner_room.id})
         code, text = autosave(signed_in, url, notes="North wall")
-        assert code == 200 and "Saved" in text
+        assert code == 200
+        assert "Saved" in text
         owner_room.refresh_from_db()
         assert owner_room.notes == "North wall"
 
@@ -199,7 +202,8 @@ class TestTheOtherSheets:
         )
         url = reverse("tasks:edit", kwargs={"home_id": alice_home.id, "task_id": task.id})
         code, text = autosave(signed_in, url, notes="Use the white vinegar")
-        assert code == 200 and "Saved" in text, text
+        assert code == 200
+        assert "Saved" in text, text
         task.refresh_from_db()
         assert task.notes == "Use the white vinegar"
         before = Change.objects.filter(row_id=task.pk).count()
@@ -210,7 +214,8 @@ class TestTheOtherSheets:
         article = stock_services.create_article(alice, alice_home, name="Water filter")
         url = reverse("stock:edit", kwargs={"home_id": alice_home.id, "article_id": article.id})
         code, text = autosave(signed_in, url, unit_price="7.90")
-        assert code == 200 and "Saved" in text, text
+        assert code == 200
+        assert "Saved" in text, text
         article.refresh_from_db()
         assert article.unit_price == Decimal("7.90")
 
@@ -218,7 +223,7 @@ class TestTheOtherSheets:
         self, signed_in: Client, alice_home: Home, owner_room: Room
     ) -> None:
         url = reverse("rooms:edit", kwargs={"home_id": alice_home.id, "room_id": owner_room.id})
-        code, text = autosave(signed_in, url, name="x" * 200)
+        _code, text = autosave(signed_in, url, name="x" * 200)
         assert "Not saved" in text
         assert "at most 120 characters" in text.split('id="autosave-error-name"')[1][:300]
         room_services.rooms_of(alice_home).get(pk=owner_room.pk)  # still there

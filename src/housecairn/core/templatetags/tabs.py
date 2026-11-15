@@ -100,7 +100,11 @@ def _rooms(context: template.Context, request: HttpRequest, view: str) -> list[T
     kwargs = {"home_id": home_id}
     return [
         Tab(_("Rooms"), reverse("rooms:list", kwargs=kwargs), view == "rooms:list"),
-        Tab(pgettext_lazy("tab", "Equipment"), reverse("rooms:items", kwargs=kwargs), view == "rooms:items"),
+        Tab(
+            pgettext_lazy("tab", "Equipment"),
+            reverse("rooms:items", kwargs=kwargs),
+            view == "rooms:items",
+        ),
         Tab(_("Stock"), reverse("stock:list", kwargs=kwargs), view == "stock:list"),
     ]
 

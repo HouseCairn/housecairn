@@ -3,10 +3,14 @@
 import datetime
 from typing import Any
 
-from django.core.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
-from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
-from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import (
+    MaxLengthValidator,
+    MaxValueValidator,
+    MinValueValidator,
+    URLValidator,
+)
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -139,7 +143,9 @@ class WarrantyProvider(models.TextChoices):
 MAX_WARRANTY_DURATION = 99
 
 
-def warranty_end(start: datetime.date | None, duration: int | None, unit: str) -> datetime.date | None:
+def warranty_end(
+    start: datetime.date | None, duration: int | None, unit: str
+) -> datetime.date | None:
     """The day a warranty of `duration` months or years from `start` ends; None without one.
 
     The same date that many months or years later, the last day of the month when that month is

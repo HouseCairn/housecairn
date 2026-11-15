@@ -196,11 +196,14 @@ class ItemForm(forms.ModelForm[Item]):
             "notes": forms.Textarea(attrs={"rows": 4}),
         }
         help_texts = {
-            "warranty_duration": _("The warranty of the manufacturer or of the shop, in months or years."),
+            "warranty_duration": _(
+                "The warranty of the manufacturer or of the shop, in months or years."
+            ),
             "warranty_provider_name": _("Example: Acme, or the shop where you bought it."),
             "warranty_starts_on": _("Empty: from the purchase date."),
             "warranty_ends_on": _(
-                "Worked out from the start and the duration. Type it only when you do not know them."
+                "Worked out from the start and the duration. "
+                "Type it only when you do not know them."
             ),
         }
 

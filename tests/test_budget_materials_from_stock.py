@@ -1,4 +1,4 @@
-"""The materials of a task are worked out from its priced stock items, never typed twice (ADR 0081)."""
+"""The materials of a task come from its priced stock items, never typed twice (ADR 0081)."""
 
 import datetime
 from decimal import Decimal
@@ -95,13 +95,15 @@ class TestTheScreens:
         real = cost.split("data-real")[1].split("</dl>")[0]
         assert "€7.90" in planned
         assert "Materials, from the stock" in planned
-        assert "Paid so far" in real and "€7.90" not in real
+        assert "Paid so far" in real
+        assert "€7.90" not in real
         assert cost.index(">Planned<") < cost.index(">Real<")
         page = signed_in.get(
             reverse("tasks:detail", kwargs={"home_id": alice_home.id, "task_id": task.id}),
             HTTP_ACCEPT_LANGUAGE="fr",
         ).text
-        assert ">Prévu<" in page and ">Réel<" in page
+        assert ">Prévu<" in page
+        assert ">Réel<" in page
 
     def test_the_form_asks_for_no_second_figure(
         self, signed_in: Client, alice: User, alice_home: Home

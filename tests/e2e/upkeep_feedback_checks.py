@@ -22,7 +22,7 @@ import sys
 from playwright.sync_api import Browser, Page, expect, sync_playwright
 
 EMAIL = "feedback@example.com"
-PASSWORD = "correct-horse-battery-staple"  # noqa: S105 - an account of the CI instance only
+PASSWORD = "correct-horse-battery-staple"
 failures: list[str] = []
 
 

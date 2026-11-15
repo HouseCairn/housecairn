@@ -46,7 +46,8 @@ class TestTheList:
         page = signed_in.get(url(alice_home)).text
         assert "Television" in page
         assert "Espresso machine" in page
-        assert "Living room" in page and "Kitchen" in page
+        assert "Living room" in page
+        assert "Kitchen" in page
 
     def test_it_is_a_tab_of_rooms_beside_stock(
         self, signed_in: Client, alice_home: Home, two_rooms: tuple[Room, Room]
@@ -87,7 +88,8 @@ class TestTheList:
     ) -> None:
         theirs = services.create_room(bob, bob_home, name="Theirs")
         page = signed_in.get(url(alice_home), {"room": str(theirs.id)}).text
-        assert "Television" in page and "Espresso machine" in page
+        assert "Television" in page
+        assert "Espresso machine" in page
 
     def test_the_warranty_and_the_next_task_of_each_item(
         self, signed_in: Client, alice: User, alice_home: Home, two_rooms: tuple[Room, Room]

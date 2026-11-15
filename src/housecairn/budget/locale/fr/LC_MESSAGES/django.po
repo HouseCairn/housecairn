@@ -127,9 +127,6 @@ msgstr "Voir le détail du budget"
 msgid "Cost"
 msgstr "Coût"
 
-msgid "Planned"
-msgstr "Prévu"
-
 msgid "Materials, from the stock"
 msgstr "Matériel, depuis le stock"
 
