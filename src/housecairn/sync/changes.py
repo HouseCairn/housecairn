@@ -133,7 +133,7 @@ def record_change(
         won: dict[str, Any] = {}
         lost: dict[str, tuple[str, str]] = {}
         for name, value in written.items():
-            if value is WRITE_CLOCK:
+            if isinstance(value, _WriteClock):
                 value = clock.format_clock(made)
             is_known = known is None or name in known or name == DELETED_AT
             stored = _stored_stamp(row, name, is_known, server_stamp)
