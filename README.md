@@ -172,7 +172,7 @@ default.
 
 ## Project status
 
-**Alpha: [v0.4.0](https://github.com/HouseCairn/housecairn/releases/tag/v0.4.0).**
+**Alpha: [v0.4.1](https://github.com/HouseCairn/housecairn/releases/tag/v0.4.1).**
 It has not been used in a real home for any length of time yet, and what it
 stores can still change shape between 0.x versions: try it, and keep a backup
 of what you enter. Released images are tagged `X.Y.Z`, `X.Y` and `latest`;
