@@ -86,6 +86,41 @@ more than 400 days ago (exactly 400 days old is kept), records in `floor` the hi
 it removed, so that a cursor below it can be answered with 410, and removes the clocks of the
 rows deleted more than 400 days ago, with those rows when they are still deleted.
 
+## Which applications record their changes
+
+An application is covered when every write path of its models calls the change log and the
+guard test below lists it in `COVERED_APPS`. The applications are covered one lot after the
+other ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)); each has its
+own section here.
+
+### Stock and reports
+
+`stock` records `stock.article`, `stock.supplier`, `stock.movement` and the link rows
+`stock.article_rooms` and `stock.article_compatible_items`; `reports` records `reports.report`.
+
+They share `housecairn.stock.changelog`, which turns a write into a change:
+
+- `read` takes the state of a row before the write and `record_save` records the fields whose
+  value differs afterwards (a new row is a `put` of every field, a form that sends every field
+  records the ones that changed and no other);
+- `soft_delete` and `soft_delete_all` write the deletion of one row or of a queryset, a tombstone
+  per row; `update_rows` is a queryset `update` that records its rows one by one;
+- `set_links` writes a set of links (the rooms and the compatible items of an article). Each
+  element is a row of a link table whose id is `uuid5(home, "<entity>:<owner id>:<other id>")`:
+  adding one is a `put` of `<owner>_id` and `<other>_id` (a `restore` when it was removed before),
+  removing one is a `delete`.
+
+Values are those of the protocol: decimals as strings, dates `YYYY-MM-DD`, instants as clock
+strings, foreign keys by their column name (`article_id`). A movement does not carry its effect
+(`delta`), which is derived on read. A file field holds the name of the stored file, and the
+columns derived from a file (its type, its size, its thumbnail) are not fields: the lot of the
+files maps the name to the file reference of the protocol.
+
+A row that goes for good (the retention purge, the erasure of a home, the deletion of an account)
+leaves nothing behind: `stock.cascades` and `reports.cascades` remove the clocks of the children
+that have no foreign key to their row (suppliers, movements, link rows) and the files on the
+disk, and record the reference that a report or a movement loses (`SET_NULL`) as a change.
+
 ## The guard test
 
 `tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a

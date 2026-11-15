@@ -31,7 +31,7 @@ from tests.test_export_registry import cascades_from_home, project_models
 pytestmark = pytest.mark.django_db
 
 # The apps whose every write path records its change. One line per lot (M3b to M3e).
-COVERED_APPS: tuple[str, ...] = ()
+COVERED_APPS: tuple[str, ...] = ("stock", "reports")
 
 # The apps whose rows are synced and the lot that covers each; none may be missing, so that a
 # new app of rows of a home cannot slip by. Remove an app from here when it joins COVERED_APPS.
@@ -39,8 +39,6 @@ WAITING_FOR_ITS_LOT = {
     "homes": "M3b",
     "rooms": "M3b",
     "tasks": "M3c",
-    "stock": "M3d",
-    "reports": "M3d",
     "projects": "M3e",
 }
 

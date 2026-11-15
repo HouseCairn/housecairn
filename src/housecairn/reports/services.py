@@ -35,6 +35,7 @@ from housecairn.reports.models import (
 from housecairn.rooms import images
 from housecairn.rooms.models import Item, Room
 from housecairn.rooms.services import _read_upload
+from housecairn.stock import changelog
 from housecairn.stock.models import Article
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import Occurrence, Task
@@ -266,6 +267,7 @@ def create_report(
             report.save()
         else:
             _store_photo(report, photo)
+        changelog.record_save(Report, report.pk, None)
         audit.record_object("report.created", actor=actor, home_id=home.id, title=report.title)
         transaction.on_commit(lambda: _alert(report.id))
     return report
@@ -292,8 +294,11 @@ def make_task(actor: AnyUser, report: Report) -> Task:
         room=where if isinstance(where, Room) else None,
         item=where if isinstance(where, Item) else None,
     )
-    changed = Report.objects.filter(pk=report.pk, status=ReportStatus.OPEN).update(
-        status=ReportStatus.TASK, task=task, updated_at=timezone.now()
+    changed = changelog.update_rows(
+        Report.objects.filter(pk=report.pk, status=ReportStatus.OPEN),
+        status=ReportStatus.TASK,
+        task=task,
+        updated_at=timezone.now(),
     )
     if not changed:  # somebody else dealt with it first: undo the task too
         raise ValidationError(_("Only an open report can be made into a task."))
@@ -308,9 +313,8 @@ def close_report(actor: AnyUser, report: Report, *, resolution: str) -> Report:
     _require_write(actor, report.home)
     if resolution not in CLOSED_STATUSES:
         raise ValidationError({"resolution": _("Choose resolved or closed without action.")})
-    changed = Report.objects.filter(
-        pk=report.pk, status__in=(ReportStatus.OPEN, ReportStatus.TASK)
-    ).update(
+    changed = changelog.update_rows(
+        Report.objects.filter(pk=report.pk, status__in=(ReportStatus.OPEN, ReportStatus.TASK)),
         status=resolution,
         closed_at=timezone.now(),
         closed_by=actor if isinstance(actor, User) else None,
@@ -338,8 +342,12 @@ def reopen_report(actor: AnyUser, report: Report) -> Report:
         if report.task is not None and report.task.deleted_at is None
         else ReportStatus.OPEN
     )
-    changed = Report.objects.filter(pk=report.pk, status__in=CLOSED_STATUSES).update(
-        status=back, closed_at=None, closed_by=None, updated_at=timezone.now()
+    changed = changelog.update_rows(
+        Report.objects.filter(pk=report.pk, status__in=CLOSED_STATUSES),
+        status=back,
+        closed_at=None,
+        closed_by=None,
+        updated_at=timezone.now(),
     )
     if not changed:
         raise ValidationError(_("Only a closed report can be reopened."))

@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**The stock and the reports now feed the change log of the mobile app.** Every write of a stock item, a supplier, a stock movement, the rooms and compatible items of a stock item, and a report adds an entry to the change log, for the fields that changed. Nothing reads the log yet. The nightly purge also removes, with a stock item or a report that it deletes for good, the entries of its suppliers, movements and links and the photo files that would otherwise stay on the disk. See [Data model of the synchronization](../../../developer/sync-data-model.md)."
+msgstr "**Le stock et les signalements alimentent désormais le journal des changements de l'application mobile.** Chaque écriture d'un article du stock, d'un fournisseur, d'un mouvement de stock, des pièces et des éléments compatibles d'un article, et d'un signalement ajoute une entrée au journal, pour les champs qui ont changé. Rien ne lit encore le journal. La purge nocturne retire aussi, avec un article du stock ou un signalement qu'elle supprime pour de bon, les entrées de ses fournisseurs, mouvements et liens et les fichiers de photo qui resteraient sinon sur le disque. Voir [Modèle de données de la synchronisation](../../../developer/sync-data-model.md)."
+
