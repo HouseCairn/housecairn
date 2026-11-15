@@ -7,7 +7,7 @@
 // from): typing in one fills in the other.
 // Inside a line of the materials (`data-scope="materials-3-"`) a rule names a field of the
 // line. The buttons + and - add and remove lines there; without script the page offers
-// "Add lines", which sends the form back with more lines.
+// "Add a line", which sends the form back with one more line.
 (function () {
   "use strict";
   var form = document.querySelector("form[data-task-form], form[data-in-place-form]");

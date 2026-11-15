@@ -49,7 +49,7 @@ from housecairn.tasks.forms.materials import BaseMaterialFormSet, MaterialLineFo
 from housecairn.tasks.models import Attachment, Occurrence, Status, Task
 
 PAGE_SIZE = 30
-# The button "Add lines" of the materials, for the form without script.
+# The button "Add a line" of the materials, for the form without script.
 MORE_LINES = "materials-add"
 # How many photos of the item or the room the page of a task shows; the sheet has them all.
 PLACE_PHOTOS = 6
@@ -178,7 +178,7 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
         kwargs = super().get_form_kwargs()
         kwargs.update(home=self.home, with_files=self.with_files)
         if self.more_lines:
-            # "Add lines" without script: the form again with what was typed, nothing checked.
+            # "Add a line" without script: the form again with what was typed, nothing checked.
             kwargs.pop("data", None)
             kwargs.pop("files", None)
             kwargs["initial"] = {**kwargs.get("initial", {}), **self.typed()}
@@ -186,7 +186,7 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
 
     @cached_property
     def more_lines(self) -> bool:
-        """The button "Add lines" (without script) sent the form: show it again, longer."""
+        """The button "Add a line" (without script) sent the form: show it again, longer."""
         return self.request.method == "POST" and MORE_LINES in self.request.POST
 
     def typed(self) -> dict[str, Any]:

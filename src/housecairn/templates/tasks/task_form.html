@@ -13,7 +13,7 @@
   <form method="post" data-task-form{% if form.uploads %} enctype="multipart/form-data"{% endif %}>
     {% csrf_token %}
     {% next_field %}
-    {% if materials.can_add_more %}{# Enter in a field saves the task: this button, first in the form, is the one it presses, not "Add lines" of the materials. #}<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button>{% endif %}
+    {% if materials.can_add_more %}{# Enter in a field saves the task: this button, first in the form, is the one it presses, not "Add a line" of the materials. #}<button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button>{% endif %}
     {% include "components/form_errors.html" with form=form formset=materials only %}
     <div class="card">
       {% include "tasks/_field.html" with field=form.title %}

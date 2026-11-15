@@ -14,7 +14,7 @@ leaving the form (see [Adding a room or an item](#adding-a-room-or-an-item)):
 | Repeat (open when the task is added from an item, or when it repeats) | One sentence: **Repeat this task**, **Repeat every** N days, weeks, months or years, **Count from** the due date or the day it is done (see below). A **season** outside of which nothing falls (see below), the number of days before the date from which the task shows, and the repetition said in plain words. |
 | Who | Priority, the person in charge (a member of the home, shown by name) and the contractor, chosen in the list of the contractors of the home; its last choice, **Add a contractor…**, adds one without leaving the form (see below). The dash removes the contractor. |
 | Time and budget | Estimated duration (a number and a unit: minutes, hours, days, weeks, months or years), labour and material budgets, in the currency of the home. |
-| Materials | The stock items the task needs, one line each: the stock item and the quantity; the last choice of the list, **Add a stock item…**, adds one. Three empty lines are offered; **+** adds a line and **−** removes one, up to 50 (see [Materials](#materials)). Marking the task done takes these quantities from the stock. |
+| Materials | The stock items the task needs, one line each: the stock item and the quantity; the last choice of the list, **Add a stock item…**, adds one. One empty line is offered; **+** adds a line and **−** removes one, up to 50 (see [Materials](#materials)). Marking the task done takes these quantities from the stock. |
 | How to do it | The procedure in Markdown, notes and, when adding, photos and files. |
 
 ## Repeat
@@ -91,12 +91,12 @@ item joins the stock of the home when the task is saved, linked to the equipment
 the task (the one added by the same form included), and a form refused creates
 nothing. A name already in the stock, or added by another line, is refused with a message.
 
-Three empty lines are offered. With script, **+** adds a line and **−** removes the line it
+One empty line is offered. With script, **+** adds a line and **−** removes the line it
 is on, up to 50 lines (the number of stock items a task may list); when the limit is reached
 **+** is disabled and a notice says so, which a screen reader announces. Without script,
-**Add lines** sends the form back with what was typed and three more lines, without
+**Add a line** sends the form back with what was typed and one more line, without
 checking or saving anything (the files chosen have to be chosen again); to remove a line,
-set its stock item to the dash. Pressing Enter in a field saves the task, never **Add lines**.
+set its stock item to the dash. Pressing Enter in a field saves the task, never **Add a line**.
 
 ## Contractor
 

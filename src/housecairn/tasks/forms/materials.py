@@ -28,8 +28,9 @@ class ArticleAddField(AddInPlaceChoiceField):
         return str(obj.name)
 
 
-# Added to the formset by "Add lines" without script, and shown empty at first.
-EXTRA_LINES = 3
+# Shown empty at first, and added by "Add a line" without script: one line, the next ones
+# come with + (with script) or that button.
+EXTRA_LINES = 1
 
 
 def _quantity() -> QuantityField:
