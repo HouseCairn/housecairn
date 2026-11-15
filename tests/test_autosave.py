@@ -21,6 +21,7 @@ pytest_plugins = ("tests.rooms_fixtures", "tests.stock_fixtures")
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("media_root")]
 
 HTMX = {"HTTP_HX_REQUEST": "true"}
+TODAY = datetime.date(2026, 12, 1)
 
 
 class _Form(HTMLParser):
@@ -137,6 +138,24 @@ class TestTheItemSheet:
         owner_item.refresh_from_db()
         assert owner_item.name == "Boiler"
 
+    @pytest.mark.parametrize("duration", ["0", "100"])
+    def test_a_warranty_duration_out_of_bounds_is_shown_under_its_field(
+        self, signed_in: Client, alice_home: Home, owner_item: Item, duration: str
+    ) -> None:
+        url = item_url(alice_home, owner_item)
+        page = signed_in.get(url).text
+        # The page holds a place for the error of the duration and of the unit.
+        assert 'id="autosave-error-warranty_duration"' in page
+        assert 'id="autosave-error-warranty_duration_unit"' in page
+        code, text = autosave(signed_in, url, warranty_duration=duration)
+        assert code == 200
+        assert "Not saved" in text
+        error = text.split('id="autosave-error-warranty_duration"')[1].split("</span>")[0]
+        assert "hidden" not in error.split(">")[0]
+        assert "Ensure this value is" in error
+        owner_item.refresh_from_db()
+        assert owner_item.warranty_duration is None
+
     def test_a_new_contractor_waits_for_the_button(
         self, signed_in: Client, alice_home: Home, owner_item: Item
     ) -> None:
@@ -209,6 +228,30 @@ class TestTheOtherSheets:
         before = Change.objects.filter(row_id=task.pk).count()
         autosave(signed_in, url)
         assert Change.objects.filter(row_id=task.pk).count() == before
+
+    def test_the_calculated_material_budget_follows_a_priced_line(
+        self, signed_in: Client, alice: User, alice_home: Home
+    ) -> None:
+        task = task_services.create_task(alice, alice_home, title="Descale", due_on=TODAY)
+        url = reverse("tasks:edit", kwargs={"home_id": alice_home.id, "task_id": task.id})
+        page = signed_in.get(url).text
+        assert 'id="material-budget"' in page
+        assert "data-material-from-stock" not in page
+        article = stock_services.create_article(
+            alice, alice_home, name="Water filter", unit="piece", unit_price=Decimal("7.90")
+        )
+        code, text = autosave(
+            signed_in, url, **{"materials-0-article": str(article.pk), "materials-0-quantity": "1"}
+        )
+        assert code == 200
+        assert "Saved" in text, text
+        block = text.split('id="material-budget"')[1].split("</div>")[0]
+        assert 'hx-swap-oob="true"' in text.split('id="material-budget"')[1][:60]
+        assert "data-material-from-stock" in block
+        assert "€7.90 each time, calculated from the stock items of the task." in block
+        # Another field changed: the block is left alone (a figure being typed keeps its focus).
+        _code, text = autosave(signed_in, url, notes="Use the white vinegar")
+        assert 'id="material-budget"' not in text
 
     def test_a_stock_item(self, signed_in: Client, alice: User, alice_home: Home) -> None:
         article = stock_services.create_article(alice, alice_home, name="Water filter")

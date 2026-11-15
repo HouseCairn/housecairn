@@ -941,6 +941,10 @@ msgstr "Rien ne correspond."
 msgid "Nothing done yet."
 msgstr "Rien de fait pour l'instant."
 
+#, python-format
+msgid "%(amount)s each time, calculated from the stock items of the task."
+msgstr "%(amount)s à chaque fois, calculé à partir des articles de la tâche."
+
 msgid "New stock item"
 msgstr "Nouvel article"
 
@@ -1249,10 +1253,6 @@ msgstr "Utilisé seulement avec « Ajouter un intervenant… » dans la liste ci
 
 msgid "Time and budget"
 msgstr "Durée et budget"
-
-#, python-format
-msgid "%(amount)s each time, calculated from the stock items of the task."
-msgstr "%(amount)s à chaque fois, calculé à partir des articles de la tâche."
 
 msgid "Delete the task"
 msgstr "Supprimer la tâche"

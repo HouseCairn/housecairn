@@ -17,6 +17,7 @@ from django.db.models import prefetch_related_objects
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.urls import Resolver404, reverse
 from django.utils import translation
@@ -422,6 +423,24 @@ class TaskEditView(AutosaveMixin, TaskFormMixin):
 
     def autosave_changed(self, form: forms.TaskForm) -> bool:
         return form.has_changed() or (self.materials_sent and self.materials.has_changed())
+
+    def autosave_extra(self, form: forms.TaskForm) -> str:
+        """The material budget follows the stock items just saved: calculated, or typed again."""
+        if not (self.materials_sent and self.materials.has_changed()):
+            return ""
+        from housecairn.budget import services as budget_services
+
+        return render_to_string(
+            "tasks/_material_budget.html",
+            {
+                "form": form,
+                "home": self.home,
+                "stock_plan": budget_services.stock_plan_of(self.get_task()),
+                "autosave": True,
+                "oob": True,
+            },
+            request=self.request,
+        )
 
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()

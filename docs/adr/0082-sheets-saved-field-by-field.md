@@ -20,8 +20,10 @@ limits as the other forms.
   `_autosave=1`. The view, the form, the CSRF token, the services and the change log are those of
   the button; `core.autosave.AutosaveMixin` changes only the answer: a status in
   `#autosave-status` (`role="status"`, `aria-live="polite"`) and, by out-of-band swaps, the error
-  of each field in a place under it, empty when the field is right. Nothing in the form is
-  replaced, so nothing typed is lost.
+  of each field in a place under it, empty when the field is right (every field has one, the
+  duration and the unit of a warranty included). Nothing the user types in is replaced, so nothing
+  typed is lost; the one exception is a figure the form calculates (the material budget of a task,
+  from its priced stock items), swapped in place when the stock items of the task changed.
 - **One write per field changed.** A form whose values are those stored (`has_changed`, and the
   lines of the materials of a task) writes nothing; the change log records only the fields whose
   value changed (`sync.rows`). The timer of the typing is cancelled by the change of the same

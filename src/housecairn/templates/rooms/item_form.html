@@ -28,6 +28,7 @@
             <label for="{{ form.warranty_duration.id_for_label }}">{% translate "Duration" %}</label>
             <span class="field-pair">{{ form.warranty_duration }}<label class="sr-only" for="{{ form.warranty_duration_unit.id_for_label }}">{% translate "Unit" %}</label>{{ form.warranty_duration_unit }}</span>
             <span class="helptext">{{ form.warranty_duration.help_text }}</span>
+            {% if autosave %}<span id="autosave-error-{{ form.warranty_duration.html_name }}" class="autosave-error" hidden></span><span id="autosave-error-{{ form.warranty_duration_unit.html_name }}" class="autosave-error" hidden></span>{% endif %}
           </p>
           {% include "tasks/_field.html" with field=form.warranty_provider %}
           {% include "tasks/_field.html" with field=form.warranty_provider_name %}

@@ -17,6 +17,7 @@ from typing import Any
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 AUTOSAVE_KEY = "_autosave"
@@ -59,6 +60,10 @@ class AutosaveMixin:
         cleaned = [getattr(f, "cleaned_data", {}) or {} for f in self.autosave_forms(form)]
         return any(data.get(key) for data in cleaned for key in CREATING_KEYS)
 
+    def autosave_extra(self, form: Any) -> str:
+        """Markup swapped in place after a save (`hx-swap-oob`), for what a field changes."""
+        return ""
+
     # ---------- the answers ----------
 
     def _answer(self, form: Any, status: str, *, failed: bool = False) -> HttpResponse:
@@ -71,7 +76,13 @@ class AutosaveMixin:
         return render(
             self.request,
             "components/autosave_result.html",
-            {"status": status, "failed": failed, "fields": fields, "general": general},
+            {
+                "status": status,
+                "failed": failed,
+                "fields": fields,
+                "general": general,
+                "extra": "" if failed else mark_safe(self.autosave_extra(form)),  # noqa: S308
+            },
         )
 
     def form_invalid(self, form: Any) -> HttpResponse:
