@@ -20,6 +20,14 @@ The notes of each version are also published with it on the project's
 ```{release-fragments} upgrade
 ```
 
+## 0.4.1
+
+HouseCairn is still alpha software. This version lets phones connect with the HouseCairn mobile app: in 0.4.0 the server refused, for want of a CSRF cookie, the requests with which the app exchanges its sign-in code, renews its access and disconnects, so a phone could not finish connecting. Nothing else changes: no migration runs and no setting is new.
+
+### Fixed
+
+- **Mobile app sign-in.** The token and revocation endpoints (`/o/token/` and `/o/revoke_token/`) no longer answer 403 when the mobile app calls them without a CSRF cookie, which kept the app from exchanging its code, refreshing its access or disconnecting. The consent page keeps its CSRF check.
+
 ## 0.4.0
 
 HouseCairn is still alpha software. This version opens the server to the HouseCairn mobile app: a phone connects with OAuth 2 and PKCE, sees only the homes it was given, and reads and pushes their changes field by field through a new sync API, checked against the rules the web applies. It also adds barcodes to the stock and the items, a list of every item of the home with its manufacturer's warranty, the archiving of a home and sheets saved as you go, and fixes a sign-in that could sign the person out at once. Read the upgrade notes before updating: eleven migrations of HouseCairn and those of a new dependency run, two settings are new, the export format becomes version 4, and going back to 0.3.2 needs the backup made before.
