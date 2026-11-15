@@ -10,7 +10,7 @@ from housecairn.accounts.models import User
 from housecairn.apitokens import transport
 from housecairn.core.proxy import ForwardedHeadersMiddleware
 from housecairn.homes.models import Home
-from tests.oauth_support import code_of, consent, exchange
+from tests.oauth_support import authorize_params, code_of, consent, exchange, pkce_pair
 
 
 @pytest.fixture(autouse=True)
@@ -69,6 +69,7 @@ class TestRule:
             ("172.16.1.30", "example.com"),
             ("172.16.1.30", "8.8.8.8"),  # a public literal
             ("2001:4860:4860::8888", "[fd00::1]"),
+            ("172.16.1.30", "[::ffff:8.8.8.8]"),  # a public IPv4 address carried in IPv6
         ],
     )
     def test_each_condition_alone_fails(self, peer: str, host: str) -> None:
@@ -103,6 +104,16 @@ class TestRule:
             request = make("172.16.1.1", "172.16.1.20", HTTP_X_FORWARDED_FOR="172.16.1.30")
             assert transport.refusal(request) is None  # type: ignore[arg-type]
 
+    def test_forwarded_for_from_an_untrusted_peer_is_ignored(self) -> None:
+        # A public peer that claims a local client: no proxy is trusted, the peer decides.
+        with override_settings(HOUSECAIRN_FORWARDED_ALLOW_IPS=[]):
+            request = make("8.8.8.8", "172.16.1.20", HTTP_X_FORWARDED_FOR="172.16.1.30")
+            assert transport.refusal(request) is not None  # type: ignore[arg-type]
+        # Trusted proxies elsewhere change nothing for this peer.
+        with override_settings(HOUSECAIRN_FORWARDED_ALLOW_IPS=["127.0.0.1"]):
+            request = make("8.8.8.8", "172.16.1.20", HTTP_X_FORWARDED_FOR="172.16.1.30")
+            assert transport.refusal(request) is not None  # type: ignore[arg-type]
+
     def test_https_needs_neither(self) -> None:
         request = RequestFactory().get(
             "/", REMOTE_ADDR="8.8.8.8", HTTP_HOST="example.com", secure=True
@@ -126,39 +137,36 @@ class TestEndpoints:
 
     def test_plain_http_on_the_local_network(self, alice: User, alice_home: Home) -> None:
         local = {"REMOTE_ADDR": "172.16.1.30", "HTTP_HOST": "172.16.1.20:8000"}
-        if True:
-            client = Client()
-            client.force_login(alice)
-            answer, verifier = consent(client, [alice_home], secure=False, **local)
-            assert answer.status_code == 302
-            page = client.get("/api/v1/sync/info", **local)  # type: ignore[arg-type]
-            assert page.status_code in (200, 403)
-            tokens = exchange(Client(), code_of(answer), verifier, secure=False, **local)
-            assert tokens.status_code == 200, tokens.content
-            info = Client().get(
-                "/api/v1/sync/info",
-                HTTP_AUTHORIZATION=f"Bearer {tokens.json()['access_token']}",
-                **local,  # type: ignore[arg-type]
-            )
-            assert info.status_code == 200
+        client = Client()
+        client.force_login(alice)
+        answer, verifier = consent(client, [alice_home], secure=False, **local)
+        assert answer.status_code == 302
+        # The transport passes; the session is then refused by the sync API itself.
+        page = client.get("/api/v1/sync/info", **local)  # type: ignore[arg-type]
+        assert page.status_code == 403
+        assert page.json()["code"] == "sync_needs_connection"
+        tokens = exchange(Client(), code_of(answer), verifier, secure=False, **local)
+        assert tokens.status_code == 200, tokens.content
+        info = Client().get(
+            "/api/v1/sync/info",
+            HTTP_AUTHORIZATION=f"Bearer {tokens.json()['access_token']}",
+            **local,  # type: ignore[arg-type]
+        )
+        assert info.status_code == 200
 
     def test_the_consent_page_warns_on_plain_http(self, alice: User, alice_home: Home) -> None:
         local = {"REMOTE_ADDR": "172.16.1.30", "HTTP_HOST": "172.16.1.20"}
-        if True:
-            client = Client()
-            client.force_login(alice)
-            from tests.oauth_support import authorize_params, pkce_pair
-
-            _verifier, challenge = pkce_pair()
-            page = client.get("/o/authorize/", authorize_params(challenge), **local)  # type: ignore[arg-type]
-            assert page.status_code == 200
-            assert "not encrypted" in page.content.decode()
+        client = Client()
+        client.force_login(alice)
+        _verifier, challenge = pkce_pair()
+        page = client.get("/o/authorize/", authorize_params(challenge), **local)  # type: ignore[arg-type]
+        assert page.status_code == 200
+        assert "not encrypted" in page.content.decode()
 
     def test_a_public_peer_with_a_private_host_is_refused(self) -> None:
-        if True:
-            answer = Client().post("/o/token/", {}, REMOTE_ADDR="9.9.9.9", HTTP_HOST="172.16.1.20")
-            assert answer.status_code == 403
-            assert answer.json()["code"] == "insecure_transport"
+        answer = Client().post("/o/token/", {}, REMOTE_ADDR="9.9.9.9", HTTP_HOST="172.16.1.20")
+        assert answer.status_code == 403
+        assert answer.json()["code"] == "insecure_transport"
 
 
 class TestOauthlibAddress:

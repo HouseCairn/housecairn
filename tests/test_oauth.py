@@ -228,13 +228,14 @@ class TestConsent:
         verifier, _challenge = pkce_pair()
         params = authorize_params(verifier, code_challenge_method="plain")
         page = client.get(reverse("oauth2_provider:authorize"), params, secure=True)
+        # oauthlib lets `plain` through to the page; the post is refused before a connection.
+        assert page.status_code == 200
         data = {**params, "homes": [str(alice_home.id)], "allow": "1"}
         answer = client.post(reverse("oauth2_provider:authorize"), data, secure=True)
         assert answer.status_code == 302
         assert "code=" not in answer["Location"]
         assert "error=invalid_request" in answer["Location"]
         assert not AppConnection.objects.exists()
-        assert page.status_code in (200, 302, 400)
 
     def test_pkce_missing_is_refused(self, client: Client, alice: User) -> None:
         client.force_login(alice)
@@ -251,8 +252,10 @@ class TestConsent:
         _verifier, challenge = pkce_pair()
         params = authorize_params(challenge, redirect_uri="https://example.com/callback")
         page = client.get(reverse("oauth2_provider:authorize"), params, secure=True)
-        assert page.status_code in (200, 400)
-        assert "form" not in (page.context or {}) or page.context.get("error")
+        # An error page, never a redirect to the address given.
+        assert page.status_code == 400
+        assert "Mismatching redirect URI" in str(page.context["error"])
+        assert not page.has_header("Location")
 
     def test_the_mobile_app_turned_off(self, client: Client, alice: User) -> None:
         mobile_app(on=False)
@@ -519,3 +522,314 @@ class TestUnits:
         assert TokenScopePermission().has_permission(request, SyncInfoView())
         request.auth.scope = "homes.create"
         assert not TokenScopePermission().has_permission(request, SyncInfoView())
+
+
+class TestConsentIsNeverSkipped:
+    """Follow-ups of the review of M2: each test fails without the control it names."""
+
+    def test_approval_prompt_auto_still_shows_the_page(
+        self, client: Client, alice: User, alice_home: Home
+    ) -> None:
+        # A person who has a live token of the client: the toolkit would approve in silence.
+        connect(alice, [alice_home])
+        grants = Grant.objects.count()
+        client.force_login(alice)
+        _verifier, challenge = pkce_pair()
+        page = client.get(
+            reverse("oauth2_provider:authorize"),
+            authorize_params(challenge, approval_prompt="auto"),
+            secure=True,
+        )
+        assert page.status_code == 200
+        assert 'name="allow"' in page.content.decode()
+        assert Grant.objects.count() == grants
+        assert AppConnection.objects.count() == 1
+
+    def test_the_form_needs_its_csrf_token(self, alice: User, alice_home: Home) -> None:
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(alice)
+        _verifier, challenge = pkce_pair()
+        params = authorize_params(challenge)
+        page = client.get(reverse("oauth2_provider:authorize"), params, secure=True)
+        assert page.status_code == 200
+        data = {**params, "homes": [str(alice_home.id)], "allow": "1"}
+        url = reverse("oauth2_provider:authorize")
+        referer = {"HTTP_REFERER": "https://testserver" + url}
+        forged = client.post(url, data, secure=True, **referer)
+        assert forged.status_code == 403
+        assert not AppConnection.objects.exists()
+        # The same post with the page's token goes through: the 403 was the CSRF check.
+        data["csrfmiddlewaretoken"] = client.cookies[settings.CSRF_COOKIE_NAME].value
+        answer = client.post(url, data, secure=True, **referer)
+        code_of(answer)
+        assert AppConnection.objects.count() == 1
+
+    def test_the_page_cannot_be_framed(self, client: Client, alice: User) -> None:
+        client.force_login(alice)
+        _verifier, challenge = pkce_pair()
+        page = client.get(
+            reverse("oauth2_provider:authorize"), authorize_params(challenge), secure=True
+        )
+        assert page.status_code == 200
+        assert page["X-Frame-Options"] == "DENY"
+        assert "frame-ancestors 'none'" in page["Content-Security-Policy"]
+
+    @override_settings(
+        EMAIL_HOST="smtp.example.com",
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        ACCOUNT_EMAIL_NOTIFICATIONS=True,
+    )
+    def test_a_post_with_another_redirect_uri_gives_no_code_and_no_email(
+        self, client: Client, alice: User, alice_home: Home
+    ) -> None:
+        client.force_login(alice)
+        _verifier, challenge = pkce_pair()
+        params = authorize_params(challenge)
+        client.get(reverse("oauth2_provider:authorize"), params, secure=True)
+        data = {
+            **params,
+            "redirect_uri": "https://example.com/callback",
+            "homes": [str(alice_home.id)],
+            "allow": "1",
+        }
+        answer = client.post(reverse("oauth2_provider:authorize"), data, secure=True)
+        assert answer.status_code == 400
+        assert not Grant.objects.exists()
+        # The connection made before oauthlib's own check is revoked, and no email went out.
+        assert not AppConnection.objects.filter(revoked_at__isnull=True).exists()
+        assert mail.outbox == []
+
+    def test_homes_create_unticked_leaves_the_scope_out(
+        self, alice: User, alice_home: Home
+    ) -> None:
+        phone = connect(alice, [alice_home], scope="sync homes.create", may_create_homes=False)
+        assert phone.connection.may_create_homes is False
+        assert AccessToken.objects.get().scope == "sync"
+        assert RefreshToken.objects.get().access_token.scope == "sync"
+
+    def test_homes_create_ticked_keeps_the_scope(self, alice: User, alice_home: Home) -> None:
+        connect(alice, [alice_home], scope="sync homes.create", may_create_homes=True)
+        assert set(AccessToken.objects.get().scope.split()) == {"sync", "homes.create"}
+
+
+def _revoked_in_place(connection: AppConnection) -> None:
+    """The connection marked revoked, its tokens left alive: what only a guard can stop."""
+    AppConnection.objects.filter(pk=connection.pk).update(revoked_at=timezone.now())
+
+
+def _account_off(user: User) -> None:
+    User.objects.filter(pk=user.pk).update(is_active=False)
+
+
+class TestStoppedConnection:
+    """A connection revoked, or its account turned off, opens nothing more."""
+
+    @pytest.mark.parametrize("how", ["revoked", "account_off"])
+    def test_its_access_token_is_a_401(self, alice: User, alice_home: Home, how: str) -> None:
+        phone = connect(alice, [alice_home])
+        if how == "revoked":
+            _revoked_in_place(phone.connection)
+        else:
+            _account_off(alice)
+        assert info(phone.access).status_code == 401  # type: ignore[attr-defined]
+        answer = Client().get(
+            reverse("api-v1:home-list"), secure=True, HTTP_AUTHORIZATION=f"Bearer {phone.access}"
+        )
+        assert answer.status_code == 401
+
+    @pytest.mark.parametrize("how", ["revoked", "account_off"])
+    def test_its_refresh_token_is_a_400(self, alice: User, alice_home: Home, how: str) -> None:
+        phone = connect(alice, [alice_home])
+        if how == "revoked":
+            _revoked_in_place(phone.connection)
+        else:
+            _account_off(alice)
+        answer = refresh(Client(), phone.refresh)
+        assert answer.status_code == 400
+        assert answer.json()["error"] == "invalid_grant"
+        assert AccessToken.objects.count() == 1
+
+    @pytest.mark.parametrize("how", ["revoked", "account_off"])
+    def test_its_code_is_a_400(
+        self, client: Client, alice: User, alice_home: Home, how: str
+    ) -> None:
+        client.force_login(alice)
+        answer, verifier = consent(client, [alice_home])
+        code = code_of(answer)
+        connection = AppConnection.objects.get()
+        if how == "revoked":
+            _revoked_in_place(connection)
+        else:
+            _account_off(alice)
+        tokens = exchange(Client(), code, verifier)
+        assert tokens.status_code == 400
+        assert tokens.json()["error"] == "invalid_grant"
+        assert not AccessToken.objects.exists()
+
+
+class TestValidatorUnits:
+    """Each check of `ConnectionValidator` alone, since the next one would hide its absence."""
+
+    def _request(self) -> Any:
+        from oauthlib.common import Request as OAuthRequest
+
+        request = OAuthRequest("https://testserver/o/token/")
+        request.client = Application.objects.get()
+        return request
+
+    @pytest.mark.parametrize("how", ["revoked", "account_off"])
+    def test_validate_code_refuses_a_stopped_connection(
+        self, client: Client, alice: User, alice_home: Home, how: str
+    ) -> None:
+        from housecairn.apitokens.oauth import ConnectionValidator
+
+        client.force_login(alice)
+        answer, _verifier = consent(client, [alice_home])
+        code = code_of(answer)
+        request = self._request()
+        assert ConnectionValidator().validate_code(CLIENT_ID, code, request.client, request)
+        if how == "revoked":
+            _revoked_in_place(AppConnection.objects.get())
+        else:
+            _account_off(alice)
+        request = self._request()
+        assert not ConnectionValidator().validate_code(CLIENT_ID, code, request.client, request)
+
+    @pytest.mark.parametrize("how", ["revoked", "account_off"])
+    def test_validate_refresh_token_refuses_a_stopped_connection(
+        self, alice: User, alice_home: Home, how: str
+    ) -> None:
+        from housecairn.apitokens.oauth import ConnectionValidator
+
+        phone = connect(alice, [alice_home])
+        request = self._request()
+        assert ConnectionValidator().validate_refresh_token(phone.refresh, request.client, request)
+        if how == "revoked":
+            _revoked_in_place(phone.connection)
+        else:
+            _account_off(alice)
+        request = self._request()
+        assert not ConnectionValidator().validate_refresh_token(
+            phone.refresh, request.client, request
+        )
+
+    @pytest.mark.parametrize("how", ["revoked", "account_off"])
+    def test_no_token_is_made_for_a_stopped_connection(
+        self, alice: User, alice_home: Home, how: str
+    ) -> None:
+        """Both makers read the connection again, so each refuses on its own."""
+        from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
+
+        from housecairn.apitokens.oauth import ConnectionValidator
+
+        phone = connect(alice, [alice_home])
+        if how == "revoked":
+            _revoked_in_place(phone.connection)
+        else:
+            _account_off(alice)
+        request = self._request()
+        request.user = alice
+        request.housecairn_connection = phone.connection
+        tokens = AccessToken.objects.count(), RefreshToken.objects.count()
+        with pytest.raises(InvalidGrantError):
+            ConnectionValidator()._create_access_token(
+                timezone.now() + timedelta(hours=1),
+                request,
+                {"access_token": "hca_new", "scope": "sync"},
+            )
+        with pytest.raises(InvalidGrantError):
+            ConnectionValidator()._create_refresh_token(
+                request, "hcr_new", AccessToken.objects.get(), None
+            )
+        assert (AccessToken.objects.count(), RefreshToken.objects.count()) == tokens
+
+    def test_a_revocation_during_a_rotation_gives_no_token(
+        self, alice: User, alice_home: Home, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The refresh token is checked, then the connection is revoked, then the token would
+        be made: `_create_access_token` reads the connection again and refuses."""
+        from housecairn.apitokens.oauth import ConnectionValidator
+
+        phone = connect(alice, [alice_home])
+        checked = ConnectionValidator.validate_refresh_token
+
+        def check_then_revoke(self: Any, *args: Any, **kwargs: Any) -> bool:
+            valid: bool = checked(self, *args, **kwargs)
+            _revoked_in_place(phone.connection)
+            return valid
+
+        monkeypatch.setattr(ConnectionValidator, "validate_refresh_token", check_then_revoke)
+        answer = refresh(Client(), phone.refresh)
+        assert answer.status_code == 400
+        assert answer.json()["error"] == "invalid_grant"
+        assert AccessToken.objects.count() == 1
+        # The whole exchange was rolled back: the refresh token was not rotated.
+        assert RefreshToken.objects.get().revoked is None
+
+    def test_a_revocation_during_the_exchange_gives_no_token(
+        self, client: Client, alice: User, alice_home: Home, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from housecairn.apitokens.oauth import ConnectionValidator
+
+        client.force_login(alice)
+        answer, verifier = consent(client, [alice_home])
+        checked = ConnectionValidator.validate_code
+
+        def check_then_revoke(self: Any, *args: Any, **kwargs: Any) -> bool:
+            valid: bool = checked(self, *args, **kwargs)
+            _revoked_in_place(AppConnection.objects.get())
+            return valid
+
+        monkeypatch.setattr(ConnectionValidator, "validate_code", check_then_revoke)
+        tokens = exchange(Client(), code_of(answer), verifier)
+        assert tokens.status_code == 400
+        assert not AccessToken.objects.exists()
+        assert not RefreshToken.objects.exists()
+
+
+class TestTokenEndpoint:
+    def test_it_is_rate_limited_as_signing_in(self) -> None:
+        admin = User.objects.create_user(
+            email="admin-limits@example.com", is_staff=True, is_superuser=True
+        )
+        settings_services.update(admin, {"ratelimit_login": 2})
+        client = Client()
+        answers = [
+            client.post(reverse("oauth2_provider:token"), {}, secure=True).status_code
+            for _ in range(3)
+        ]
+        assert answers == [400, 400, 429]
+        assert client.post(reverse("oauth2_provider:token"), {}, secure=True).json() == {
+            "detail": "Too many attempts. Try again later.",
+            "code": "rate_limited",
+        }
+
+    def test_a_code_of_another_client_is_refused(
+        self, client: Client, alice: User, alice_home: Home
+    ) -> None:
+        other = Application.objects.create(
+            client_id="another-app",
+            client_type=Application.CLIENT_PUBLIC,
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            redirect_uris=REDIRECT_URI,
+            name="Another app",
+        )
+        client.force_login(alice)
+        answer, verifier = consent(client, [alice_home])
+        code = code_of(answer)
+        stolen = Client().post(
+            reverse("oauth2_provider:token"),
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": REDIRECT_URI,
+                "client_id": other.client_id,
+                "code_verifier": verifier,
+            },
+            secure=True,
+        )
+        assert stolen.status_code == 400
+        assert stolen.json()["error"] == "invalid_grant"
+        assert not AccessToken.objects.exists()
+        # The code is still the phone's: its own client exchanges it.
+        assert exchange(Client(), code, verifier).status_code == 200

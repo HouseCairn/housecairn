@@ -33,8 +33,10 @@ and a public client, mounted at `/o/`.
 
 ### Library: django-oauth-toolkit
 
-**django-oauth-toolkit** (3.4.x, BSD-2-Clause, Django 5.2 supported, release 3.4.1 of
-2026-08-21), as ADR 0007 planned, mounted at `/o/`. It implements the authorization code
+**django-oauth-toolkit** (3.4.x, BSD-2-Clause in the FreeBSD wording, SPDX
+`BSD-2-Clause-Views`, as [ADR 0001](0001-record-architecture-decisions-and-dependencies.md)
+records; Django 5.2 supported, release 3.4.1 of 2026-08-21), as ADR 0007 planned, mounted at
+`/o/`. It implements the authorization code
 grant with PKCE on oauthlib, refresh token rotation with reuse detection, revocation
 (RFC 7009), opaque tokens checked in the database (so a revocation takes effect at the next
 request), tokens stored hashed (`COMPLIANT_BCP_RFC9700_TOKEN_STORAGE`), private-use URI schemes
@@ -233,7 +235,8 @@ opens none of them.
 
 The app opens `/o/authorize/` with `client_id`, `redirect_uri`, `state`, `code_challenge`,
 `scope` and the phone's name. The person signs in by the usual page if needed, then sees a page
-of Housecairn (`REQUEST_APPROVAL_PROMPT = "force"`, never skipped):
+of Housecairn (`REQUEST_APPROVAL_PROMPT = "force"`, never skipped; an `approval_prompt` in the
+address is dropped, so `approval_prompt=auto` cannot skip it either):
 
 - the name of the app and the address of the server, as typed;
 - "This phone will see and change everything in the homes you choose, as you can";
@@ -256,7 +259,8 @@ connections stay listed and are not revoked, so turning the setting on again bri
 
 A new connection sends the account the security email of
 [ADR 0023](0023-audit-log-export-erasure-and-email-alerts.md) ("A phone was connected to your
-account"), and is recorded in the audit log.
+account"), once oauthlib has accepted the request and given a code, and is recorded in the
+audit log.
 
 ### Lifetimes
 

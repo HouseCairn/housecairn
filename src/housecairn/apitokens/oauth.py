@@ -6,7 +6,8 @@
 - `ConnectionValidator` binds every grant and token to exactly one `AppConnection`: the consent
   creates the connection and its grant, the exchange of the code carries it to the tokens,
   every rotation keeps it. A token without a connection, or of a revoked connection, is
-  refused; a refresh token presented again after its rotation revokes the connection.
+  refused, and the connection is read again, locked, just before a token is made; a
+  refresh token presented again after its rotation revokes the connection.
 """
 
 import hashlib
@@ -18,6 +19,7 @@ from django.db import transaction
 from oauth2_provider.models import AccessToken, Grant, RefreshToken
 from oauth2_provider.oauth2_backends import OAuthLibCore
 from oauth2_provider.oauth2_validators import OAuth2Validator
+from oauthlib.oauth2.rfc6749.errors import InvalidGrantError
 
 from housecairn.apitokens import transport
 from housecairn.apitokens.models import (
@@ -59,6 +61,22 @@ class TransportRuleCore(OAuthLibCore):  # type: ignore[misc]
         parts = urlsplit(absolute)
         return urlunsplit(("https", *parts[1:]))
 
+    def create_token_response(self, request: Any) -> tuple[Any, dict[str, str], str, int]:
+        """An error raised while the token is saved is JSON too, as oauthlib's own are.
+
+        oauthlib words the errors of its checks with its default headers, but an error raised
+        after them (`_still_usable`) reaches the toolkit with the error's headers alone.
+        """
+        uri, headers, body, status = super().create_token_response(request)
+        if status >= 400 and "Content-Type" not in headers:
+            headers = {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store",
+                "Pragma": "no-cache",
+                **headers,
+            }
+        return uri, headers, body, status
+
 
 def _usable(connection: AppConnection | None) -> bool:
     from housecairn.apitokens import connections
@@ -69,6 +87,22 @@ def _usable(connection: AppConnection | None) -> bool:
         and connection.user.is_active
         and connections.mobile_app_enabled()
     )
+
+
+def _still_usable(connection: AppConnection, request: Any) -> None:
+    """Read the connection again, locked as `connections.revoke` locks it, before a token.
+
+    A revocation, or an account turned off, between the check of the code or refresh token
+    and the making of the token gives no token: the error rolls the whole exchange back.
+    """
+    current = (
+        AppConnection.objects.select_for_update(of=("self",))
+        .select_related("user")
+        .filter(pk=connection.pk)
+        .first()
+    )
+    if not _usable(current):
+        raise InvalidGrantError(request=request)
 
 
 class ConnectionValidator(OAuth2Validator):  # type: ignore[misc]
@@ -129,6 +163,7 @@ class ConnectionValidator(OAuth2Validator):  # type: ignore[misc]
         if not isinstance(connection, AppConnection):
             raise ValueError("an access token needs its connection")
         with transaction.atomic():
+            _still_usable(connection, request)
             created: AccessToken = super()._create_access_token(
                 expires, request, token, source_refresh_token
             )
@@ -142,6 +177,7 @@ class ConnectionValidator(OAuth2Validator):  # type: ignore[misc]
         if not isinstance(connection, AppConnection):
             raise ValueError("a refresh token needs its connection")
         with transaction.atomic():
+            _still_usable(connection, request)
             created: RefreshToken = super()._create_refresh_token(
                 request, refresh_token_code, access_token, previous_refresh_token
             )

@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.test import Client
 from django.test.utils import override_settings
 from django.urls import reverse
@@ -24,6 +24,7 @@ from housecairn.apitokens import services as token_services
 from housecairn.apitokens.models import Scope
 from housecairn.audit.models import AuditEvent
 from housecairn.calendar import feeds
+from housecairn.calendar.models import Feed
 from housecairn.homes import current, exports, restore
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Role
@@ -375,6 +376,85 @@ class TestCalendarFeeds:
         assert [str(e["SUMMARY"]) for e in events(self.fetch(raw).content)] == ["Boiler"]
 
 
+class TestNoNewFeed:
+    """An archived home gets no new feed (API, form, screen); one it has keeps its line."""
+
+    def test_the_service_refuses(self, alice: User, alice_home: Home) -> None:
+        home_services.archive_home(alice, alice_home)
+        with pytest.raises(ValidationError):
+            feeds.create_feed(alice, alice_home)
+        assert not Feed.objects.exists()
+        # The combined feed is still made: it leaves archived homes out.
+        feeds.create_feed(alice, None)
+        assert Feed.objects.filter(home__isnull=True).count() == 1
+
+    def test_the_api_refuses(self, api_client: APIClient, alice: User, alice_home: Home) -> None:
+        home_services.archive_home(alice, alice_home)
+        api_client.force_login(alice)
+        url = reverse("api-v1:calendar-feed-list")
+        response = api_client.post(url, {"home": str(alice_home.id)}, format="json")
+        assert response.status_code == 400
+        assert "archived" in " ".join(response.json()["detail"])
+        assert not Feed.objects.exists()
+        home_services.unarchive_home(alice, alice_home)
+        response = api_client.post(url, {"home": str(alice_home.id)}, format="json")
+        assert response.status_code == 201
+
+    def test_a_forged_form_is_refused(
+        self, signed_in: Client, alice: User, alice_home: Home
+    ) -> None:
+        home_services.archive_home(alice, alice_home)
+        response = signed_in.post(reverse("calendar:feeds"), {"home": str(alice_home.id)})
+        assert response.status_code == 302
+        assert response["Location"] == reverse("calendar:feeds")
+        assert not Feed.objects.exists()
+        page = signed_in.get(reverse("calendar:feeds")).content.decode()
+        assert "This home is archived. Bring it back to make a feed of it." in page
+
+    def test_the_screen_offers_no_feed_but_keeps_an_existing_one(
+        self, signed_in: Client, alice: User, alice_home: Home, flat: Home
+    ) -> None:
+        feed, _raw = feeds.create_feed(alice, flat)
+        home_services.archive_home(alice, alice_home)
+        home_services.archive_home(alice, flat)
+        rows = signed_in.get(reverse("calendar:feeds")).context["rows"]
+        assert [(home.id if home else None, found) for home, found in rows] == [
+            (None, None),
+            (flat.id, feed),
+        ]
+        # The kept line still regenerates and revokes its feed.
+        regenerate = reverse("calendar:regenerate", kwargs={"feed_id": feed.id})
+        assert signed_in.post(regenerate).status_code == 200
+        home_services.unarchive_home(alice, alice_home)
+        rows = signed_in.get(reverse("calendar:feeds")).context["rows"]
+        assert [home.id if home else None for home, _found in rows] == [
+            None,
+            alice_home.id,
+            flat.id,
+        ]
+
+
+class TestRecurringTask:
+    def test_finishing_a_recurring_task_of_an_archived_home_makes_the_next(
+        self, alice: User, alice_home: Home
+    ) -> None:
+        """Wanted (docs/adr/0079): the home stays editable, so its tasks work as before."""
+        task = task_services.create_task(
+            alice,
+            alice_home,
+            title="Change the filter",
+            due_on=task_services.today(),
+            repeat_mode="fixed",
+            repeat_unit="month",
+            repeat_interval=1,
+        )
+        home_services.archive_home(alice, alice_home)
+        closing = task_services.complete(alice, task.occurrences.get())
+        assert closing.next is not None
+        assert closing.next.task == task
+        assert task.occurrences.count() == 2
+
+
 class TestApi:
     @pytest.fixture
     def authed(self, api_client: APIClient, alice: User) -> APIClient:
@@ -471,6 +551,18 @@ class TestExportAndRestore:
         home_services.erase_home(alice_home)
         result = restore.restore_bytes(alice, data)
         assert Home.objects.get(pk=result.home.pk).archived_at == stamp
+
+    def test_a_copy_of_an_archived_home_is_archived_with_a_new_id(
+        self, alice: User, alice_home: Home
+    ) -> None:
+        home_services.archive_home(alice, alice_home)
+        alice_home.refresh_from_db()
+        result = restore.restore_bytes(alice, archive_bytes(alice_home), as_copy=True)
+        copy = Home.objects.get(pk=result.home.pk)
+        assert copy.pk != alice_home.pk
+        assert copy.archived_at == alice_home.archived_at
+        # The original stays as it was.
+        assert Home.objects.get(pk=alice_home.pk).archived_at == alice_home.archived_at
 
     def test_an_archive_of_format_3_is_restored_and_not_archived(
         self, alice: User, alice_home: Home

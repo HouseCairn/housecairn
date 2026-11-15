@@ -72,7 +72,6 @@ def _check_homes(
 
 
 def create_connection(
-    request: HttpRequest,
     user: User,
     *,
     name: str,
@@ -80,7 +79,11 @@ def create_connection(
     may_create_homes: bool,
     signed_in_with: frozenset[str],
 ) -> AppConnection:
-    """The connection a consent makes; the security email and the audit entry go with it."""
+    """The connection a consent makes, with its audit entry.
+
+    The security email waits for oauthlib's own checks: the consent page sends it with
+    `send_security_email` once a code was given for the connection.
+    """
     home_list, provider = _check_homes(user, homes, signed_in_with)
     with transaction.atomic():
         connection = AppConnection.objects.create(
@@ -91,12 +94,12 @@ def create_connection(
         )
         connection.homes.set(home_list)
         audit.record("appconnection.created", actor=user, title=connection.name or _("Mobile app"))
-    _send_security_email(request, user)
     made: AppConnection = connection
     return made
 
 
-def _send_security_email(request: HttpRequest, user: User) -> None:
+def send_security_email(request: HttpRequest, user: User) -> None:
+    """Tell the person by email that a phone was connected to their account."""
     from allauth.account.adapter import get_adapter
 
     from housecairn.accounts.services import email_is_configured
