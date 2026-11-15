@@ -21,10 +21,12 @@ from django.utils import timezone
 from housecairn.core.models import BaseModel
 from housecairn.sync import changes as sync_changes
 from housecairn.sync import rows as sync_rows
-from housecairn.sync.models import Change, HomeHead, RowClocks
+from housecairn.sync.models import Change, HomeHead, Push, RowClocks
 from housecairn.sync.rows import entity_of, link_row_id
 
 RETENTION = datetime.timedelta(days=400)
+# A push number is kept 30 days, so that a push sent again within them runs once.
+PUSH_RETENTION = datetime.timedelta(days=30)
 # Rows removed per statement, to keep the lists of identifiers short.
 CHUNK = 500
 
@@ -34,6 +36,7 @@ class Purged:
     changes: int
     tombstones: int
     rows: int
+    pushes: int = 0
 
 
 def limit(now: datetime.datetime | None = None) -> datetime.datetime:
@@ -45,12 +48,14 @@ def limit(now: datetime.datetime | None = None) -> datetime.datetime:
 
 
 def purge(now: datetime.datetime | None = None) -> Purged:
-    """Remove the changes and the tombstones that the retention has expired."""
+    """Remove the changes and the tombstones that the retention has expired, and old pushes."""
     expired = limit(now)
     with transaction.atomic():
         changes = _purge_changes(expired)
         tombstones, rows = _purge_tombstones(expired)
-    return Purged(changes, tombstones, rows)
+        pushes = Push.objects.filter(created_at__lt=(now or timezone.now()) - PUSH_RETENTION)
+        pushed = pushes.delete()[0]
+    return Purged(changes, tombstones, rows, pushed)
 
 
 def _purge_changes(expired: datetime.datetime) -> int:

@@ -440,6 +440,102 @@ def create_or_revive(instance: Any) -> Any:
         return stored
 
 
+# ---------- a write made on a phone (a push, docs/adr/0077) ----------
+
+
+def apply_stamped(
+    model: type[models.Model],
+    home_id: uuid.UUID,
+    pk: uuid.UUID,
+    kind: str,
+    fields: Mapping[str, Any] | None,
+    values: Mapping[str, Any],
+    *,
+    stamp: tuple[str, bytes],
+    known: Collection[str],
+) -> changes.Recorded:
+    """Write a row as a phone's operation says, field by field, and record its change.
+
+    The other writers of this module write the row, then record what changed with the server's
+    clock. A phone's write carries its own clock, which may be older than what the row holds: so
+    the change is recorded first, which decides per field which writes win (`record_change`),
+    and only the fields that won are written to the row. A field that lost is not written.
+
+    - `fields`: the fields of a `put` as the protocol writes them (they go to the feed), those
+      without a column included (`extra`); None for a `delete` or a `restore`.
+    - `values`: the same fields that have a column, as Python holds them, by column name.
+    - `known`: the columns of the model the phone may write.
+
+    A `put` of a row the table does not hold creates it, with the fields that won; a `delete`
+    and a `restore` need the row (the caller checks it).
+    """
+    with transaction.atomic():
+        stored = model._base_manager.select_for_update().filter(pk=pk).first()
+        if kind != changes.PUT and stored is None:
+            raise ValueError("A deletion or a restoration needs its row.")
+        recorded = changes.record_change(
+            home_id,
+            entity_of(model),
+            pk,
+            kind,
+            fields if kind == changes.PUT else None,
+            stamp=stamp,
+            known=known,
+            updated_at=getattr(stored, "updated_at", None),
+        )
+        if recorded.change is None:
+            return recorded
+        won = recorded.change.fields
+        row: Any = stored
+        if kind == changes.DELETE:
+            row.soft_delete()
+        elif kind == changes.RESTORE:
+            row.restore()
+        else:
+            columns = {name: values[name] for name in won if name in values}
+            if stored is None:
+                _create_stamped(model, home_id, pk, columns)
+            elif columns:
+                for name, value in columns.items():
+                    setattr(stored, name, value)
+                stored.save(update_fields=[*columns, "updated_at"])
+        return recorded
+
+
+def _create_stamped(
+    model: type[models.Model], home_id: uuid.UUID, pk: uuid.UUID, columns: Mapping[str, Any]
+) -> None:
+    """Insert the row a phone made, with its id; a row whose deletion came first stays deleted."""
+    instance = model(pk=pk, **({} if model is Home else {"home_id": home_id}))
+    for name, value in columns.items():
+        setattr(instance, name, value)
+    clocks = RowClocks.objects.filter(home_id=home_id, entity=entity_of(model), row_id=pk).first()
+    if clocks is not None and clocks.tombstoned_at is not None:
+        instance.deleted_at = clocks.tombstoned_at  # type: ignore[attr-defined]
+    instance.save(force_insert=True)
+    # `auto_now_add` sets the instant of the insert: an instant the phone sent is kept.
+    stamped = {
+        f.attname: columns[f.attname]
+        for f in model._meta.concrete_fields
+        if getattr(f, "auto_now_add", False) and f.attname in columns
+    }
+    if stamped:
+        model._base_manager.filter(pk=pk).update(**stamped)
+
+
+def write_link(through: type[models.Model], columns: Mapping[str, Any]) -> None:
+    """Make the link row of `columns` live in its table, after its change was recorded."""
+    manager: Any = through._default_manager
+    if not manager.filter(**columns).exists():
+        manager.create(**columns)
+
+
+def remove_link(through: type[models.Model], columns: Mapping[str, Any]) -> None:
+    """Remove the link row of `columns` from its table, after its deletion was recorded."""
+    manager: Any = through._default_manager
+    manager.filter(**columns).delete()
+
+
 # ---------- link tables ----------
 
 

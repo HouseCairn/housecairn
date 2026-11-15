@@ -139,7 +139,8 @@ def public_fields(
     return {
         name: (
             file_reference(model, name, row, row_id)
-            if name in file_names and value is not None
+            # A stored file name; a reference a phone pushed is kept as it came (until M6).
+            if name in file_names and isinstance(value, str)
             else value
         )
         for name, value in fields.items()

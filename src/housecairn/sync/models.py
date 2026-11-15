@@ -111,6 +111,31 @@ class RowClocks(models.Model):
         return f"{self.entity} {self.row_id}"
 
 
+class Push(models.Model):
+    """A push a phone made, kept 30 days so that a push sent again runs once (docs/adr/0077).
+
+    Per connection: the number the phone gave the push, the SHA-256 of its body and the answer
+    the server gave. The same number with the same body gets that answer again without being
+    applied; with another body, 409 `push_conflict`.
+    """
+
+    connection = models.ForeignKey(
+        "apitokens.AppConnection", on_delete=models.CASCADE, related_name="+"
+    )
+    number = models.PositiveBigIntegerField()
+    digest = models.CharField(max_length=64)
+    answer = models.JSONField(default=dict)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["connection", "number"], name="sync_push_number")
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.connection_id} push {self.number}"
+
+
 class ErasedHome(models.Model):
     """A home that was erased, outside the home: erasing it erased its changes too.
 
