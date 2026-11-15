@@ -715,6 +715,31 @@ class TestMerge:
         assert later["status"] == "applied"
         assert Room.all_objects.get(pk=room.pk).deleted_at is None
 
+    def test_a_field_a_new_row_did_not_set_takes_a_write_made_before_the_insert(
+        self, phone: Connected, alice_home: Home
+    ) -> None:
+        """A phone made a row offline, then wrote its notes, and pushes both later. Mutant: the
+        fields the put did not set read as the `updated_at` of the insert, and the notes,
+        written before that instant, lose to nobody (and so does a delete)."""
+        row_id = uuid.uuid4()
+        made, noted, deleted = stamp(-90_000), stamp(-60_000), stamp(-30_000)
+        send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", row_id, {"name": "Hall"}, c=made)],
+        )
+        later = [
+            op(alice_home.pk, "rooms.room", row_id, {"notes": "Paint"}, c=noted),
+            op(alice_home.pk, "rooms.room", row_id, k="delete", c=deleted),
+        ]
+        answer = send(phone.access, alice_home.pk, later, number=2)
+        assert [r["status"] for r in answer.json()["results"]] == ["applied", "applied"]
+        stored = Room.all_objects.get(pk=row_id)
+        assert stored.notes == "Paint"
+        assert stored.deleted_at is not None
+        line = snapshot_line(alice_home, row_id)
+        assert line["f"]["position"][1] == clock.ZERO_CLOCK
+
     def test_a_delete_before_the_put_keeps_a_tombstone_and_the_row_comes_deleted(
         self, phone: Connected, alice: User, alice_home: Home
     ) -> None:

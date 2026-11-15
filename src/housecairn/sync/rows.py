@@ -494,7 +494,7 @@ def apply_stamped(
         else:
             columns = {name: values[name] for name in won if name in values}
             if stored is None:
-                _create_stamped(model, home_id, pk, columns)
+                _create_stamped(model, home_id, pk, columns, known)
             elif columns:
                 for name, value in columns.items():
                     setattr(stored, name, value)
@@ -503,16 +503,32 @@ def apply_stamped(
 
 
 def _create_stamped(
-    model: type[models.Model], home_id: uuid.UUID, pk: uuid.UUID, columns: Mapping[str, Any]
+    model: type[models.Model],
+    home_id: uuid.UUID,
+    pk: uuid.UUID,
+    columns: Mapping[str, Any],
+    known: Collection[str],
 ) -> None:
-    """Insert the row a phone made, with its id; a row whose deletion came first stays deleted."""
+    """Insert the row a phone made, with its id; a row whose deletion came first stays deleted.
+
+    A column the phone did not set holds its default, which nobody wrote: it gets the zero
+    clock, so that any later write of it wins. Without it, the field would read as the
+    `updated_at` of the insert, the server's time, and a write the phone made before that
+    instant (sent in a later push, or by another phone) would lose to nobody.
+    """
     instance = model(pk=pk, **({} if model is Home else {"home_id": home_id}))
     for name, value in columns.items():
         setattr(instance, name, value)
-    clocks = RowClocks.objects.filter(home_id=home_id, entity=entity_of(model), row_id=pk).first()
-    if clocks is not None and clocks.tombstoned_at is not None:
+    clocks = RowClocks.objects.get(home_id=home_id, entity=entity_of(model), row_id=pk)
+    if clocks.tombstoned_at is not None:
         instance.deleted_at = clocks.tombstoned_at  # type: ignore[attr-defined]
     instance.save(force_insert=True)
+    unset = [name for name in (*known, changes.DELETED_AT) if name not in clocks.clocks]
+    if unset:
+        never = [clock.ZERO_CLOCK, clock.device_to_b64(changes.server_device())]
+        for name in unset:
+            clocks.clocks[name] = never
+        clocks.save(update_fields=["clocks"])
     # `auto_now_add` sets the instant of the insert: an instant the phone sent is kept.
     stamped = {
         f.attname: columns[f.attname]
