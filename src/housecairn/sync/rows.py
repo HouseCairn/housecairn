@@ -253,7 +253,7 @@ def soft_delete(target: models.QuerySet[Any]) -> int: ...
 def soft_delete(target: models.Model) -> changes.Recorded | None: ...
 
 
-def soft_delete(target: Any) -> changes.Recorded | None | int:
+def soft_delete(target: Any) -> changes.Recorded | int | None:
     """Soft-delete a row, or the live rows of a queryset, with a tombstone each.
 
     A row: `row.soft_delete()`, then its deletion; None when it was deleted already. A queryset:

@@ -90,14 +90,14 @@ msgstr "Pour"
 msgid "`rows.save(instance, **kwargs)`"
 msgstr "`rows.save(instance, **kwargs)`"
 
-msgid "`instance.save()`: a new row records every field, an existing one the fields that changed."
-msgstr "`instance.save()` : une ligne neuve enregistre tous ses champs, une ligne existante ceux qui ont changé."
+msgid "`instance.save()`: a new row records every field, an existing one the fields that changed. With `update_fields`, only those fields are compared."
+msgstr "`instance.save()` : une ligne neuve enregistre tous ses champs, une ligne existante ceux qui ont changé. Avec `update_fields`, seuls ces champs sont comparés."
 
 msgid "`rows.soft_delete(instance)`"
 msgstr "`rows.soft_delete(instance)`"
 
-msgid "A soft deletion of one row, with its tombstone. A row already deleted records nothing."
-msgstr "La suppression logique d'une ligne, avec sa pierre tombale. Une ligne déjà supprimée n'enregistre rien."
+msgid "A soft deletion of one row, with its tombstone. A row already deleted records nothing. Given a queryset, the same as `rows.soft_delete_queryset`."
+msgstr "La suppression logique d'une ligne, avec sa pierre tombale. Une ligne déjà supprimée n'enregistre rien. Avec un queryset, comme `rows.soft_delete_queryset`."
 
 msgid "`rows.soft_delete_queryset(rows)`"
 msgstr "`rows.soft_delete_queryset(rows)`"
@@ -111,14 +111,26 @@ msgstr "`rows.update_queryset(rows, **values)`"
 msgid "A queryset update with plain values: one change per row and field that changed."
 msgstr "La mise à jour d'un queryset avec des valeurs simples : un changement par ligne et par champ modifié."
 
+msgid "`rows.restore(instance)`"
+msgstr "`rows.restore(instance)`"
+
+msgid "`instance.restore()`, with its restoration. A row that is not deleted records nothing."
+msgstr "`instance.restore()`, avec sa restauration. Une ligne qui n'est pas supprimée n'enregistre rien."
+
+msgid "`rows.before(instance)`, then `rows.record_saved(instance, was)`"
+msgstr "`rows.before(instance)`, puis `rows.record_saved(instance, was)`"
+
+msgid "Read before a write, then recorded after it: the two halves of `rows.save`, for a write it cannot wrap."
+msgstr "Lu avant une écriture, puis enregistré après elle : les deux moitiés de `rows.save`, pour une écriture qu'elle ne peut pas envelopper."
+
 msgid "`rows.record_created(instances)`"
 msgstr "`rows.record_created(instances)`"
 
 msgid "Rows inserted in bulk (restoring an archive)."
 msgstr "Des lignes insérées en masse (restauration d'une archive)."
 
-msgid "What a row sends is its concrete fields under their column names (`room_id`), without `id`, `home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`; dates are `YYYY-MM-DD`, amounts decimal strings. An application adjusts that for a model with `rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not send `required_provider`, a rule of the instance), fields without a column (a photo sends its file as `image`, a reference with the size, type and dimensions of the stored picture, and no thumbnail), and fields that read as the clock of their own write (`homes.home.archived_at`: an archive made on the web is the clock of that write, and an empty value stays empty)."
-msgstr "Une ligne envoie ses champs concrets sous le nom de leur colonne (`room_id`), sans `id`, `home` (le logement est la clé du changement), `created_at`, `updated_at` ni `deleted_at` ; les dates sont au format `AAAA-MM-JJ`, les montants des chaînes décimales. Une application l'ajuste pour un modèle par `rows.register(model, rows.Spec(...))` dans son `ready()` : colonnes écartées (`homes.home` n'envoie pas `required_provider`, une règle de l'instance), champs sans colonne (une photo envoie son fichier sous `image`, une référence avec la taille, le type et les dimensions de l'image stockée, et sans la vignette), et champs qui valent l'horloge de leur propre écriture (`homes.home.archived_at` : un archivage fait sur le web vaut l'horloge de cette écriture, et une valeur vide reste vide)."
+msgid "What a row sends is its concrete fields under their column names (`room_id`), without `id`, `home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`, nor the derived fields a model lists in `SYNC_DERIVED` (`tasks.occurrence.visible_from`): they are recomputed on every side and never synced (mobile ADR 0003). Dates are `YYYY-MM-DD`, amounts decimal strings with the places of their field (`12.50`). An application adjusts that for a model with `rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not send `required_provider`, a rule of the instance), fields without a column (a photo sends its file as `image`, a reference with the size, type and dimensions of the stored picture, and no thumbnail), and fields that read as the clock of their own write (`homes.home.archived_at`: an archive made on the web is the clock of that write, and an empty value stays empty)."
+msgstr "Une ligne envoie ses champs concrets sous le nom de leur colonne (`room_id`), sans `id`, `home` (le logement est la clé du changement), `created_at`, `updated_at` ni `deleted_at`, ni les champs dérivés qu'un modèle liste dans `SYNC_DERIVED` (`tasks.occurrence.visible_from`) : ils sont recalculés de chaque côté et jamais synchronisés (ADR 0003 du mobile). Les dates sont au format `AAAA-MM-JJ`, les montants des chaînes décimales avec les décimales de leur champ (`12.50`). Une application l'ajuste pour un modèle par `rows.register(model, rows.Spec(...))` dans son `ready()` : colonnes écartées (`homes.home` n'envoie pas `required_provider`, une règle de l'instance), champs sans colonne (une photo envoie son fichier sous `image`, une référence avec la taille, le type et les dimensions de l'image stockée, et sans la vignette), et champs qui valent l'horloge de leur propre écriture (`homes.home.archived_at` : un archivage fait sur le web vaut l'horloge de cette écriture, et une valeur vide reste vide)."
 
 msgid "A write made on the web gets a clock from the server's hybrid clock and the device id of the server. A write that comes from a phone passes its own `stamp` (clock and device id)."
 msgstr "Une écriture faite sur le web reçoit une horloge de l'horloge hybride du serveur et l'identifiant d'appareil du serveur. Une écriture venue d'un téléphone passe son propre `stamp` (horloge et identifiant d'appareil)."
@@ -156,8 +168,8 @@ msgstr "Restaurer une archive (en copie ou non) enregistre le nouveau logement e
 msgid "Retention"
 msgstr "Rétention"
 
-msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted. What hangs off a purged row goes with it: the items and photos of a purged room lose their clocks too, and the files of their photos are removed from the disk once the purge is committed."
-msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours est gardé), enregistre dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont encore supprimées. Ce qui dépend d'une ligne purgée part avec elle : les éléments et les photos d'une pièce purgée perdent aussi leurs horloges, et les fichiers de leurs photos sont retirés du disque une fois la purge validée."
+msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted. What hangs off a purged row goes with it: the items and photos of a purged room lose their clocks too, and the files of their photos are removed from the disk once the purge is committed. A row that stays but whose reference the purge empties (`SET_NULL`: the paint of a room whose article is purged, the contract of an item whose contractor is) records that change, as any write of a row does."
+msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours est gardé), enregistre dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont encore supprimées. Ce qui dépend d'une ligne purgée part avec elle : les éléments et les photos d'une pièce purgée perdent aussi leurs horloges, et les fichiers de leurs photos sont retirés du disque une fois la purge validée. Une ligne qui reste mais dont la purge vide une référence (`SET_NULL` : la peinture d'une pièce dont l'article est purgé, le contrat d'un élément dont l'intervenant l'est) enregistre ce changement, comme toute écriture d'une ligne."
 
 msgid "The guard test"
 msgstr "Le test garde-fou"

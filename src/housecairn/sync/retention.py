@@ -8,8 +8,9 @@ year still learns of a deletion. Then the nightly task removes them. A cursor be
 import contextlib
 import datetime
 import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from django.apps import apps
 from django.db import models, transaction
@@ -148,13 +149,12 @@ def _emptied(
         # `SET(row)` gives a row, `SET_NULL` None: the column holds the key.
         value = set_to.pk if isinstance(set_to, models.Model) else set_to
         for batch in batches:
-            for row in list(batch):
+            for row in list(cast(Iterable[Any], batch)):
                 kind = type(row)
                 if (
                     not issubclass(kind, BaseModel)
                     or (kind, row.pk) in gone
                     or field.attname not in sync_rows.raw_values(row, {field.attname})
-                    or getattr(row, field.attname) == value
                 ):
                     continue
                 _row, fields = found.setdefault((kind, row.pk), (row, {}))

@@ -45,15 +45,19 @@ value changed are sent:
 
 | Function | For |
 | --- | --- |
-| `rows.save(instance, **kwargs)` | `instance.save()`: a new row records every field, an existing one the fields that changed. |
-| `rows.soft_delete(instance)` | A soft deletion of one row, with its tombstone. A row already deleted records nothing. |
+| `rows.save(instance, **kwargs)` | `instance.save()`: a new row records every field, an existing one the fields that changed. With `update_fields`, only those fields are compared. |
+| `rows.soft_delete(instance)` | A soft deletion of one row, with its tombstone. A row already deleted records nothing. Given a queryset, the same as `rows.soft_delete_queryset`. |
 | `rows.soft_delete_queryset(rows)` | A soft deletion of a queryset: one tombstone per row it deleted. |
+| `rows.restore(instance)` | `instance.restore()`, with its restoration. A row that is not deleted records nothing. |
 | `rows.update_queryset(rows, **values)` | A queryset update with plain values: one change per row and field that changed. |
 | `rows.record_created(instances)` | Rows inserted in bulk (restoring an archive). |
+| `rows.before(instance)`, then `rows.record_saved(instance, was)` | Read before a write, then recorded after it: the two halves of `rows.save`, for a write it cannot wrap. |
 
 What a row sends is its concrete fields under their column names (`room_id`), without `id`,
-`home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`; dates are
-`YYYY-MM-DD`, amounts decimal strings. An application adjusts that for a model with
+`home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`, nor the derived
+fields a model lists in `SYNC_DERIVED` (`tasks.occurrence.visible_from`): they are recomputed on
+every side and never synced (mobile ADR 0003). Dates are `YYYY-MM-DD`, amounts decimal strings
+with the places of their field (`12.50`). An application adjusts that for a model with
 `rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not
 send `required_provider`, a rule of the instance), fields without a column (a photo sends its
 file as `image`, a reference with the size, type and dimensions of the stored picture, and no
@@ -113,7 +117,9 @@ more than 400 days ago (exactly 400 days old is kept), records in `floor` the hi
 it removed, so that a cursor below it can be answered with 410, and removes the clocks of the
 rows deleted more than 400 days ago, with those rows when they are still deleted. What hangs off
 a purged row goes with it: the items and photos of a purged room lose their clocks too, and the
-files of their photos are removed from the disk once the purge is committed.
+files of their photos are removed from the disk once the purge is committed. A row that stays but
+whose reference the purge empties (`SET_NULL`: the paint of a room whose article is purged, the
+contract of an item whose contractor is) records that change, as any write of a row does.
 
 ## The guard test
 
