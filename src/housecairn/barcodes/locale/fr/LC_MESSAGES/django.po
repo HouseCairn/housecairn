@@ -1,0 +1,151 @@
+# French translation of HouseCairn.
+# This file is distributed under the same license as HouseCairn (AGPL-3.0-only).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn\n"
+"Report-Msgid-Bugs-To: \n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Barcodes"
+msgstr "Codes-barres"
+
+msgid "Local catalogue of barcodes"
+msgstr "Catalogue local des codes-barres"
+
+msgid "Look a scanned code up in a copy of the open Nudger catalogue kept on this server, refreshed every week; no lookup leaves the server. Downloading it takes hours and space on the disk: see the documentation."
+msgstr "Chercher un code scanné dans une copie du catalogue ouvert de Nudger gardée sur ce serveur, mise à jour chaque semaine ; aucune recherche ne sort du serveur. Le téléchargement prend des heures et de la place sur le disque : voir la documentation."
+
+msgid "Online lookup of barcodes"
+msgstr "Recherche en ligne des codes-barres"
+
+msgid "When a code is not in the local catalogue, ask Open Products Facts, then Open Food Facts. Only the code is sent, nothing else. Off: a code is only kept."
+msgstr "Quand un code n'est pas dans le catalogue local, interroger Open Products Facts, puis Open Food Facts. Seul le code est envoyé, rien d'autre. Désactivé : le code est seulement gardé."
+
+msgid "barcode (EAN)"
+msgstr "code-barres (EAN)"
+
+msgid "The 8 to 14 digits under the bars. Scan it, or type it."
+msgstr "Les 8 à 14 chiffres sous les barres. Scannez-le, ou saisissez-le."
+
+msgid "Not a valid barcode: type the 8, 12, 13 or 14 digits under the bars (EAN-8, UPC-A, EAN-13 or GTIN-14)."
+msgstr "Ce n'est pas un code-barres valide : saisissez les 8, 12, 13 ou 14 chiffres sous les barres (EAN-8, UPC-A, EAN-13 ou GTIN-14)."
+
+msgid "catalogue product"
+msgstr "produit du catalogue"
+
+msgid "catalogue products"
+msgstr "produits du catalogue"
+
+msgid "Downloading"
+msgstr "Téléchargement"
+
+msgid "Importing"
+msgstr "Import"
+
+msgid "Done"
+msgstr "Terminé"
+
+msgid "Failed"
+msgstr "Échec"
+
+msgid "catalogue import"
+msgstr "import du catalogue"
+
+msgid "catalogue imports"
+msgstr "imports du catalogue"
+
+msgid "In progress"
+msgstr "En cours"
+
+msgid "Found"
+msgstr "Trouvé"
+
+msgid "Not found"
+msgstr "Introuvable"
+
+msgid "Could not be read"
+msgstr "Illisible"
+
+msgid "barcode lookup"
+msgstr "recherche de code-barres"
+
+msgid "barcode lookups"
+msgstr "recherches de codes-barres"
+
+#, python-format
+msgid "The sheet is saved, but the photo of the product could not be added: %(why)s"
+msgstr "La fiche est enregistrée, mais la photo du produit n'a pas pu être ajoutée : %(why)s"
+
+#, python-format
+msgid "Photo by %(author)s"
+msgstr "Photo de %(author)s"
+
+msgid "This code is not a valid barcode: check its digits."
+msgstr "Ce code n'est pas un code-barres valide : vérifiez ses chiffres."
+
+msgid "Too many codes looked up in a short time. Try again in a minute."
+msgstr "Trop de codes cherchés en peu de temps. Réessayez dans une minute."
+
+msgid "Looking this code up…"
+msgstr "Recherche de ce code…"
+
+msgid "The lookup is taking long. Scan the code again in a moment."
+msgstr "La recherche prend du temps. Scannez de nouveau le code dans un moment."
+
+#, python-format
+msgid "Found in %(source)s. Check before you use it: only the empty fields are filled, nothing is saved until you save the form."
+msgstr "Trouvé dans %(source)s. Vérifiez avant de l'utiliser : seuls les champs vides sont remplis, rien n'est enregistré avant que vous enregistriez le formulaire."
+
+msgid "Name"
+msgstr "Nom"
+
+msgid "Brand"
+msgstr "Marque"
+
+msgid "Model"
+msgstr "Modèle"
+
+msgid "Category"
+msgstr "Catégorie"
+
+msgid "Photo of the product"
+msgstr "Photo du produit"
+
+msgid "Keep this photo, if the sheet has none"
+msgstr "Garder cette photo, si la fiche n'en a pas"
+
+msgid "Use these values"
+msgstr "Utiliser ces valeurs"
+
+msgid "This code is in none of the open databases. Fill the sheet by hand."
+msgstr "Ce code n'est dans aucune des bases ouvertes. Remplissez la fiche à la main."
+
+msgid "The open databases could not be read. Try again later, or fill the sheet by hand."
+msgstr "Les bases ouvertes n'ont pas pu être lues. Réessayez plus tard, ou remplissez la fiche à la main."
+
+msgid "The code is kept with the sheet. Looking it up in the open databases is off on this server."
+msgstr "Le code est gardé avec la fiche. La recherche dans les bases ouvertes est désactivée sur ce serveur."
+
+msgid "Turn on the lookup of barcodes in the settings of the server"
+msgstr "Activer la recherche des codes-barres dans les réglages du serveur"
+
+msgid "Scan"
+msgstr "Scanner"
+
+msgid "Scan the barcode with the camera"
+msgstr "Scanner le code-barres avec la caméra"
+
+msgid "Hold the barcode in front of the camera."
+msgstr "Tenez le code-barres devant la caméra."
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "No camera could be used. Type the digits under the bars."
+msgstr "Aucune caméra n'est utilisable. Saisissez les chiffres sous les barres."

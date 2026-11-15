@@ -271,6 +271,9 @@ msgstr "Prix unitaire"
 msgid "Manufacturer reference"
 msgstr "Référence fabricant"
 
+msgid "Barcode (EAN)"
+msgstr "Code-barres (EAN)"
+
 msgid "Dimensions"
 msgstr "Dimensions"
 
