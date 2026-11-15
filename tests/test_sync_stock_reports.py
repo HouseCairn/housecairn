@@ -22,7 +22,7 @@ from django.db import models
 
 from housecairn.accounts.models import User
 from housecairn.homes import services as home_services
-from housecairn.homes.models import Home, Role
+from housecairn.homes.models import Home
 from housecairn.reports import services as report_services
 from housecairn.reports.models import Report
 from housecairn.rooms.models import Item, Room
@@ -32,146 +32,24 @@ from housecairn.sync import retention
 from housecairn.sync.models import Change, ErasedHome, RowClocks
 from housecairn.tasks.models import Occurrence
 from tests.rooms_support import image_bytes, upload
-from tests.test_sync_guard import KINDS, NOT_APPLICABLE, SCENARIOS, guard_problems
+from tests.sync_scenarios_stock_reports import (
+    ARTICLE,
+    ITEMS,
+    NOT_APPLICABLE,
+    OWNER_ONLY,
+    ROOMS,
+    SCENARIOS,
+    article_in,
+    report_in,
+)
+from tests.test_sync_guard import KINDS, guard_problems
 
 pytest_plugins = ("tests.rooms_fixtures", "tests.stock_fixtures", "tests.tasks_fixtures")
 pytestmark = pytest.mark.django_db
 
-OWNER_ONLY = ("stock", "reports")
-ARTICLE = Article._meta.label
-ROOMS = Article.rooms.through._meta.label
-ITEMS = Article.compatible_items.through._meta.label
 NOW = datetime.datetime(2026, 11, 15, 3, 30, tzinfo=datetime.UTC)
 LONG_AGO = NOW - datetime.timedelta(days=401)
 HLC = re.compile(r"[0-9a-f]{16}")
-
-
-def owner_of(home: Home) -> User:
-    membership = home.memberships.filter(role=Role.OWNER).select_related("user").first()  # type: ignore[attr-defined]
-    assert membership is not None
-    user: User = membership.user
-    return user
-
-
-# ---------- the guard ----------
-# Rows are made with the ORM, not with the services: the change that the guard looks for is the
-# one of the write under test.
-
-
-def _article(home: Home, name: str = "Filter") -> Article:
-    return Article.objects.create(home=home, name=name)
-
-
-def _room(home: Home) -> Room:
-    return Room.objects.create(home=home, name="Hall")
-
-
-def _item(home: Home) -> Item:
-    return Item.objects.create(home=home, room=_room(home), name="Boiler")
-
-
-def _report(home: Home) -> Report:
-    return Report.objects.create(home=home, reporter=owner_of(home), title="The tap drips")
-
-
-def _create_article(home: Home) -> None:
-    services.create_article(owner_of(home), home, name="Filter", unit_price=Decimal("3"))
-
-
-def _delete_article(home: Home) -> None:
-    services.delete_article(owner_of(home), _article(home))
-
-
-def _create_supplier(home: Home) -> None:
-    services.create_supplier(owner_of(home), _article(home), name="Shop")
-
-
-def _delete_supplier(home: Home) -> None:
-    supplier = Supplier.objects.create(home=home, article=_article(home), name="Shop")
-    services.delete_supplier(owner_of(home), supplier)
-
-
-def _record_movement(home: Home) -> None:
-    services.record_movement(owner_of(home), _article(home), kind="entry", quantity=Decimal("2"))
-
-
-def _delete_movements(home: Home) -> None:
-    article = _article(home)
-    Movement.objects.create(
-        home=home, article=article, kind="entry", quantity=Decimal("1"), delta=Decimal("1")
-    )
-    services.delete_article(owner_of(home), article)
-
-
-def _add_rooms(home: Home) -> None:
-    services.update_article(owner_of(home), _article(home), rooms=[_room(home)])
-
-
-def _remove_rooms(home: Home) -> None:
-    article = _article(home)
-    article.rooms.add(_room(home))
-    services.update_article(owner_of(home), article, rooms=[])
-
-
-def _add_items(home: Home) -> None:
-    services.update_article(owner_of(home), _article(home), compatible_items=[_item(home)])
-
-
-def _remove_items(home: Home) -> None:
-    article = _article(home)
-    article.compatible_items.add(_item(home))
-    services.update_article(owner_of(home), article, compatible_items=[])
-
-
-def _create_report(home: Home) -> None:
-    report_services.create_report(owner_of(home), home, title="The tap drips")
-
-
-def _report_updates(home: Home) -> None:
-    report = _report(home)
-    report_services.make_task(owner_of(home), report)
-    report_services.close_report(owner_of(home), report, resolution="resolved")
-    report_services.reopen_report(owner_of(home), report)
-
-
-SCENARIOS.update(
-    {
-        (ARTICLE, "save"): _create_article,
-        (ARTICLE, "soft_delete"): _delete_article,
-        ("stock.Supplier", "save"): _create_supplier,
-        ("stock.Supplier", "soft_delete"): _delete_supplier,
-        ("stock.Movement", "save"): _record_movement,
-        ("stock.Movement", "soft_delete"): _delete_movements,
-        (ROOMS, "save"): _add_rooms,
-        (ROOMS, "hard_delete"): _remove_rooms,
-        (ITEMS, "save"): _add_items,
-        (ITEMS, "hard_delete"): _remove_items,
-        ("reports.Report", "save"): _create_report,
-        ("reports.Report", "queryset_update"): _report_updates,
-    }
-)
-
-_HARD = (
-    "leaves only by the retention purge and the erasure of a home, which remove its clocks "
-    "(housecairn.stock.cascades)"
-)
-NOT_APPLICABLE.update(
-    {
-        (ARTICLE, "queryset_update"): "no code updates stock items by queryset",
-        (ARTICLE, "hard_delete"): f"a stock item {_HARD}",
-        ("stock.Supplier", "queryset_update"): "no code updates suppliers by queryset",
-        ("stock.Supplier", "hard_delete"): f"a supplier {_HARD}",
-        (
-            "stock.Movement",
-            "queryset_update",
-        ): "the ledger is never edited, a mistake is a new line",
-        ("stock.Movement", "hard_delete"): f"a movement {_HARD}",
-        (ROOMS, "queryset_update"): "a link row has no field to update",
-        (ITEMS, "queryset_update"): "a link row has no field to update",
-        ("reports.Report", "soft_delete"): "a report is closed, never deleted",
-        ("reports.Report", "hard_delete"): f"a report {_HARD}",
-    }
-)
 
 
 def test_every_write_path_of_the_stock_and_the_reports_records_its_change(
@@ -393,7 +271,7 @@ class TestArticles:
         services.create_article(
             alice, alice_home, name="Filter", rooms=[owner_room], compatible_items=[owner_item]
         )
-        entities = [c.entity for c in changes_of(alice_home)]
+        entities = [c.entity for c in changes_of(alice_home) if c.entity.startswith("stock.")]
         assert entities[:1] == ["stock.article"]
         assert set(entities[1:]) == {"stock.article_rooms", "stock.article_compatible_items"}
 
@@ -547,7 +425,7 @@ class TestQuerysets:
     def test_a_queryset_update_writes_one_change_per_row_for_the_fields_that_differ(
         self, alice_home: Home
     ) -> None:
-        one, two = (_report(alice_home) for _ in range(2))
+        one, two = (report_in(alice_home) for _ in range(2))
         Report.objects.filter(pk=two.pk).update(status="resolved")
         found = changelog.update_rows(
             Report.objects.filter(pk__in=[one.pk, two.pk]), status="resolved"
@@ -557,7 +435,7 @@ class TestQuerysets:
         assert changed == {one.pk: {"status": "resolved"}}
 
     def test_a_queryset_soft_deletion_writes_a_tombstone_per_row(self, alice_home: Home) -> None:
-        article = _article(alice_home)
+        article = article_in(alice_home)
         rows = [
             Movement.objects.create(
                 home=alice_home,
@@ -755,9 +633,10 @@ class TestOtherWritePaths:
         from housecairn.homes import csv_import
 
         texts = {"stock": "name,unit\nTape,piece\nGlue,\n"}
+        before = len(changes_of(alice_home))
         preview = csv_import.run(alice, alice_home, texts, confirm=False)
         assert not preview.written
-        assert not changes_of(alice_home)  # the preview is rolled back with its changes
+        assert len(changes_of(alice_home)) == before  # the preview is rolled back with its changes
         report = csv_import.run(alice, alice_home, texts, confirm=True)
         assert report.written
         names = [c.fields["name"] for c in changes_of(alice_home, "stock.article")]

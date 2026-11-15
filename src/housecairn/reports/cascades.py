@@ -18,7 +18,8 @@ from housecairn.stock.cascades import erase_file_on_commit
 
 
 def report_is_going(sender: Any, instance: Report, **_kwargs: Any) -> None:
-    changelog.forget_clocks(instance.home_id, changelog.entity_of(Report), [instance.pk])
+    if instance.deleted_at is None:  # a tombstone is counted and removed by the retention purge
+        changelog.forget_clocks(instance.home_id, changelog.entity_of(Report), [instance.pk])
     erase_file_on_commit(report_storage, instance.photo.name if instance.photo else "")
     erase_file_on_commit(report_storage, instance.thumbnail.name if instance.thumbnail else "")
 

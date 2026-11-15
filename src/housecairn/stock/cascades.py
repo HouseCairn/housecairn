@@ -56,7 +56,8 @@ def article_is_going(sender: Any, instance: Article, **_kwargs: Any) -> None:
             entity,
             [changelog.link_id(home_id, entity, instance.pk, o) for o in others],
         )
-    changelog.forget_clocks(home_id, changelog.entity_of(Article), [instance.pk])
+    if instance.deleted_at is None:  # a tombstone is counted and removed by the retention purge
+        changelog.forget_clocks(home_id, changelog.entity_of(Article), [instance.pk])
     erase_file_on_commit(stock_storage, instance.label.name if instance.label else "")
 
 
