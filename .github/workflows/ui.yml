@@ -1,7 +1,8 @@
 # Interface checks in a real browser (docs/adr/0018): an end-to-end passkey sign-in
 # with Chromium's virtual authenticator, the one-click single sign-on button, the summary of
 # the errors of a refused form, the tabs of the instance administration and the choice of several
-# rooms or items by search and chips (docs/adr/0063); the
+# rooms or items by search and chips (docs/adr/0063); no request the sign-in page starts by
+# itself can carry the session cookie past the sign-in; the
 # installable application and offline reading (docs/adr/0065); the offer to receive the
 # reminders on this device, with a simulated browser push (docs/adr/0072).
 # No screenshots until the dedicated lot before the public release (docs/adr/0017).
@@ -127,6 +128,9 @@ jobs:
       - name: The tabs of the instance administration do not run into each other
         run: |
           uv run python tests/e2e/browser_checks.py instance-tabs --base http://localhost:8001
+      - name: The requests the sign-in page starts by itself cannot sign the person out again
+        run: |
+          uv run python tests/e2e/sign_in_race_checks.py --base http://localhost:8001
       - name: The public accounts of a demonstration instance stack and are never cut, at 320, 375 and 1280 px
         env:
           HOUSECAIRN_DEMO: "true"

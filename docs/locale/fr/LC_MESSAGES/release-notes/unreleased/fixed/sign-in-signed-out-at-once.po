@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Signed out right after signing in.** On a slow server, signing in with the password could land back on the sign-in page, under \"Successfully signed in\": a request the sign-in page had started by itself (the passkey offered in the address field, or the offline pages the installable application keeps) answered after the sign-in with the session of before. The passkey request is now cancelled when the form is sent, and the offline pages are kept without the session."
+msgstr ""
+"**Déconnecté juste après la connexion.** Sur un serveur lent, se connecter avec le mot de passe pouvait ramener à la page de connexion, sous le message de connexion réussie : une requête que la page de connexion avait lancée d'elle-même (la clé d'accès proposée dans le champ d'adresse, ou les pages hors ligne que garde l'application installée) répondait après la connexion avec la session d'avant. La requête de la clé d'accès est désormais annulée à l'envoi du formulaire, et les pages hors ligne sont gardées sans la session."
