@@ -134,4 +134,6 @@ scenario writes without recording, fails. Covered today: `homes` (the home itsel
 `tasks` (lot M3c) is covered too: contractors, tasks, task materials, occurrences, material
 draws and attachments. Taking back a closing deletes the occurrence that followed with a
 tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing
-can be made again.
+can be made again. An attachment sends its file as `file`, a reference with its size, type and
+dimensions, as a photo does. Deleting an account takes it off the tasks it is assigned and the
+occurrences it closed, with a change for each, where the database would empty them without one.
