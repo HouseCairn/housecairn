@@ -16,6 +16,7 @@ from django.urls import path
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from oauth2_provider import views as dot_views
 from oauth2_provider.exceptions import OAuthToolkitError
 from oauth2_provider.models import get_application_model
@@ -175,6 +176,9 @@ class ConsentView(dot_views.AuthorizationView):  # type: ignore[misc]
         return redirected
 
 
+# The toolkit marks `dispatch` of its views `csrf_exempt`; overriding `dispatch` drops the mark, and
+# the app has no cookie to send. Both endpoints are called by the app, never from a browser form.
+@method_decorator(csrf_exempt, name="dispatch")
 class TokenView(dot_views.TokenView):  # type: ignore[misc]
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         refused = _refused(request, page=False)
@@ -190,6 +194,7 @@ class TokenView(dot_views.TokenView):  # type: ignore[misc]
         return response
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class RevokeTokenView(dot_views.RevokeTokenView):  # type: ignore[misc]
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         reason = transport.refusal(request)
