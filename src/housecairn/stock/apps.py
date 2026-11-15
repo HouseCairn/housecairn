@@ -9,7 +9,8 @@ class StockConfig(AppConfig):
 
     def ready(self) -> None:
         from housecairn.homes import files
-        from housecairn.stock import exports
+        from housecairn.stock import cascades, exports
 
         exports.register()
         files.register_media_folder("stock")
+        cascades.connect()

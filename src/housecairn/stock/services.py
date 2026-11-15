@@ -29,6 +29,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.rooms import conf, images
 from housecairn.rooms.models import Item, Room
+from housecairn.stock import changelog
 from housecairn.stock.models import Article, Movement, MovementKind, Supplier, Unit
 from housecairn.stock.storage import stock_storage
 
@@ -291,8 +292,9 @@ def create_article(
         _write_label(article, processed)
     try:
         article.save()
-        article.compatible_items.set(items)
-        article.rooms.set(chosen_rooms)
+        changelog.record_save(Article, article.pk, None)
+        changelog.set_links(article, "compatible_items", items)
+        changelog.set_links(article, "rooms", chosen_rooms)
     except Exception:
         if processed is not None:
             _erase_label_file(article.label.name)
@@ -314,6 +316,7 @@ def update_article(
 ) -> Article:
     """Change the article; `label` replaces the photo, `clear_label` removes it."""
     _require_write(actor, article.home)
+    before = changelog.read(Article, article.pk)
     _apply(article, ARTICLE_FIELDS, changes)
     _tidy_unit(article)
     article.full_clean(exclude=["label"])
@@ -327,10 +330,11 @@ def update_article(
         previous = _forget_label(article)
     try:
         article.save()
+        changelog.record_save(Article, article.pk, before)
         if items is not None:
-            article.compatible_items.set(items)
+            changelog.set_links(article, "compatible_items", items)
         if chosen_rooms is not None:
-            article.rooms.set(chosen_rooms)
+            changelog.set_links(article, "rooms", chosen_rooms)
     except Exception:
         if processed is not None:
             _erase_label_file(article.label.name)
@@ -357,9 +361,9 @@ def update_article(
 def delete_article(actor: AnyUser, article: Article) -> None:
     """Soft-delete the article with its suppliers and movements."""
     _require_write(actor, article.home)
-    Supplier.objects.filter(article=article).soft_delete()  # type: ignore[attr-defined]
-    Movement.objects.filter(article=article).soft_delete()  # type: ignore[attr-defined]
-    article.soft_delete()
+    changelog.soft_delete_all(Supplier.objects.filter(article=article))
+    changelog.soft_delete_all(Movement.objects.filter(article=article))
+    changelog.soft_delete(article)
     audit.record_object("article.deleted", actor=actor, home_id=article.home_id, title=article.name)
 
 
@@ -375,8 +379,10 @@ def _prefill_unit_price(article: Article, supplier: Supplier) -> None:
     current: Decimal | None = article.unit_price
     paid: Decimal | None = supplier.last_price
     if current is None and paid is not None:
+        before = changelog.read(Article, article.pk)
         article.unit_price = paid
         article.save(update_fields=["unit_price", "updated_at"])
+        changelog.record_save(Article, article.pk, before)
 
 
 @transaction.atomic
@@ -386,6 +392,7 @@ def create_supplier(actor: AnyUser, article: Article, **fields: Any) -> Supplier
     _apply(supplier, SUPPLIER_FIELDS, fields)
     supplier.full_clean()
     supplier.save()
+    changelog.record_save(Supplier, supplier.pk, None)
     _prefill_unit_price(article, supplier)
     audit.record_object(
         "supplier.created", actor=actor, home_id=supplier.home_id, title=supplier.name
@@ -397,9 +404,11 @@ def create_supplier(actor: AnyUser, article: Article, **fields: Any) -> Supplier
 def update_supplier(actor: AnyUser, supplier: Supplier, **changes: Any) -> Supplier:
     _require_write(actor, supplier.home)
     before: Decimal | None = supplier.last_price
+    state = changelog.read(Supplier, supplier.pk)
     _apply(supplier, SUPPLIER_FIELDS, changes)
     supplier.full_clean()
     supplier.save()
+    changelog.record_save(Supplier, supplier.pk, state)
     if supplier.last_price != before:  # only a last price that really changed prefills
         _prefill_unit_price(supplier.article, supplier)
     audit.record_object(
@@ -412,9 +421,10 @@ def update_supplier(actor: AnyUser, supplier: Supplier, **changes: Any) -> Suppl
     return supplier
 
 
+@transaction.atomic
 def delete_supplier(actor: AnyUser, supplier: Supplier) -> None:
     _require_write(actor, supplier.home)
-    supplier.soft_delete()
+    changelog.soft_delete(supplier)
     audit.record_object(
         "supplier.deleted", actor=actor, home_id=supplier.home_id, title=supplier.name
     )
@@ -463,6 +473,7 @@ def _append(
             )
         raise ValidationError(errors) from exc
     movement.save()
+    changelog.record_save(Movement, movement.pk, None)
     return movement
 
 

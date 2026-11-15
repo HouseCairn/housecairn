@@ -174,6 +174,36 @@ msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 40
 msgid "The rows a purged row takes with it by cascade (the quotes of a project, the rows of its link tables) lose their clocks too, and their files are removed from the disk once the purge is committed: the purge leaves no clock without its row and no file without its record."
 msgstr "Les lignes qu'une ligne purgée emporte en cascade (les devis d'un projet, les lignes de ses tables de liaison) perdent aussi leurs horloges, et leurs fichiers sont retirés du disque une fois la purge validée : la purge ne laisse ni horloge sans sa ligne ni fichier sans son enregistrement."
 
+msgid "Which applications record their changes"
+msgstr "Quelles applications enregistrent leurs changements"
+
+msgid "An application is covered when every write path of its models calls the change log and the guard test below lists it in `COVERED_APPS`. The applications are covered one lot after the other ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)); each has its own section here."
+msgstr "Une application est couverte quand chaque chemin d'écriture de ses modèles appelle le journal des changements et que le test garde-fou ci-dessous la liste dans `COVERED_APPS`. Les applications sont couvertes lot après lot ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)) ; chacune a sa section ici."
+
+msgid "Stock and reports"
+msgstr "Stock et signalements"
+
+msgid "`stock` records `stock.article`, `stock.supplier`, `stock.movement` and the link rows `stock.article_rooms` and `stock.article_compatible_items`; `reports` records `reports.report`."
+msgstr "`stock` enregistre `stock.article`, `stock.supplier`, `stock.movement` et les lignes de liaison `stock.article_rooms` et `stock.article_compatible_items` ; `reports` enregistre `reports.report`."
+
+msgid "They share `housecairn.stock.changelog`, which turns a write into a change:"
+msgstr "Elles partagent `housecairn.stock.changelog`, qui transforme une écriture en changement :"
+
+msgid "`read` takes the state of a row before the write and `record_save` records the fields whose value differs afterwards (a new row is a `put` of every field, a form that sends every field records the ones that changed and no other);"
+msgstr "`read` prend l'état d'une ligne avant l'écriture et `record_save` enregistre ensuite les champs dont la valeur diffère (une ligne nouvelle est un `put` de tous ses champs ; un formulaire qui envoie tous les champs n'enregistre que ceux qui ont changé) ;"
+
+msgid "`soft_delete` and `soft_delete_all` write the deletion of one row or of a queryset, a tombstone per row; `update_rows` is a queryset `update` that records its rows one by one;"
+msgstr "`soft_delete` et `soft_delete_all` écrivent la suppression d'une ligne ou d'un queryset, une pierre tombale par ligne ; `update_rows` est un `update` de queryset qui enregistre ses lignes une à une ;"
+
+msgid "`set_links` writes a set of links (the rooms and the compatible items of an article). Each element is a row of a link table whose id is `uuid5(home, \"<entity>:<owner id>:<other id>\")`: adding one is a `put` of `<owner>_id` and `<other>_id` (a `restore` when it was removed before), removing one is a `delete`."
+msgstr "`set_links` écrit un ensemble de liens (les pièces et les éléments compatibles d'un article). Chaque élément est une ligne d'une table de liaison dont l'identifiant est `uuid5(home, \"<entité>:<identifiant du propriétaire>:<identifiant de l'autre>\")` : en ajouter un est un `put` de `<propriétaire>_id` et `<autre>_id` (un `restore` s'il avait été retiré avant), en retirer un est un `delete`."
+
+msgid "Values are those of the protocol: decimals as strings, dates `YYYY-MM-DD`, instants as clock strings, foreign keys by their column name (`article_id`). A movement does not carry its effect (`delta`), which is derived on read. A file field holds the name of the stored file, and the columns derived from a file (its type, its size, its thumbnail) are not fields: the lot of the files maps the name to the file reference of the protocol."
+msgstr "Les valeurs sont celles du protocole : décimaux en chaînes, dates `AAAA-MM-JJ`, instants en chaînes d'horloge, clés étrangères par le nom de leur colonne (`article_id`). Un mouvement ne porte pas son effet (`delta`), dérivé à la lecture. Un champ de fichier contient le nom du fichier stocké, et les colonnes dérivées d'un fichier (son type, sa taille, sa miniature) ne sont pas des champs : le lot des fichiers fera correspondre le nom à la référence de fichier du protocole."
+
+msgid "A row that goes for good (the retention purge, the erasure of a home, the deletion of an account) leaves nothing behind: `stock.cascades` and `reports.cascades` remove the clocks of the children that have no foreign key to their row (suppliers, movements, link rows) and the files on the disk, and record the reference that a report or a movement loses (`SET_NULL`) as a change."
+msgstr "Une ligne qui disparaît pour de bon (la purge de rétention, l'effacement d'un logement, la suppression d'un compte) ne laisse rien derrière elle : `stock.cascades` et `reports.cascades` retirent les horloges des enfants qui n'ont pas de clé étrangère vers leur ligne (fournisseurs, mouvements, lignes de liaison) et les fichiers sur le disque, et enregistrent comme un changement la référence qu'un signalement ou un mouvement perd (`SET_NULL`)."
+
 msgid "The guard test"
 msgstr "Le test garde-fou"
 
