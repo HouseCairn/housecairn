@@ -99,6 +99,13 @@ def room(alice: User, alice_home: Home) -> Room:
     return room_services.create_room(alice, alice_home, name="Kitchen", kind="kitchen")
 
 
+def snapshot_line(home: Home, row_id: Any) -> dict[str, Any]:
+    found: dict[str, Any] = next(
+        line for line in reading.snapshot_lines(home) if line.get("id") == str(row_id)
+    )
+    return found
+
+
 def result_of(answer: Any, index: int = 0) -> dict[str, Any]:
     assert answer.status_code == 200, answer.content
     found: dict[str, Any] = answer.json()["results"][index]
@@ -413,16 +420,14 @@ class TestBody:
         wrong = json.dumps(op(alice_home.pk, entity, uuid.uuid4(), {})).replace(
             '"f": {}', '"f": ' + fields % nested
         )
-        raw = ('{"push":1,"sv":1,"device":"%s","ops":[%s,%s]}' % (DEVICE, good, wrong)).encode()
+        raw = f'{{"push":1,"sv":1,"device":"{DEVICE}","ops":[{good},{wrong}]}}'.encode()
         answer = send(phone.access, alice_home.pk, raw=raw)
         assert answer.status_code == 400, answer.content
         assert answer.json()["code"] == "malformed"
         assert answer.json()["index"] == 1
         assert not Push.objects.exists()
 
-    def test_a_value_nested_to_the_bound_is_kept(
-        self, phone: Connected, alice_home: Home
-    ) -> None:
+    def test_a_value_nested_to_the_bound_is_kept(self, phone: Connected, alice_home: Home) -> None:
         nested: Any = []
         for _level in range(pushing.MAX_DEPTH - 1):
             nested = [nested]
@@ -710,15 +715,57 @@ class TestMerge:
         assert later["status"] == "applied"
         assert Room.all_objects.get(pk=room.pk).deleted_at is None
 
-    def test_a_delete_of_a_row_the_server_never_had_is_ignored(
+    def test_a_delete_before_the_put_keeps_a_tombstone_and_the_row_comes_deleted(
+        self, phone: Connected, alice: User, alice_home: Home
+    ) -> None:
+        """Mutant: a delete of a row the server never had ignored: the put that comes later
+        (from another phone, with an older clock) makes the row live on the server only."""
+        row_id, deleted, made = uuid.uuid4(), stamp(60_000), stamp(30_000)
+        result = result_of(
+            send(
+                phone.access,
+                alice_home.pk,
+                [op(alice_home.pk, "rooms.room", row_id, k="delete", c=deleted)],
+            )
+        )
+        assert result == {"i": 0, "status": "applied"}
+        clocks = RowClocks.objects.get(home=alice_home, entity="rooms.room", row_id=row_id)
+        assert clocks.tombstoned_at is not None
+        assert clocks.clocks["deleted_at"] == [deleted, DEVICE]
+        line = snapshot_line(alice_home, row_id)
+        assert line["f"] == {"deleted_at": [deleted, deleted, DEVICE]}
+        other = connect(alice, [alice_home])
+        put = [op(alice_home.pk, "rooms.room", row_id, {"name": "Late"}, c=made)]
+        assert (
+            result_of(send(other.access, alice_home.pk, put, device=OTHER_DEVICE))["status"]
+            == "applied"
+        )
+        stored = Room.all_objects.get(pk=row_id)
+        assert stored.name == "Late"
+        assert stored.deleted_at is not None
+        line = snapshot_line(alice_home, row_id)
+        assert line["f"]["deleted_at"][0] == deleted
+
+    def test_a_restore_of_a_row_the_server_never_had_is_kept_and_beats_an_older_delete(
         self, phone: Connected, alice_home: Home
     ) -> None:
         row_id = uuid.uuid4()
-        result = result_of(
-            send(phone.access, alice_home.pk, [op(alice_home.pk, "rooms.room", row_id, k="delete")])
+        restored, deleted = stamp(60_000), stamp(30_000)
+        send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", row_id, k="restore", c=restored)],
         )
-        assert result == {"i": 0, "status": "ignored"}
-        assert not RowClocks.objects.filter(row_id=row_id).exists()
+        answer = send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "rooms.room", row_id, k="delete", c=deleted)],
+            number=2,
+        )
+        assert result_of(answer)["status"] == "ignored"
+        clocks = RowClocks.objects.get(home=alice_home, entity="rooms.room", row_id=row_id)
+        assert clocks.tombstoned_at is None
+        assert all(line.get("id") != str(row_id) for line in reading.snapshot_lines(alice_home))
 
     def test_values_of_every_kind_are_stored_and_logged_as_the_protocol_writes_them(
         self, phone: Connected, alice: User, alice_home: Home, room: Room

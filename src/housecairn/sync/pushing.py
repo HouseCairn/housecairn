@@ -401,7 +401,11 @@ def _apply_row(
         if model is Home:
             raise _RejectedError(FORBIDDEN)  # a home is erased on the web, by an owner only
         if stored is None:
-            return _result(op, None, {})  # nothing to delete or restore: the row never came
+            # The row has not reached the server yet (its put comes later, from another
+            # phone): the deletion is kept as a tombstone, which the put then finds
+            # (`rows._create_stamped`), so that the order of the pushes does not matter.
+            recorded = changes.record_change(home.pk, op.entity, op.row_id, op.kind, stamp=stamp)
+            return _result(op, recorded, _lost(op, model, recorded))
         recorded = sync_rows.apply_stamped(
             model, home.pk, op.row_id, op.kind, None, {}, stamp=stamp, known=columns.writable
         )
@@ -550,8 +554,8 @@ def _apply_link(home: Home, op: Operation, stamp: tuple[str, bytes]) -> dict[str
         return _result(op, recorded, _link_lost(rc, lost))
 
     pair = _link_pair(home, op, link)
-    if rc is None and pair is None:
-        return _result(op, None, {})  # a link the server never had
+    # A link the server never had gets its tombstone too: a put of it that comes later stays
+    # removed (the check of `tombstoned_at` above).
     recorded = changes.record_change(home.pk, entity, op.row_id, op.kind, stamp=stamp)
     if recorded.change is not None and pair is not None:
         columns = {link.owner_column: pair[0], link.other_column: pair[1]}

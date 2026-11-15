@@ -20,15 +20,20 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from django.core.cache import cache
+from django.test import Client
 
 from housecairn.accounts.models import User
+from housecairn.apitokens.models import AppConnection
 from housecairn.homes.models import Home, Membership, Role
 from housecairn.rooms import services as room_services
 from housecairn.sync import changes, clock, pushing, reading
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import RowClocks
 from tests.data_support import fill_home
+from tests.oauth_support import connect
 from tests.test_sync_guard import COVERED_APPS, guard_problems, home_models
+from tests.test_sync_push_api import send
 
 pytestmark = pytest.mark.django_db
 pytest_plugins = ("tests.rooms_fixtures",)
@@ -209,8 +214,11 @@ def _substitute(value: Any, names: dict[str, str]) -> Any:
 
 
 def _state(home: Home, row_id: uuid.UUID) -> dict[str, Any]:
-    line = next(line for line in reading.snapshot_lines(home) if line.get("id") == str(row_id))
-    return {name: entry[0] for name, entry in line["f"].items()}
+    """The fields of the row in the snapshot; none when the snapshot has no line for it."""
+    for line in reading.snapshot_lines(home):
+        if line.get("id") == str(row_id):
+            return {name: entry[0] for name, entry in line["f"].items()}
+    return {}
 
 
 @pytest.mark.parametrize("case", _vectors()["cases"], ids=lambda case: case["name"])
@@ -219,8 +227,10 @@ def test_a_merge_vector_gives_its_row_in_every_order(
 ) -> None:
     data = _vectors()
     devices = {name: clock.device_from_b64(text) for name, text in data["devices"].items()}
-    room = room_services.create_room(alice, alice_home, name="Start", kind="other")
-    names = {"$home": str(alice_home.pk), "$row": str(room.pk)}
+    # `$row` is new to the server: no row of that id before the first operation, so that a
+    # delete or a restore may come before the put that makes the row (a tombstone).
+    row_id = uuid.uuid4()
+    names = {"$home": str(alice_home.pk), "$row": str(row_id)}
     ops = [(entry["device"], _substitute(entry["op"], names)) for entry in case["ops"]]
     seen: list[dict[str, Any]] = []
     for order in itertools.permutations(ops):
@@ -229,12 +239,51 @@ def test_a_merge_vector_gives_its_row_in_every_order(
             pushing.apply(
                 alice_home, pushing.Pusher(alice, Role.OWNER, devices[device]), [operation]
             )
-        state = _state(alice_home, room.pk)
+        state = _state(alice_home, row_id)
         seen.append(state)
         for name, value in case["expect"].items():
             assert state.get(name) == value, (case["name"], order, name)
         transaction_rollback(sid)
     assert all(state == seen[0] for state in seen)
+
+
+@pytest.mark.parametrize("case", _vectors()["cases"], ids=lambda case: case["name"])
+def test_a_merge_vector_over_http_one_connection_per_device(
+    alice: User, alice_home: Home, case: dict[str, Any]
+) -> None:
+    """As a phone replays the file: one push per operation, each device its own connection,
+    in every order, the row read back from the snapshot of the API."""
+    data = _vectors()
+    for order in itertools.permutations(case["ops"]):
+        cache.clear()
+        AppConnection.objects.all().delete()
+        phones = {device: connect(alice, [alice_home]) for device in data["devices"]}
+        row_id = uuid.uuid4()
+        names = {"$home": str(alice_home.pk), "$row": str(row_id)}
+        numbers = dict.fromkeys(data["devices"], 0)
+        for entry in order:
+            device = entry["device"]
+            numbers[device] += 1
+            answer = send(
+                phones[device].access,
+                alice_home.pk,
+                [_substitute(entry["op"], names)],
+                number=numbers[device],
+                device=data["devices"][device],
+            )
+            assert answer.status_code == 200, (case["name"], answer.content)
+            assert answer.json()["results"][0]["status"] != "rejected", answer.content
+        snapshot = Client().get(
+            f"/api/v1/sync/homes/{alice_home.pk}/snapshot",
+            secure=True,
+            HTTP_AUTHORIZATION=f"Bearer {phones['a'].access}",
+        )
+        assert snapshot.status_code == 200
+        lines = [json.loads(line) for line in snapshot.content.decode().splitlines()]
+        row = next((line["f"] for line in lines if line.get("id") == str(row_id)), {})
+        state = {name: entry[0] for name, entry in row.items()}
+        for name, value in case["expect"].items():
+            assert state.get(name) == value, (case["name"], order, name)
 
 
 def transaction_savepoint() -> str:
