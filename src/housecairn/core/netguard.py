@@ -263,6 +263,7 @@ def _hop(
     max_bytes: int,
     truncate: bool,
     allowed: Callable[[Address], bool],
+    user_agent: str = USER_AGENT,
 ) -> Fetched | str:
     """One request. Returns the answer, or the address a redirect points to."""
     try:
@@ -294,7 +295,7 @@ def _hop(
                     "GET",
                     path,
                     headers={
-                        "User-Agent": USER_AGENT,
+                        "User-Agent": user_agent,
                         "Accept": accept,
                         "Accept-Encoding": "identity",
                         "Connection": "close",
@@ -381,12 +382,14 @@ def fetch(
     truncate: bool = False,
     allowed: Callable[[Address], bool] | None = None,
     max_redirects: int = MAX_REDIRECTS,
+    user_agent: str = USER_AGENT,
 ) -> Fetched:
     """GET a page or a file on the open web; `RefusedError` with a reason code if it cannot be.
 
     `truncate`: stop at `max_bytes` and return what came (the head of a page); otherwise
     a longer answer is refused. `allowed` is the rule for an address, `is_public` unless a
-    test needs a local server.
+    test needs a local server. `user_agent` names the caller (the barcode lookup gives its own,
+    as the open databases ask, docs/adr/0083).
     """
     rule: Callable[[Address], bool] = allowed or is_public
     session = _Session(seconds)
@@ -400,6 +403,7 @@ def fetch(
                 max_bytes=max_bytes,
                 truncate=truncate,
                 allowed=rule,
+                user_agent=user_agent,
             )
             if isinstance(result, Fetched):
                 return result
