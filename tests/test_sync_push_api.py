@@ -22,6 +22,7 @@ from housecairn.apitokens import services as token_services
 from housecairn.apitokens.models import AppConnection, Scope
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Membership, Role
+from housecairn.reports.models import Report
 from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Room
 from housecairn.stock import services as stock_services
@@ -933,6 +934,79 @@ class TestMerge:
         assert result["status"] == "applied"
         occurrence.refresh_from_db()
         assert occurrence.completed_by_id == bob.pk
+
+    def test_the_reporter_and_who_closed_a_report_are_the_account_of_the_phone(
+        self,
+        alice: User,
+        bob: User,
+        alice_home: Home,
+        add_member: Callable[..., Membership],
+    ) -> None:
+        """Mutant: `reporter_id` or `closed_by_id` taken from the operation: Bob reports, or
+        closes, in Alice's name."""
+        add_member(alice_home, bob, Role.MEMBER)
+        phone = connect(bob, [alice_home])
+        made, other = uuid.uuid4(), uuid.uuid4()
+        ops = [
+            op(
+                alice_home.pk,
+                "reports.report",
+                made,
+                {"title": "Leak", "reporter_id": str(alice.pk)},
+            ),
+            op(alice_home.pk, "reports.report", other, {"title": "Crack"}),
+        ]
+        answer = send(phone.access, alice_home.pk, ops)
+        assert [r["status"] for r in answer.json()["results"]] == ["applied", "applied"]
+        assert Report.objects.get(pk=made).reporter_id == bob.pk
+        assert Report.objects.get(pk=other).reporter_id == bob.pk
+        logged = Change.objects.get(row_id=made)
+        assert logged.fields["reporter_id"] == str(bob.pk)
+        # Later: the author does not change; who closed is the phone's account.
+        later = {
+            "reporter_id": str(alice.pk),
+            "status": "closed",
+            "closed_by_id": str(alice.pk),
+            "closed_at": stamp(60_000),
+        }
+        answer = send(
+            phone.access,
+            alice_home.pk,
+            [op(alice_home.pk, "reports.report", made, later, c=stamp(60_000))],
+            number=2,
+        )
+        assert result_of(answer)["status"] == "applied"
+        report = Report.objects.get(pk=made)
+        assert (report.reporter_id, report.closed_by_id) == (bob.pk, bob.pk)
+        only_author = [
+            op(
+                alice_home.pk,
+                "reports.report",
+                made,
+                {"reporter_id": str(alice.pk)},
+                c=stamp(90_000),
+            )
+        ]
+        answer = send(phone.access, alice_home.pk, only_author, number=3)
+        assert result_of(answer) == {"i": 0, "status": "ignored"}
+        assert Report.objects.get(pk=made).reporter_id == bob.pk
+
+    def test_the_assignee_is_any_member_of_the_home(
+        self,
+        alice: User,
+        bob: User,
+        alice_home: Home,
+        add_member: Callable[..., Membership],
+    ) -> None:
+        add_member(alice_home, bob, Role.MEMBER)
+        phone = connect(bob, [alice_home])
+        task_id = uuid.uuid4()
+        fields = {"title": "Gutters", "assignee_id": str(alice.pk)}
+        answer = send(
+            phone.access, alice_home.pk, [op(alice_home.pk, "tasks.task", task_id, fields)]
+        )
+        assert result_of(answer)["status"] == "applied"
+        assert Task.objects.get(pk=task_id).assignee_id == alice.pk
 
 
 # ---------- the results and their codes ----------

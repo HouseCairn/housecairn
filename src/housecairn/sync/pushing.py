@@ -58,8 +58,11 @@ CLOCK_AHEAD = "clock_ahead"
 
 KINDS = (changes.PUT, changes.DELETE, changes.RESTORE)
 ARCHIVED_AT = "archived_at"
-# The field the server writes itself: the account of the phone, whatever the operation says.
-COMPLETED_BY = "completed_by_id"
+# The fields the server writes itself, whatever the operation says: who did it is the account
+# of the phone. `ACTED_BY` when the operation sets it (done, closed); `MADE_BY` when the row is
+# made, and never changed afterwards (the author of a report).
+ACTED_BY = ("completed_by_id", "closed_by_id")
+MADE_BY = {"reports.report": "reporter_id"}
 
 _ENTITY = re.compile(r"[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*")
 _FIELD = re.compile(r"[a-z][a-z0-9_]{0,63}")
@@ -426,9 +429,9 @@ def _apply_row(
         raise _RejectedError(FORBIDDEN)  # a column of the server, a derived field
     if model is Home and ARCHIVED_AT in op.fields and pusher.role != Role.OWNER:
         raise _RejectedError(FORBIDDEN)  # owners only archive (docs/adr/0077, need 9)
-    fields = dict(op.fields)
-    if COMPLETED_BY in columns.writable and fields.get(COMPLETED_BY) is not None:
-        fields[COMPLETED_BY] = str(pusher.user.pk)  # the phone acts as its account
+    fields = _authors(op, columns, stored is None, str(pusher.user.pk))
+    if not fields:
+        return _result(op, None, {})  # it only named the author of the row: nothing to write
     values: dict[str, Any] = {}
     logged: dict[str, Any] = {}
     for name, value in fields.items():
@@ -458,6 +461,27 @@ def _apply_row(
     if texts:
         result["other_version"] = texts
     return result
+
+
+def _authors(op: Operation, columns: Columns, new: bool, account: str) -> dict[str, Any]:
+    """The fields of `op` with who acted written by the server: the phone acts as its account.
+
+    `completed_by_id` and `closed_by_id` set by the operation become the account of the phone;
+    `assignee_id` stays free among the members (`_check_references`). The author of a row
+    (`MADE_BY`) is the account of the phone that makes it, and a later operation does not
+    change it: the field is left out.
+    """
+    fields = dict(op.fields)
+    for name in ACTED_BY:
+        if name in columns.writable and fields.get(name) is not None:
+            fields[name] = account
+    author = MADE_BY.get(op.entity)
+    if author is not None:
+        if new:
+            fields[author] = account
+        else:
+            fields.pop(author, None)
+    return fields
 
 
 def _check_extra(op: Operation, unknown: Mapping[str, Any]) -> None:
