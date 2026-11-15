@@ -139,7 +139,8 @@ def public_fields(
     return {
         name: (
             file_reference(model, name, row, row_id)
-            if name in file_names and value is not None
+            # A stored file name; a reference a phone pushed is kept as it came (until M6).
+            if name in file_names and isinstance(value, str)
             else value
         )
         for name, value in fields.items()
@@ -344,13 +345,26 @@ def _entity_lines(home: Home, entity: str, server_device: str) -> list[dict[str,
     )
     expired = retention.limit()
     lines = []
+    seen = set()
     for row in queryset.order_by("pk").iterator():
+        seen.add(row.pk)
         rc = clocks.get(row.pk)
         deleted_at = getattr(row, "deleted_at", None)
         tombstone = rc is not None and rc.tombstoned_at is not None
         if deleted_at is not None and not tombstone and deleted_at < expired:
             continue  # deleted before the log, longer ago than the retention
         lines.append(_row_line(home, entity, model, row, rc, server_device))
+    # A row a phone deleted before its put reached the server: only its tombstone is here,
+    # given as in the feed, so that a phone starting from the snapshot keeps it deleted.
+    for row_id in sorted((r for r in clocks if r not in seen), key=str):
+        rc = clocks[row_id]
+        entry = rc.clocks.get(DELETED_AT)
+        if rc.tombstoned_at is None or entry is None:
+            continue
+        fields: dict[str, list[Any]] = {DELETED_AT: [entry[0], entry[0], entry[1]]}
+        for name, (value, made, device) in sorted(rc.extra.items()):
+            fields[name] = [value, made, device]
+        lines.append({"t": entity, "h": str(home.pk), "id": str(row_id), "f": fields})
     return lines
 
 

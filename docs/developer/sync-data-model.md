@@ -67,6 +67,36 @@ archive made on the web is the clock of that write, and an empty value stays emp
 A write made on the web gets a clock from the server's hybrid clock and the device id of the
 server. A write that comes from a phone passes its own `stamp` (clock and device id).
 
+## A push
+
+A push (`sync/pushing.py`) applies the operations of a phone through `rows.apply_stamped`, the
+writer of the change log for a write that carries its own clock. It records the change first,
+which decides field by field which writes win, then writes to the row only the fields that won:
+a field whose stored clock is newer is never overwritten, even for a moment. A deletion or a
+restoration is the field `deleted_at`, and soft-deletes or restores the row; a link row is
+written or removed in its table. Every check that can refuse an operation (role, type, home,
+id, references) runs before anything is written; the whole push is one transaction, and an
+operation that breaks a rule of the database refuses the push (400) instead of failing.
+
+A `delete` or a `restore` of a row the table does not hold is recorded all the same
+(`record_change` alone): its `RowClocks` keeps the clock of `deleted_at`, and `tombstoned_at`
+for a deletion, so that a `put` arriving later, from another phone, inserts the row deleted
+(`rows._create_stamped`); the snapshot gives such a tombstone as a line of its own. When a push
+inserts a row, the columns the phone did not set get the zero clock in `RowClocks`: without a
+clock of its own, a field reads as the `updated_at` of the row, the time of the insert, and an
+older write of it would lose to nobody. The values of an operation are walked with a stack, not
+by recursion (at most 32 levels, texts UTF-8 only), and `extra` is bounded per row (64 fields,
+64 KiB), so that a push is refused with 400 rather than failing.
+
+`sync_push` keeps, per connection, the number of each push, the SHA-256 of its body and the
+answer, 30 days; the nightly purge removes the older ones. The connection keeps the device id of
+its first push (`AppConnection.device_id`).
+
+The guard test runs with the push as the writer too (`tests/test_sync_push_merge.py`): every
+entity type is written and deleted by a push, and each write must record its change. The same
+file publishes the merge vectors `tests/fixtures/sync_merge.json`, the cases of the per-field
+rule applied in every order, for the mobile app to pin.
+
 ## Clocks and conflicts
 
 A clock is a 64-bit number, `(milliseconds since 1970-01-01 UTC << 16) | counter`, written as 16

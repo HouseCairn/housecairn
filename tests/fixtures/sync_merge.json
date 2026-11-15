@@ -1,0 +1,361 @@
+{
+  "version": 1,
+  "about": "Merge vectors of the per-field rule of mobile ADR 0003, as a Housecairn server applies them (docs/adr/0077). Each case is a set of operations of the mobile protocol (section 2.2) on one row `$row` of `rooms.room` in the home `$home`, each with the device that wrote it; applied in every order, they give the fields of `expect`. `$row` is new to the server: it has no row of that id before the first operation, so a delete or a restore may come before the put that makes the row. Clocks are on 2026-01-01, in the past of any server: a server refuses a clock more than 24 hours ahead of its own (`clock_ahead`). A phone pins this file and replays it.",
+  "devices": {
+    "a": "EREREREREREREREREREREQ",
+    "b": "7u7u7u7u7u7u7u7u7u7u7g"
+  },
+  "cases": [
+    {
+      "name": "later_clock_wins",
+      "rule": "later clock wins",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8010000",
+            "f": {
+              "name": "Early"
+            }
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8020000",
+            "f": {
+              "name": "Late"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "name": "Late"
+      }
+    },
+    {
+      "name": "counter_orders_one_millisecond",
+      "rule": "later clock wins",
+      "ops": [
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8050001",
+            "f": {
+              "name": "First"
+            }
+          }
+        },
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8050002",
+            "f": {
+              "name": "Second"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "name": "Second"
+      }
+    },
+    {
+      "name": "two_fields_merge_apart",
+      "rule": "fields merge apart",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8010000",
+            "f": {
+              "name": "Named by a"
+            }
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8020000",
+            "f": {
+              "notes": "Notes by b"
+            }
+          }
+        },
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8030000",
+            "f": {
+              "position": 4
+            }
+          }
+        }
+      ],
+      "expect": {
+        "name": "Named by a",
+        "notes": "Notes by b",
+        "position": 4
+      }
+    },
+    {
+      "name": "equal_clocks_greater_device_wins",
+      "rule": "tie broken by device",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8070000",
+            "f": {
+              "name": "From a"
+            }
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8070000",
+            "f": {
+              "name": "From b"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "name": "From b"
+      }
+    },
+    {
+      "name": "same_operation_twice",
+      "rule": "repeat changes nothing",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8030000",
+            "f": {
+              "name": "Once"
+            }
+          }
+        },
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8030000",
+            "f": {
+              "name": "Once"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "name": "Once"
+      }
+    },
+    {
+      "name": "edit_does_not_bring_back_a_deleted_row",
+      "rule": "delete is a field",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "delete",
+            "c": "019b76daa8020000"
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8030000",
+            "f": {
+              "name": "Edited"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "deleted_at": "019b76daa8020000",
+        "name": "Edited"
+      }
+    },
+    {
+      "name": "restore_after_delete",
+      "rule": "restore needs a later clock",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "delete",
+            "c": "019b76daa8020000"
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "restore",
+            "c": "019b76daa8040000"
+          }
+        }
+      ],
+      "expect": {
+        "deleted_at": null
+      }
+    },
+    {
+      "name": "restore_before_delete_loses",
+      "rule": "restore needs a later clock",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "delete",
+            "c": "019b76daa8040000"
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "restore",
+            "c": "019b76daa8020000"
+          }
+        }
+      ],
+      "expect": {
+        "deleted_at": "019b76daa8040000"
+      }
+    },
+    {
+      "name": "unknown_field_merges_like_the_others",
+      "rule": "unknown field kept",
+      "ops": [
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8010000",
+            "f": {
+              "moisture_goal": "40-60"
+            }
+          }
+        },
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8020000",
+            "f": {
+              "moisture_goal": "45-55"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "moisture_goal": "45-55"
+      }
+    },
+    {
+      "name": "long_text_later_wins",
+      "rule": "later clock wins",
+      "ops": [
+        {
+          "device": "b",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8010000",
+            "f": {
+              "notes": "Older text"
+            }
+          }
+        },
+        {
+          "device": "a",
+          "op": {
+            "t": "rooms.room",
+            "h": "$home",
+            "id": "$row",
+            "k": "put",
+            "c": "019b76daa8090000",
+            "f": {
+              "notes": "Newer text"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "notes": "Newer text"
+      }
+    }
+  ]
+}

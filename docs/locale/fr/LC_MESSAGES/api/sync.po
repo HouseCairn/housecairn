@@ -21,8 +21,8 @@ msgstr ""
 msgid "Sync API"
 msgstr "API de synchronisation"
 
-msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, and starts from a snapshot of the home when it has none. This page describes the reading routes; sending changes comes in a later version."
-msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, et part d'un instantané du logement quand elle n'en a aucune. Cette page décrit les routes de lecture ; l'envoi des modifications vient dans une version ultérieure."
+msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, starts from a snapshot of the home when it has none, and pushes what was typed on the phone. Creating a home from the phone and sending files come in a later version."
+msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, part d'un instantané du logement quand elle n'en a aucune, et envoie ce qui a été saisi sur le téléphone. La création d'un logement depuis le téléphone et l'envoi des fichiers viennent dans une version ultérieure."
 
 msgid "Access"
 msgstr "Accès"
@@ -33,8 +33,8 @@ msgstr "Toutes les routes sauf `info` n'acceptent que le jeton d'accès d'une [a
 msgid "A connection reads the homes chosen when it was made, as long as its account is a member of them, with the account's role. A home it was not given, a home its account left, and a home that does not exist all answer `404`, never `403`. A home that requires a sign-in provider is read only by a connection made after signing in through it (`403` with `\"code\": \"sso_required\"` otherwise), as for an API token. An archived home is listed and read like the others."
 msgstr "Une connexion lit les logements choisis quand elle a été créée, tant que son compte en est membre, avec le rôle du compte. Un logement qui ne lui a pas été donné, un logement que son compte a quitté et un logement qui n'existe pas répondent tous `404`, jamais `403`. Un logement qui exige un fournisseur de connexion n'est lu que par une connexion créée après s'être connecté par lui (`403` avec `\"code\": \"sso_required\"` sinon), comme pour un jeton d'API. Un logement archivé est listé et lu comme les autres."
 
-msgid "Reads are limited to 600 a minute per connection; beyond that the answer is `429`."
-msgstr "Les lectures sont limitées à 600 par minute et par connexion ; au-delà, la réponse est `429`."
+msgid "Reads are limited to 600 a minute per connection, and pushes to 60 a minute per connection, counted apart; beyond that the answer is `429`."
+msgstr "Les lectures sont limitées à 600 par minute et par connexion, et les envois à 60 par minute et par connexion, comptés à part ; au-delà, la réponse est `429`."
 
 msgid "Values"
 msgstr "Valeurs"
@@ -95,21 +95,121 @@ msgstr "L'état du logement, en lignes JSON (`application/x-ndjson`) : une ligne
 msgid "A deleted row is in the snapshot for 400 days after its deletion, with the field `deleted_at` (its value is the clock of the deletion). The fields the server has no column for, written by a newer app, are given back as the others. The app then reads the changes after `covers`; a change it already has from the snapshot changes nothing when applied again."
 msgstr "Une ligne supprimée reste dans l'instantané 400 jours après sa suppression, avec le champ `deleted_at` (sa valeur est l'horloge de la suppression). Les champs pour lesquels le serveur n'a pas de colonne, écrits par une application plus récente, sont rendus comme les autres. L'application lit ensuite les modifications après `covers` ; une modification qu'elle a déjà par l'instantané ne change rien quand elle est appliquée à nouveau."
 
+msgid "Pushing changes"
+msgstr "Envoyer les modifications"
+
+#, python-brace-format
+msgid "`POST /api/v1/sync/homes/{home id}/push`, with a JSON body (`Content-Type: application/json`):"
+msgstr "`POST /api/v1/sync/homes/{id du logement}/push`, avec un corps JSON (`Content-Type: application/json`) :"
+
+msgid "`push`: the number the app gives this push, 1 or more, per connection. A push sent again with the same number and the same bytes gets the first answer, and is not applied again; the same number with other bytes is `409` with `\"code\": \"push_conflict\"`. A number is kept 30 days."
+msgstr "`push` : le numéro que l'application donne à cet envoi, 1 ou plus, par connexion. Un envoi renvoyé avec le même numéro et les mêmes octets reçoit la première réponse, sans être appliqué de nouveau ; le même numéro avec d'autres octets donne `409` avec `\"code\": \"push_conflict\"`. Un numéro est gardé 30 jours."
+
+msgid "`sv`: the schema version of the app. Below the lowest version the server accepts (1), the app reads but does not write: `400` with `\"code\": \"sync_version\"`."
+msgstr "`sv` : la version de schéma de l'application. En dessous de la plus basse que le serveur accepte (1), l'application lit mais n'écrit pas : `400` avec `\"code\": \"sync_version\"`."
+
+msgid "`device`: the device id of the phone, 16 bytes in base64url. The first push of a connection fixes it; another one afterwards, the device id of another connection in use or the server's own is refused (`409` with `\"code\": \"wrong_device\"`, or `400`). A revoked connection holds no device id: a phone signed out then in again pushes with its own."
+msgstr "`device` : l'identifiant d'appareil du téléphone, 16 octets en base64url. Le premier envoi d'une connexion le fixe ; un autre ensuite, celui d'une autre connexion en service ou celui du serveur lui-même sont refusés (`409` avec `\"code\": \"wrong_device\"`, ou `400`). Une connexion révoquée ne garde aucun identifiant d'appareil : un téléphone déconnecté puis reconnecté envoie avec le sien."
+
+msgid "`ops`: at most 500 operations of the protocol, in the order the phone made them. A body is at most 1 MiB. Beyond either limit: `400` with `\"code\": \"too_large\"`."
+msgstr "`ops` : au plus 500 opérations du protocole, dans l'ordre où le téléphone les a faites. Un corps fait au plus 1 Mio. Au-delà de l'une ou l'autre limite : `400` avec `\"code\": \"too_large\"`."
+
+msgid "The push is applied in one transaction, as a whole or not at all. An operation the server cannot read (a type, an id, a clock or a value out of form, a text that is not valid Unicode, a value that nests lists or objects more than 32 deep, a new row without the fields it needs, a write that breaks a rule of the data) makes the whole push `400` with `\"code\": \"malformed\"` and the `index` of the operation, and nothing is written. So does an operation that would leave a row with more than 64 fields the server does not know, or more than 64 KiB of them as JSON."
+msgstr "L'envoi s'applique en une transaction, en entier ou pas du tout. Une opération que le serveur ne peut pas lire (un type, un identifiant, une horloge ou une valeur hors format, un texte qui n'est pas de l'Unicode valide, une valeur qui imbrique listes ou objets sur plus de 32 niveaux, une nouvelle ligne sans les champs dont elle a besoin, une écriture qui enfreint une règle des données) rend tout l'envoi `400` avec `\"code\": \"malformed\"` et l'`index` de l'opération, et rien n'est écrit. De même pour une opération qui laisserait à une ligne plus de 64 champs inconnus du serveur, ou plus de 64 Kio de ces champs en JSON."
+
+msgid "**Each field is decided on its own**: a field is written only if the clock of the operation, then its device id, is greater than the ones the field holds; the server keeps a clock per field of every row, and a write made on the web gets one from the server's clock. A `put` of a row the server does not have creates it with the phone's id; the fields it does not set can be written by any later operation. A `delete` or a `restore` writes the field `deleted_at`; a `put` never brings back a deleted row, only a `restore` with a later clock does. A `delete` may come before the `put` of its row, from another phone: the server keeps it, the row then comes deleted, and the snapshot gives the deletion of a row the server does not have yet. A field the server has no column for (written by a newer app) is kept and given back to the other phones; a file reference is kept the same way until the server stores the files of the phone. The server writes who acted, whatever the operation says: `completed_by_id` and `closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no later operation changes. `assignee_id` may name any member of the home."
+msgstr "**Chaque champ se décide seul** : un champ n'est écrit que si l'horloge de l'opération, puis son identifiant d'appareil, est plus grande que celles que le champ porte ; le serveur garde une horloge par champ de chaque ligne, et une écriture faite sur le web en reçoit une de l'horloge du serveur. Un `put` d'une ligne que le serveur n'a pas la crée avec l'identifiant du téléphone ; les champs qu'il ne pose pas peuvent être écrits par toute opération ultérieure. Un `delete` ou un `restore` écrit le champ `deleted_at` ; un `put` ne ramène jamais une ligne supprimée, seul un `restore` d'horloge plus récente le fait. Un `delete` peut arriver avant le `put` de sa ligne, venu d'un autre téléphone : le serveur le garde, la ligne arrive alors supprimée, et l'instantané donne la suppression d'une ligne que le serveur n'a pas encore. Un champ sans colonne sur le serveur (écrit par une application plus récente) est gardé et rendu aux autres téléphones ; une référence de fichier est gardée de la même façon tant que le serveur ne stocke pas les fichiers du téléphone. Le serveur écrit qui a agi, quoi que dise l'opération : `completed_by_id` et `closed_by_id` sont le compte du téléphone, comme `reporter_id` d'un nouveau signalement, qu'aucune opération ultérieure ne change. `assignee_id` peut désigner tout membre du logement."
+
+msgid "Each operation gets one result, with its index `i`:"
+msgstr "Chaque opération reçoit un résultat, avec son index `i` :"
+
+msgid "Status"
+msgstr "Statut"
+
+msgid "Meaning"
+msgstr "Sens"
+
+msgid "`applied`"
+msgstr "`applied`"
+
+msgid "Written, perhaps with some fields lost."
+msgstr "Écrite, peut-être avec des champs perdants."
+
+msgid "`ignored`"
+msgstr "`ignored`"
+
+msgid "Nothing written: every field lost, or the same operation was applied before."
+msgstr "Rien d'écrit : chaque champ a perdu, ou la même opération était déjà appliquée."
+
+msgid "`rejected`"
+msgstr "`rejected`"
+
+msgid "Not written, with a `code` the app shows on the row without blocking the rest of the push."
+msgstr "Non écrite, avec un `code` que l'application affiche sur la ligne sans bloquer le reste de l'envoi."
+
+msgid "`lost`: for each field that lost, the value, the clock and the device of the write that won."
+msgstr "`lost` : pour chaque champ perdant, la valeur, l'horloge et l'appareil de l'écriture gagnante."
+
+msgid "`other_version`: for a long text that lost (notes, procedure, goal), the phone's own text, so that the app keeps it as an other version."
+msgstr "`other_version` : pour un texte long perdant (notes, procédure, objectif), le texte du téléphone lui-même, que l'application garde comme autre version."
+
+msgid "`head`: the position of the last change of the home after the push."
+msgstr "`head` : la position de la dernière modification du logement après l'envoi."
+
+msgid "The codes of a rejected operation:"
+msgstr "Les codes d'une opération rejetée :"
+
+msgid "Code"
+msgstr "Code"
+
+msgid "When"
+msgstr "Quand"
+
+msgid "`forbidden`"
+msgstr "`forbidden`"
+
+msgid "The account is a read-only member of the home; or the operation sets `archived_at` on the home and the account is not an owner (the whole operation is rejected, its other fields too); or it writes a field the server keeps for itself (`required_provider`, `visible_from`, a thumbnail); or it deletes or restores the home itself, which is erased on the web only."
+msgstr "Le compte est membre en lecture seule du logement ; ou l'opération pose `archived_at` sur le logement et le compte n'en est pas propriétaire (toute l'opération est rejetée, ses autres champs aussi) ; ou elle écrit un champ que le serveur garde pour lui (`required_provider`, `visible_from`, une miniature) ; ou elle supprime ou restaure le logement lui-même, qui ne s'efface que sur le web."
+
+msgid "`unknown_type`"
+msgstr "`unknown_type`"
+
+msgid "The entity type is not one the server keeps (`family.member` and `family.settings` included)."
+msgstr "Le type d'entité n'est pas de ceux que le serveur garde (`family.member` et `family.settings` compris)."
+
+msgid "`invalid_reference`"
+msgstr "`invalid_reference`"
+
+msgid "A reference names a row that is not in this home, or a person who is not a member; or the id of a link row does not name its two rows."
+msgstr "Une référence nomme une ligne qui n'est pas dans ce logement, ou une personne qui n'en est pas membre ; ou l'identifiant d'une ligne de lien ne nomme pas ses deux lignes."
+
+msgid "`wrong_home`"
+msgstr "`wrong_home`"
+
+msgid "The operation names another home than the one of the route."
+msgstr "L'opération nomme un autre logement que celui de la route."
+
+msgid "`id_taken`"
+msgstr "`id_taken`"
+
+msgid "The id is held by a row of another home or of another type. The answer does not say where."
+msgstr "L'identifiant est pris par une ligne d'un autre logement ou d'un autre type. La réponse ne dit pas où."
+
+msgid "`clock_ahead`"
+msgstr "`clock_ahead`"
+
+msgid "The clock of the operation is more than 24 hours ahead of the server's: the date of the phone is wrong. The other operations of the push apply."
+msgstr "L'horloge de l'opération a plus de 24 heures d'avance sur celle du serveur : la date du téléphone est fausse. Les autres opérations de l'envoi s'appliquent."
+
+msgid "A push to a home that was erased answers `410` with `\"code\": \"home_gone\"`, and applies nothing."
+msgstr "Un envoi vers un logement effacé répond `410` avec `\"code\": \"home_gone\"`, et n'applique rien."
+
 msgid "Errors"
 msgstr "Erreurs"
 
 #, python-brace-format
 msgid "Errors are those of the rest of the API, `{\"detail\": \"...\"}`, with a `code` the app words itself:"
 msgstr "Les erreurs sont celles du reste de l'API, `{\"detail\": \"...\"}`, avec un `code` que l'application formule elle-même :"
-
-msgid "Code"
-msgstr "Code"
-
-msgid "Status"
-msgstr "Statut"
-
-msgid "When"
-msgstr "Quand"
 
 msgid "`sync_needs_connection`"
 msgstr "`sync_needs_connection`"
@@ -119,6 +219,42 @@ msgstr "`403`"
 
 msgid "An API token, a session or no credential."
 msgstr "Un jeton d'API, une session ou aucun identifiant."
+
+msgid "`malformed`"
+msgstr "`malformed`"
+
+msgid "`400`"
+msgstr "`400`"
+
+msgid "A push whose body or one of its operations cannot be read; with `index` for an operation."
+msgstr "Un envoi dont le corps ou une opération ne peut pas être lu ; avec `index` pour une opération."
+
+msgid "`too_large`"
+msgstr "`too_large`"
+
+msgid "A push of more than 500 operations or 1 MiB."
+msgstr "Un envoi de plus de 500 opérations ou de 1 Mio."
+
+msgid "`sync_version`"
+msgstr "`sync_version`"
+
+msgid "A push from an app whose schema version is below the server's lowest."
+msgstr "Un envoi d'une application dont la version de schéma est sous la plus basse du serveur."
+
+msgid "`push_conflict`"
+msgstr "`push_conflict`"
+
+msgid "`409`"
+msgstr "`409`"
+
+msgid "A push number used before with another body."
+msgstr "Un numéro d'envoi déjà utilisé avec un autre corps."
+
+msgid "`wrong_device`"
+msgstr "`wrong_device`"
+
+msgid "A device id other than the one the connection pushed with, or one of another connection."
+msgstr "Un identifiant d'appareil autre que celui avec lequel la connexion a envoyé, ou celui d'une autre connexion."
 
 msgid "`insecure_transport`"
 msgstr "`insecure_transport`"

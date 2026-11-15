@@ -27,3 +27,124 @@ msgstr "limit vaut 1 ou plus."
 
 msgid "This position is beyond the last change of the home."
 msgstr "Cette position est au-delà de la dernière modification du logement."
+
+msgid "This push number was used with another body."
+msgstr "Ce numéro de push a déjà servi avec un autre contenu."
+
+#, python-format
+msgid "A push holds at most %(ops)s operations and %(bytes)s bytes."
+msgstr "Un push contient au plus %(ops)s opérations et %(bytes)s octets."
+
+msgid "The body is not JSON."
+msgstr "Le contenu n'est pas du JSON."
+
+msgid "The body is a JSON object."
+msgstr "Le contenu est un objet JSON."
+
+#, python-format
+msgid "%(name)s is a whole number."
+msgstr "%(name)s est un nombre entier."
+
+msgid "device is a device id, 22 characters of base64url."
+msgstr "device est un identifiant d'appareil, 22 caractères en base64url."
+
+msgid "device is the server's own device id."
+msgstr "device est l'identifiant d'appareil du serveur lui-même."
+
+msgid "This connection pushes with another device id."
+msgstr "Cette connexion envoie avec un autre identifiant d'appareil."
+
+msgid "This device id belongs to another connection."
+msgstr "Cet identifiant d'appareil appartient à une autre connexion."
+
+msgid "ops is a list of operations."
+msgstr "ops est une liste d'opérations."
+
+msgid "This version of the app reads but does not write: update it."
+msgstr "Cette version de l'application lit mais n'écrit pas : mettez-la à jour."
+
+#, python-format
+msgid "%(name)s is a UUID in its canonical text form."
+msgstr "%(name)s est un UUID sous sa forme textuelle canonique."
+
+msgid "A text holds a NUL character."
+msgstr "Un texte contient un caractère NUL."
+
+msgid "A text is not valid Unicode."
+msgstr "Un texte n'est pas de l'Unicode valide."
+
+#, python-format
+msgid "A value is nested more than %(depth)s deep."
+msgstr "Une valeur est imbriquée sur plus de %(depth)s niveaux."
+
+msgid "An operation is a JSON object."
+msgstr "Une opération est un objet JSON."
+
+msgid "t is an entity type, <app>.<model> in lower case."
+msgstr "t est un type d'entité, <app>.<model> en minuscules."
+
+msgid "k is put, delete or restore."
+msgstr "k vaut put, delete ou restore."
+
+msgid "c is a clock, 16 lower-case hexadecimal digits."
+msgstr "c est une horloge, 16 chiffres hexadécimaux en minuscules."
+
+msgid "A put sets at least one field in f."
+msgstr "Un put écrit au moins un champ dans f."
+
+msgid "A delete or a restore sets no field."
+msgstr "Un delete ou un restore n'écrit aucun champ."
+
+msgid "A field is named in lower case, at most 64 characters."
+msgstr "Un champ est nommé en minuscules, en 64 caractères au plus."
+
+msgid "deleted_at is written by a delete or a restore."
+msgstr "deleted_at s'écrit par un delete ou un restore."
+
+msgid "An instant is an HLC, 16 hexadecimal digits."
+msgstr "Un instant est une HLC, 16 chiffres hexadécimaux."
+
+msgid "An instant is beyond the dates the server keeps."
+msgstr "Cet instant dépasse les dates que le serveur conserve."
+
+#, python-format
+msgid "%(name)s cannot be empty."
+msgstr "%(name)s ne peut pas être vide."
+
+#, python-format
+msgid "%(name)s is true or false."
+msgstr "%(name)s vaut true ou false."
+
+#, python-format
+msgid "%(name)s is an amount, a decimal string."
+msgstr "%(name)s est un montant, une chaîne décimale."
+
+#, python-format
+msgid "%(name)s is a date, YYYY-MM-DD."
+msgstr "%(name)s est une date, AAAA-MM-JJ."
+
+#, python-format
+msgid "%(name)s is a text."
+msgstr "%(name)s est un texte."
+
+#, python-format
+msgid "%(name)s cannot be written by a push."
+msgstr "%(name)s ne peut pas être écrit par un push."
+
+#, python-format
+msgid "%(name)s is not a valid value."
+msgstr "%(name)s n'est pas une valeur valide."
+
+msgid "This operation breaks a rule of the data."
+msgstr "Cette opération enfreint une règle des données."
+
+#, python-format
+msgid "A new row needs %(fields)s."
+msgstr "Une nouvelle ligne a besoin de %(fields)s."
+
+#, python-format
+msgid "A row keeps at most %(fields)s fields the server does not know, %(bytes)s bytes together."
+msgstr "Une ligne garde au plus %(fields)s champs inconnus du serveur, %(bytes)s octets en tout."
+
+msgid "A link names both of its rows."
+msgstr "Un lien nomme ses deux lignes."

@@ -30,7 +30,12 @@ def next_run(now: datetime.datetime | None = None) -> datetime.datetime:
 def purge() -> dict[str, int]:
     """Remove what the retention has expired; the counts go to the task result."""
     done = retention.purge()
-    return {"changes": done.changes, "tombstones": done.tombstones, "rows": done.rows}
+    return {
+        "changes": done.changes,
+        "tombstones": done.tombstones,
+        "rows": done.rows,
+        "pushes": done.pushes,
+    }
 
 
 def schedule(**_kwargs: object) -> None:

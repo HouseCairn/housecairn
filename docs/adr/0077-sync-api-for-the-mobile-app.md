@@ -8,7 +8,11 @@
   The reading routes are built by lot M4, which gives two keys the first shapes lacked: the
   `device` of each change of the feed, which the per-field rule needs to break a tie (as the
   relay's signature gives it), and the `members` of a home in `GET /sync/homes/` and in the
-  snapshot, which need 9 asks for.
+  snapshot, which need 9 asks for. Lot M5a builds the push, with three additions: the body names
+  the phone's `device` (the connection keeps the one of its first push, and `409` `wrong_device`
+  refuses another), a malformed push is `400` with the code `malformed`, and a field a phone may
+  not write (a column of the server, a derived field) is `rejected` with `forbidden`. Its review
+  led to the [decisions of 2026-11-15](#decisions-of-2026-11-15-after-the-review-of-the-push).
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and
@@ -295,7 +299,8 @@ The device that won is a device id in `b64`, here the server's `server_device`.
 `status` is `applied` (written, perhaps with some fields lost), `ignored` (every field lost, or
 a repeat), `repaired` (written, then changed by a repair rule: the changes follow in the feed),
 or `rejected` with a `code` (`forbidden` for a read-only member, or for `archived_at` set by a
-member who is not an owner; `unknown_type`, `invalid_reference`, `wrong_home`, `id_taken`),
+member who is not an owner; `unknown_type`, `invalid_reference`, `wrong_home`, `id_taken`,
+`clock_ahead` for a clock more than 24 hours ahead of the server's),
 which the phone shows on the row without blocking the rest. Every status but `rejected` tells
 the phone that the server has seen the row ([next section](#starting-again-after-410)).
 
@@ -341,6 +346,39 @@ an operation (only an owner, on the web, after typing its name). Home scoping
 ([ADR 0006](0006-home-scoping.md)) narrows by the homes bound to the connection, and a home that
 requires a sign-in provider follows the rule of tokens
 ([ADR 0057](0057-api-tokens-of-a-home-that-requires-a-provider.md)).
+
+### Decisions of 2026-11-15, after the review of the push
+
+The security review of lot M5a found three defects, fixed in the same lot: a text with a lone
+surrogate (half of an emoji) and a value nested a thousand deep made the push fail (500), and a
+phone signed out then in again could no longer push, its device id still held by the revoked
+connection. A text that UTF-8 cannot encode and a value nested more than 32 deep are now
+`400` `malformed` with the index of the operation, and a revoked connection holds no device id.
+The questions it left open are decided as follows.
+
+1. **A clock far ahead is refused.** An operation whose clock is more than 24 hours ahead of
+   the server's wall clock is `rejected` with the code `clock_ahead`; the other operations of
+   the push apply. Accepted, such a clock won its field for good: the server's clock does not
+   follow a clock past 24 hours (`receive`, mobile ADR 0003), so a later web edit wrote the
+   column while the feed kept the phone's value, and the web and the phones disagreed. The
+   phone keeps the operation as it keeps any rejected one, and its user learns that the date of
+   the phone is wrong (mobile lot 4).
+2. **`extra` is bounded per row**: at most 64 fields the server does not know, and 64 KiB of
+   them as JSON, those the row keeps and those of the operation together. Beyond, the push is
+   `400` `malformed` with the index. A newer app adds a few fields per row; without a bound, a
+   member could fill a row with twenty thousand fields in one push.
+3. **The authors are the server's to write.** `reporter_id` of a report is the account of the
+   phone that makes it, and a later operation does not change it (the field is left out);
+   `closed_by_id`, like `completed_by_id`, is the account of the phone that sets it.
+   `assignee_id` of a task stays free among the members of the home: assigning work to someone
+   else is the point of it.
+4. **A deletion may come before its row.** A `delete` or a `restore` of a row the server never
+   had is kept, as the clock of `deleted_at` (a tombstone for a delete); the `put` that comes
+   later makes the row deleted, and the snapshot gives the tombstone of a row it does not have,
+   as the feed did. The merge vectors (`tests/fixtures/sync_merge.json`) are applied to a row
+   new to the server, in every order, with clocks in the past of the server. A field a phone's
+   new row does not set has the zero clock, so that any later write of it wins, rather than the
+   time of the insert.
 
 ### Compatibility
 
