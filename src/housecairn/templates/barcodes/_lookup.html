@@ -24,7 +24,7 @@
         {% if answer.has_photo %}
           <figure class="barcode-photo">
             <img src="{% url 'barcodes:photo' home_id=home.id code=answer.code %}" alt="{% translate 'Photo of the product' %}" loading="lazy" decoding="async">
-            <figcaption class="small">{% include "barcodes/_attribution.html" with source=answer.source_label source_url=answer.product_url license=answer.license author=answer.author %}</figcaption>
+            <figcaption class="small">{% include "barcodes/_attribution.html" with source=answer.source_label source_url=answer.product_url license=answer.license license_url=license_url author=answer.author %}</figcaption>
           </figure>
           <label class="checkbox"><input type="checkbox" name="{{ photo_field }}" value="{{ answer.code }}" data-barcode-photo> {% translate "Keep this photo, if the sheet has none" %}</label>
         {% else %}

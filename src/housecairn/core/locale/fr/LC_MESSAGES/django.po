@@ -502,11 +502,13 @@ msgstr "Développé avec un agent IA, sous revue humaine."
 msgid "Open data"
 msgstr "Données ouvertes"
 
-msgid "The barcode lookup reads open databases, when the administrator turns it on: the catalogue of <a href=\"https://nudger.fr/opendata/gtin\" rel=\"noopener noreferrer\">Nudger</a> (open4goods), and <a href=\"https://world.openproductsfacts.org\" rel=\"noopener noreferrer\">Open Products Facts</a> and <a href=\"https://world.openfoodfacts.org\" rel=\"noopener noreferrer\">Open Food Facts</a>. Their data is available under the <a href=\"https://opendatacommons.org/licenses/odbl/1-0/\" rel=\"license noopener noreferrer\">Open Database License (ODbL)</a>."
-msgstr "La recherche par code-barres lit des bases de données ouvertes, quand l'administrateur l'active : le catalogue de <a href=\"https://nudger.fr/opendata/gtin\" rel=\"noopener noreferrer\">Nudger</a> (open4goods), puis <a href=\"https://world.openproductsfacts.org\" rel=\"noopener noreferrer\">Open Products Facts</a> et <a href=\"https://world.openfoodfacts.org\" rel=\"noopener noreferrer\">Open Food Facts</a>. Leurs données sont disponibles sous la <a href=\"https://opendatacommons.org/licenses/odbl/1-0/\" rel=\"license noopener noreferrer\">licence ouverte de base de données (ODbL)</a>."
+#, python-format
+msgid "The barcode lookup reads open databases, when the administrator turns it on: the catalogue of <a href=\"%(nudger)s\" rel=\"noopener noreferrer\">Nudger</a> (open4goods), and <a href=\"%(opf)s\" rel=\"noopener noreferrer\">Open Products Facts</a> and <a href=\"%(off)s\" rel=\"noopener noreferrer\">Open Food Facts</a>. Their data is available under the <a href=\"%(odbl)s\" rel=\"license noopener noreferrer\">Open Database License (ODbL)</a>."
+msgstr "La recherche par code-barres lit des bases de données ouvertes, quand l'administrateur l'active : le catalogue de <a href=\"%(nudger)s\" rel=\"noopener noreferrer\">Nudger</a> (open4goods), puis <a href=\"%(opf)s\" rel=\"noopener noreferrer\">Open Products Facts</a> et <a href=\"%(off)s\" rel=\"noopener noreferrer\">Open Food Facts</a>. Leurs données sont disponibles sous la <a href=\"%(odbl)s\" rel=\"license noopener noreferrer\">licence ouverte de base de données (ODbL)</a>."
 
-msgid "The photos of Open Products Facts and Open Food Facts are under the <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\" rel=\"license noopener noreferrer\">Creative Commons Attribution-ShareAlike 3.0</a> licence: each one is shown with its source and its author."
-msgstr "Les photos d'Open Products Facts et d'Open Food Facts sont sous licence <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\" rel=\"license noopener noreferrer\">Creative Commons Attribution - Partage dans les mêmes conditions 3.0</a> : chacune est affichée avec sa source et son auteur."
+#, python-format
+msgid "The photos of Open Products Facts and Open Food Facts are under the <a href=\"%(ccbysa)s\" rel=\"license noopener noreferrer\">Creative Commons Attribution-ShareAlike 3.0</a> licence: each one is shown with its source and its author."
+msgstr "Les photos d'Open Products Facts et d'Open Food Facts sont sous licence <a href=\"%(ccbysa)s\" rel=\"license noopener noreferrer\">Creative Commons Attribution - Partage dans les mêmes conditions 3.0</a> : chacune est affichée avec sa source et son auteur."
 
 msgid "Links"
 msgstr "Liens"

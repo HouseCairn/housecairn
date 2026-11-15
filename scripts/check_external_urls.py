@@ -20,6 +20,12 @@ EXTERNAL_URL = re.compile(
     r"(?:https?:)?//[a-z0-9.-]+\.(?:[a-z]{2,}|xn--[a-z0-9-]+)(?![a-z0-9.-])", re.IGNORECASE
 )
 
+# XML namespace names, which a script writes into the elements it builds (an SVG drawn by a
+# vendored library): an identifier the browser never fetches, not an address.
+NAMESPACE_NAMES = re.compile(
+    r"http://www\.w3\.org/(?:2000/svg|1999/xhtml|1999/xlink|1998/Math/MathML|2000/xmlns/)"
+)
+
 
 def web_files(root: Path) -> list[Path]:
     """Templates and static files of the package, sorted."""
@@ -33,7 +39,11 @@ def offenders(root: Path) -> list[tuple[Path, int, str]]:
     for path in web_files(root):
         lines = path.read_text(encoding="utf-8").splitlines()
         for number, line in enumerate(lines, start=1):
-            found += [(path, number, m.group(0)) for m in EXTERNAL_URL.finditer(line)]
+            found += [
+                (path, number, m.group(0))
+                for m in EXTERNAL_URL.finditer(line)
+                if not NAMESPACE_NAMES.match(line, m.start())
+            ]
     return found
 
 

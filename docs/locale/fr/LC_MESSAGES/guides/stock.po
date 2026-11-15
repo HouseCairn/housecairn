@@ -36,6 +36,15 @@ msgstr "L'**unité** vient d'une liste (pièce, litre, millilitre, mètre, kilog
 msgid "Choose the **compatible items** when the part is made for a given piece of equipment, such as the boiler a filter fits, and the **rooms** where it is used: type in the field to narrow the list, pick one, and it becomes a chip you can remove. The links are shown on the page of the stock item, and the page of a room lists the stock items that concern it (listed on the room, compatible with one of its items, or its paint left over)."
 msgstr "Choisissez les **éléments compatibles** quand la pièce est faite pour un équipement précis, comme la chaudière à laquelle convient un filtre, et les **pièces** où elle sert : saisissez dans le champ pour réduire la liste, choisissez, et le choix devient une puce que vous pouvez retirer. Les liens s'affichent sur la page de l'article, et la page d'une pièce liste les articles qui la concernent (rattachés à la pièce, compatibles avec l'un de ses éléments, ou sa peinture restante)."
 
+msgid "Scan a barcode"
+msgstr "Scanner un code-barres"
+
+msgid "The **barcode (EAN)** field takes the 8 to 14 digits printed under the bars. Type them, or press **Scan** next to the field to read them with the camera of the phone or the computer. The code is checked (its last digit is a check digit): a code read wrong is refused. The search of the stock finds a record by its code too, with or without its spaces."
+msgstr "Le champ **code-barres (EAN)** prend les 8 à 14 chiffres imprimés sous les barres. Saisissez-les, ou touchez **Scanner** à côté du champ pour les lire avec la caméra du téléphone ou de l'ordinateur. Le code est vérifié (son dernier chiffre est une clé de contrôle) : un code mal lu est refusé. La recherche du matériel trouve aussi une fiche par son code, avec ou sans ses espaces."
+
+msgid "If the administrator of the server turned on the [barcode lookup](../administration/barcodes.md), a scanned code shows what the open databases know of the product: name, brand, model, category, and sometimes a photo. **Use these values** fills only the fields that are still empty; nothing is saved until you save the form. Tick **Keep this photo** to add the photo of the product as the label of a stock item that has none: it is shown with its source, its author and its licence (CC BY-SA 3.0), as that licence asks."
+msgstr "Si l'administrateur du serveur a activé la [recherche par code-barres](../administration/barcodes.md), un code scanné montre ce que les bases ouvertes savent du produit : nom, marque, modèle, catégorie, et parfois une photo. **Utiliser ces valeurs** remplit seulement les champs encore vides ; rien n'est enregistré avant que vous enregistriez le formulaire. Cochez **Garder cette photo** pour en faire l'étiquette d'un article qui n'en a pas : elle est affichée avec sa source, son auteur et sa licence (CC BY-SA 3.0), comme cette licence le demande."
+
 msgid "Count what you have"
 msgstr "Compter ce que l'on a"
 
@@ -74,4 +83,3 @@ msgstr "Partager"
 
 msgid "Everyone in the home sees the same stock; members and owners change it, read-only members change nothing. The same data is available to scripts through the [API](../api/index.md) (`articles`, `suppliers` and `movements`), with the `read` and `write` scopes of an API token. The stock, the materials of the tasks and what each closing took are part of the [export of the home](../administration/data.md), label photos included, and is erased with it."
 msgstr "Tout le monde dans le logement voit le même matériel ; les membres et les propriétaires le modifient, les membres en lecture seule ne modifient rien. Les mêmes données sont disponibles pour les scripts par l'[API](../api/index.md) (`articles`, `suppliers` et `movements`), avec les portées `read` et `write` d'un jeton d'API. Le matériel, les fournitures des tâches et ce que chaque clôture a pris font partie de l'[export du logement](../administration/data.md), photos d'étiquettes comprises, et sont effacés avec lui."
-

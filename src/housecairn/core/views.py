@@ -80,6 +80,17 @@ class SecurityView(LoginRequiredMixin, TemplateView):
     template_name = "core/security.html"
 
 
+# The open databases of the barcode lookup and their licences (docs/adr/0083): links of the
+# About page, kept here because a template names no other host (docs/adr/0011).
+OPEN_DATA = {
+    "nudger": "https://nudger.fr/opendata/gtin",
+    "opf": "https://world.openproductsfacts.org",
+    "off": "https://world.openfoodfacts.org",
+    "odbl": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "ccbysa": "https://creativecommons.org/licenses/by-sa/3.0/",
+}
+
+
 class AboutView(TemplateView):
     template_name = "core/about.html"
 
@@ -93,6 +104,7 @@ class AboutView(TemplateView):
             version=version,
             source_url=settings.HOUSECAIRN_SOURCE_URL,
             about_links=about_links.links(),
+            open_data=OPEN_DATA,
         )
         return context
 
