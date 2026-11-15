@@ -368,6 +368,34 @@ class TestBody:
         assert not Change.objects.filter(home=alice_home, entity="rooms.room").exists()
         assert not Push.objects.exists()
 
+    @pytest.mark.parametrize(
+        "fields",
+        [
+            {"name": "Half \ud83d"},  # a known text column
+            {"name": "R", "moisture_goal": "\udc00 cut"},  # a field the server does not know
+            {"name": "R", "moisture_goal": {"\ud800": 1}},  # a key, in a value
+            {"name": "R", "moisture_goal": ["ok", ["\ud800"]]},
+            {"\ud800": "R"},  # the name of a field
+        ],
+    )
+    def test_a_lone_surrogate_is_400_and_the_feed_stays_readable(
+        self, phone: Connected, alice_home: Home, fields: dict[str, Any]
+    ) -> None:
+        """Mutant: texts not checked for UTF-8: the write fails (500), or `extra` keeps it and
+        every later read of the feed and of the snapshot fails (500)."""
+        good = op(alice_home.pk, "rooms.room", uuid.uuid4(), {"name": "First"})
+        wrong = op(alice_home.pk, "rooms.room", uuid.uuid4(), fields)
+        answer = send(phone.access, alice_home.pk, [good, wrong])
+        assert answer.status_code == 400, answer.content
+        assert answer.json()["code"] == "malformed"
+        assert answer.json()["index"] == 1
+        assert not Room.all_objects.filter(home=alice_home).exists()
+        assert not Push.objects.exists()
+        headers = {"HTTP_AUTHORIZATION": f"Bearer {phone.access}"}
+        base = f"/api/v1/sync/homes/{alice_home.pk}"
+        assert Client().get(f"{base}/changes", secure=True, **headers).status_code == 200
+        assert Client().get(f"{base}/snapshot", secure=True, **headers).status_code == 200
+
     def test_bad_values_of_every_kind_are_400(
         self, phone: Connected, alice_home: Home, room: Room
     ) -> None:

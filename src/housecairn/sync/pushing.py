@@ -110,11 +110,25 @@ def _uuid(index: int, value: Any, what: str) -> uuid.UUID:
     )
 
 
+def _text_ok(index: int, value: str) -> None:
+    """A text the databases store: no NUL character, and nothing UTF-8 cannot encode.
+
+    PostgreSQL refuses a NUL in text and JSON. JSON may also carry a lone surrogate
+    (`"\\ud800"`, half of an emoji cut by a phone), which no database encodes: kept, it would
+    fail the write, or fail every later read of the feed if it went to `extra`.
+    """
+    if "\x00" in value:
+        raise MalformedError(index, _("A text holds a NUL character."))
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise MalformedError(index, _("A text is not valid Unicode.")) from None
+
+
 def _no_nul(index: int, value: Any, depth: int = 0) -> None:
-    """A NUL character is refused by PostgreSQL in text and JSON: never stored."""
+    """Every text of the fields of an operation, keys included, as `_text_ok` wants it."""
     if isinstance(value, str):
-        if "\x00" in value:
-            raise MalformedError(index, _("A text holds a NUL character."))
+        _text_ok(index, value)
     elif isinstance(value, dict):
         for key, item in value.items():
             _no_nul(index, key, depth + 1)
