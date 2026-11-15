@@ -275,7 +275,14 @@ def test_attachments_record_their_writes(alice: User, plain_task: Task, media_ro
     attachment = services.add_attachment(alice, plain_task, upload=upload(PDF, "manual.pdf"))
     created = last_change(attachment).fields
     assert created["name"] == "manual.pdf"
-    assert created["file"] == attachment.file.name
+    assert created["file"] == {
+        "file": str(attachment.pk),
+        "size": len(PDF),
+        "type": "application/pdf",
+        "width": None,
+        "height": None,
+    }
+    assert "content_type" not in created
     services.update_attachment(alice, attachment, name="boiler.pdf")
     assert last_change(attachment).fields == {"name": "boiler.pdf"}
     services.delete_attachment(alice, attachment)
@@ -320,12 +327,12 @@ def test_the_purge_of_a_task_leaves_no_clock_and_no_file_of_its_children(
     occurrence = Occurrence.objects.get(task=owner_task)
     stored = Path(attachment.file.path)
     # A phone deletes the task alone: its children are hidden on read, still on the disk.
-    rows.delete_row(owner_task)
+    rows.soft_delete(owner_task)
     assert stored.exists()
     _expire(owner_task)
     with django_capture_on_commit_callbacks(execute=True):
         purged = retention.purge()
-    assert purged.rows == 1
+    assert purged.rows == 3  # the task, its occurrence and its attachment
     assert not Task.all_objects.filter(pk=owner_task.pk).exists()
     assert not Attachment.all_objects.filter(pk=attachment.pk).exists()
     for row in (owner_task, occurrence, attachment):
