@@ -78,6 +78,48 @@ msgstr "Le code qui écrit une ligne d'un logement appelle `housecairn.sync.chan
 msgid "It locks the row of the home until the commit, so the order of the positions is the order of the commits (SQLite writes one transaction at a time; PostgreSQL waits on the lock). Pass only the fields whose value changed: a form that sends every field must not give a clock to a field nobody touched. A deletion is `changes.DELETE`, a restoration `changes.RESTORE`; both write the field `deleted_at`."
 msgstr "La fonction verrouille la ligne du logement jusqu'à la validation, de sorte que l'ordre des positions est l'ordre des validations (SQLite écrit une transaction à la fois ; PostgreSQL attend sur le verrou). Ne passez que les champs dont la valeur a changé : un formulaire qui envoie tous les champs ne doit pas donner d'horloge à un champ que personne n'a touché. Une suppression est `changes.DELETE`, une restauration `changes.RESTORE` ; toutes deux écrivent le champ `deleted_at`."
 
+msgid "Services do not call it by hand. They write through `housecairn.sync.rows`, which reads the row as the database holds it, writes, and records the difference, so that only the fields whose value changed are sent:"
+msgstr "Les services ne l'appellent pas à la main. Ils écrivent par `housecairn.sync.rows`, qui lit la ligne telle que la base la tient, écrit, puis enregistre la différence : seuls les champs dont la valeur a changé sont envoyés :"
+
+msgid "Function"
+msgstr "Fonction"
+
+msgid "For"
+msgstr "Pour"
+
+msgid "`rows.save(instance, **kwargs)`"
+msgstr "`rows.save(instance, **kwargs)`"
+
+msgid "`instance.save()`: a new row records every field, an existing one the fields that changed."
+msgstr "`instance.save()` : une ligne neuve enregistre tous ses champs, une ligne existante ceux qui ont changé."
+
+msgid "`rows.soft_delete(instance)`"
+msgstr "`rows.soft_delete(instance)`"
+
+msgid "A soft deletion of one row, with its tombstone. A row already deleted records nothing."
+msgstr "La suppression logique d'une ligne, avec sa pierre tombale. Une ligne déjà supprimée n'enregistre rien."
+
+msgid "`rows.soft_delete_queryset(rows)`"
+msgstr "`rows.soft_delete_queryset(rows)`"
+
+msgid "A soft deletion of a queryset: one tombstone per row it deleted."
+msgstr "La suppression logique d'un queryset : une pierre tombale par ligne supprimée."
+
+msgid "`rows.update_queryset(rows, **values)`"
+msgstr "`rows.update_queryset(rows, **values)`"
+
+msgid "A queryset update with plain values: one change per row and field that changed."
+msgstr "La mise à jour d'un queryset avec des valeurs simples : un changement par ligne et par champ modifié."
+
+msgid "`rows.record_created(instances)`"
+msgstr "`rows.record_created(instances)`"
+
+msgid "Rows inserted in bulk (restoring an archive)."
+msgstr "Des lignes insérées en masse (restauration d'une archive)."
+
+msgid "What a row sends is its concrete fields under their column names (`room_id`), without `id`, `home` (the home keys the change), `created_at`, `updated_at` and `deleted_at`; dates are `YYYY-MM-DD`, amounts decimal strings. An application adjusts that for a model with `rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not send `required_provider`, a rule of the instance), fields without a column (a photo sends its file as `image`, a reference with the size, type and dimensions of the stored picture, and no thumbnail), and fields that read as the clock of their own write (`homes.home.archived_at`: an archive made on the web is the clock of that write, and an empty value stays empty)."
+msgstr "Une ligne envoie ses champs concrets sous le nom de leur colonne (`room_id`), sans `id`, `home` (le logement est la clé du changement), `created_at`, `updated_at` ni `deleted_at` ; les dates sont au format `AAAA-MM-JJ`, les montants des chaînes décimales. Une application l'ajuste pour un modèle par `rows.register(model, rows.Spec(...))` dans son `ready()` : colonnes écartées (`homes.home` n'envoie pas `required_provider`, une règle de l'instance), champs sans colonne (une photo envoie son fichier sous `image`, une référence avec la taille, le type et les dimensions de l'image stockée, et sans la vignette), et champs qui valent l'horloge de leur propre écriture (`homes.home.archived_at` : un archivage fait sur le web vaut l'horloge de cette écriture, et une valeur vide reste vide)."
+
 msgid "A write made on the web gets a clock from the server's hybrid clock and the device id of the server. A write that comes from a phone passes its own `stamp` (clock and device id)."
 msgstr "Une écriture faite sur le web reçoit une horloge de l'horloge hybride du serveur et l'identifiant d'appareil du serveur. Une écriture venue d'un téléphone passe son propre `stamp` (horloge et identifiant d'appareil)."
 
@@ -108,15 +150,18 @@ msgstr "Logements effacés"
 msgid "Erasing a home writes one row to `sync_erasedhome` in the same transaction, with the ids of the connected apps bound to the home. That row, not the home, tells a phone that the home is gone. It is kept: it is a few dozen bytes, and the 400 days of retention below do not apply to it."
 msgstr "Effacer un logement écrit une ligne dans `sync_erasedhome` dans la même transaction, avec les identifiants des applications connectées liées au logement. C'est cette ligne, et non le logement, qui dit à un téléphone que le logement a disparu. Elle est conservée : elle pèse quelques dizaines d'octets et les 400 jours de rétention ci-dessous ne la concernent pas."
 
+msgid "Restoring an archive (as a copy or not) records the new home and every row it inserts, whatever their application, with every field: a phone that reads the feed from position 0 gets them all. An archive whose `updated_at` of the home or of a row is more than 24 hours ahead of the clock of the instance is refused: a field with no clock of its own reads as that date, and a date in the future would hold the clock of the home there."
+msgstr "Restaurer une archive (en copie ou non) enregistre le nouveau logement et chaque ligne insérée, quelle que soit leur application, avec tous leurs champs : un téléphone qui lit le flux depuis la position 0 les reçoit toutes. Une archive dont le `updated_at` du logement ou d'une ligne a plus de 24 heures d'avance sur l'horloge de l'instance est refusée : un champ sans horloge propre se lit comme cette date, et une date dans le futur y retiendrait l'horloge du logement."
+
 msgid "Retention"
 msgstr "Rétention"
 
-msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted."
-msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours, ils restent), inscrit dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont toujours supprimées."
+msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted. What hangs off a purged row goes with it: the items and photos of a purged room lose their clocks too, and the files of their photos are removed from the disk once the purge is committed."
+msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours est gardé), enregistre dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont encore supprimées. Ce qui dépend d'une ligne purgée part avec elle : les éléments et les photos d'une pièce purgée perdent aussi leurs horloges, et les fichiers de leurs photos sont retirés du disque une fois la purge validée."
 
 msgid "The guard test"
 msgstr "Le test garde-fou"
 
-msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs. An application that is listed without scenarios, or whose scenario writes without recording, fails."
-msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, pour chaque modèle, un scénario par nature d'écriture (enregistrement, mise à jour d'un queryset, suppression douce, suppression définitive) qui exécute le code que l'application exécute vraiment. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue."
+msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs, in a file of its own, `tests/sync_scenarios_<lot>.py`, that the test loads. A kind that cannot happen goes to `NOT_APPLICABLE` with its reason. An application that is listed without scenarios, or whose scenario writes without recording, fails. Covered today: `homes` (the home itself) and `rooms` (rooms, items, photos)."
+msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, pour chaque modèle, un scénario par sorte d'écriture (enregistrement, mise à jour de queryset, suppression logique, suppression définitive) qui exécute le code que l'application exécute vraiment, dans un fichier à lui, `tests/sync_scenarios_<lot>.py`, que le test charge. Une sorte qui ne peut pas se produire va dans `NOT_APPLICABLE` avec sa raison. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue. Couvertes aujourd'hui : `homes` (le logement lui-même) et `rooms` (pièces, éléments, photos)."
 

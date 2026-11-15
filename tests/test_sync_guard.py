@@ -5,15 +5,19 @@ deletion, a hard deletion) adds a change to the feed, and that a test fails when
 The lots M3b to M3e cover the apps one after the other (docs/adr/0079):
 
 - add the app to `COVERED_APPS`, one line;
-- add to `SCENARIOS` one writer per model and kind, each calling the code the application runs
-  for that write and nothing else. A scenario that writes the table without adding a change
-  fails; a covered model with a missing scenario fails; a kind that makes no sense for a
-  model (the ledger of stock movements is never edited) goes to `NOT_APPLICABLE` with its reason.
+- add the writers of the app, one per model and kind, to a file of its own,
+  `tests/sync_scenarios_<lot>.py`, that defines `SCENARIOS` and `NOT_APPLICABLE`; this module
+  loads every such file, so that two lots never edit the same lines. A writer calls the code
+  the application runs for that write and nothing else. A scenario that writes the table
+  without adding a change fails; a covered model with a missing scenario fails; a kind that
+  makes no sense for a model (the ledger of stock movements is never edited) goes to
+  `NOT_APPLICABLE` with its reason.
 
-M3a covers no app: the guard runs on an empty list, and the tests below prove that it fails
-the moment an app is listed without being covered.
+The tests below prove that the guard fails the moment an app is listed without being covered.
 """
 
+import importlib
+import pathlib
 import re
 import sys
 import uuid
@@ -31,13 +35,14 @@ from tests.test_export_registry import cascades_from_home, project_models
 pytestmark = pytest.mark.django_db
 
 # The apps whose every write path records its change. One line per lot (M3b to M3e).
-COVERED_APPS: tuple[str, ...] = ()
+COVERED_APPS: tuple[str, ...] = (
+    "homes",
+    "rooms",
+)
 
 # The apps whose rows are synced and the lot that covers each; none may be missing, so that a
 # new app of rows of a home cannot slip by. Remove an app from here when it joins COVERED_APPS.
 WAITING_FOR_ITS_LOT = {
-    "homes": "M3b",
-    "rooms": "M3b",
     "tasks": "M3c",
     "stock": "M3d",
     "reports": "M3d",
@@ -65,10 +70,14 @@ KINDS = ("save", "queryset_update", "soft_delete", "hard_delete")
 LINK_KINDS = ("save", "hard_delete")
 
 Scenario = Callable[[Home], None]
-# (model label, kind) -> the write. Filled by the lots M3b to M3e.
+# (model label, kind) -> the write, and (model label, kind) -> why the kind does not apply to the
+# model. Filled by the files `tests/sync_scenarios_*.py` of the lots M3b to M3e.
 SCENARIOS: dict[tuple[str, str], Scenario] = {}
-# (model label, kind) -> why the kind does not apply to the model.
 NOT_APPLICABLE: dict[tuple[str, str], str] = {}
+for _file in sorted(pathlib.Path(__file__).parent.glob("sync_scenarios_*.py")):
+    _scenarios = importlib.import_module(f"tests.{_file.stem}")
+    SCENARIOS.update(_scenarios.SCENARIOS)
+    NOT_APPLICABLE.update(_scenarios.NOT_APPLICABLE)
 
 
 def home_models() -> list[type[models.Model]]:
@@ -177,7 +186,7 @@ def test_the_models_of_the_homes_are_listed() -> None:
 
 
 def test_a_write_of_a_covered_model_records_a_change(alice_home: Home) -> None:
-    """Empty in M3a. From M3b, a write path that skips `record_change` fails here."""
+    """A write path of a covered model that skips `record_change` fails here."""
     problems = guard_problems(alice_home, COVERED_APPS, SCENARIOS, NOT_APPLICABLE)
     assert problems == [], "\n".join(problems)
 
@@ -197,6 +206,7 @@ def test_adding_an_app_to_covered_apps_fails_the_guard_test(
 ) -> None:
     """The test above, run as it is, fails once an app is listed that is not covered."""
     monkeypatch.setattr(sys.modules[__name__], "COVERED_APPS", ("rooms",))
+    monkeypatch.setattr(sys.modules[__name__], "SCENARIOS", {})
     with pytest.raises(AssertionError, match=r"rooms\.Room save: no scenario"):
         test_a_write_of_a_covered_model_records_a_change(alice_home)
 

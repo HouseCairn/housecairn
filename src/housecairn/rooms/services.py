@@ -16,7 +16,6 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 from django.db import models, transaction
 from django.template.defaultfilters import filesizeformat
-from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from housecairn.accounts.models import User
@@ -27,6 +26,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.rooms import conf, images
 from housecairn.rooms.models import Item, Photo, PhotoCategory, Room, RoomKind
+from housecairn.sync import rows as sync_rows
 
 AnyUser = User | AnonymousUser
 
@@ -68,7 +68,8 @@ def _require_write(actor: AnyUser, home: Home) -> None:
 
 
 def _soft_delete(rows: models.QuerySet[Any]) -> None:
-    rows.update(deleted_at=timezone.now())
+    """Soft-delete the rows, each with its tombstone in the change log (docs/adr/0077)."""
+    sync_rows.soft_delete_queryset(rows)
 
 
 # Free text on one line: control and format characters are dropped. Notes keep their line breaks.
@@ -172,11 +173,12 @@ def create_room(actor: AnyUser, home: Home, **fields: Any) -> Room:
     last = Room.objects.filter(home=home).aggregate(last=models.Max("position"))["last"]
     room.position = 0 if last is None else last + 1
     room.full_clean()
-    room.save()
+    sync_rows.save(room)
     audit.record_object("room.created", actor=actor, home_id=home.id, title=room.name)
     return room
 
 
+@transaction.atomic
 def update_room(actor: AnyUser, room: Room, **changes: Any) -> Room:
     _require_write(actor, room.home)
     _apply(room, ROOM_FIELDS | MEMORY_FIELDS, changes)
@@ -184,7 +186,7 @@ def update_room(actor: AnyUser, room: Room, **changes: Any) -> Room:
     if "paint_article" in changes:
         _check_paint(room)
     room.full_clean()
-    room.save()
+    sync_rows.save(room)
     audit.record_object(
         "room.updated", actor=actor, home_id=room.home_id, title=room.name, fields=sorted(changes)
     )
@@ -197,7 +199,7 @@ def delete_room(actor: AnyUser, room: Room) -> None:
     _require_write(actor, room.home)
     _soft_delete(Photo.objects.filter(models.Q(room=room) | models.Q(item__room=room)))
     _soft_delete(Item.objects.filter(room=room))
-    room.soft_delete()
+    sync_rows.soft_delete(room)
     audit.record_object("room.deleted", actor=actor, home_id=room.home_id, title=room.name)
 
 
@@ -215,7 +217,7 @@ def reorder_rooms(actor: AnyUser, home: Home, ordered_ids: Sequence[UUID]) -> li
     for position, room in enumerate(ordered):
         if room.position != position:
             room.position = position
-            room.save(update_fields=["position", "updated_at"])
+            sync_rows.save(room, update_fields=["position", "updated_at"])
     return ordered
 
 
@@ -245,7 +247,7 @@ def create_item(actor: AnyUser, room: Room, **fields: Any) -> Item:
     item = Item(home=room.home, room=room)
     _apply(item, ITEM_FIELDS, fields)
     item.full_clean()
-    item.save()
+    sync_rows.save(item)
     audit.record_object("item.created", actor=actor, home_id=item.home_id, title=item.name)
     return item
 
@@ -259,7 +261,7 @@ def update_item(actor: AnyUser, item: Item, *, room: Room | None = None, **chang
         _check_same_home(room, item.home)
         item.room = room
     item.full_clean()
-    item.save()
+    sync_rows.save(item)
     audit.record_object(
         "item.updated",
         actor=actor,
@@ -274,7 +276,7 @@ def update_item(actor: AnyUser, item: Item, *, room: Room | None = None, **chang
 def delete_item(actor: AnyUser, item: Item) -> None:
     _require_write(actor, item.home)
     _soft_delete(Photo.objects.filter(item=item))
-    item.soft_delete()
+    sync_rows.soft_delete(item)
     audit.record_object("item.deleted", actor=actor, home_id=item.home_id, title=item.name)
 
 
@@ -338,7 +340,7 @@ def add_photo(
         photo.image.save(processed.extension, ContentFile(processed.data), save=False)
         photo.thumbnail.save("-thumb.jpg", ContentFile(processed.thumbnail), save=False)
         try:
-            photo.save()
+            sync_rows.save(photo)
         except Exception:
             photo.image.delete(save=False)
             photo.thumbnail.delete(save=False)
@@ -353,18 +355,20 @@ def add_photo(
     return photo
 
 
+@transaction.atomic
 def update_photo(actor: AnyUser, photo: Photo, **changes: Any) -> Photo:
     _require_write(actor, photo.home)
     _apply(photo, frozenset({"caption", "category"}), changes)
     photo.full_clean(exclude=["image", "thumbnail"])
-    photo.save()
+    sync_rows.save(photo)
     return photo
 
 
+@transaction.atomic
 def delete_photo(actor: AnyUser, photo: Photo) -> None:
     """Soft-delete: the file stays on disk until the purge of deleted records."""
     _require_write(actor, photo.home)
-    photo.soft_delete()
+    sync_rows.soft_delete(photo)
     target = photo.room or photo.item
     audit.record_object(
         "photo.deleted",
@@ -372,6 +376,18 @@ def delete_photo(actor: AnyUser, photo: Photo) -> None:
         home_id=photo.home_id,
         title=target.name if target is not None else "",
         kind="room" if photo.room_id else "item",
+    )
+
+
+@transaction.atomic
+def clear_contract_contractor(contractor: Any) -> int:
+    """Take a contractor off the maintenance contracts of the items that name it.
+
+    The number and the link of each contract stay (docs/adr/0058). Called when a contractor is
+    deleted; each item that loses its provider records the change.
+    """
+    return sync_rows.update_queryset(
+        Item.all_objects.filter(contract_contractor=contractor), contract_contractor=None
     )
 
 

@@ -9,7 +9,8 @@ class RoomsConfig(AppConfig):
 
     def ready(self) -> None:
         from housecairn.homes import files
-        from housecairn.rooms import checks, exports  # noqa: F401 - registers the system check
+        from housecairn.rooms import checks, exports, syncing  # noqa: F401 - registers the check
 
         exports.register()
+        syncing.register()
         files.register_media_folder("photos")
