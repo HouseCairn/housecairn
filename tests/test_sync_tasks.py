@@ -6,6 +6,10 @@ tombstones, the occurrence an undo takes back included; the purge leaves nothing
 """
 
 import datetime
+import hashlib
+import io
+import json
+import zipfile
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -195,6 +199,52 @@ def test_marking_done_records_the_closing_and_the_next_occurrence(
     assert last_change(closing.next).fields["follows_id"] == str(owner_occurrence.pk)
 
 
+@pytest.fixture
+def done_for_good(alice: User, alice_home: Home, frozen_today: datetime.date) -> Occurrence:
+    """A task done once and for good: closed, with no occurrence after it."""
+    task = services.create_task(
+        alice, alice_home, title="Paint the fence", due_on=frozen_today - datetime.timedelta(days=3)
+    )
+    closing = services.complete(alice, Occurrence.objects.get(task=task))
+    assert closing.next is None
+    assert services.open_occurrence_of(task) is None
+    return closing.occurrence
+
+
+def test_a_rule_given_to_a_task_done_for_good_records_its_start_and_its_occurrence(
+    alice: User, done_for_good: Occurrence, frozen_today: datetime.date
+) -> None:
+    task = done_for_good.task
+    services.update_task(alice, task, repeat_mode="after_last", repeat_unit="month")
+    task.refresh_from_db()
+    reopened = services.open_occurrence_of(task)
+    assert reopened is not None
+    # A month after the last closing, the day it was done.
+    assert task.series_start == reopened.due_on
+    assert reopened.due_on is not None and reopened.due_on > frozen_today
+    # The edit puts the rule, then the reopening puts the start counted from the last closing.
+    assert last_change(task).fields == {"series_start": task.series_start.isoformat()}
+    created = last_change(reopened)
+    assert created.kind == "put"
+    assert created.fields["follows_id"] == str(done_for_good.pk)
+    assert created.fields["due_on"] == reopened.due_on.isoformat()
+    assert created.fields["task_id"] == str(task.pk)
+
+
+def test_a_date_given_to_a_task_done_for_good_records_its_new_occurrence(
+    alice: User, done_for_good: Occurrence, frozen_today: datetime.date
+) -> None:
+    task = done_for_good.task
+    day = frozen_today + datetime.timedelta(days=10)
+    services.update_task(alice, task, due_on=day)
+    reopened = services.open_occurrence_of(task)
+    assert reopened is not None
+    assert last_change(task).fields == {"series_start": day.isoformat()}
+    created = last_change(reopened)
+    assert created.fields["follows_id"] == str(done_for_good.pk)
+    assert created.fields["due_on"] == day.isoformat()
+
+
 def test_postponing_records_the_new_date(
     alice: User, owner_occurrence: Occurrence, frozen_today: datetime.date
 ) -> None:
@@ -307,6 +357,47 @@ def test_a_copy_records_every_row_of_its_tasks(
             change = last_change(row)
             assert change.home_id == copy.pk
             assert change.kind == "put"
+
+
+def _with_deleted_task(data: bytes) -> bytes:
+    """The archive with `deleted_at` forged on its task, its manifest agreeing (a careful forger)."""
+    with zipfile.ZipFile(io.BytesIO(data)) as archive:
+        files = {name: archive.read(name) for name in archive.namelist()}
+    document = json.loads(files["data/tasks.json"])
+    document["sections"]["tasks"][0]["deleted_at"] = "2026-01-05T10:00:00+00:00"
+    files["data/tasks.json"] = json.dumps(document).encode()
+    manifest = json.loads(files["manifest.json"])
+    manifest["entries"] = {
+        name: {"sha256": hashlib.sha256(body).hexdigest(), "size": len(body)}
+        for name, body in files.items()
+        if name != "manifest.json"
+    }
+    files["manifest.json"] = json.dumps(manifest).encode()
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name, body in files.items():
+            archive.writestr(name, body)
+    return out.getvalue()
+
+
+def test_a_restore_brings_back_no_deleted_row_so_it_records_no_tombstone(
+    alice: User, alice_home: Home, owner_task: Task, media_root: Path
+) -> None:
+    """An archive holds live rows only: a deleted row of the home is not restored, and a
+    `deleted_at` forged in the archive is not read, so a restore has no deletion to record."""
+    from housecairn.homes import restore
+    from tests.data_support import archive_bytes
+
+    gone = services.create_contractor(alice, alice_home, name="Gone Ltd")
+    services.delete_contractor(alice, gone)
+    data = _with_deleted_task(archive_bytes(alice_home))
+    copy = restore.restore_bytes(alice, data, as_copy=True).home
+    assert not Contractor.all_objects.filter(home=copy).exists()
+    restored = Task.all_objects.get(home=copy)
+    assert restored.deleted_at is None
+    assert [c.kind for c in changes_of(restored)] == ["put"]
+    assert RowClocks.objects.get(row_id=restored.pk).tombstoned_at is None
+    assert not Change.objects.filter(home=copy, kind="delete").exists()
 
 
 # ---------- the purge ----------
