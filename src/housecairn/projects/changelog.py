@@ -199,9 +199,12 @@ def links_changed(
 
 
 def restored(instances: Iterable[models.Model]) -> None:
-    """Record the rows a restore wrote, every carried field, and their links (docs/adr/0069)."""
+    """Record the links of the projects a restore wrote (docs/adr/0069).
+
+    The restore records the rows themselves (`sync.rows.record_created`); a link table has no
+    row of its own there, so the links are recorded here, once they are written.
+    """
     for instance in instances:
-        saved(instance)
         for relation in type(instance)._meta.many_to_many:
             links_changed(instance, relation.name, None)
 

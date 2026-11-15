@@ -26,14 +26,13 @@ def test_a_reset_keeps_the_device_of_the_server_and_empties_the_change_log(
         reset.reset(language="en", today=datetime.date(2026, 11, 12))
         device = changes.server_device()
         home = Home.objects.get()
-        # The demonstration data records its own changes, as any write of a covered app.
-        demo = Change.objects.count()
-        row = uuid.uuid4()
-        changes.record_change(home, "rooms.room", row, changes.PUT, {"name": "x"})
-        assert Change.objects.count() == demo + 1
+        marker = changes.record_change(home, "rooms.room", uuid.uuid4(), changes.PUT, {"name": "x"})
+        assert marker.change is not None
         reset.reset(language="en", today=datetime.date(2026, 11, 12))
         assert bytes(ServerDevice.objects.get(pk=1).device) == device
-        assert not Change.objects.filter(row_id=row).exists()
-        assert Change.objects.count() == demo
+        # The log of the old home went with it; the new one starts again from position 1.
+        assert not Change.objects.filter(pk=marker.change.pk).exists()
+        assert not Change.objects.filter(home_id=home.pk).exists()
+        assert Change.objects.filter(pos=1).exists()
     finally:
         config.invalidate()

@@ -27,6 +27,18 @@ RESTORE = Change.Kind.RESTORE.value
 # `delete` and `restore` write the field `deleted_at` (mobile protocol, section 2.2).
 DELETED_AT = "deleted_at"
 
+
+class _WriteClock:
+    """The value of a field that reads as the clock of its own write (a web archive)."""
+
+    def __repr__(self) -> str:
+        return "WRITE_CLOCK"
+
+
+# Pass it as the value of a field that reads as an instant: the write is then given the clock it
+# gets, as 16 hexadecimal digits (docs/adr/0077, need 9: an archive made on the web).
+WRITE_CLOCK = _WriteClock()
+
 _ENTITY = re.compile(r"[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*")
 
 
@@ -88,7 +100,7 @@ def record_change(
         raise ValueError("A deletion or a restoration carries no field.")
     if fields and DELETED_AT in fields:
         raise ValueError("`deleted_at` is written by a deletion or a restoration, not as a field.")
-    written = {DELETED_AT: None} if kind != PUT else dict(fields or {})
+    written: dict[str, Any] = {DELETED_AT: None} if kind != PUT else dict(fields or {})
     if not written:
         raise ValueError("A change writes at least one field.")
     now_ms = clock.wall_ms() if wall is None else wall
@@ -121,6 +133,8 @@ def record_change(
         won: dict[str, Any] = {}
         lost: dict[str, tuple[str, str]] = {}
         for name, value in written.items():
+            if isinstance(value, _WriteClock):
+                value = clock.format_clock(made)
             is_known = known is None or name in known or name == DELETED_AT
             stored = _stored_stamp(row, name, is_known, server_stamp)
             if stored is not None and not clock.wins(new, stored):

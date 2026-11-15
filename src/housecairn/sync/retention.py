@@ -5,25 +5,24 @@ year still learns of a deletion. Then the nightly task removes them. A cursor be
 `floor` of its home then asks for the snapshot again (410 `cursor_expired`).
 """
 
+import contextlib
 import datetime
-import logging
 import uuid
 from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from django.apps import apps
-from django.core.exceptions import SuspiciousOperation
-from django.db import models, router, transaction
+from django.db import models, transaction
 from django.db.models import Max
 from django.db.models.deletion import Collector
 from django.utils import timezone
 
 from housecairn.core.models import BaseModel
+from housecairn.sync import changes as sync_changes
+from housecairn.sync import rows as sync_rows
 from housecairn.sync.links import entity_of, link_row_id
 from housecairn.sync.models import Change, HomeHead, RowClocks
-
-logger = logging.getLogger(__name__)
 
 RETENTION = datetime.timedelta(days=400)
 # Rows removed per statement, to keep the lists of identifiers short.
@@ -80,66 +79,9 @@ def _purge_tombstones(expired: datetime.datetime) -> tuple[int, int]:
             chunk = RowClocks.objects.filter(pk__in=pks[start : start + CHUNK])
             if model is not None:
                 ids = list(chunk.values_list("row_id", flat=True))
-                doomed = model.all_objects.filter(pk__in=ids, deleted_at__isnull=False)
-                removed += _forget_what_goes_with(doomed)
-                removed_rows += doomed.delete()[0]
+                removed_rows += _delete_rows(model, ids)
             removed += chunk.delete()[0]
     return removed, removed_rows
-
-
-def _forget_what_goes_with(doomed: "models.QuerySet[Any]") -> int:
-    """Remove the clocks and the files of every row the deletion of `doomed` takes with it.
-
-    The deletion cascades to the children of the rows (the quotes of a project, the rows of
-    its link tables), which have no foreign key to their clocks: their clocks would be left
-    behind, and their files on the disk. The files go once the purge is committed.
-    """
-    collector = Collector(using=router.db_for_write(doomed.model))
-    collector.collect(list(doomed))
-    rows: dict[str, set[uuid.UUID]] = {}
-    files: list[models.fields.files.FieldFile] = []
-    batches: list[tuple[type[models.Model], Iterable[models.Model]]] = list(collector.data.items())
-    batches += [(qs.model, qs) for qs in collector.fast_deletes if isinstance(qs, models.QuerySet)]
-    for model, instances in batches:
-        file_fields = [f for f in model._meta.concrete_fields if isinstance(f, models.FileField)]
-        for instance in instances:
-            row_id = _row_id(model, instance)
-            if row_id is not None:
-                rows.setdefault(entity_of(model), set()).add(row_id)
-            files += [getattr(instance, f.attname) for f in file_fields]
-    removed = 0
-    for entity, ids in rows.items():
-        removed += RowClocks.objects.filter(entity=entity, row_id__in=ids).delete()[0]
-    names: list[tuple[Any, str]] = [(f.storage, f.name) for f in files if f.name]
-    transaction.on_commit(lambda: _erase(names))
-    return removed
-
-
-def _row_id(model: type[models.Model], instance: models.Model) -> uuid.UUID | None:
-    """The id of a row in the change log: its own, or that of a link table (`sync.links`)."""
-    if not model._meta.auto_created:
-        return instance.pk if isinstance(instance.pk, uuid.UUID) else None
-    owner_field, other_field = (
-        f for f in model._meta.concrete_fields if isinstance(f, models.ForeignKey)
-    )
-    owner: Any = getattr(instance, owner_field.name)
-    home_id = getattr(owner, "home_id", None)
-    if home_id is None:
-        return None
-    return link_row_id(
-        home_id,
-        model,
-        getattr(instance, owner_field.attname),
-        getattr(instance, other_field.attname),
-    )
-
-
-def _erase(names: list[tuple[Any, str]]) -> None:
-    for storage, name in names:
-        try:
-            storage.delete(name)
-        except (OSError, ValueError, SuspiciousOperation):
-            logger.error("Could not erase the file of a purged row: %s", name)
 
 
 def _model_of(entity: str) -> type[BaseModel] | None:
@@ -150,3 +92,120 @@ def _model_of(entity: str) -> type[BaseModel] | None:
     except LookupError:
         return None
     return model if issubclass(model, BaseModel) else None
+
+
+def _delete_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
+    """Delete rows that are still deleted, and what hangs off them.
+
+    The children go by cascade (the items and photos of a room). Their clocks go with them, and
+    so do their files, once the transaction is committed: neither may outlive the row. A row
+    that stays but whose reference the deletion empties (`SET_NULL`: the paint of a room when
+    its article goes) records that change, as any write of a row of a home does.
+    """
+    rows = model.all_objects.filter(pk__in=ids, deleted_at__isnull=False)
+    collector = Collector(using=rows.db)
+    collector.collect(list(rows))
+    doomed: dict[type[models.Model], list[models.Model]] = {}
+    for kind, instances in collector.data.items():
+        doomed.setdefault(kind, []).extend(instances)
+    for fast in collector.fast_deletes:
+        if isinstance(fast, models.QuerySet):
+            doomed.setdefault(fast.model, []).extend(fast)
+    files: list[tuple[Any, str]] = []
+    for kind, instances in doomed.items():
+        files.extend(_files_of(kind, instances))
+        if issubclass(kind, BaseModel) and isinstance(kind._meta.pk, models.UUIDField):
+            gone = [row.pk for row in instances if kind is not model or row.pk not in ids]
+            for start in range(0, len(gone), CHUNK):
+                RowClocks.objects.filter(
+                    entity=kind._meta.label_lower, row_id__in=gone[start : start + CHUNK]
+                ).delete()
+        elif kind._meta.auto_created:
+            _forget_links(kind, instances)
+    emptied = _emptied(collector, doomed)
+    deleted: int = collector.delete()[0]
+    for row, written in emptied:
+        sync_changes.record_change(
+            sync_rows.home_of(row),
+            sync_rows.entity_of(type(row)),
+            row.pk,
+            sync_changes.PUT,
+            written,
+            updated_at=getattr(row, "updated_at", None),
+        )
+    if files:
+        transaction.on_commit(lambda: _remove_files(files))
+    return deleted
+
+
+def _forget_links(through: type[models.Model], instances: list[models.Model]) -> None:
+    """Remove the clocks of the rows of a link table that the deletion takes with it.
+
+    A link row has no id of its own: its clock is under `sync.links.link_row_id`.
+    """
+    owner_field, other_field = (
+        f for f in through._meta.concrete_fields if isinstance(f, models.ForeignKey)
+    )
+    ids: list[uuid.UUID] = []
+    for link in instances:
+        owner: Any = getattr(link, owner_field.name)
+        home_id = getattr(owner, "home_id", None)
+        if home_id is not None:
+            ids.append(
+                link_row_id(
+                    home_id,
+                    through,
+                    getattr(link, owner_field.attname),
+                    getattr(link, other_field.attname),
+                )
+            )
+    for start in range(0, len(ids), CHUNK):
+        RowClocks.objects.filter(
+            entity=entity_of(through), row_id__in=ids[start : start + CHUNK]
+        ).delete()
+
+
+def _emptied(
+    collector: Collector, doomed: dict[type[models.Model], list[models.Model]]
+) -> list[tuple[models.Model, dict[str, Any]]]:
+    """The rows of a home that stay, and the synced references the deletion sets on each.
+
+    Read before `collector.delete()`, which writes them: Django keeps, per field and value,
+    lists of rows or querysets that it evaluates only then.
+    """
+    gone = {(type(row), row.pk) for instances in doomed.values() for row in instances}
+    found: dict[tuple[type[models.Model], Any], tuple[models.Model, dict[str, Any]]] = {}
+    for (field, set_to), batches in collector.field_updates.items():
+        # `SET(row)` gives a row, `SET_NULL` None: the column holds the key.
+        value = set_to.pk if isinstance(set_to, models.Model) else set_to
+        for batch in batches:
+            for row in list(cast(Iterable[Any], batch)):
+                kind = type(row)
+                if (
+                    not issubclass(kind, BaseModel)
+                    # A row of no home (an account, a setting of the instance) has no log.
+                    or not (kind._meta.label == "homes.Home" or hasattr(row, "home_id"))
+                    or (kind, row.pk) in gone
+                    or field.attname not in sync_rows.raw_values(row, {field.attname})
+                ):
+                    continue
+                _row, fields = found.setdefault((kind, row.pk), (row, {}))
+                fields[field.attname] = sync_rows.encode(kind, field.attname, value)
+    return list(found.values())
+
+
+def _files_of(kind: type[models.Model], instances: list[models.Model]) -> list[tuple[Any, str]]:
+    found = []
+    for field in kind._meta.concrete_fields:
+        if isinstance(field, models.FileField):
+            for instance in instances:
+                name = getattr(instance, field.attname).name
+                if name:
+                    found.append((field.storage, name))
+    return found
+
+
+def _remove_files(files: list[tuple[Any, str]]) -> None:
+    for storage, name in files:
+        with contextlib.suppress(OSError):
+            storage.delete(name)

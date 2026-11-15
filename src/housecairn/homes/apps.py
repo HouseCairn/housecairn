@@ -9,7 +9,8 @@ class HomesConfig(AppConfig):
     verbose_name = _("Homes")
 
     def ready(self) -> None:
-        from housecairn.homes import jobs
+        from housecairn.homes import jobs, syncing
 
         # The worker removes expired export archives every hour (docs/adr/0048).
         post_migrate.connect(jobs.schedule_purge, sender=self)
+        syncing.register()
