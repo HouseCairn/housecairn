@@ -36,3 +36,39 @@
 form .errorlist.nonfield {
   display: none;
 }
+
+/* The submit row of a form (`.form-submit`: its primary button, and Cancel when it has one,
+   design/patterns.md, Forms). On a phone it sticks at the bottom of the screen, above the
+   tab bar and clear of the home indicator, while the end of the form is out of sight: the
+   button stays under the thumb in a long form. On a computer it stays in the flow. */
+@media (max-width: 55.99rem) {
+  .form-submit {
+    position: sticky;
+    bottom: env(safe-area-inset-bottom);
+    z-index: 5;
+    padding: var(--hc-space-2) 0;
+    background: var(--hc-color-background);
+  }
+
+  .has-nav .form-submit {
+    bottom: calc(var(--hc-layout-tabbar-height) + env(safe-area-inset-bottom));
+  }
+
+  .card .form-submit {
+    background: var(--hc-color-surface);
+  }
+
+  /* The row must not hide the field that has the focus (WCAG 2.2, 2.4.11). */
+  html:has(.form-submit) {
+    scroll-padding-bottom: calc(
+      var(--hc-layout-touch-target-lg) + var(--hc-space-6) + env(safe-area-inset-bottom)
+    );
+  }
+
+  html:has(.has-nav .form-submit) {
+    scroll-padding-bottom: calc(
+      var(--hc-layout-tabbar-height) + var(--hc-layout-touch-target-lg) + var(--hc-space-6) +
+        env(safe-area-inset-bottom)
+    );
+  }
+}

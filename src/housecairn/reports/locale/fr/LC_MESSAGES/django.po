@@ -96,11 +96,17 @@ msgstr "Ce signalement est déjà classé."
 msgid "Only a closed report can be reopened."
 msgstr "Seul un signalement classé peut être rouvert."
 
+msgctxt "reports filter"
+msgid "Open"
+msgstr "Ouverts"
+
+msgctxt "reports filter"
 msgid "Closed"
 msgstr "Classés"
 
+msgctxt "reports filter"
 msgid "All"
-msgstr "Toutes"
+msgstr "Tous"
 
 msgid "This file is too large."
 msgstr "Ce fichier est trop volumineux."

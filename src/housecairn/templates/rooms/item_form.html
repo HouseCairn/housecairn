@@ -51,7 +51,7 @@
       {% endif %}
     {% endfor %}
     <datalist id="brand-suggestions">{% for brand in form.brands %}<option value="{{ brand }}">{% endfor %}</datalist>
-    <button type="submit" class="button-block">{% if item %}{% translate "Save" %}{% else %}{% translate "Add the item" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if item %}{% translate "Save" %}{% else %}{% translate "Add the item" %}{% endif %}</button></div>
     {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
   {% if item %}

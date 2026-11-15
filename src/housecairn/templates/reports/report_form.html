@@ -12,7 +12,7 @@
     {% include "tasks/_field.html" with field=form.place %}
     {% include "tasks/_field.html" with field=form.photo %}
     <p class="small">{% blocktranslate with max=max_bytes|filesizeformat %}A photo is optional: a JPEG, PNG or WebP image, {{ max }} at most. Its location and other metadata are removed.{% endblocktranslate %}</p>
-    <div class="button-row">
+    <div class="button-row form-submit">
       <button type="submit">{% translate "Send the report" %}</button>
       <a class="button button-secondary" href="{% back_href parent %}">{% translate "Cancel" %}</a>
     </div>

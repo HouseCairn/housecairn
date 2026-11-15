@@ -10,6 +10,7 @@ from oauth2_provider.forms import AllowForm
 from housecairn.accounts.models import User
 from housecairn.apitokens import services
 from housecairn.apitokens.models import Scope
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.homes.models import Home
 from housecairn.homes.sso import Provider
 
@@ -49,7 +50,7 @@ def _lifetime_label(days: int) -> str:
     return ngettext("%(n)d day", "%(n)d days", days) % {"n": days}
 
 
-class TokenForm(forms.Form):
+class TokenForm(LabelAboveMixin, forms.Form):
     name = forms.CharField(
         label=_("Name"),
         max_length=100,
@@ -126,7 +127,7 @@ class TokenForm(forms.Form):
 # ---------- connected apps (docs/adr/0078) ----------
 
 
-class ConnectionHomesMixin(forms.Form):
+class ConnectionHomesMixin(LabelAboveMixin, forms.Form):
     """The homes of a connection, with the rules of the token form."""
 
     homes = HomeChoiceField(

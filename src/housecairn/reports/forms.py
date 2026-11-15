@@ -5,6 +5,7 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.reports.models import TITLE_MAX_LENGTH
 from housecairn.rooms.models import Item, Room
 from housecairn.stock.models import Article
@@ -13,7 +14,7 @@ PHOTO_ACCEPT = "image/jpeg,image/png,image/webp"
 GROUP_TITLES = {"room": _("Rooms"), "item": _("Items"), "article": _("Stock")}
 
 
-class ReportForm(forms.Form):
+class ReportForm(LabelAboveMixin, forms.Form):
     title = forms.CharField(
         label=_("What is wrong?"),
         max_length=TITLE_MAX_LENGTH,

@@ -1,12 +1,13 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.notifications.models import Preference
 
 _TIME = forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
 
 
-class ChannelForm(forms.Form):
+class ChannelForm(LabelAboveMixin, forms.Form):
     name = forms.CharField(label=_("Name"), max_length=60)
     # Never rendered back: the address carries the secrets of the channel.
     url = forms.CharField(
@@ -17,12 +18,12 @@ class ChannelForm(forms.Form):
     )
 
 
-class ChannelEditForm(forms.Form):
+class ChannelEditForm(LabelAboveMixin, forms.Form):
     name = forms.CharField(label=_("Name"), max_length=60)
     enabled = forms.BooleanField(label=_("Enabled"), required=False)
 
 
-class PreferenceForm(forms.ModelForm[Preference]):
+class PreferenceForm(LabelAboveMixin, forms.ModelForm[Preference]):
     class Meta:
         model = Preference
         fields = [
@@ -36,5 +37,5 @@ class PreferenceForm(forms.ModelForm[Preference]):
         widgets = {"send_at": _TIME, "quiet_start": _TIME, "quiet_end": _TIME}
 
 
-class DeviceForm(forms.Form):
+class DeviceForm(LabelAboveMixin, forms.Form):
     name = forms.CharField(label=_("Name"), max_length=60)

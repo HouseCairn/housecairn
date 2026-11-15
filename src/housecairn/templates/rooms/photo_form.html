@@ -9,7 +9,7 @@
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
-    <button type="submit" class="button-block">{% translate "Upload" %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% translate "Upload" %}</button></div>
     <p class="small">{% blocktranslate with size=max_bytes|filesizeformat %}JPEG, PNG or WebP, up to {{ size }}. Location data and other information stored in the file are removed.{% endblocktranslate %}</p>
   </form>
 {% endblock content %}

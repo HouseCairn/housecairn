@@ -6,7 +6,7 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from housecairn.core.forms import QuantityField
+from housecairn.core.forms import LabelAboveMixin, QuantityField
 from housecairn.stock.models import Article, Unit
 from housecairn.tasks import materials as material_services
 from housecairn.tasks.forms.fields import NEW, AddInPlaceChoiceField
@@ -37,7 +37,7 @@ def _quantity() -> QuantityField:
     return QuantityField(label=_("Quantity"), min_value=MIN_QUANTITY, required=False)
 
 
-class MaterialLineForm(forms.Form):
+class MaterialLineForm(LabelAboveMixin, forms.Form):
     """One line: a stock item and the quantity the task needs. An empty line is ignored."""
 
     article = ArticleAddField(
@@ -164,7 +164,7 @@ MaterialFormSet = forms.formset_factory(
 )
 
 
-class MaterialSaveForm(forms.Form):
+class MaterialSaveForm(LabelAboveMixin, forms.Form):
     """The small form of the task page: add a stock item, or change the quantity of one."""
 
     article = ArticleChoiceField(

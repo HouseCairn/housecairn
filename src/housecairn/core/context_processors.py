@@ -21,6 +21,35 @@ TODAY, ROOMS, PROJECTS, BUDGET, MORE = "today", "rooms", "projects", "budget", "
 # feeds of the person (More, Me).
 _IN_MORE = ("tasks:contractor", "calendar:feeds", "calendar:regenerate", "calendar:revoke")
 
+# The roots of the five sections and their tabs, the pages without a back link (design
+# guide, Return rule), and the entry pages that lead to them. On a phone only these keep
+# the brand in the app bar; every other page starts with its back link, then its title
+# (design/patterns.md, Header).
+SECTION_ROOTS = frozenset(
+    {
+        "index",
+        "tasks",
+        "tasks:today",
+        "tasks:list",
+        "calendar:index",
+        "calendar:week",
+        "calendar:month",
+        "calendar:year",
+        "rooms",
+        "rooms:list",
+        "stock",
+        "stock:list",
+        "projects",
+        "projects:list",
+        "budget",
+        "budget:overview",
+        "budget:rooms",
+        "budget:projects",
+        "budget:tasks",
+        "more",
+    }
+)
+
 
 def nav_section(request: HttpRequest) -> str:
     """The navigation entry that matches the page being shown ("" on an error page).
@@ -55,6 +84,16 @@ def section_of(match: ResolverMatch) -> str:
     if match.namespace == "budget" or view == "budget":
         return BUDGET
     return MORE
+
+
+def is_section_root(request: HttpRequest) -> bool:
+    """Whether the page is a root of its section (or a tab of one): it keeps the brand.
+
+    A page that resolved to no route (an error page) counts as a root: it has no back link
+    either, and must not start with nothing.
+    """
+    match = getattr(request, "resolver_match", None)
+    return match is None or match.view_name in SECTION_ROOTS
 
 
 def _home_id(request: HttpRequest) -> Any:
@@ -154,6 +193,7 @@ def shell(request: HttpRequest) -> dict[str, Any]:
         "home_switcher": home_switcher(request, section),
         "nav_more": more_groups(request),
         "nav_section": section,
+        "section_root": is_section_root(request),
         "today_url": today_url(request),
         "rooms_url": rooms_url(request),
         "projects_url": projects_url(request),

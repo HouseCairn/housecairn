@@ -15,7 +15,7 @@
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
-    <button type="submit" class="button-block">{% if room %}{% translate "Save" %}{% else %}{% translate "Add the room" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if room %}{% translate "Save" %}{% else %}{% translate "Add the room" %}{% endif %}</button></div>
     {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
   {% if room %}

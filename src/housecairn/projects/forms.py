@@ -6,7 +6,7 @@ from django import forms
 from django.utils.dates import MONTHS
 from django.utils.translation import gettext_lazy as _
 
-from housecairn.core.forms import MoneyField
+from housecairn.core.forms import LabelAboveMixin, MoneyField
 from housecairn.core.widgets import ChipSelectMultiple
 from housecairn.projects.models import (
     ENVELOPE_YEARS,
@@ -24,7 +24,7 @@ from housecairn.tasks.models import Priority, Season, Task
 _DATE = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
-class ProjectForm(forms.ModelForm[Project]):
+class ProjectForm(LabelAboveMixin, forms.ModelForm[Project]):
     """A project: the title is the only required field; the rest is under the headings."""
 
     rooms = forms.ModelMultipleChoiceField(
@@ -124,7 +124,7 @@ class ProjectForm(forms.ModelForm[Project]):
         return data
 
 
-class LineForm(forms.ModelForm[BudgetLine]):
+class LineForm(LabelAboveMixin, forms.ModelForm[BudgetLine]):
     planned = MoneyField(label=_("Planned"), initial=0)
     paid = MoneyField(
         label=_("Paid"),
@@ -137,7 +137,7 @@ class LineForm(forms.ModelForm[BudgetLine]):
         fields = ["label", "nature", "planned", "paid"]
 
 
-class QuoteForm(forms.ModelForm[Quote]):
+class QuoteForm(LabelAboveMixin, forms.ModelForm[Quote]):
     contractor_name = forms.CharField(
         label=_("Contractor"),
         max_length=120,
@@ -208,7 +208,7 @@ class QuoteForm(forms.ModelForm[Quote]):
         return data
 
 
-class AcceptForm(forms.Form):
+class AcceptForm(LabelAboveMixin, forms.Form):
     """The line an accepted quote is committed on."""
 
     budget_line = forms.ModelChoiceField(
@@ -222,13 +222,13 @@ class AcceptForm(forms.Form):
         field.queryset = BudgetLine.objects.filter(project=project)
 
 
-class StatusForm(forms.Form):
+class StatusForm(LabelAboveMixin, forms.Form):
     status = forms.ChoiceField(
         choices=[s for s in QuoteStatus.choices if s[0] != QuoteStatus.ACCEPTED]
     )
 
 
-class TaskAddForm(forms.Form):
+class TaskAddForm(LabelAboveMixin, forms.Form):
     title = forms.CharField(label=_("New task"), max_length=200)
     due_on = forms.DateField(label=_("Due on"), required=False, widget=_DATE)
     room = forms.ModelChoiceField(
@@ -242,7 +242,7 @@ class TaskAddForm(forms.Form):
         field.queryset = Room.objects.filter(home=home)
 
 
-class TaskAttachForm(forms.Form):
+class TaskAttachForm(LabelAboveMixin, forms.Form):
     task = forms.ModelChoiceField(
         label=_("Existing task"),
         queryset=Task.objects.none(),
@@ -257,7 +257,7 @@ class TaskAttachForm(forms.Form):
         field.queryset = tasks
 
 
-class PhotoForm(forms.Form):
+class PhotoForm(LabelAboveMixin, forms.Form):
     photo = forms.FileField(
         label=_("Photo"),
         widget=forms.FileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
@@ -265,7 +265,7 @@ class PhotoForm(forms.Form):
     )
 
 
-class LinkForm(forms.Form):
+class LinkForm(LabelAboveMixin, forms.Form):
     url = forms.URLField(
         label=_("Address of the page"),
         max_length=500,
@@ -284,7 +284,7 @@ class LinkForm(forms.Form):
     )
 
 
-class EnvelopeForm(forms.Form):
+class EnvelopeForm(LabelAboveMixin, forms.Form):
     year = forms.IntegerField(
         label=_("Year"), min_value=ENVELOPE_YEARS[0], max_value=ENVELOPE_YEARS[1]
     )
@@ -294,7 +294,7 @@ class EnvelopeForm(forms.Form):
     )
 
 
-class FilterForm(forms.Form):
+class FilterForm(LabelAboveMixin, forms.Form):
     """The filters at the head of the list; an invalid value is ignored."""
 
     q = forms.CharField(required=False, max_length=120)

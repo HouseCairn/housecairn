@@ -661,7 +661,10 @@ def new_records_and_materials(browser: Browser, base: str) -> None:
                 page.fill("#id_materials-0-new_article_name", f"Pinceau {suffix}")
                 page.select_option("#id_materials-0-new_article_unit", "piece")
                 page.fill("#id_materials-0-quantity", "2")
-                page.click("form[data-task-form] > button.button-block[type=submit] >> nth=-1")
+                page.click(
+                    "form[data-task-form] > .form-submit > button.button-block[type=submit]"
+                    " >> nth=-1"
+                )
                 page.wait_for_url(lambda url: "/tasks/new/" not in url)
                 if page.locator("h1").first.text_content() != f"Peindre le mur {suffix}":
                     page.locator(f"main a:has-text('Peindre le mur {suffix}')").first.click()
@@ -1169,7 +1172,7 @@ def form_errors(browser: Browser, base: str) -> None:
         page = context.new_page()
         sign_in(page, base, FORMS_EMAIL)
         _refuse_task_form(page, base, script=True)
-        page.click("form[data-task-form] > button.button-block[type=submit]")
+        page.click("form[data-task-form] > .form-submit > button.button-block[type=submit]")
         page.wait_for_selector(SUMMARY)
         label = f"{width} px, script"
         _on_summary(page, label)
@@ -1204,7 +1207,7 @@ def form_errors(browser: Browser, base: str) -> None:
               htmx.process(form);
             }"""
         )
-        page.click("form[data-task-form] > button.button-block[type=submit]")
+        page.click("form[data-task-form] > .form-submit > button.button-block[type=submit]")
         page.wait_for_selector(SUMMARY)
         label = f"{width} px, HTMX"
         check(page.evaluate("window.__sameDocument === true"), f"{label}: the page was swapped")
@@ -1220,7 +1223,7 @@ def form_errors(browser: Browser, base: str) -> None:
     page = context.new_page()
     context.add_cookies(_session_cookies(browser, base, FORMS_EMAIL))
     _refuse_task_form(page, base, script=False)
-    page.click("form[data-task-form] > button.button-block[type=submit]")
+    page.click("form[data-task-form] > .form-submit > button.button-block[type=submit]")
     page.wait_for_selector(SUMMARY)
     _on_summary(page, "360 px, no script")
     check(

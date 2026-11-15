@@ -5,6 +5,7 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.homes.models import Home
 from housecairn.rooms.models import Room
 from housecairn.tasks import task_templates
@@ -22,7 +23,7 @@ def template_choices() -> list[tuple[str, list[tuple[str, str]]]]:
     ]
 
 
-class TemplateForm(forms.Form):
+class TemplateForm(LabelAboveMixin, forms.Form):
     templates = forms.MultipleChoiceField(
         label=_("Templates"),
         widget=forms.CheckboxSelectMultiple,

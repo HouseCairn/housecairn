@@ -9,6 +9,6 @@
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
-    <button type="submit" class="button-block">{% translate "Postpone" %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% translate "Postpone" %}</button></div>
   </form>
 {% endblock content %}

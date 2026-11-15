@@ -5,6 +5,7 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.tasks import services
 from housecairn.tasks.forms.fields import NEW
 from housecairn.tasks.models import (
@@ -13,7 +14,7 @@ from housecairn.tasks.models import (
 )
 
 
-class ContractorForm(forms.ModelForm[Contractor]):
+class ContractorForm(LabelAboveMixin, forms.ModelForm[Contractor]):
     """A contractor: only the name is required (docs/adr/0045)."""
 
     class Meta:

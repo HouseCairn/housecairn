@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 from housecairn.homes.models import HomeOwnedModel
 from housecairn.projects.storage import project_storage
@@ -51,7 +52,7 @@ ZERO = Decimal("0")
 
 class ProjectStatus(models.TextChoices):
     IDEA = "idea", _("Idea")
-    PLANNED = "planned", _("Planned")
+    PLANNED = "planned", pgettext_lazy("project status", "Planned")
     IN_PROGRESS = "in_progress", _("In progress")
     DONE = "done", _("Finished")
     ABANDONED = "abandoned", _("Abandoned")
