@@ -267,6 +267,7 @@ class ItemSerializer(serializers.ModelSerializer[Item]):
             "brand",
             "model",
             "serial_number",
+            "ean",
             "purchased_on",
             "installed_on",
             "warranty_duration",

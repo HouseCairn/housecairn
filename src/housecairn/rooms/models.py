@@ -14,6 +14,7 @@ from django.core.validators import (
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.barcodes.fields import EanField
 from housecairn.homes.models import HomeOwnedModel
 from housecairn.rooms.storage import photo_storage
 
@@ -169,6 +170,7 @@ class Item(HomeOwnedModel):
     brand = models.CharField(_("brand"), max_length=120, blank=True)
     model = models.CharField(_("model"), max_length=120, blank=True)
     serial_number = models.CharField(_("serial number"), max_length=120, blank=True)
+    ean = EanField()
     purchased_on = models.DateField(_("purchased on"), null=True, blank=True)
     installed_on = models.DateField(_("installed on"), null=True, blank=True)
     # The warranty of the maker or of the shop, apart from the maintenance contract
@@ -221,7 +223,10 @@ class Item(HomeOwnedModel):
         verbose_name = _("item")
         verbose_name_plural = _("items")
         ordering = ["name", "created_at", "id"]
-        indexes = [models.Index(fields=["room", "name"], name="item_room_name")]
+        indexes = [
+            models.Index(fields=["room", "name"], name="item_room_name"),
+            models.Index(fields=["home", "ean"], name="item_home_ean"),
+        ]
 
     def __str__(self) -> str:
         return self.name

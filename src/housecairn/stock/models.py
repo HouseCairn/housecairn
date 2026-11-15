@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
 
+from housecairn.barcodes.fields import EanField
 from housecairn.homes.models import HomeOwnedModel
 from housecairn.rooms.models import Item, Room, WebUrlField, notes_field
 from housecairn.stock.storage import stock_storage
@@ -75,6 +76,7 @@ class Article(HomeOwnedModel):
     manufacturer_reference = models.CharField(
         _("manufacturer reference"), max_length=120, blank=True
     )
+    ean = EanField()
     dimensions = models.CharField(_("dimensions"), max_length=120, blank=True)
     storage_location = models.CharField(
         _("storage location"),
@@ -128,7 +130,10 @@ class Article(HomeOwnedModel):
         verbose_name = _("stock item")
         verbose_name_plural = _("stock items")
         ordering = ["name", "created_at", "id"]
-        indexes = [models.Index(fields=["home", "name"], name="article_home_name")]
+        indexes = [
+            models.Index(fields=["home", "name"], name="article_home_name"),
+            models.Index(fields=["home", "ean"], name="article_home_ean"),
+        ]
 
     def __str__(self) -> str:
         return self.name

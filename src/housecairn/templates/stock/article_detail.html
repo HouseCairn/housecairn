@@ -13,6 +13,7 @@
       {% if article.threshold is not None %}<div><dt>{% translate "Threshold" %}</dt><dd>{{ article.threshold|floatformat:"-2" }}</dd></div>{% endif %}
       {% if article.unit_price is not None %}<div><dt>{% translate "Unit price" %}</dt><dd>{{ article.unit_price|money:home.currency }}</dd></div>{% endif %}
       {% if article.manufacturer_reference %}<div><dt>{% translate "Manufacturer reference" %}</dt><dd class="mono">{{ article.manufacturer_reference }}</dd></div>{% endif %}
+      {% if article.ean %}<div><dt>{% translate "Barcode (EAN)" %}</dt><dd class="mono">{{ article.ean }}</dd></div>{% endif %}
       {% if article.dimensions %}<div><dt>{% translate "Dimensions" %}</dt><dd>{{ article.dimensions }}</dd></div>{% endif %}
       {% if article.storage_location %}<div><dt>{% translate "Storage location" %}</dt><dd>{{ article.storage_location }}</dd></div>{% endif %}
       {% if article.notes %}<div><dt>{% translate "Notes" %}</dt><dd class="prose">{{ article.notes|linebreaksbr }}</dd></div>{% endif %}

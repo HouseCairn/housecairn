@@ -105,6 +105,7 @@ class ArticleSerializer(serializers.ModelSerializer[Article]):
             "id",
             "name",
             "manufacturer_reference",
+            "ean",
             "dimensions",
             "storage_location",
             "unit",

@@ -49,6 +49,7 @@ class ArticleForm(forms.ModelForm[Article]):
         fields = [
             "name",
             "manufacturer_reference",
+            "ean",
             "dimensions",
             "storage_location",
             "unit",

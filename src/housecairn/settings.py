@@ -108,6 +108,7 @@ INSTALLED_APPS = [
     "housecairn.notifications",
     "housecairn.calendar",
     "housecairn.labels",
+    "housecairn.barcodes",
     "housecairn.reports",
     "housecairn.demo",
 ]

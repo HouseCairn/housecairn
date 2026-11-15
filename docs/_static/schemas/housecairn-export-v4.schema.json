@@ -431,6 +431,10 @@
                       "type": "string",
                       "maxLength": 120
                     },
+                    "ean": {
+                      "type": "string",
+                      "maxLength": 14
+                    },
                     "purchased_on": {
                       "type": [
                         "string",
@@ -513,6 +517,7 @@
                     "contract_number",
                     "contract_url",
                     "created_at",
+                    "ean",
                     "id",
                     "installed_on",
                     "kind",
@@ -1203,6 +1208,10 @@
                       "type": "string",
                       "maxLength": 120
                     },
+                    "ean": {
+                      "type": "string",
+                      "maxLength": 14
+                    },
                     "dimensions": {
                       "type": "string",
                       "maxLength": 120
@@ -1281,6 +1290,7 @@
                     "compatible_items",
                     "created_at",
                     "dimensions",
+                    "ean",
                     "id",
                     "label",
                     "label_content_type",

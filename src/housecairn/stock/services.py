@@ -44,6 +44,7 @@ ARTICLE_FIELDS = frozenset(
     {
         "name",
         "manufacturer_reference",
+        "ean",
         "dimensions",
         "storage_location",
         "unit",
@@ -55,6 +56,16 @@ ARTICLE_FIELDS = frozenset(
 )
 SUPPLIER_FIELDS = frozenset({"name", "reference", "url", "last_price"})
 _ZERO = Decimal("0")
+
+
+def _ean_matches(query: str) -> models.Q:
+    """A code typed with or without its spaces, and a UPC-A found by its EAN-13 (docs/adr/0083)."""
+    from housecairn.barcodes import gtin
+
+    code = gtin.clean(query)
+    if not code.isdigit():
+        return models.Q(pk__in=[])
+    return models.Q(ean__in=sorted(gtin.variants(code))) | models.Q(ean__contains=code)
 
 
 def _require_write(actor: AnyUser, home: Home) -> None:
@@ -141,7 +152,7 @@ def search_articles(
     item: UUID | None = None,
     room: UUID | None = None,
 ) -> models.QuerySet[Article]:
-    """Articles whose name, manufacturer reference or supplier matches `query`.
+    """Articles whose name, manufacturer reference, barcode or supplier matches `query`.
 
     `low` keeps those at or below their threshold; `item` those compatible with an item;
     `room` those that concern a room (see `articles_of_room`).
@@ -155,6 +166,7 @@ def search_articles(
         articles = articles.filter(
             models.Q(name__icontains=query)
             | models.Q(manufacturer_reference__icontains=query)
+            | _ean_matches(query)
             | models.Exists(suppliers)
         )
     if low:
