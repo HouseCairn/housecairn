@@ -1,0 +1,756 @@
+{
+  "$description": "Glossary of Housecairn: one term per concept, in English (the source) and French, shared by the web application and the mobile app (design/patterns.md, Glossary). `web` names where the web catalogs carry the term (app, msgid, msgctxt); tests/test_design_glossary.py checks that each catalog says `fr`. `web_fault` is what the web catalog says today when it is wrong, until the fix: the test then expects that text, and fails once the catalog is fixed, so that the entry is removed. The mobile app keeps a copy of this file and checks its ARB files against it.",
+  "terms": [
+    {
+      "id": "today",
+      "concept": "Section: what to do, and when",
+      "en": "Today",
+      "fr": "Aujourd'hui",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Today"
+        }
+      ]
+    },
+    {
+      "id": "rooms",
+      "concept": "Section: where, and with what",
+      "en": "Rooms",
+      "fr": "Pièces",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Rooms"
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "concept": "Section: the works",
+      "en": "Projects",
+      "fr": "Projets",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Projects"
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "concept": "Section: for how much",
+      "en": "Budget",
+      "fr": "Budget",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Budget"
+        }
+      ]
+    },
+    {
+      "id": "more",
+      "concept": "Section: everything else",
+      "en": "More",
+      "fr": "Plus",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "More"
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "concept": "Group of More about the home being viewed",
+      "en": "Home",
+      "fr": "Logement",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Home",
+          "msgctxt": "group of More"
+        }
+      ]
+    },
+    {
+      "id": "me",
+      "concept": "Group of More about the person",
+      "en": "Me",
+      "fr": "Moi",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Me"
+        }
+      ]
+    },
+    {
+      "id": "help",
+      "concept": "Group of More: help and information",
+      "en": "Help",
+      "fr": "Aide",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Help"
+        }
+      ]
+    },
+    {
+      "id": "about",
+      "concept": "Entry of Help",
+      "en": "About",
+      "fr": "À propos",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "About"
+        }
+      ]
+    },
+    {
+      "id": "home-settings",
+      "concept": "Entry of Home: name, currency, export",
+      "en": "Home settings",
+      "fr": "Réglages du logement",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Home settings"
+        }
+      ]
+    },
+    {
+      "id": "household",
+      "concept": "The members of a home and their roles; never a group of More",
+      "en": "Household and roles",
+      "fr": "Foyer et rôles",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Household and roles"
+        }
+      ]
+    },
+    {
+      "id": "my-homes",
+      "concept": "The list of the person's homes",
+      "en": "My homes",
+      "fr": "Mes logements",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "My homes"
+        }
+      ]
+    },
+    {
+      "id": "contractors",
+      "concept": "People and companies who work on the home",
+      "en": "Contractors",
+      "fr": "Intervenants",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Contractors"
+        }
+      ]
+    },
+    {
+      "id": "notifications",
+      "concept": "Entry of Me: where and when reminders go",
+      "en": "Notifications",
+      "fr": "Notifications",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Notifications"
+        }
+      ]
+    },
+    {
+      "id": "display-preferences",
+      "concept": "Entry of Me",
+      "en": "Display preferences",
+      "fr": "Préférences d'affichage",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Display preferences"
+        }
+      ]
+    },
+    {
+      "id": "language",
+      "concept": "Language of the person",
+      "en": "Language",
+      "fr": "Langue",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Language"
+        }
+      ]
+    },
+    {
+      "id": "room",
+      "concept": "A room of the home",
+      "en": "Room",
+      "fr": "Pièce",
+      "web": [
+        {
+          "app": "rooms",
+          "msgid": "Room"
+        }
+      ]
+    },
+    {
+      "id": "item",
+      "concept": "Something in a room (its kind is Equipment or Surface)",
+      "en": "Item",
+      "fr": "Élément",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Item"
+        }
+      ]
+    },
+    {
+      "id": "equipment",
+      "concept": "Kind of item",
+      "en": "Equipment",
+      "fr": "Équipement",
+      "web": [
+        {
+          "app": "rooms",
+          "msgid": "Equipment"
+        }
+      ]
+    },
+    {
+      "id": "stock",
+      "concept": "Tab of Rooms: what is kept in the home",
+      "en": "Stock",
+      "fr": "Matériel",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Stock"
+        }
+      ]
+    },
+    {
+      "id": "stock-item",
+      "concept": "One article of the stock",
+      "en": "Stock item",
+      "fr": "Article",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Stock item"
+        }
+      ]
+    },
+    {
+      "id": "materials",
+      "concept": "What a task or a project needs",
+      "en": "Materials",
+      "fr": "Fournitures",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Materials"
+        }
+      ]
+    },
+    {
+      "id": "suppliers",
+      "concept": "Where a stock item is bought",
+      "en": "Suppliers",
+      "fr": "Fournisseurs",
+      "web": [
+        {
+          "app": "stock",
+          "msgid": "Suppliers"
+        }
+      ]
+    },
+    {
+      "id": "paint-left",
+      "concept": "Field of the memory of a room",
+      "en": "Paint left in stock",
+      "fr": "Peinture restante en stock",
+      "web": [
+        {
+          "app": "rooms",
+          "msgid": "Paint left in stock"
+        }
+      ],
+      "web_fault": "Peinture restant en stock"
+    },
+    {
+      "id": "upkeep",
+      "concept": "Recurring maintenance (tab of Budget)",
+      "en": "Upkeep",
+      "fr": "Entretien",
+      "web": [
+        {
+          "app": "budget",
+          "msgid": "Upkeep"
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "concept": "Button: the task is done",
+      "en": "Done",
+      "fr": "Fait",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Done",
+          "msgctxt": "task"
+        }
+      ]
+    },
+    {
+      "id": "done-filter",
+      "concept": "Filter of All: finished tasks",
+      "en": "Done",
+      "fr": "Faites",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Done",
+          "msgctxt": "task filter"
+        }
+      ]
+    },
+    {
+      "id": "postpone",
+      "concept": "Button: move the task to a later date",
+      "en": "Postpone",
+      "fr": "Reporter",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Postpone"
+        }
+      ]
+    },
+    {
+      "id": "skip",
+      "concept": "Button: not this time",
+      "en": "Skip this time",
+      "fr": "Ignorer cette fois",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Skip this time"
+        }
+      ]
+    },
+    {
+      "id": "undo",
+      "concept": "Action of the undo bar",
+      "en": "Undo",
+      "fr": "Annuler",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Undo"
+        }
+      ]
+    },
+    {
+      "id": "edit",
+      "concept": "Opens the form of a record",
+      "en": "Edit",
+      "fr": "Modifier",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Edit"
+        }
+      ]
+    },
+    {
+      "id": "save",
+      "concept": "Sends a form",
+      "en": "Save",
+      "fr": "Enregistrer",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Save"
+        }
+      ]
+    },
+    {
+      "id": "cancel",
+      "concept": "Leaves a form without saving",
+      "en": "Cancel",
+      "fr": "Annuler",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Cancel"
+        }
+      ]
+    },
+    {
+      "id": "delete",
+      "concept": "Removes a record, after a confirmation",
+      "en": "Delete",
+      "fr": "Supprimer",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Delete"
+        }
+      ]
+    },
+    {
+      "id": "overdue",
+      "concept": "Group of Today",
+      "en": "Overdue",
+      "fr": "En retard",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Overdue"
+        }
+      ]
+    },
+    {
+      "id": "coming-up",
+      "concept": "Group of Today",
+      "en": "Coming up",
+      "fr": "À venir",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Coming up"
+        }
+      ]
+    },
+    {
+      "id": "no-date",
+      "concept": "Group: tasks without a due date",
+      "en": "No date",
+      "fr": "Sans date",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "No date"
+        }
+      ]
+    },
+    {
+      "id": "in-season",
+      "concept": "Group of Today: undated tasks of the season",
+      "en": "In season",
+      "fr": "De saison",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "In season"
+        }
+      ]
+    },
+    {
+      "id": "repeat",
+      "concept": "Section of the task form",
+      "en": "Repeat",
+      "fr": "Répétition",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Repeat"
+        }
+      ]
+    },
+    {
+      "id": "season",
+      "concept": "Field of a task",
+      "en": "Season",
+      "fr": "Saison",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Season"
+        }
+      ]
+    },
+    {
+      "id": "priority",
+      "concept": "Field of a task or a project",
+      "en": "Priority",
+      "fr": "Priorité",
+      "web": [
+        {
+          "app": "projects",
+          "msgid": "Priority"
+        }
+      ]
+    },
+    {
+      "id": "add-task",
+      "concept": "Add button",
+      "en": "Add a task",
+      "fr": "Ajouter une tâche",
+      "web": [
+        {
+          "app": "tasks",
+          "msgid": "Add a task"
+        }
+      ]
+    },
+    {
+      "id": "add-room",
+      "concept": "Add button",
+      "en": "Add a room",
+      "fr": "Ajouter une pièce",
+      "web": [
+        {
+          "app": "rooms",
+          "msgid": "Add a room"
+        }
+      ]
+    },
+    {
+      "id": "add-item",
+      "concept": "Add button",
+      "en": "Add an item",
+      "fr": "Ajouter un élément",
+      "web": [
+        {
+          "app": "rooms",
+          "msgid": "Add an item"
+        }
+      ]
+    },
+    {
+      "id": "add-photo",
+      "concept": "Add button",
+      "en": "Add a photo",
+      "fr": "Ajouter une photo",
+      "web": [
+        {
+          "app": "rooms",
+          "msgid": "Add a photo"
+        }
+      ]
+    },
+    {
+      "id": "reports",
+      "concept": "Problems reported in a home",
+      "en": "Reports",
+      "fr": "Signalements",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Reports"
+        }
+      ]
+    },
+    {
+      "id": "report-a-problem",
+      "concept": "Opens the report form",
+      "en": "Report a problem",
+      "fr": "Signaler un problème",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Report a problem"
+        }
+      ]
+    },
+    {
+      "id": "reports-closed",
+      "concept": "Filter of the reports",
+      "en": "Closed",
+      "fr": "Classés",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Closed"
+        }
+      ]
+    },
+    {
+      "id": "reports-all",
+      "concept": "Filter of the reports: every report (masculine)",
+      "en": "All",
+      "fr": "Tous",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "All"
+        }
+      ],
+      "web_fault": "Toutes"
+    },
+    {
+      "id": "reports-mine",
+      "concept": "Filter of the reports",
+      "en": "Mine",
+      "fr": "Les miens",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Mine"
+        }
+      ]
+    },
+    {
+      "id": "what-is-wrong",
+      "concept": "First field of the report form",
+      "en": "What is wrong?",
+      "fr": "Qu'est-ce qui ne va pas ?",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "What is wrong?"
+        }
+      ]
+    },
+    {
+      "id": "where",
+      "concept": "Place field of the report form",
+      "en": "Where?",
+      "fr": "Où ?",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Where?"
+        }
+      ]
+    },
+    {
+      "id": "send-report",
+      "concept": "Sends the report form",
+      "en": "Send the report",
+      "fr": "Envoyer le signalement",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Send the report"
+        }
+      ]
+    },
+    {
+      "id": "envelope",
+      "concept": "Amount set aside for the year",
+      "en": "Envelope",
+      "fr": "Enveloppe",
+      "web": [
+        {
+          "app": "budget",
+          "msgid": "Envelope"
+        }
+      ]
+    },
+    {
+      "id": "spent",
+      "concept": "Real spending",
+      "en": "Spent",
+      "fr": "Dépensé",
+      "web": [
+        {
+          "app": "budget",
+          "msgid": "Spent"
+        }
+      ]
+    },
+    {
+      "id": "amount-planned",
+      "concept": "Amount: what is planned",
+      "en": "Planned",
+      "fr": "Prévu",
+      "web": [
+        {
+          "app": "budget",
+          "msgid": "Planned",
+          "msgctxt": "amount"
+        }
+      ]
+    },
+    {
+      "id": "committed",
+      "concept": "Amount: what is signed",
+      "en": "Committed",
+      "fr": "Engagé",
+      "web": [
+        {
+          "app": "budget",
+          "msgid": "Committed"
+        }
+      ]
+    },
+    {
+      "id": "paid",
+      "concept": "Amount: what is paid",
+      "en": "Paid",
+      "fr": "Payé",
+      "web": [
+        {
+          "app": "budget",
+          "msgid": "Paid"
+        }
+      ]
+    },
+    {
+      "id": "in-progress",
+      "concept": "Tab of Projects",
+      "en": "In progress",
+      "fr": "En cours",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "In progress"
+        }
+      ]
+    },
+    {
+      "id": "ideas",
+      "concept": "Tab of Projects",
+      "en": "Ideas",
+      "fr": "Idées",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Ideas"
+        }
+      ]
+    },
+    {
+      "id": "finished-tab",
+      "concept": "Tab of Projects",
+      "en": "Finished",
+      "fr": "Terminés",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Finished",
+          "msgctxt": "projects tab"
+        }
+      ]
+    },
+    {
+      "id": "quotes",
+      "concept": "Quotes of a project",
+      "en": "Quotes",
+      "fr": "Devis",
+      "web": [
+        {
+          "app": "projects",
+          "msgid": "Quotes"
+        }
+      ]
+    }
+  ]
+}
