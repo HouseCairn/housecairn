@@ -28,6 +28,7 @@ from django.views.generic import FormView, TemplateView
 
 from housecairn.accounts import names
 from housecairn.core import navigation, offline
+from housecairn.core.autosave import AutosaveMixin
 from housecairn.core.form_errors import banner_messages
 from housecairn.core.language import instance_default
 from housecairn.core.prefix import in_application, resolve_url
@@ -413,8 +414,14 @@ class TaskDetailView(HomeTasksMixin, TemplateView):
         )
 
 
-class TaskEditView(TaskFormMixin):
+class TaskEditView(AutosaveMixin, TaskFormMixin):
     with_files = False
+
+    def autosave_forms(self, form: forms.TaskForm) -> list[Any]:
+        return [form, *self.materials.forms] if self.materials_sent else [form]
+
+    def autosave_changed(self, form: forms.TaskForm) -> bool:
+        return form.has_changed() or (self.materials_sent and self.materials.has_changed())
 
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()

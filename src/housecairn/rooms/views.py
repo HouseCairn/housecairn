@@ -18,6 +18,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from housecairn.core import navigation
+from housecairn.core.autosave import AutosaveMixin
 from housecairn.homes import current
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
@@ -155,7 +156,7 @@ class RoomDetailView(HomeRoomsMixin, TemplateView):
         )
 
 
-class RoomEditView(RoomFormMixin):
+class RoomEditView(AutosaveMixin, RoomFormMixin):
     template_name = "rooms/room_form.html"
     form_class: Any = forms.RoomForm
 
@@ -339,7 +340,7 @@ class ItemDetailView(HomeRoomsMixin, TemplateView):
         )
 
 
-class ItemEditView(ItemFormMixin):
+class ItemEditView(AutosaveMixin, ItemFormMixin):
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["instance"] = self.get_item()

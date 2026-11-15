@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n navigation static %}
-{% block extra_head %}<script src="{% static 'js/task-form.js' %}" defer></script>{% endblock extra_head %}
+{% block extra_head %}<script src="{% static 'js/task-form.js' %}" defer></script>{% if autosave %}<script src="{% static 'js/autosave.js' %}" defer></script>{% endif %}{% endblock extra_head %}
 {% block head_title %}{% if item %}{% translate "Edit the item" %}{% else %}{% translate "Add an item" %}{% endif %}{% endblock head_title %}
 {% block content %}
   {% if item %}
@@ -10,7 +10,7 @@
     {% url 'rooms:detail' home_id=home.id room_id=room.id as parent %}{% back_link parent room.name %}
     <h1>{% translate "Add an item" %}</h1>
   {% endif %}
-  <form method="post" class="card" data-in-place-form>
+  <form method="post" class="card" data-in-place-form{% if autosave %} data-autosave{% endif %}>
     {% csrf_token %}
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
@@ -51,6 +51,7 @@
     {% endfor %}
     <datalist id="brand-suggestions">{% for brand in form.brands %}<option value="{{ brand }}">{% endfor %}</datalist>
     <button type="submit" class="button-block">{% if item %}{% translate "Save" %}{% else %}{% translate "Add the item" %}{% endif %}</button>
+    {% if autosave %}{% include "components/autosave_status.html" %}{% endif %}
   </form>
   {% if item %}
     <a class="button button-danger button-block" href="{% url_with_next 'rooms:item-delete' home_id=home.id item_id=item.id %}">{% translate "Delete the item" %}</a>

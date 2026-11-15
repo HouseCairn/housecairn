@@ -24,3 +24,7 @@ Only the name is required.
 The link at the top and the form once sent lead back to the screen the form was
 opened from: an item added from its room goes back to the room, with the message
 **Item added · Open**. Saved changes go back to where the form was opened.
+
+## Saved as you go
+
+When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script.

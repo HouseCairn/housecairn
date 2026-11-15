@@ -1,0 +1,4 @@
+{# The answer to a field saved on the fly (core/autosave.py): the status, then the error of each field, swapped in place by HTMX. `status`, `failed`, `fields`: (name, error), `general`. #}
+<span class="autosave-text{% if failed %} autosave-failed{% endif %}">{{ status }}{% if general %} {{ general }}{% endif %}</span>
+{% for name, error in fields %}<span id="autosave-error-{{ name }}" class="autosave-error" hx-swap-oob="true"{% if not error %} hidden{% endif %}>{{ error }}</span>
+{% endfor %}

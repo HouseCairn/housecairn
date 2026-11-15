@@ -19,3 +19,7 @@ to edit one, at `/h/<home id>/stock/<item id>/edit/`.
 The quantity is not a field: the stock starts at zero and changes with the
 movements, which you record on the [page of the item](stock-item.md). Only the name
 is required.
+
+## Saved as you go
+
+When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script.
