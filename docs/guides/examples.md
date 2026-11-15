@@ -14,7 +14,7 @@ A small job that comes back every three months and uses a part each time.
 3. **The part.** The task lists one *Water filter*, a stock item at 7.90 each. Marking
    the task **Done** takes one filter from the stock.
 4. **The cost.** The budget plans 7.90 each time, four times a year: the task shows
-   **Cost a year** 31.60, and **Budget**, **Maintenance** lists it with the same figure.
+   **Cost a year** 31.60, and **Budget**, **Upkeep** lists it with the same figure.
 5. **The stock.** Two filters were bought; after one Done there is one left, the
    threshold of the item, and the stock list marks it **Low** before it runs out.
 

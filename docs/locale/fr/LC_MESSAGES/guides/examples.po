@@ -39,7 +39,7 @@ msgstr "**L'équipement.** La tâche est rattachée à la *Machine expresso* de 
 msgid "**The part.** The task lists one *Water filter*, a stock item at 7.90 each. Marking the task **Done** takes one filter from the stock."
 msgstr "**La fourniture.** La tâche demande un *Filtre à eau*, un article en stock à 7,90 l'unité. Marquer la tâche **Fait** prend un filtre dans le stock."
 
-msgid "**The cost.** The budget plans 7.90 each time, four times a year: the task shows **Cost a year** 31.60, and **Budget**, **Maintenance** lists it with the same figure."
+msgid "**The cost.** The budget plans 7.90 each time, four times a year: the task shows **Cost a year** 31.60, and **Budget**, **Upkeep** lists it with the same figure."
 msgstr "**Le coût.** Le budget prévoit 7,90 à chaque fois, quatre fois par an : la tâche affiche **Coût par an** 31,60, et **Budget**, **Entretien** la liste avec le même chiffre."
 
 msgid "**The stock.** Two filters were bought; after one Done there is one left, the threshold of the item, and the stock list marks it **Low** before it runs out."
