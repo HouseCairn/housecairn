@@ -21,6 +21,7 @@ from django.utils import timezone
 from housecairn.core.models import BaseModel
 from housecairn.sync import changes as sync_changes
 from housecairn.sync import rows as sync_rows
+from housecairn.sync.links import entity_of, link_row_id
 from housecairn.sync.models import Change, HomeHead, RowClocks
 
 RETENTION = datetime.timedelta(days=400)
@@ -119,6 +120,8 @@ def _delete_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
                 RowClocks.objects.filter(
                     entity=kind._meta.label_lower, row_id__in=gone[start : start + CHUNK]
                 ).delete()
+        elif kind._meta.auto_created:
+            _forget_links(kind, instances)
     emptied = _emptied(collector, doomed)
     deleted: int = collector.delete()[0]
     for row, written in emptied:
@@ -133,6 +136,33 @@ def _delete_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
     if files:
         transaction.on_commit(lambda: _remove_files(files))
     return deleted
+
+
+def _forget_links(through: type[models.Model], instances: list[models.Model]) -> None:
+    """Remove the clocks of the rows of a link table that the deletion takes with it.
+
+    A link row has no id of its own: its clock is under `sync.links.link_row_id`.
+    """
+    owner_field, other_field = (
+        f for f in through._meta.concrete_fields if isinstance(f, models.ForeignKey)
+    )
+    ids: list[uuid.UUID] = []
+    for link in instances:
+        owner: Any = getattr(link, owner_field.name)
+        home_id = getattr(owner, "home_id", None)
+        if home_id is not None:
+            ids.append(
+                link_row_id(
+                    home_id,
+                    through,
+                    getattr(link, owner_field.attname),
+                    getattr(link, other_field.attname),
+                )
+            )
+    for start in range(0, len(ids), CHUNK):
+        RowClocks.objects.filter(
+            entity=entity_of(through), row_id__in=ids[start : start + CHUNK]
+        ).delete()
 
 
 def _emptied(

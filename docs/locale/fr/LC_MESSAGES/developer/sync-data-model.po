@@ -171,11 +171,53 @@ msgstr "Rétention"
 msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted. What hangs off a purged row goes with it: the items and photos of a purged room lose their clocks too, and the files of their photos are removed from the disk once the purge is committed. A row that stays but whose reference the purge empties (`SET_NULL`: the paint of a room whose article is purged, the contract of an item whose contractor is) records that change, as any write of a row does."
 msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours est gardé), enregistre dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont encore supprimées. Ce qui dépend d'une ligne purgée part avec elle : les éléments et les photos d'une pièce purgée perdent aussi leurs horloges, et les fichiers de leurs photos sont retirés du disque une fois la purge validée. Une ligne qui reste mais dont la purge vide une référence (`SET_NULL` : la peinture d'une pièce dont l'article est purgé, le contrat d'un élément dont l'intervenant l'est) enregistre ce changement, comme toute écriture d'une ligne."
 
+msgid "The rows a purged row takes with it by cascade (the quotes of a project, the rows of its link tables) lose their clocks too, and their files are removed from the disk once the purge is committed: the purge leaves no clock without its row and no file without its record."
+msgstr "Les lignes qu'une ligne purgée emporte en cascade (les devis d'un projet, les lignes de ses tables de liaison) perdent aussi leurs horloges, et leurs fichiers sont retirés du disque une fois la purge validée : la purge ne laisse ni horloge sans sa ligne ni fichier sans son enregistrement."
+
 msgid "The guard test"
 msgstr "Le test garde-fou"
 
-msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs, in a file of its own, `tests/sync_scenarios_<lot>.py`, that the test loads. A kind that cannot happen goes to `NOT_APPLICABLE` with its reason. An application that is listed without scenarios, or whose scenario writes without recording, fails. Covered today: `homes` (the home itself) and `rooms` (rooms, items, photos)."
-msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, pour chaque modèle, un scénario par sorte d'écriture (enregistrement, mise à jour de queryset, suppression logique, suppression définitive) qui exécute le code que l'application exécute vraiment, dans un fichier à lui, `tests/sync_scenarios_<lot>.py`, que le test charge. Une sorte qui ne peut pas se produire va dans `NOT_APPLICABLE` avec sa raison. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue. Couvertes aujourd'hui : `homes` (le logement lui-même) et `rooms` (pièces, éléments, photos)."
+msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs, in a file of its own, `tests/sync_scenarios_<lot>.py`, that the test loads. A kind that cannot happen goes to `NOT_APPLICABLE` with its reason. An application that is listed without scenarios, or whose scenario writes without recording, fails. Covered today: `homes` (the home itself) and `rooms` (rooms, items, photos); the later lots add their application to the table below."
+msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, pour chaque modèle, un scénario par sorte d'écriture (enregistrement, mise à jour de queryset, suppression logique, suppression définitive) qui exécute le code que l'application exécute vraiment, dans un fichier à lui, `tests/sync_scenarios_<lot>.py`, que le test charge. Une sorte qui ne peut pas se produire va dans `NOT_APPLICABLE` avec sa raison. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue. Couvertes aujourd'hui : `homes` (le logement lui-même) et `rooms` (pièces, éléments, photos) ; les lots suivants ajoutent leur application au tableau ci-dessous."
 
-msgid "`tasks` (lot M3c) is covered too: contractors, tasks, task materials, occurrences, material draws and attachments. Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. An attachment sends its file as `file`, a reference with its size, type and dimensions, as a photo does. Deleting an account takes it off the tasks it is assigned and the occurrences it closed, with a change for each, where the database would empty them without one."
-msgstr "`tasks` (lot M3c) est aussi couverte : intervenants, tâches, matériel des tâches, occurrences, tirages de matériel et pièces jointes. Annuler une clôture supprime l'occurrence qui suivait avec une pierre tombale au lieu de l'effacer, et la détache de l'occurrence qu'elle suivait, pour que la clôture puisse être refaite. Une pièce jointe envoie son fichier sous `file`, une référence avec sa taille, son type et ses dimensions, comme une photo. Supprimer un compte le retire des tâches qui lui sont attribuées et des occurrences qu'il a clôturées, avec un changement pour chacune, là où la base les viderait sans aucun."
+msgid "Covered applications"
+msgstr "Applications couvertes"
+
+msgid "Application"
+msgstr "Application"
+
+msgid "Lot"
+msgstr "Lot"
+
+msgid "Rows"
+msgstr "Lignes"
+
+msgid "`projects`"
+msgstr "`projects`"
+
+msgid "M3e"
+msgstr "M3e"
+
+msgid "project, budget line, quote, file, link, task of a project, annual envelope, rooms of a project"
+msgstr "projet, ligne de budget, devis, fichier, lien, tâche d'un projet, enveloppe annuelle, pièces d'un projet"
+
+msgid "**Projects.** The services of `housecairn.projects` call `housecairn.projects.changelog`, which compares the row with what the database held before the write and records the fields whose value changed. A change carries the columns of the model, a foreign key by its column name (`project_id`); it leaves out the times the server keeps, where the reading of a link's page stands (`preview_state`, not data of the home, as in the export) and the stored files of a `projects.projectfile`, whose references the lot of the files maps. Taking a task out of a project deletes its link for good, so that the task may join another project, and leaves a tombstone first; so does deleting a project for the links to its tasks."
+msgstr "**Projets.** Les services de `housecairn.projects` appellent `housecairn.projects.changelog`, qui compare la ligne à ce que la base contenait avant l'écriture et enregistre les champs dont la valeur a changé. Un changement porte les colonnes du modèle, une clé étrangère par son nom de colonne (`project_id`) ; il laisse de côté les instants que le serveur tient, l'état de la lecture de la page d'un lien (`preview_state`, qui n'est pas une donnée du logement, comme dans l'export) et les fichiers stockés d'un `projects.projectfile`, dont le lot des fichiers fait correspondre les références. Sortir une tâche d'un projet supprime son lien pour de bon, pour que la tâche puisse rejoindre un autre projet, et laisse d'abord une pierre tombale ; supprimer un projet fait de même pour les liens vers ses tâches."
+
+msgid "**Link tables.** A row of a link table has no id a phone could share: its change is recorded under `uuid5(home, t + \":\" + owner + \":\" + other)`, as ADR 0077 names it (`housecairn.sync.links`). Linking two rows again restores the row from its tombstone."
+msgstr "**Tables de liaison.** Une ligne d'une table de liaison n'a pas d'identifiant qu'un téléphone pourrait partager : son changement est enregistré sous `uuid5(home, t + \":\" + owner + \":\" + other)`, comme l'ADR 0077 la nomme (`housecairn.sync.links`). Relier de nouveau deux lignes restaure la ligne depuis sa pierre tombale."
+
+msgid "**Restore.** A restore records the rows it inserts itself (`sync.rows.record_created`), the rows of the projects included; the rows of a link table have no row of their own there. The projects section of the export therefore gives `on_written`, which a restore, as a copy or not, calls with the rows of the section once they and their links are written, in its transaction: the application records the links under their new ids."
+msgstr "**Restauration.** Une restauration enregistre elle-même les lignes qu'elle insère (`sync.rows.record_created`), celles des projets comprises ; les lignes d'une table de liaison n'ont pas de ligne propre à cet endroit. La section des projets de l'export donne donc `on_written`, qu'une restauration, en copie ou non, appelle avec les lignes de la section une fois celles-ci et leurs liaisons écrites, dans sa transaction : l'application enregistre les liaisons sous leurs nouveaux identifiants."
+
+msgid "contractor, task, task material, occurrence, material draw, attachment"
+msgstr "intervenant, tâche, matériel d'une tâche, occurrence, tirage de matériel, pièce jointe"
+
+msgid "**Tasks.** Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. An attachment sends its file as `file`, a reference with its size, type and dimensions, as a photo does. Deleting an account takes it off the tasks it is assigned and the occurrences it closed, with a change for each, where the database would empty them without one."
+msgstr "**Tâches.** Annuler une clôture supprime l'occurrence qui suivait avec une pierre tombale au lieu de l'effacer, et la détache de l'occurrence qu'elle suivait, pour que la clôture puisse être refaite. Une pièce jointe envoie son fichier sous `file`, une référence avec sa taille, son type et ses dimensions, comme une photo. Supprimer un compte le retire des tâches qui lui sont attribuées et des occurrences qu'il a clôturées, avec un changement pour chacune, là où la base les viderait sans aucun."
+
+msgid "`tasks`"
+msgstr "`tasks`"
+
+msgid "M3c"
+msgstr "M3c"

@@ -38,6 +38,7 @@ pytestmark = pytest.mark.django_db
 COVERED_APPS: tuple[str, ...] = (
     "homes",
     "rooms",
+    "projects",
     "tasks",
 )
 
@@ -46,7 +47,6 @@ COVERED_APPS: tuple[str, ...] = (
 WAITING_FOR_ITS_LOT = {
     "stock": "M3d",
     "reports": "M3d",
-    "projects": "M3e",
 }
 
 # Tables that hang off a home and are not rows of the protocol: said once, with the reason.
@@ -105,7 +105,9 @@ class _WriteSpy:
     """Notes whether a statement wrote a table (INSERT, UPDATE or DELETE)."""
 
     def __init__(self, table: str) -> None:
-        self.pattern = re.compile(rf'\s*(?:INSERT INTO|UPDATE|DELETE FROM) "{re.escape(table)}"')
+        self.pattern = re.compile(
+            rf'\s*(?:INSERT (?:OR IGNORE )?INTO|UPDATE|DELETE FROM) "{re.escape(table)}"'
+        )
         self.wrote = False
 
     def __call__(self, execute: Callable[..., object], sql: str, *args: object) -> object:
