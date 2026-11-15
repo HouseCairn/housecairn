@@ -29,6 +29,14 @@ use it.
 > Back up your data before every upgrade.
 
 <p align="center">
+  <a href="https://housecairn.app/video/"><img src="docs/assets/readme-tour-video.png" width="720"
+     alt="Watch the two-minute tour of HouseCairn: the Today screen on a phone, with overdue, today and coming-up tasks."></a>
+  <br>
+  <a href="https://housecairn.app/video/"><b>▶ Watch the two-minute tour</b></a>
+  (English, French subtitles: <a href="https://housecairn.app/fr/video/">version française</a>)
+</p>
+
+<p align="center">
   <img src="docs/assets/readme-today-desktop.png" width="600"
        alt="The Today screen on a computer: two overdue tasks (change the smoke detector battery, 3 days late; clean the cooker hood filter, 1 day late), two tasks due today and the boiler service coming up, each with its room, its item and a Done button.">
   <img src="docs/assets/readme-item-phone.png" width="190"
