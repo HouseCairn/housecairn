@@ -33,7 +33,7 @@
       {% endif %}
     {% endfor %}
     <datalist id="brand-suggestions">{% for brand in form.brands %}<option value="{{ brand }}">{% endfor %}</datalist>
-    <button type="submit" class="button-block">{% if item %}{% translate "Save" %}{% else %}{% translate "Add the item" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if item %}{% translate "Save" %}{% else %}{% translate "Add the item" %}{% endif %}</button></div>
   </form>
   {% if item %}
     <a class="button button-danger button-block" href="{% url_with_next 'rooms:item-delete' home_id=home.id item_id=item.id %}">{% translate "Delete the item" %}</a>

@@ -13,10 +13,11 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from housecairn.accounts import antibot, names, services
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.homes.scoping import allow
 
 
-class LoginForm(AllauthLoginForm):  # type: ignore[misc]
+class LoginForm(LabelAboveMixin, AllauthLoginForm):  # type: ignore[misc]
     """Sign-in form whose address field also offers the browser's passkeys.
 
     The `webauthn` autofill token (and nothing else) is what lets a browser list
@@ -34,7 +35,7 @@ class LoginForm(AllauthLoginForm):  # type: ignore[misc]
             self.fields["password"].help_text = ""
 
 
-class ChangePasswordForm(AllauthChangePasswordForm):  # type: ignore[misc]
+class ChangePasswordForm(LabelAboveMixin, AllauthChangePasswordForm):  # type: ignore[misc]
     """Password change form without the reset link on an instance that cannot send mail.
 
     allauth puts "Forgot your password?" under the current password; without outgoing
@@ -47,7 +48,7 @@ class ChangePasswordForm(AllauthChangePasswordForm):  # type: ignore[misc]
             self.fields["oldpassword"].help_text = ""
 
 
-class ReauthenticateForm(AllauthReauthenticateForm):  # type: ignore[misc]
+class ReauthenticateForm(LabelAboveMixin, AllauthReauthenticateForm):  # type: ignore[misc]
     """Password confirmation form without the reset link on an instance that cannot send mail.
 
     The page is reached before sensitive actions (instance settings, for example);
@@ -60,7 +61,7 @@ class ReauthenticateForm(AllauthReauthenticateForm):  # type: ignore[misc]
             self.fields["password"].help_text = ""
 
 
-class ProfileForm(forms.Form):
+class ProfileForm(LabelAboveMixin, forms.Form):
     """The only thing a person edits of their profile: how they are named (docs/adr/0045)."""
 
     display_name = forms.CharField(
@@ -73,7 +74,7 @@ class ProfileForm(forms.Form):
     )
 
 
-class DeleteAccountForm(forms.Form):
+class DeleteAccountForm(LabelAboveMixin, forms.Form):
     """Confirmation of the erasure of an account: the address, and the password if there is one."""
 
     confirm_email = forms.EmailField(label=_("Type your email address to confirm"))
@@ -106,7 +107,7 @@ class DeleteAccountForm(forms.Form):
         return data
 
 
-class SignupForm(AllauthSignupForm):  # type: ignore[misc]
+class SignupForm(LabelAboveMixin, AllauthSignupForm):  # type: ignore[misc]
     """Open sign-up: the allowed and blocked domains, and the proof of work (docs/adr/0024)."""
 
     pow_solution = forms.CharField(required=False, widget=forms.HiddenInput)
@@ -160,7 +161,7 @@ class _CodeInput(forms.TextInput):
         return None
 
 
-class SetupForm(forms.Form):
+class SetupForm(LabelAboveMixin, forms.Form):
     """The first-account screen: the code of the server log, then the administrator (ADR 0056)."""
 
     code = forms.CharField(

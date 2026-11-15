@@ -364,6 +364,16 @@
   text-align: center;
 }
 
+/* Phone: the brand stays on the roots of the five sections only. A page below a root
+   (`subpage`, core/context_processors.py) starts with its back link, then its title
+   (design/patterns.md, Header); the bar keeps the help link and the selector of the
+   home. On a computer the logo heads the column on every page. */
+@media (max-width: 55.99rem) {
+  .has-nav.subpage .brand {
+    display: none;
+  }
+}
+
 @media (min-width: 56rem) {
   /* Desktop: the same navigation becomes a column on the left. */
   .has-nav .appbar {

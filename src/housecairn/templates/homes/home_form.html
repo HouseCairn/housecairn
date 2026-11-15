@@ -15,6 +15,6 @@
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
-    <button type="submit" class="button-block">{% if editing %}{% translate "Save" %}{% else %}{% translate "Create the home" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if editing %}{% translate "Save" %}{% else %}{% translate "Create the home" %}{% endif %}</button></div>
   </form>
 {% endblock content %}

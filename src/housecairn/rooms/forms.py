@@ -6,6 +6,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.core.text import without_control_characters
 from housecairn.rooms.models import (
     Item,
@@ -24,7 +25,7 @@ BRAND_LIST_ID = "brand-suggestions"
 _DATE = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
-class RoomForm(forms.ModelForm[Room]):
+class RoomForm(LabelAboveMixin, forms.ModelForm[Room]):
     """The type comes first and fills the name in, which stays editable (docs/adr/0045).
 
     `static/js/room-form.js` does the filling as the type is chosen; without script, a name
@@ -67,7 +68,7 @@ class RoomForm(forms.ModelForm[Room]):
         return data
 
 
-class RoomMemoryForm(forms.ModelForm[Room]):
+class RoomMemoryForm(LabelAboveMixin, forms.ModelForm[Room]):
     class Meta:
         model = Room
         fields = [
@@ -137,7 +138,7 @@ def text_to_links(text: str) -> list[dict[str, str]]:
 _NEW_CONTRACTOR = new_contractor_fields()
 
 
-class ItemForm(forms.ModelForm[Item]):
+class ItemForm(LabelAboveMixin, forms.ModelForm[Item]):
     """The item's own fields; `room` is a choice among the rooms of its home."""
 
     room = forms.ModelChoiceField(
@@ -236,7 +237,7 @@ class ItemForm(forms.ModelForm[Item]):
         return links
 
 
-class PhotoForm(forms.Form):
+class PhotoForm(LabelAboveMixin, forms.Form):
     file = forms.FileField(
         label=_("Photo"),
         widget=forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),

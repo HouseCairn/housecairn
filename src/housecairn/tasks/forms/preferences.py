@@ -6,12 +6,13 @@ from django import forms
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.tasks.models import (
     DisplayPreference,
 )
 
 
-class PreferencesForm(forms.ModelForm[DisplayPreference]):
+class PreferencesForm(LabelAboveMixin, forms.ModelForm[DisplayPreference]):
     """The Today screen, as one person wants it."""
 
     class Meta:

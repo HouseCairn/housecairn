@@ -158,6 +158,10 @@ msgstr "Page illisible"
 msgid "Idea"
 msgstr "Idée"
 
+msgctxt "project status"
+msgid "Planned"
+msgstr "Prévu"
+
 msgid "In progress"
 msgstr "En cours"
 

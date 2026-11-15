@@ -6,7 +6,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from housecairn.core.forms import MoneyField, QuantityField
+from housecairn.core.forms import LabelAboveMixin, MoneyField, QuantityField
 from housecairn.core.widgets import ChipSelectMultiple
 from housecairn.rooms.models import Item, Room
 from housecairn.stock.models import Article, MovementKind, Supplier, Unit
@@ -21,7 +21,7 @@ class ItemChoiceField(forms.ModelMultipleChoiceField[Item]):
         return str(obj.name)
 
 
-class ArticleForm(forms.ModelForm[Article]):
+class ArticleForm(LabelAboveMixin, forms.ModelForm[Article]):
     """The article's own fields, its compatible items and the photo of its label."""
 
     compatible_items = ItemChoiceField(
@@ -77,14 +77,14 @@ class ArticleForm(forms.ModelForm[Article]):
             del self.fields["clear_label"]
 
 
-class SupplierForm(forms.ModelForm[Supplier]):
+class SupplierForm(LabelAboveMixin, forms.ModelForm[Supplier]):
     class Meta:
         model = Supplier
         fields = ["name", "reference", "url", "last_price"]
         field_classes = {"last_price": MoneyField}
 
 
-class MovementForm(forms.Form):
+class MovementForm(LabelAboveMixin, forms.Form):
     """The quick form of the article page; the button pressed gives `kind`."""
 
     kind = forms.ChoiceField(choices=MovementKind.choices)

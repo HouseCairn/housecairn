@@ -105,7 +105,7 @@
         {% if form.uploads %}{% include "tasks/_field.html" with field=form.uploads %}{% endif %}
       </div>
     </details>
-    <button type="submit" class="button-block">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if task %}{% translate "Save" %}{% else %}{% translate "Add the task" %}{% endif %}</button></div>
   </form>
   {% if task %}
     <a class="button button-danger button-block" href="{% url_with_next 'tasks:delete' home_id=home.id task_id=task.id %}">{% translate "Delete the task" %}</a>

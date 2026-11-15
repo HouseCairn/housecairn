@@ -43,7 +43,7 @@
         </p>
       {% endif %}
     {% endfor %}
-    <button type="submit" class="button-block">{% translate "Create the token" %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% translate "Create the token" %}</button></div>
   </form>
   {% for provider in form.sign_in_providers %}
     <form id="sso-continue-{{ provider.id }}" method="post" action="{% url 'openid_connect_login' provider_id=provider.id %}?process=login&amp;next={{ request.get_full_path|urlencode }}">{% csrf_token %}</form>

@@ -1,0 +1,26 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Pages on a phone.** Below the five sections, a page now starts with its back link and its title, without the brand bar, and the button that saves a form stays at the bottom of the screen while the form scrolls."
+msgstr "**Les pages sur un téléphone.** Sous les cinq sections, une page commence désormais par son lien retour et son titre, sans la barre de marque, et le bouton qui enregistre un formulaire reste en bas de l'écran pendant le défilement du formulaire."
+
+msgid "**Words.** Labels of the forms no longer end with a colon. In French, the filters of the reports read *Ouverts*, *Classés* and *Tous*, a planned project is *Prévu*, and the memory of a room says *Peinture restante en stock*."
+msgstr "**Les mots.** Les libellés des formulaires ne finissent plus par deux-points. En français, les filtres des signalements se lisent *Ouverts*, *Classés* et *Tous*, un projet prévu est *Prévu*, et la mémoire d'une pièce dit *Peinture restante en stock*."
+

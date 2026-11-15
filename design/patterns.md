@@ -191,11 +191,12 @@ One term per concept, in both languages. The source is [`design/glossary.json`](
 this table lists every term. The app keeps a copy of the file and checks its ARB files against
 it. A new shared term is added to the file and to this table in the same pull request.
 
-Two mistakes of the French catalog of the web are known and kept in the file as `web_fault`
-until they are fixed (lot D6): **Toutes** for the filter of the reports (a *signalement* is
-masculine: **Tous**), and **Peinture restant en stock** (the agreement is with *peinture*:
-**Peinture restante en stock**). The test expects them today, and fails once the catalog is
-fixed, so that the fix also removes `web_fault`.
+A mistake of a web catalog found later is kept in the file as `web_fault` until it is fixed:
+the test expects it, and fails once the catalog is fixed, so that the fix also removes
+`web_fault`. The two found by the audit (**Toutes** for the filter of the reports, **Peinture
+restant en stock**) were fixed by lot D6; the filters of the reports carry the `msgctxt`
+`reports filter`, so that their plural (*Ouverts*, *Classés*, *Tous*) does not collide with the
+state of one report (*Ouvert*).
 
 | Term | English | French | Concept |
 | --- | --- | --- | --- |
@@ -222,7 +223,7 @@ fixed, so that the fix also removes `web_fault`.
 | `stock-item` | Stock item | Article | One article of the stock |
 | `materials` | Materials | Fournitures | What a task or a project needs |
 | `suppliers` | Suppliers | Fournisseurs | Where a stock item is bought |
-| `paint-left` | Paint left in stock | Peinture restante en stock (web today: "Peinture restant en stock", to fix) | Field of the memory of a room |
+| `paint-left` | Paint left in stock | Peinture restante en stock | Field of the memory of a room |
 | `upkeep` | Upkeep | Entretien | Recurring maintenance (tab of Budget) |
 | `done` | Done | Fait | Button: the task is done |
 | `done-filter` | Done | Faites | Filter of All: finished tasks |
@@ -247,7 +248,7 @@ fixed, so that the fix also removes `web_fault`.
 | `reports` | Reports | Signalements | Problems reported in a home |
 | `report-a-problem` | Report a problem | Signaler un problème | Opens the report form |
 | `reports-closed` | Closed | Classés | Filter of the reports |
-| `reports-all` | All | Tous (web today: "Toutes", to fix) | Filter of the reports: every report (masculine) |
+| `reports-all` | All | Tous | Filter of the reports: every report (masculine) |
 | `reports-mine` | Mine | Les miens | Filter of the reports |
 | `what-is-wrong` | What is wrong? | Qu'est-ce qui ne va pas ? | First field of the report form |
 | `where` | Where? | Où ? | Place field of the report form |
@@ -306,11 +307,8 @@ fixes it. A lot that closes a gap removes its row.
 | --- | --- | --- | --- |
 | Record page and actions | follows it | a task opens as a form, its actions are not on the page | D2 |
 | Label and value, figures | follows it | values stacked under their labels (budget, project, stock item, item) | D3 |
-| Header | brand bar on every page on a phone | title in the bar, truncated by its action | D4 |
-| Forms | labels end with a colon | flat list of cards, dates as text and a button, Material pickers on iOS | D4, D5, D6 |
+| Forms | follows it | dates as text and a button, Material pickers on iOS | D5 |
 | Filters and search | pills of 28 px (reports), lists and a Filter button (projects), search buttons | no search on rooms and projects | D7 |
-| More | follows it | groups Household, Help, How you use Housecairn | D6 |
-| Glossary | two mistakes (above) | My homes, Household as a group, the labels of the report form | D6 |
 
 ## The check of the app's labels
 

@@ -6,11 +6,12 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.homes.models import Hemisphere, Home, Role
 from housecairn.homes.sso import Provider
 
 
-class HomeForm(forms.ModelForm[Home]):
+class HomeForm(LabelAboveMixin, forms.ModelForm[Home]):
     class Meta:
         model = Home
         fields = ["name", "currency", "hemisphere"]
@@ -36,16 +37,16 @@ class NewHomeForm(HomeForm):
         self.fields["equipment"] = equipment_field()
 
 
-class InviteForm(forms.Form):
+class InviteForm(LabelAboveMixin, forms.Form):
     email = forms.EmailField(label=_("Email address"), max_length=254)
     role = forms.ChoiceField(label=_("Role"), choices=Role.choices, initial=Role.MEMBER)
 
 
-class RoleForm(forms.Form):
+class RoleForm(LabelAboveMixin, forms.Form):
     role = forms.ChoiceField(label=_("Role"), choices=Role.choices)
 
 
-class ProviderForm(forms.Form):
+class ProviderForm(LabelAboveMixin, forms.Form):
     provider = forms.ChoiceField(label=_("Sign-in required to open this home"), required=False)
 
     def __init__(self, *args: Any, providers: list[Provider], **kwargs: Any) -> None:
@@ -57,7 +58,7 @@ class ProviderForm(forms.Form):
         field.choices = choices
 
 
-class InvitationSignupForm(forms.Form):
+class InvitationSignupForm(LabelAboveMixin, forms.Form):
     """Password of the account created by accepting an invitation."""
 
     # Shown, not editable: the account takes the invited address.
@@ -92,13 +93,13 @@ class InvitationSignupForm(forms.Form):
         return data
 
 
-class DeleteHomeForm(forms.Form):
+class DeleteHomeForm(LabelAboveMixin, forms.Form):
     confirmation = forms.CharField(
         label=_("Type the name of the home to confirm"), max_length=120, strip=True
     )
 
 
-class ImportForm(forms.Form):
+class ImportForm(LabelAboveMixin, forms.Form):
     """CSV tables to import into a home, one optional file per table (docs/adr/0048).
 
     The confirmation sends back only `preview`, the signed token of the text the preview
@@ -131,7 +132,7 @@ class ImportForm(forms.Form):
         return csv_import.texts_from_uploads(uploads) if uploads else {}
 
 
-class RestoreForm(forms.Form):
+class RestoreForm(LabelAboveMixin, forms.Form):
     """The archive of a home, made by Export all data (docs/adr/0048)."""
 
     RESTORE = "restore"

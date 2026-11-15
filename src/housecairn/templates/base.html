@@ -24,7 +24,8 @@
   {% if user.is_authenticated %}<script src="{% static 'js/undo-region.js' %}" defer></script>{% endif %}
   {% block extra_head %}{% endblock extra_head %}
 </head>
-<body class="{% if user.is_authenticated %}has-nav{% else %}no-nav{% endif %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+{# `subpage`: a page below the root of its section; on a phone it starts with its back link, not the brand (core/context_processors.py, SECTION_ROOTS). #}
+<body class="{% if user.is_authenticated %}has-nav{% if section_root is False %} subpage{% endif %}{% else %}no-nav{% endif %}" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <a class="skip-link" href="#main">{% translate "Skip to content" %}</a>
   <div class="shell">
     <header class="appbar">

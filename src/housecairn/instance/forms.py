@@ -5,14 +5,15 @@ from typing import Any
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from housecairn.core.forms import LabelAboveMixin
 from housecairn.instance import config, registry
 
 
-class InstanceInviteForm(forms.Form):
+class InstanceInviteForm(LabelAboveMixin, forms.Form):
     email = forms.EmailField(label=_("Email address"), max_length=254)
 
 
-class ProviderForm(forms.Form):
+class ProviderForm(LabelAboveMixin, forms.Form):
     """A sign-in provider of the interface (docs/adr/0041). The rules are in `providers`."""
 
     slug = forms.CharField(
@@ -94,7 +95,7 @@ def _field(setting: registry.Setting) -> forms.Field:
     return forms.CharField(max_length=1024, **common)
 
 
-class SettingsSectionForm(forms.Form):
+class SettingsSectionForm(LabelAboveMixin, forms.Form):
     """The fields of one section that the environment does not set.
 
     A setting that a variable sets is not a field: the screen shows its value and the

@@ -27,7 +27,7 @@
       {% include "tasks/_field.html" with field=form.paperless_url %}
     </details>
     <p class="small">{% blocktranslate with currency=home.currency %}The amount is in {{ currency }}, the currency of the home.{% endblocktranslate %}</p>
-    <button type="submit" class="button-block">{% translate "Save" %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% translate "Save" %}</button></div>
   </form>
   {% if quote %}
     {% if files %}

@@ -164,7 +164,7 @@ msgid "paint batch"
 msgstr "lot de la peinture"
 
 msgid "paint left in stock"
-msgstr "peinture restant en stock"
+msgstr "peinture restante en stock"
 
 msgid "floor covering"
 msgstr "revêtement de sol"
@@ -447,7 +447,7 @@ msgid "Paint batch"
 msgstr "Lot de la peinture"
 
 msgid "Paint left in stock"
-msgstr "Peinture restant en stock"
+msgstr "Peinture restante en stock"
 
 msgid "Floor covering"
 msgstr "Revêtement de sol"

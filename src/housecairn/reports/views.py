@@ -11,6 +11,7 @@ from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
@@ -59,7 +60,11 @@ class ReportListView(HomeReportsMixin, TemplateView):
         for report in page.object_list:
             report.reporter_label = reporters[report.id]
         filters = (
-            [("open", _("Open")), ("closed", _("Closed")), ("all", _("All"))]
+            [
+                ("open", pgettext("reports filter", "Open")),
+                ("closed", pgettext("reports filter", "Closed")),
+                ("all", pgettext("reports filter", "All")),
+            ]
             if self.can_write
             else []
         )

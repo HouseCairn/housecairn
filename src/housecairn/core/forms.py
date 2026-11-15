@@ -76,3 +76,16 @@ class MoneyField(DecimalMarkField):
         if isinstance(value, str):
             value = value.translate(_GROUPING)
         return super().to_python(value)
+
+
+class LabelAboveMixin:
+    """A form of the site: its labels are above their fields, with no colon after them.
+
+    Django ends a label with `:` (` :` in French) by default; under a label that sits above
+    its field it is noise, and the app has none (design/patterns.md, Forms). Every form of
+    the site takes this mixin first, so that `label_tag` and `as_p` draw the same labels.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("label_suffix", "")
+        super().__init__(*args, **kwargs)

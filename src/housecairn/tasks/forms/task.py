@@ -8,7 +8,7 @@ from django.utils.dates import MONTHS
 from django.utils.translation import gettext_lazy as _
 
 from housecairn.accounts.models import User
-from housecairn.core.forms import MoneyField
+from housecairn.core.forms import LabelAboveMixin, MoneyField
 from housecairn.rooms.models import Item, Room, RoomKind
 from housecairn.tasks import durations, files, recurrence, repeat_text, services
 from housecairn.tasks.forms.contractor import clean_new_contractor, new_contractor_fields
@@ -81,7 +81,7 @@ def repeat_summary(form: forms.BaseForm, home: Any) -> str:
 _NEW_CONTRACTOR = new_contractor_fields()
 
 
-class TaskForm(forms.ModelForm[Task]):
+class TaskForm(LabelAboveMixin, forms.ModelForm[Task]):
     """A task: the title is the only required field; the rest is under the headings."""
 
     assignee = PersonChoiceField(label=_("Assignee"), queryset=User.objects.none(), required=False)

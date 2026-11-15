@@ -24,6 +24,13 @@ def more_groups(html: str) -> list[str]:
     return re.findall(r'<h2 id="more-[a-z]+">([^<]*)</h2>', main)
 
 
+def body_class(html: str) -> str:
+    """The class attribute of the body of a page."""
+    found = re.search(r'<body class="([^"]*)"', html)
+    assert found
+    return found.group(1)
+
+
 def main_part(html: str) -> str:
     return html.split('<main id="main"', 1)[1]
 
@@ -278,6 +285,8 @@ class TestRoots:
             response = signed_in.get(url)
             assert response.status_code == 200, url
             assert 'class="back-link"' not in response.text, url
+            # The brand stays in the bar of a root, on a phone too (design/patterns.md, Header).
+            assert "subpage" not in body_class(response.text), url
 
     def test_a_page_below_a_root_keeps_its_back_link(
         self, signed_in: Client, alice: User, alice_home: Home, owner_room: Room
@@ -290,3 +299,20 @@ class TestRoots:
             reverse("notifications:index"),
         ):
             assert 'class="back-link"' in signed_in.get(url).text, url
+
+    def test_a_page_below_a_root_starts_with_its_title_on_a_phone(
+        self, signed_in: Client, alice_home: Home, owner_room: Room
+    ) -> None:
+        # `subpage` hides the brand on a phone (shell.css): the page starts with its back link.
+        h = {"home_id": alice_home.id}
+        for url in (
+            reverse("rooms:detail", kwargs={**h, "room_id": owner_room.id}),
+            reverse("tasks:create", kwargs=h),
+            reverse("reports:create", kwargs=h),
+            reverse("more-security"),
+        ):
+            assert "subpage" in body_class(signed_in.get(url).text), url
+
+    def test_a_form_keeps_its_button_at_hand(self, signed_in: Client, alice_home: Home) -> None:
+        html = signed_in.get(reverse("tasks:create", kwargs={"home_id": alice_home.id})).text
+        assert 'class="form-submit"' in html

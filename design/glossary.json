@@ -288,8 +288,7 @@
           "app": "rooms",
           "msgid": "Paint left in stock"
         }
-      ],
-      "web_fault": "Peinture restant en stock"
+      ]
     },
     {
       "id": "upkeep",
@@ -577,7 +576,8 @@
       "web": [
         {
           "app": "reports",
-          "msgid": "Closed"
+          "msgid": "Closed",
+          "msgctxt": "reports filter"
         }
       ]
     },
@@ -589,10 +589,10 @@
       "web": [
         {
           "app": "reports",
-          "msgid": "All"
+          "msgid": "All",
+          "msgctxt": "reports filter"
         }
-      ],
-      "web_fault": "Toutes"
+      ]
     },
     {
       "id": "reports-mine",

@@ -16,7 +16,7 @@
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
     <p class="small">{% blocktranslate with size=max_bytes|filesizeformat %}Label photo: JPEG, PNG or WebP, up to {{ size }}. Location data and other information stored in the file are removed.{% endblocktranslate %}</p>
-    <button type="submit" class="button-block">{% if article %}{% translate "Save" %}{% else %}{% translate "Add the stock item" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if article %}{% translate "Save" %}{% else %}{% translate "Add the stock item" %}{% endif %}</button></div>
   </form>
   {% if article %}
     <a class="button button-danger button-block" href="{% url_with_next 'stock:delete' home_id=home.id article_id=article.id %}">{% translate "Delete the stock item" %}</a>

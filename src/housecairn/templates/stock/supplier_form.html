@@ -10,7 +10,7 @@
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
     <p class="small">{% blocktranslate with currency=home.currency %}The price is in {{ currency }}, the currency of the home. The link is only stored: HouseCairn never opens it.{% endblocktranslate %}</p>
-    <button type="submit" class="button-block">{% if supplier %}{% translate "Save" %}{% else %}{% translate "Add the supplier" %}{% endif %}</button>
+    <div class="form-submit"><button type="submit" class="button-block">{% if supplier %}{% translate "Save" %}{% else %}{% translate "Add the supplier" %}{% endif %}</button></div>
   </form>
   {% if supplier %}
     <a class="button button-danger button-block" href="{% url_with_next 'stock:supplier-delete' home_id=home.id supplier_id=supplier.id %}">{% translate "Delete the supplier" %}</a>

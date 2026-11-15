@@ -9,7 +9,7 @@ from django import forms
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from housecairn.core.forms import MoneyField, QuantityField
+from housecairn.core.forms import LabelAboveMixin, MoneyField, QuantityField
 from housecairn.tasks import files
 from housecairn.tasks.forms.fields import (
     _DATE,
@@ -19,7 +19,7 @@ from housecairn.tasks.forms.fields import (
 from housecairn.tasks.models import MaterialDraw, Occurrence
 
 
-class CompletionForm(forms.ModelForm[Occurrence]):
+class CompletionForm(LabelAboveMixin, forms.ModelForm[Occurrence]):
     """The details of a task that is done: when, what it cost, a note."""
 
     actual_cost = MoneyField(label=_("Actual cost"), required=False)
@@ -70,11 +70,11 @@ class CompletionForm(forms.ModelForm[Occurrence]):
         return {k: v for k, v in self.cleaned_data.items() if k not in self.used_fields()}
 
 
-class PostponeForm(forms.Form):
+class PostponeForm(LabelAboveMixin, forms.Form):
     due_on = forms.DateField(label=_("New date"), widget=_DATE)
 
 
-class AttachmentForm(forms.Form):
+class AttachmentForm(LabelAboveMixin, forms.Form):
     uploads = MultipleFileField(
         label=_("Photos and files"),
         widget=MultipleFileInput(attrs={"accept": files.ACCEPT_ATTRIBUTE}),
