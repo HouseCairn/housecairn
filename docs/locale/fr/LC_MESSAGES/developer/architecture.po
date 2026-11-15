@@ -48,9 +48,12 @@ msgstr "**Anglais comme langue source, français livré**, aucune chaîne en dur
 msgid "**No table escapes the export of a home**: each app registers an exporter ([ADR 0023](../adr/0023-audit-log-export-erasure-and-email-alerts.md)), and `tests/test_export_registry.py` fails on a table of the project that the export does not read, unless it lists the table with its reason, as data of a home left out of the archive (then erased with the home) or as data of the instance or of a person."
 msgstr "**Aucune table n'échappe à l'export d'un logement** : chaque application enregistre un exporteur ([ADR 0023](../adr/0023-audit-log-export-erasure-and-email-alerts.md)), et `tests/test_export_registry.py` échoue sur une table du projet que l'export ne lit pas, sauf si elle y figure avec sa raison, comme donnée d'un logement laissée hors de l'archive (alors effacée avec le logement) ou comme donnée de l'instance ou d'une personne."
 
+msgid "**A change log for the mobile app**: the `sync` application numbers every change of a home and keeps a clock per field ([Data model of the synchronization](sync-data-model.md), [ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md))."
+msgstr "**Un journal des changements pour l'application mobile** : l'application `sync` numérote chaque changement d'un logement et tient une horloge par champ ([Modèle de données de la synchronisation](sync-data-model.md), [ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md))."
+
 msgid "**No query per row** in the export and the API lists of stock items and projects: `tests/test_query_counts.py` checks that 50 rows take as many queries as 5."
 msgstr "**Aucune requête par ligne** dans l'export et dans les listes d'API des articles et des projets : `tests/test_query_counts.py` vérifie que 50 lignes demandent autant de requêtes que 5."
 
-msgid "The code is in `src/housecairn/`, one Django application per domain (`accounts`, `apitokens`, `core`, `events`, `homes`, `rooms`)."
-msgstr "Le code est dans `src/housecairn/`, une application Django par domaine (`accounts`, `apitokens`, `core`, `events`, `homes`, `rooms`)."
+msgid "The code is in `src/housecairn/`, one Django application per domain (`accounts`, `apitokens`, `core`, `events`, `homes`, `rooms`, `sync`)."
+msgstr "Le code est dans `src/housecairn/`, une application Django par domaine (`accounts`, `apitokens`, `core`, `events`, `homes`, `rooms`, `sync`)."
 

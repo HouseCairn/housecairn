@@ -259,17 +259,23 @@ def unarchive_home(actor: AnyUser, home: Home) -> Home:
 # ---------- deletion ----------
 
 
+@transaction.atomic
 def erase_home(home: Home) -> None:
     """Delete a home and everything that hangs off it, for good (docs/adr/0023).
 
-    Rows go by cascade, soft-deleted ones included; so do the home's entries in
-    its audit log and, when files exist, its directory of files. An API token
-    left with no home is revoked. What remains is a count in the instance log.
+    Rows go by cascade, soft-deleted ones included, and so does the change log of the
+    sync API; so do the home's entries in its audit log and, when files exist, its
+    directory of files. An API token left with no home is revoked. What remains is a
+    count in the instance log, and one row in the table of erased homes, written first
+    with the connected apps bound to the home, so that the sync API can say it is gone
+    (docs/adr/0077).
     """
     from housecairn.apitokens.models import ApiToken
+    from housecairn.sync import erased
 
     home_id = home.pk
     tokens = list(ApiToken.objects.filter(homes=home).values_list("pk", flat=True))
+    erased.record_erased(home_id)
     Home.all_objects.filter(pk=home_id).delete()
     audit_models.AuditEvent.objects.filter(home_id=home_id).delete()
     ApiToken.objects.filter(pk__in=tokens, homes__isnull=True, revoked_at__isnull=True).update(

@@ -7,6 +7,7 @@ How HouseCairn is built, the decisions behind it, and how to contribute.
 
 message
 architecture
+sync-data-model
 design-guide
 decisions
 contributing

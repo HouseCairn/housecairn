@@ -29,7 +29,8 @@ logger = logging.getLogger("housecairn.demo")
 
 # Apps whose tables a reset keeps.
 KEPT_APPS = frozenset({"django_q", "contenttypes"})
-KEPT_MODELS = frozenset({"auth.permission"})
+# The device id the server writes with is made once per instance (docs/adr/0077).
+KEPT_MODELS = frozenset({"auth.permission", "sync.serverdevice"})
 
 
 class DemoOffError(Exception):

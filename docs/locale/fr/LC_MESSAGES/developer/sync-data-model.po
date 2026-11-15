@@ -1,0 +1,122 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Data model of the synchronization"
+msgstr "Modèle de données de la synchronisation"
+
+msgid "The mobile app can keep its homes on a HouseCairn server and exchange changes with it ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md), cut into lots by [ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). This page describes the `sync` application, which keeps the log of those changes. It has no screen, no route and no API resource yet: the routes arrive with the lot that reads the feed, and each application starts to record its writes in its own lot."
+msgstr "L'application mobile peut garder ses logements sur un serveur HouseCairn et échanger des changements avec lui ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md), découpé en lots par l'[ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). Cette page décrit l'application `sync`, qui tient le journal de ces changements. Elle n'a encore ni écran, ni route, ni ressource d'API : les routes arrivent avec le lot qui lit le flux, et chaque application commence à enregistrer ses écritures dans son propre lot."
+
+msgid "What is recorded"
+msgstr "Ce qui est enregistré"
+
+msgid "Every write of a row of a home is a **change**: the row (its entity type and its id), the fields written with their new values, the clock and the device that wrote them. Changes of one home are numbered by a **position** (`pos`), 1, 2, 3... with no gap and no repeat, and a phone reads the feed from the last position it has seen."
+msgstr "Toute écriture d'une ligne d'un logement est un **changement** : la ligne (son type d'entité et son identifiant), les champs écrits avec leurs nouvelles valeurs, l'horloge et l'appareil qui les ont écrits. Les changements d'un logement sont numérotés par une **position** (`pos`), 1, 2, 3... sans trou ni doublon, et un téléphone lit le flux à partir de la dernière position qu'il a vue."
+
+msgid "Table"
+msgstr "Table"
+
+msgid "Holds"
+msgstr "Contenu"
+
+msgid "`sync_homehead`"
+msgstr "`sync_homehead`"
+
+msgid "One row per home: the last position, the last clock, and the `floor`, the highest position the purge removed."
+msgstr "Une ligne par logement : la dernière position, la dernière horloge et le `floor`, la plus haute position que la purge a retirée."
+
+msgid "`sync_change`"
+msgstr "`sync_change`"
+
+msgid "The feed: position, entity type (`rooms.room`), row id, kind (`put`, `delete`, `restore`), clock, device, fields written."
+msgstr "Le flux : position, type d'entité (`rooms.room`), identifiant de la ligne, nature (`put`, `delete`, `restore`), horloge, appareil, champs écrits."
+
+msgid "`sync_rowclocks`"
+msgstr "`sync_rowclocks`"
+
+msgid "One row per row of a home: the clock and device of each field, the fields the server has no column for (`extra`), and when the row was deleted."
+msgstr "Une ligne par ligne d'un logement : l'horloge et l'appareil de chaque champ, les champs pour lesquels le serveur n'a pas de colonne (`extra`) et le moment où la ligne a été supprimée."
+
+msgid "`sync_erasedhome`"
+msgstr "`sync_erasedhome`"
+
+msgid "The homes that were erased, with the connected apps that were bound to them. Outside the home."
+msgstr "Les logements effacés, avec les applications connectées qui leur étaient liées. En dehors du logement."
+
+msgid "`sync_serverdevice`"
+msgstr "`sync_serverdevice`"
+
+msgid "The device id of the server: one row."
+msgstr "L'identifiant d'appareil du serveur : une seule ligne."
+
+msgid "All but the last two follow the home: erasing a home erases its changes with it."
+msgstr "Toutes sauf les deux dernières suivent le logement : effacer un logement efface ses changements avec lui."
+
+msgid "Recording a change"
+msgstr "Enregistrer un changement"
+
+msgid "Code that writes a row of a home calls `housecairn.sync.changes.record_change` in the transaction that writes the row:"
+msgstr "Le code qui écrit une ligne d'un logement appelle `housecairn.sync.changes.record_change` dans la transaction qui écrit la ligne :"
+
+msgid "It locks the row of the home until the commit, so the order of the positions is the order of the commits (SQLite writes one transaction at a time; PostgreSQL waits on the lock). Pass only the fields whose value changed: a form that sends every field must not give a clock to a field nobody touched. A deletion is `changes.DELETE`, a restoration `changes.RESTORE`; both write the field `deleted_at`."
+msgstr "La fonction verrouille la ligne du logement jusqu'à la validation, de sorte que l'ordre des positions est l'ordre des validations (SQLite écrit une transaction à la fois ; PostgreSQL attend sur le verrou). Ne passez que les champs dont la valeur a changé : un formulaire qui envoie tous les champs ne doit pas donner d'horloge à un champ que personne n'a touché. Une suppression est `changes.DELETE`, une restauration `changes.RESTORE` ; toutes deux écrivent le champ `deleted_at`."
+
+msgid "A write made on the web gets a clock from the server's hybrid clock and the device id of the server. A write that comes from a phone passes its own `stamp` (clock and device id)."
+msgstr "Une écriture faite sur le web reçoit une horloge de l'horloge hybride du serveur et l'identifiant d'appareil du serveur. Une écriture venue d'un téléphone passe son propre `stamp` (horloge et identifiant d'appareil)."
+
+msgid "Clocks and conflicts"
+msgstr "Horloges et conflits"
+
+msgid "A clock is a 64-bit number, `(milliseconds since 1970-01-01 UTC << 16) | counter`, written as 16 lower-case hexadecimal digits. A device id is 16 bytes, written in base64url without padding. Each field of a row keeps the clock and the device of its last write. A write replaces a field only if its clock is greater, and for equal clocks if its device id is greater, comparing the bytes: **the last writer wins, field by field**, so two people who edit two fields of one row both keep their change. The same stamp twice is a repeat and changes nothing. When every field of a write loses, no change and no position are recorded, and the result says which stamp won."
+msgstr "Une horloge est un nombre sur 64 bits, `(millisecondes depuis 1970-01-01 UTC << 16) | compteur`, écrit en 16 chiffres hexadécimaux minuscules. Un identifiant d'appareil fait 16 octets, écrits en base64url sans remplissage. Chaque champ d'une ligne garde l'horloge et l'appareil de sa dernière écriture. Une écriture ne remplace un champ que si son horloge est supérieure, et à horloges égales si son identifiant d'appareil est supérieur, en comparant les octets : **le dernier écrivain gagne, champ par champ**, de sorte que deux personnes qui modifient deux champs d'une même ligne gardent chacune leur changement. Le même couple deux fois est une répétition et ne change rien. Quand tous les champs d'une écriture perdent, ni changement ni position ne sont enregistrés, et le résultat dit quel couple a gagné."
+
+msgid "The server's clock never goes back when the wall clock does: it is the greater of the last clock plus one and the wall clock. It is kept per home, under the lock that numbers the positions. A clock read from a phone is adopted unless it is more than 24 hours ahead of the wall clock, so that a phone with a wrong date cannot push the others into the future. When the 16-bit counter overflows, it carries into the milliseconds."
+msgstr "L'horloge du serveur ne recule jamais quand l'horloge murale recule : c'est le plus grand de la dernière horloge plus un et de l'horloge murale. Elle est tenue par logement, sous le verrou qui numérote les positions. Une horloge lue d'un téléphone est adoptée, sauf si elle avance de plus de 24 heures sur l'horloge murale, pour qu'un téléphone mal réglé ne pousse pas les autres dans le futur. Quand le compteur de 16 bits déborde, la retenue passe dans les millisecondes."
+
+msgid "A known field that has no clock yet reads as the clock of the row's `updated_at`, with the device id of the server: rows written before the change log exists are not migrated."
+msgstr "Un champ connu qui n'a pas encore d'horloge se lit comme l'horloge de l'`updated_at` de la ligne, avec l'identifiant d'appareil du serveur : les lignes écrites avant l'existence du journal ne sont pas migrées."
+
+msgid "The vectors of `tests/fixtures/sync_clock.json` pin these rules (format, order, the two update rules, malformed inputs). The mobile app replays the same file, so a change to a rule is a change to the file in both repositories."
+msgstr "Les vecteurs de `tests/fixtures/sync_clock.json` figent ces règles (format, ordre, les deux règles de mise à jour, entrées mal formées). L'application mobile rejoue le même fichier : changer une règle, c'est changer le fichier dans les deux dépôts."
+
+msgid "Fields the server does not know"
+msgstr "Les champs que le serveur ne connaît pas"
+
+msgid "A field with no column goes to `extra`, a JSON value per row with, for each field, its value, clock and device. It merges by the same rule and is given back by the feed, so a second phone gets the field a newer phone wrote. When a later version gains the column, its migration moves the value out of `extra`."
+msgstr "Un champ sans colonne va dans `extra`, une valeur JSON par ligne qui garde, pour chaque champ, sa valeur, son horloge et son appareil. Il fusionne par la même règle et est rendu par le flux, de sorte qu'un second téléphone reçoit le champ qu'un téléphone plus récent a écrit. Quand une version ultérieure gagne la colonne, sa migration sort la valeur de `extra`."
+
+msgid "Erased homes"
+msgstr "Logements effacés"
+
+msgid "Erasing a home writes one row to `sync_erasedhome` in the same transaction, with the ids of the connected apps bound to the home. That row, not the home, tells a phone that the home is gone. It is kept: it is a few dozen bytes, and the 400 days of retention below do not apply to it."
+msgstr "Effacer un logement écrit une ligne dans `sync_erasedhome` dans la même transaction, avec les identifiants des applications connectées liées au logement. C'est cette ligne, et non le logement, qui dit à un téléphone que le logement a disparu. Elle est conservée : elle pèse quelques dizaines d'octets et les 400 jours de rétention ci-dessous ne la concernent pas."
+
+msgid "Retention"
+msgstr "Rétention"
+
+msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted."
+msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours, ils restent), inscrit dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont toujours supprimées."
+
+msgid "The guard test"
+msgstr "Le test garde-fou"
+
+msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs. An application that is listed without scenarios, or whose scenario writes without recording, fails."
+msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, pour chaque modèle, un scénario par nature d'écriture (enregistrement, mise à jour d'un queryset, suppression douce, suppression définitive) qui exécute le code que l'application exécute vraiment. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue."
+
