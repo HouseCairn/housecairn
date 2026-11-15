@@ -296,6 +296,29 @@ class ItemCreateView(ItemFormMixin):
         )
 
 
+class ItemListView(HomeRoomsMixin, TemplateView):
+    """Every item of the home, all rooms together, filtered by room and by text."""
+
+    template_name = "rooms/item_list.html"
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        rooms = list(services.rooms_of(self.home))
+        wanted = self.request.GET.get("room", "")
+        room = next((r for r in rooms if str(r.pk) == wanted), None)
+        query = self.request.GET.get("q", "")[:120]
+        rows = services.item_rows(self.home, room=room, query=query)
+        return super().get_context_data(
+            **self.page(
+                rows=rows,
+                rooms=rooms,
+                room=room,
+                query=query,
+                everything=room is None and not query.strip(),
+            ),
+            **kwargs,
+        )
+
+
 class ItemDetailView(HomeRoomsMixin, TemplateView):
     template_name = "rooms/item_detail.html"
 

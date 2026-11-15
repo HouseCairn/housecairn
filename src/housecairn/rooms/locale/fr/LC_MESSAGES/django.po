@@ -489,6 +489,39 @@ msgstr "Ajouter l'élément"
 msgid "Delete the item"
 msgstr "Supprimer l'élément"
 
+msgctxt "tab"
+msgid "Equipment"
+msgstr "Équipements"
+
+msgid "Search by name, brand, model or serial number"
+msgstr "Rechercher par nom, marque, modèle ou numéro de série"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Every room"
+msgstr "Toutes les pièces"
+
+msgid "Next:"
+msgstr "Prochaine :"
+
+msgid "No task to come"
+msgstr "Aucune tâche à venir"
+
+#, python-format
+msgid "warranty ended %(date)s"
+msgstr "garantie terminée le %(date)s"
+
+#, python-format
+msgid "warranty until %(date)s"
+msgstr "garantie jusqu'au %(date)s"
+
+msgid "No item yet. Add one from the page of a room."
+msgstr "Aucun élément pour l'instant. Ajoutez-en un depuis la page d'une pièce."
+
+msgid "No item matches."
+msgstr "Aucun élément ne correspond."
+
 msgid "Upload"
 msgstr "Envoyer"
 
@@ -556,10 +589,6 @@ msgstr "Aucune photo dans cette catégorie."
 msgid "Items"
 msgstr "Éléments"
 
-#, python-format
-msgid "warranty until %(date)s"
-msgstr "garantie jusqu'au %(date)s"
-
 msgid "No item in this room yet."
 msgstr "Aucun élément dans cette pièce pour l'instant."
 
@@ -574,9 +603,6 @@ msgstr "Supprimer la pièce"
 
 msgid "Search rooms and items"
 msgstr "Rechercher des pièces et des éléments"
-
-msgid "Search"
-msgstr "Rechercher"
 
 #, python-format
 msgid "Move %(name)s up"

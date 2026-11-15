@@ -126,6 +126,7 @@ LABELS: dict[str, Any] = {
     "tasks:contractors": _("Contractors"),
     "tasks:contractor-detail": Record("tasks.Contractor", "contractor_id", "name"),
     "rooms:list": _("Rooms"),
+    "rooms:items": pgettext_lazy("tab", "Equipment"),
     "rooms:search": pgettext_lazy("screen", "Search"),
     "rooms:detail": Record("rooms.Room", "room_id", "name"),
     "rooms:item-detail": Record("rooms.Item", "item_id", "name"),
@@ -275,6 +276,7 @@ def _room_of_item(kwargs: dict[str, Any]) -> tuple[str, dict[str, Any]] | None:
 PARENTS: dict[str, Callable[[dict[str, Any]], tuple[str, dict[str, Any]] | None]] = {
     "rooms:detail": lambda kw: ("rooms:list", _home(kw)),
     "rooms:item-detail": _room_of_item,
+    "rooms:items": lambda kw: ("rooms:list", _home(kw)),
     "stock:detail": lambda kw: ("stock:list", _home(kw)),
     "stock:list": lambda kw: ("rooms:list", _home(kw)),
     "tasks:detail": lambda kw: ("tasks:list", _home(kw)),

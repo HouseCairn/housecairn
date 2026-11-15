@@ -28,6 +28,7 @@ rooms
 room
 room-form
 room-memory
+equipment
 item
 item-form
 photo-form

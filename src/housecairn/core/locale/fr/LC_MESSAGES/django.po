@@ -163,6 +163,10 @@ msgstr "Historique"
 msgid "Rooms"
 msgstr "Pièces"
 
+msgctxt "tab"
+msgid "Equipment"
+msgstr "Équipements"
+
 msgctxt "screen"
 msgid "Search"
 msgstr "Recherche"

@@ -2,7 +2,7 @@
 
 One component for every sub-navigation, so that the current tab, the touch targets and
 the focus ring are the same everywhere. Tabs switch between sister views of one section,
-four at most, all visible at 360 px: Today, All, Calendar; Rooms, Stock; In progress,
+four at most, all visible at 360 px: Today, All, Calendar; Rooms, Equipment, Stock; In progress,
 Ideas, Finished; Summary, Rooms, Projects, Upkeep. A group names the tabs of a section;
 a tab is shown only to the people who may open it.
 """
@@ -100,6 +100,7 @@ def _rooms(context: template.Context, request: HttpRequest, view: str) -> list[T
     kwargs = {"home_id": home_id}
     return [
         Tab(_("Rooms"), reverse("rooms:list", kwargs=kwargs), view == "rooms:list"),
+        Tab(pgettext_lazy("tab", "Equipment"), reverse("rooms:items", kwargs=kwargs), view == "rooms:items"),
         Tab(_("Stock"), reverse("stock:list", kwargs=kwargs), view == "stock:list"),
     ]
 
