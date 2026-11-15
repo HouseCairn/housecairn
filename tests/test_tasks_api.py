@@ -406,10 +406,9 @@ class TestOccurrences:
         )
         assert undo.status_code == 200
         assert undo.json()["status"] == "planned"
+        # The next occurrence is taken back as a deleted row (a tombstone of the change log).
         assert (
-            list(
-                Occurrence.all_objects.filter(task=owner_task).values_list("id", "status", "due_on")
-            )
+            list(Occurrence.objects.filter(task=owner_task).values_list("id", "status", "due_on"))
             == before
         )
 

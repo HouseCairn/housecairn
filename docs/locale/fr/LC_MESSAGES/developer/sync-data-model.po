@@ -114,9 +114,60 @@ msgstr "Rétention"
 msgid "A change, a deleted row and its tombstone are kept 400 days; a task of the worker removes them every night at 03:30 (time zone of the instance). The purge removes the changes created more than 400 days ago (exactly 400 days old is kept), records in `floor` the highest position it removed, so that a cursor below it can be answered with 410, and removes the clocks of the rows deleted more than 400 days ago, with those rows when they are still deleted."
 msgstr "Un changement, une ligne supprimée et sa pierre tombale sont gardés 400 jours ; une tâche du worker les retire chaque nuit à 03:30 (fuseau horaire de l'instance). La purge retire les changements créés il y a plus de 400 jours (exactement 400 jours, ils restent), inscrit dans `floor` la plus haute position retirée, pour qu'un curseur en dessous puisse recevoir 410, et retire les horloges des lignes supprimées il y a plus de 400 jours, avec ces lignes si elles sont toujours supprimées."
 
+msgid "A row removed this way takes its children with it by cascade (the occurrences and attachments of a task, say). The purge removes their clocks too and, once it is committed, their files on the disk. A live row whose reference the cascade empties records that change, as any write does."
+msgstr "Une ligne retirée ainsi emporte ses enfants par cascade (les occurrences et les pièces jointes d'une tâche, par exemple). La purge retire aussi leurs horloges et, une fois validée, leurs fichiers sur le disque. Une ligne vivante dont la cascade vide une référence enregistre ce changement, comme toute écriture."
+
+msgid "Recording a write"
+msgstr "Enregistrer une écriture"
+
+msgid "The services of a covered application call the helpers of `housecairn.sync.rows` in the transaction that writes, right after the write:"
+msgstr "Les services d'une application couverte appellent les fonctions de `housecairn.sync.rows` dans la transaction qui écrit, juste après l'écriture :"
+
+msgid "`snapshot(row)` before an edit and `record_edit(row, before)` after it record only the fields whose value changed, so a form that sends every field moves the clock of the one it changed; `stored(row)` takes the snapshot from the database, for an object a form may have changed already;"
+msgstr "`snapshot(row)` avant une modification et `record_edit(row, before)` après elle n'enregistrent que les champs dont la valeur a changé : un formulaire qui envoie tous les champs n'avance l'horloge que de celui qu'il a changé ; `stored(row)` prend l'instantané dans la base, pour un objet qu'un formulaire a peut-être déjà modifié ;"
+
+msgid "`record_created(row)` after an insert records every field;"
+msgstr "`record_created(row)` après une insertion enregistre tous les champs ;"
+
+msgid "`delete_row(row)` and `restore_row(row)` replace `row.soft_delete()` and `row.restore()`;"
+msgstr "`delete_row(row)` et `restore_row(row)` remplacent `row.soft_delete()` et `row.restore()` ;"
+
+msgid "`soft_delete(queryset)` and `update(queryset, **values)` replace the queryset methods, with one change for each row whose value changed."
+msgstr "`soft_delete(queryset)` et `update(queryset, **values)` remplacent les méthodes du queryset, avec un changement pour chaque ligne dont la valeur a changé."
+
+msgid "Fields are named by their column (`room_id`) and given as the protocol writes them: amounts as decimal strings with the places of the field, dates as `YYYY-MM-DD`, instants as clocks, a file by its name in the storage until the files lot gives it the reference of the protocol. The base fields (`id`, `home`, `created_at`, `updated_at`, `deleted_at`) are not fields of a change, nor the derived ones a model lists in `SYNC_DERIVED` (`visible_from` of an occurrence). A restore, as a copy or not, records every row it inserts for the applications of `RECORDED_APPS` in `homes/restore.py`."
+msgstr "Les champs sont nommés par leur colonne (`room_id`) et donnés comme le protocole les écrit : les montants en chaînes décimales avec les décimales du champ, les dates en `YYYY-MM-DD`, les instants en horloges, un fichier par son nom dans le stockage jusqu'à ce que le lot des fichiers lui donne la référence du protocole. Les champs de base (`id`, `home`, `created_at`, `updated_at`, `deleted_at`) ne sont pas des champs d'un changement, pas plus que les champs dérivés qu'un modèle liste dans `SYNC_DERIVED` (`visible_from` d'une occurrence). Une restauration, en copie ou non, enregistre chaque ligne qu'elle insère pour les applications de `RECORDED_APPS` dans `homes/restore.py`."
+
+msgid "Covered applications"
+msgstr "Applications couvertes"
+
+msgid "Application"
+msgstr "Application"
+
+msgid "Lot"
+msgstr "Lot"
+
+msgid "Rows"
+msgstr "Lignes"
+
+msgid "Notes"
+msgstr "Remarques"
+
+msgid "`tasks`"
+msgstr "`tasks`"
+
+msgid "M3c"
+msgstr "M3c"
+
+msgid "contractor, task, task material, occurrence, material draw, attachment"
+msgstr "intervenant, tâche, matériel de tâche, occurrence, tirage de matériel, pièce jointe"
+
+msgid "Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again."
+msgstr "Annuler une clôture supprime l'occurrence qui suivait avec une pierre tombale au lieu de l'effacer, et la détache de l'occurrence qu'elle suivait, pour que la clôture puisse être refaite."
+
 msgid "The guard test"
 msgstr "Le test garde-fou"
 
-msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs. An application that is listed without scenarios, or whose scenario writes without recording, fails."
-msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, pour chaque modèle, un scénario par nature d'écriture (enregistrement, mise à jour d'un queryset, suppression douce, suppression définitive) qui exécute le code que l'application exécute vraiment. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue."
+msgid "`tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a covered application adds no change. A lot that covers an application adds its name to `COVERED_APPS` and, in `tests/sync_scenarios/<app>.py`, one scenario per model and kind of write (save, queryset update, soft deletion, hard deletion) that runs the code the application really runs, after setting its rows up straight in the tables. An application that is listed without scenarios, or whose scenario writes without recording, fails."
+msgstr "`tests/test_sync_guard.py` liste les modèles des logements et échoue quand une écriture d'un modèle d'une application couverte n'ajoute aucun changement. Un lot qui couvre une application ajoute son nom à `COVERED_APPS` et, dans `tests/sync_scenarios/<app>.py`, un scénario par modèle et par nature d'écriture (enregistrement, mise à jour d'un queryset, suppression douce, suppression définitive) qui exécute le code que l'application exécute vraiment, après avoir posé ses lignes directement dans les tables. Une application listée sans scénario, ou dont le scénario écrit sans enregistrer, échoue."
 

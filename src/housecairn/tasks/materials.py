@@ -22,6 +22,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.stock import services as stock_services
 from housecairn.stock.models import Article
+from housecairn.sync import rows as changelog
 from housecairn.tasks.models import MaterialDraw, Occurrence, Task, TaskMaterial
 
 AnyUser = User | AnonymousUser
@@ -97,6 +98,7 @@ def add_material(actor: AnyUser, task: Task, article: Article, quantity: Decimal
     line = TaskMaterial(home=task.home, task=task, article=article, quantity=quantity)
     line.full_clean()
     line.save()
+    changelog.record_created(line)
     _changed(actor, task)
     return line
 
@@ -105,9 +107,11 @@ def add_material(actor: AnyUser, task: Task, article: Article, quantity: Decimal
 def update_material(actor: AnyUser, line: TaskMaterial, *, quantity: Decimal) -> TaskMaterial:
     _require_write(actor, line.home)
     _positive(quantity)
+    before = changelog.stored(line)
     line.quantity = quantity
     line.full_clean()
     line.save()
+    changelog.record_edit(line, before)
     _changed(actor, line.task)
     return line
 
@@ -124,7 +128,7 @@ def save_material(actor: AnyUser, task: Task, article: Article, quantity: Decima
 @transaction.atomic
 def remove_material(actor: AnyUser, line: TaskMaterial) -> None:
     _require_write(actor, line.home)
-    line.soft_delete()
+    changelog.delete_row(line)
     _changed(actor, line.task)
 
 
@@ -195,13 +199,14 @@ def draw_for_done(actor: AnyUser, occurrence: Occurrence, *, on: datetime.date) 
         taken = stock_services.draw_for_task(
             actor, line.article, line.quantity, occurrence=occurrence, occurred_on=on
         )
-        MaterialDraw.objects.create(
+        draw = MaterialDraw.objects.create(
             home=occurrence.home,
             occurrence=occurrence,
             article=line.article,
             wanted=line.quantity,
             drawn=taken,
         )
+        changelog.record_created(draw)
         if taken < line.quantity:
             short.append(Shortage(line.article, line.quantity, taken))
     return short
@@ -214,7 +219,7 @@ def return_draws(actor: AnyUser, occurrence: Occurrence, *, on: datetime.date) -
             stock_services.give_back_for_task(
                 actor, draw.article, draw.drawn, occurrence=occurrence, occurred_on=on
             )
-        draw.soft_delete()
+        changelog.delete_row(draw)
 
 
 def adjust_draws(
@@ -239,6 +244,7 @@ def adjust_draws(
     short: list[Shortage] = []
     for article_id in sorted(used, key=str):
         draw, wanted = draws[article_id], used[article_id]
+        before = changelog.snapshot(draw)
         if wanted < draw.drawn:
             stock_services.give_back_for_task(
                 actor, draw.article, draw.drawn - wanted, occurrence=occurrence, occurred_on=on
@@ -251,6 +257,7 @@ def adjust_draws(
         draw.wanted = wanted
         draw.full_clean()
         draw.save()
+        changelog.record_edit(draw, before)
         if draw.drawn < draw.wanted:
             short.append(Shortage(draw.article, draw.wanted, draw.drawn))
     return short

@@ -51,6 +51,11 @@ from housecairn.core.text import without_control_characters
 from housecairn.homes import exports, quotas, services
 from housecairn.homes.exports import FileSpec, Section
 from housecairn.homes.models import Home, Membership, Role
+from housecairn.sync import rows as changelog
+
+# The apps whose restored rows record their change (docs/adr/0079): one line per lot, M3b to
+# M3e, as the app joins the guard of the change log.
+RECORDED_APPS: tuple[str, ...] = ("tasks",)
 
 SUPPORTED_VERSIONS = frozenset({2, 3, 4})
 DOCUMENT_MAX_BYTES = 64 * 1024 * 1024
@@ -716,6 +721,12 @@ def _write(home: Home, prepared: list[Prepared], archive: Archive, written: list
             section.model._base_manager.bulk_update(
                 [p.instance for p in stamped], list(stamped[0].stamps), batch_size=500
             )
+        if section.model._meta.app_label in RECORDED_APPS:
+            # Each restored row is a write of the home: the change log has it (docs/adr/0077).
+            for p in group:
+                changelog.record_created(p.instance)
+                if getattr(p.instance, "deleted_at", None) is not None:
+                    changelog.record_deleted(p.instance)
         for relation in section.many_to_many():
             through: Any = relation.remote_field.through
             source = relation.m2m_field_name()

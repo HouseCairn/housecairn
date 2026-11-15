@@ -6,15 +6,26 @@ year still learns of a deletion. Then the nightly task removes them. A cursor be
 """
 
 import datetime
+import logging
+import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
+from typing import Any, cast
 
 from django.apps import apps
-from django.db import transaction
+from django.core.exceptions import SuspiciousOperation
+from django.core.files.storage import Storage
+from django.db import models, router, transaction
 from django.db.models import Max
+from django.db.models.deletion import Collector
 from django.utils import timezone
 
 from housecairn.core.models import BaseModel
+from housecairn.sync import changes
+from housecairn.sync import rows as rows_module
 from housecairn.sync.models import Change, HomeHead, RowClocks
+
+logger = logging.getLogger(__name__)
 
 RETENTION = datetime.timedelta(days=400)
 # Rows removed per statement, to keep the lists of identifiers short.
@@ -70,12 +81,73 @@ def _purge_tombstones(expired: datetime.datetime) -> tuple[int, int]:
         for start in range(0, len(pks), CHUNK):
             chunk = RowClocks.objects.filter(pk__in=pks[start : start + CHUNK])
             if model is not None:
-                ids = list(chunk.values_list("row_id", flat=True))
-                removed_rows += model.all_objects.filter(
-                    pk__in=ids, deleted_at__isnull=False
-                ).delete()[0]
+                removed_rows += _remove_rows(model, list(chunk.values_list("row_id", flat=True)))
             removed += chunk.delete()[0]
     return removed, removed_rows
+
+
+def _remove_rows(model: type[BaseModel], ids: list[uuid.UUID]) -> int:
+    """Remove the rows that are still deleted, and what goes with them by cascade.
+
+    The rows the cascade takes (the occurrences of a task, its attachments) leave no clock
+    behind and no file on the disk; a row whose reference the cascade empties (`SET_NULL`)
+    records that change, as any write of a row of a home does.
+    """
+    doomed = list(model.all_objects.filter(pk__in=ids, deleted_at__isnull=False))
+    if not doomed:
+        return 0
+    collector = Collector(using=router.db_for_write(model))
+    collector.collect(doomed)
+    gone: dict[str, set[uuid.UUID]] = {}
+    files: list[tuple[Storage, str]] = []
+    cascaded = [row for rows in collector.data.values() for row in rows]
+    cascaded += [row for rows in collector.fast_deletes for row in rows]
+    for row in cascaded:
+        gone.setdefault(row._meta.label_lower, set()).add(row.pk)
+        for field in row._meta.concrete_fields:
+            if isinstance(field, models.FileField):
+                name = getattr(row, field.attname).name
+                if name:
+                    files.append((field.storage, name))
+    # Django keeps, per (field, value), lists of rows or querysets: read them before deleting.
+    emptied: list[tuple[Any, Any, list[Any]]] = [
+        (field, value, list(cast(Iterable[Any], rows)))
+        for (field, value), batches in collector.field_updates.items()
+        for rows in batches
+    ]
+    entity = model._meta.label_lower
+    removed = sum(1 for row in doomed if row.pk in gone.get(entity, set()))
+    # The clocks of the rows themselves go with their chunk (`_purge_tombstones`).
+    gone[entity] = gone.get(entity, set()) - {row.pk for row in doomed}
+    collector.delete()
+    for label, row_ids in gone.items():
+        RowClocks.objects.filter(entity=label, row_id__in=row_ids).delete()
+    for field, value, rows in emptied:
+        for row in rows:
+            if (
+                isinstance(row, BaseModel)
+                and hasattr(row, "home_id")
+                and row.pk not in gone.get(row._meta.label_lower, set())
+            ):
+                changes.record_change(
+                    row.home_id,
+                    row._meta.label_lower,
+                    row.pk,
+                    changes.PUT,
+                    {field.attname: rows_module.wire_value(field, value)},
+                    updated_at=row.updated_at,
+                )
+    transaction.on_commit(lambda: _erase(files))
+    return removed
+
+
+def _erase(files: list[tuple[Storage, str]]) -> None:
+    """Remove the files of the rows the purge removed; a failure is logged, never raised."""
+    for storage, name in files:
+        try:
+            storage.delete(name)
+        except (OSError, ValueError, SuspiciousOperation):
+            logger.error("Could not erase the file of a purged row: %s", name)
 
 
 def _model_of(entity: str) -> type[BaseModel] | None:

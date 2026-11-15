@@ -86,10 +86,44 @@ more than 400 days ago (exactly 400 days old is kept), records in `floor` the hi
 it removed, so that a cursor below it can be answered with 410, and removes the clocks of the
 rows deleted more than 400 days ago, with those rows when they are still deleted.
 
+A row removed this way takes its children with it by cascade (the occurrences and attachments
+of a task, say). The purge removes their clocks too and, once it is committed, their files on
+the disk. A live row whose reference the cascade empties records that change, as any write
+does.
+
+## Recording a write
+
+The services of a covered application call the helpers of `housecairn.sync.rows` in the
+transaction that writes, right after the write:
+
+- `snapshot(row)` before an edit and `record_edit(row, before)` after it record only the fields
+  whose value changed, so a form that sends every field moves the clock of the one it changed;
+  `stored(row)` takes the snapshot from the database, for an object a form may have changed
+  already;
+- `record_created(row)` after an insert records every field;
+- `delete_row(row)` and `restore_row(row)` replace `row.soft_delete()` and `row.restore()`;
+- `soft_delete(queryset)` and `update(queryset, **values)` replace the queryset methods, with
+  one change for each row whose value changed.
+
+Fields are named by their column (`room_id`) and given as the protocol writes them: amounts as
+decimal strings with the places of the field, dates as `YYYY-MM-DD`, instants as clocks, a file
+by its name in the storage until the files lot gives it the reference of the protocol. The base
+fields (`id`, `home`, `created_at`, `updated_at`, `deleted_at`) are not fields of a change, nor
+the derived ones a model lists in `SYNC_DERIVED` (`visible_from` of an occurrence). A restore,
+as a copy or not, records every row it inserts for the applications of `RECORDED_APPS` in
+`homes/restore.py`.
+
+## Covered applications
+
+| Application | Lot | Rows | Notes |
+| --- | --- | --- | --- |
+| `tasks` | M3c | contractor, task, task material, occurrence, material draw, attachment | Taking back a closing deletes the occurrence that followed with a tombstone instead of erasing it, and lets go of the occurrence it followed, so that the closing can be made again. |
+
 ## The guard test
 
 `tests/test_sync_guard.py` lists the models of the homes and fails when a write of a model of a
 covered application adds no change. A lot that covers an application adds its name to
-`COVERED_APPS` and, for each model, one scenario per kind of write (save, queryset update, soft
-deletion, hard deletion) that runs the code the application really runs. An application that is
-listed without scenarios, or whose scenario writes without recording, fails.
+`COVERED_APPS` and, in `tests/sync_scenarios/<app>.py`, one scenario per model and kind of write
+(save, queryset update, soft deletion, hard deletion) that runs the code the application really
+runs, after setting its rows up straight in the tables. An application that is listed without
+scenarios, or whose scenario writes without recording, fails.

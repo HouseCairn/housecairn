@@ -37,7 +37,10 @@ def url(name: str, home: Home, **kwargs: object) -> str:
 
 
 def state(task: Task) -> list[tuple[object, ...]]:
-    """Everything that tells where a task stands: its occurrences, in order of creation."""
+    """Everything that tells where a task stands: its live occurrences, in order of creation.
+
+    An occurrence an undo took back stays as a deleted row, the tombstone of the change log.
+    """
     return [
         (
             o.id,
@@ -48,7 +51,9 @@ def state(task: Task) -> list[tuple[object, ...]]:
             o.completion_note,
             o.postponed_from,
         )
-        for o in Occurrence.all_objects.filter(task=task).order_by("created_at", "id")
+        for o in Occurrence.all_objects.filter(task=task, deleted_at__isnull=True).order_by(
+            "created_at", "id"
+        )
     ]
 
 
@@ -223,7 +228,10 @@ class TestDoneAndUndo:
         reopened = services.undo(alice, closing.occurrence)
         assert reopened.status == Status.PLANNED
         assert state(owner_task) == before
-        assert Occurrence.all_objects.filter(task=owner_task).count() == 1
+        assert Occurrence.objects.filter(task=owner_task).count() == 1
+        # The occurrence taken back is deleted, not erased: a phone learns of it.
+        withdrawn = Occurrence.all_objects.get(task=owner_task, deleted_at__isnull=False)
+        assert withdrawn.follows_id is None
 
     def test_a_postponed_occurrence_comes_back_postponed(
         self, alice: User, owner_task: Task, owner_occurrence: Occurrence
@@ -321,6 +329,8 @@ class TestDoneAndUndo:
 
         with mock.patch.object(models.QuerySet, "select_for_update", spy):
             services.undo(alice, closing.occurrence)
+        # The change log locks the row of the home too; the occurrences are locked twice.
+        locked = [query for query in locked if 'FROM "tasks_occurrence"' in query]
         assert len(locked) == 2
         assert "follows_id" in locked[1]
 
