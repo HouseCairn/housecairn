@@ -24,8 +24,11 @@ read only by a connection made after signing in through it (`403` with
 `"code": "sso_required"` otherwise), as for an API token. An archived home is listed and read
 like the others.
 
-Reads are limited to 600 a minute per connection, and pushes to 60 a minute per connection,
-counted apart; beyond that the answer is `429`.
+Reads are limited to 600 a minute per connection, pushes to 60 a minute per connection, and
+snapshots to 6 a minute per connection (a snapshot also counts as a read), each counted apart;
+beyond that the answer is `429`. `GET /api/v1/sync/info`, with the access token of a connection,
+gives these limits in `limits`: `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`,
+`ops_per_push` and `push_bytes`.
 
 ## Values
 
@@ -65,7 +68,8 @@ the id of its row, never by the name of the file the server stores.
 - `members`: the accounts of the home, with the name shown for them and their role, never
   their address. The rows name a person by this `id` (`assignee_id`, `completed_by_id`).
 - `gone`: the homes erased while they were bound to this connection, and when. The app erases
-  them on the phone.
+  them on the phone. A connection whose account had already left the home when it was erased
+  is not told.
 
 ## The changes
 
@@ -233,4 +237,4 @@ itself:
 | `insecure_transport` | `403` | Plain HTTP outside the local network. |
 | `sso_required` | `403` | The home requires a sign-in provider the connection was not made with. |
 | `cursor_expired` | `410` | `after` is older than the oldest change kept. |
-| `home_gone` | `410` | The home was erased while it was bound to this connection. To any other connection, the same home is a `404`. |
+| `home_gone` | `410` | The home was erased while it was bound to this connection and its account was still a member. To any other connection, the same home is a `404`. |

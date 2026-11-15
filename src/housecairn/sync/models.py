@@ -139,14 +139,36 @@ class Push(models.Model):
 class ErasedHome(models.Model):
     """A home that was erased, outside the home: erasing it erased its changes too.
 
-    `connection_ids` keeps the ids of the connected apps that were bound to the home when it
-    was erased; they alone get 410 `home_gone`, anyone else 404.
+    The connected apps that were bound to the home when it was erased, and whose account was
+    still a member of it, are the rows of `ErasedHomeConnection`; they alone get 410
+    `home_gone`, anyone else 404.
     """
 
     # The id the home had.
     id = models.UUIDField(primary_key=True, editable=False)
     erased_at = models.DateTimeField(default=timezone.now)
-    connection_ids = models.JSONField(default=list)
 
     def __str__(self) -> str:
         return str(self.id)
+
+
+class ErasedHomeConnection(models.Model):
+    """One connected app told that a home was erased: a row per erased home and connection.
+
+    A table and not a list in the row of the home, so that `GET /sync/homes/` finds the homes
+    erased for one connection by an index, whatever the number of erased homes of the instance.
+    The connection is a plain identifier, not a foreign key: the row outlives the connection.
+    """
+
+    erased = models.ForeignKey(ErasedHome, on_delete=models.CASCADE, related_name="connections")
+    connection_id = models.UUIDField(db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["erased", "connection_id"], name="sync_erased_home_connection"
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.erased_id} for {self.connection_id}"

@@ -69,7 +69,9 @@ class SyncInfoView(SyncAPIView):
         description=(
             "The versions of the sync protocol this server speaks and where the mobile app "
             "signs in; `oauth` is null when the instance turned the mobile app off. With an "
-            "access token of a connected app, also the server's version and the connection."
+            "access token of a connected app, also the server's version, the limits it keeps "
+            "to (`limits`: reads, snapshots and pushes per minute per connection, operations "
+            "and bytes per push) and the connection."
         ),
     )
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -81,13 +83,15 @@ class SyncInfoView(SyncAPIView):
                 "revoke": request.build_absolute_uri(reverse("oauth2_provider:revoke-token")),
                 "client_id": CLIENT_ID,
             }
+        from housecairn.sync import limits as sync_limits  # the sync app reads this module
+
         body: dict[str, Any] = {"sync": SYNC_VERSIONS, "oauth": oauth}
         connection = connection_of(request)
         if connection is not None:
             body.update(
                 server=_server_version(),
                 features=[],
-                limits={},
+                limits=sync_limits.announced(),
                 connection={
                     "id": str(connection.id),
                     "may_create_homes": connection.may_create_homes,

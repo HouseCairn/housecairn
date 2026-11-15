@@ -42,6 +42,9 @@ def rates() -> dict[str, str]:
         "housecairn_calendar_feed": "60/m/ip",
         # The reads of the sync API, per connected phone (docs/adr/0077, need 11).
         "housecairn_sync_read": "600/m/key",
+        # The snapshot of a home is built in memory from every row: a few a minute per phone,
+        # on top of the reads above (a phone asks for it on its first sync or after a 410).
+        "housecairn_sync_snapshot": "6/m/key",
         # The pushes of the sync API, per connected phone, apart from its reads.
         "housecairn_sync_push": "60/m/key",
     }
