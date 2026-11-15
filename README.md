@@ -44,6 +44,22 @@ For example:
 - repaint the living room, with its quotes and its budget, planned, committed
   and paid.
 
+### One example: descaling the espresso machine
+
+<img src="docs/assets/readme-example-descaling.png" width="300" align="right"
+     alt="The Descaling task of the demo home after it was done once: due again in three months, in the kitchen, on the espresso machine, 7.90 each time from the stock, 31.60 a year, and one water filter left in stock.">
+
+1. A task, *Descaling*, every three months.
+2. It belongs to the *Espresso machine* of the kitchen.
+3. It uses one water filter at 7.90, taken from the stock each time you tap **Done**.
+4. The budget plans it at 31.60 a year.
+5. The stock goes down, and the filter is marked **Low** before you run out.
+
+The [Examples](https://docs.housecairn.app/guides/examples/) page follows this job and a
+bathroom renovation, with its quotes and its budget, step by step.
+
+<br clear="right">
+
 It is for the people who live in a house or a flat, owners or tenants, alone or
 as a household. It is not business maintenance software (CMMS), nor a home
 automation app: it works alongside Home Assistant.

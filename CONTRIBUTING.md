@@ -61,8 +61,10 @@ environment, so `DEBUG=true` there changes nothing for them.
 
 To try the screens with something in them, add a fictional home to your account:
 `uv run python manage.py load_demo_data --owner <your e-mail> --language fr` (or
-`en`). It creates rooms, recurring tasks (one overdue, two due today, three coming)
-and two projects with budget lines, all with generic names, in that language. Use it
+`en`). It creates rooms, recurring tasks (one overdue, two due today, five coming)
+and two projects with budget lines, all with generic names, in that language, with the
+two jobs of the [Examples](docs/guides/examples.md) page: the descaling of the espresso
+machine and its filter in stock, and the bathroom project with its quotes. Use it
 for demonstrations and for the screenshots of the website, never on a real instance.
 
 Architecture decisions are in [docs/adr/](docs/adr/README.md); read them before
@@ -241,7 +243,11 @@ No screenshots are taken in CI, for the documentation or for review: they come
 back in one dedicated change before the first public release
 ([ADR 0016](docs/adr/0016-documentation-site.md)).
 
-Exception: the images of the README (`docs/assets/readme-*.png`) are allowed. They are taken by hand on a local instance with made-up data, never in CI, and no page of the documentation uses them.
+Exceptions: the images of the README (`docs/assets/readme-*.png`) and of the
+[Examples](docs/guides/examples.md) page (`docs/assets/examples/`, English, and the same
+name with `.fr` before the extension for French). They are taken by hand on a local
+instance with the demo home of `load_demo_data`, never in CI; no other page of the
+documentation uses an image of the application.
 
 The site is in `docs/_build/site/`. After changing a page, refresh the French
 catalogs with `uv run python scripts/build_docs.py --update-catalogs`, then

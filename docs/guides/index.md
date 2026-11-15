@@ -6,6 +6,7 @@ Step-by-step pages, written as the screens arrive. To install HouseCairn, see
 ```{toctree}
 :maxdepth: 1
 
+examples
 rooms-and-items
 tasks-and-recurrence
 today-and-history
