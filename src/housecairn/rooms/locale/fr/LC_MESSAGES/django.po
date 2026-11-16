@@ -519,11 +519,14 @@ msgstr "garantie terminée le %(date)s"
 msgid "warranty until %(date)s"
 msgstr "garantie jusqu'au %(date)s"
 
-msgid "No item yet. Add one from the page of a room."
-msgstr "Aucun élément pour l'instant. Ajoutez-en un depuis la page d'une pièce."
+msgid "No item yet."
+msgstr "Aucun élément pour l'instant."
 
 msgid "No item matches."
 msgstr "Aucun élément ne correspond."
+
+msgid "Add a room"
+msgstr "Ajouter une pièce"
 
 msgid "Upload"
 msgstr "Envoyer"
@@ -594,9 +597,6 @@ msgstr "Éléments"
 
 msgid "No item in this room yet."
 msgstr "Aucun élément dans cette pièce pour l'instant."
-
-msgid "Add a room"
-msgstr "Ajouter une pièce"
 
 msgid "Add the room"
 msgstr "Ajouter la pièce"

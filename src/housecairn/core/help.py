@@ -62,6 +62,7 @@ HELP_PAGES: dict[str, str] = {
     "rooms:delete": "screens/room/",
     "rooms:move": "screens/rooms/",
     "rooms:item-create": "screens/item-form/",
+    "rooms:item-add": "screens/item-form/",
     "rooms:items": "screens/equipment/",
     "rooms:item-detail": "screens/item/",
     "rooms:item-edit": "screens/item-form/",

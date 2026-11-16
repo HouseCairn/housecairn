@@ -1,7 +1,9 @@
 # Add or edit an item
 
 The form to add an item to a room, at
-`/h/<home id>/rooms/<room id>/items/new/`, and to edit one, at
+`/h/<home id>/rooms/<room id>/items/new/` (from the page of a room) or
+`/h/<home id>/items/new/` (from the [Equipment](equipment.md) list, with `?room=<room id>`
+to preselect the room), and to edit one, at
 `/h/<home id>/items/<item id>/edit/`.
 
 | Field | Content |

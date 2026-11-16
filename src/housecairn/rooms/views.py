@@ -270,6 +270,9 @@ class ItemFormMixin(RoomFormMixin):
 
 
 class ItemCreateView(ItemFormMixin):
+    # Route name of the list a creation opens the new item from (the guide's rule on `next`).
+    section_list = "rooms:list"
+
     def get_initial(self) -> dict[str, Any]:
         return {"room": self.get_room()}
 
@@ -292,11 +295,28 @@ class ItemCreateView(ItemFormMixin):
             navigation.after_create(
                 self.request,
                 _url("item-detail", home_id=self.home.id, item_id=item.id),
-                "rooms:list",
+                self.section_list,
                 added=_("Item added"),
                 saved=_("Item added."),
             )
         )
+
+
+class ItemAddView(ItemCreateView):
+    """Add an item from the Equipment list: the room is a choice of the form.
+
+    `?room=<room id>`, set by the list when it is filtered on a room, preselects it.
+    """
+
+    section_list = "rooms:items"
+
+    def get_room(self) -> Room | None:  # type: ignore[override]
+        wanted = self.request.GET.get("room", "")
+        return next((r for r in services.rooms_of(self.home) if str(r.pk) == wanted), None)
+
+    def get_initial(self) -> dict[str, Any]:
+        room = self.get_room()
+        return {"room": room} if room else {}
 
 
 class ItemListView(HomeRoomsMixin, TemplateView):

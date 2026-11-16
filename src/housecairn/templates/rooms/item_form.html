@@ -6,8 +6,11 @@
   {% if item %}
     {% url 'rooms:item-detail' home_id=home.id item_id=item.id as parent %}{% back_link parent item.name %}
     <h1>{% translate "Edit the item" %}</h1>
-  {% else %}
+  {% elif room %}
     {% url 'rooms:detail' home_id=home.id room_id=room.id as parent %}{% back_link parent room.name %}
+    <h1>{% translate "Add an item" %}</h1>
+  {% else %}
+    {% url 'rooms:items' home_id=home.id as parent %}{% back_link parent %}
     <h1>{% translate "Add an item" %}</h1>
   {% endif %}
   <form method="post" class="card" data-in-place-form{% if autosave %} data-autosave{% endif %}>

@@ -226,6 +226,7 @@ FORM_TITLES: dict[str, Any] = {
     "rooms:create": _("Add a room"),
     "rooms:edit": _("Edit the room"),
     "rooms:item-create": _("Add an item"),
+    "rooms:item-add": _("Add an item"),
     "rooms:item-edit": _("Edit the item"),
     "stock:create": _("Add a stock item"),
     "stock:edit": _("Edit the stock item"),
