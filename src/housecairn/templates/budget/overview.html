@@ -18,9 +18,9 @@
       <div><dt>{% translate "Left" %}</dt><dd>{% if envelope.left < 0 %}{% blocktranslate with amount=envelope.left_over|money:home.currency %}Over by {{ amount }}{% endblocktranslate %}{% else %}{{ envelope.left|money:home.currency }}{% endif %}</dd></div>
     </dl>
     {% if envelope.percent is not None %}
-      <p class="envelope-gauge">
-        <progress max="100" value="{{ envelope.gauge_value }}" aria-label="{% translate 'Spent against the envelope or the plans' %}">{{ envelope.percent }} %</progress>
-        <span class="small">{% if envelope.left < 0 %}<strong>{% blocktranslate with percent=envelope.percent %}{{ percent }} % spent: over budget{% endblocktranslate %}</strong>{% else %}{% blocktranslate with percent=envelope.percent %}{{ percent }} % spent{% endblocktranslate %}{% endif %}</span>
+      <p class="gauge">
+        <progress{% if envelope.left < 0 %} class="over"{% endif %} max="100" value="{{ envelope.gauge_value }}" aria-label="{% translate 'Spent against the envelope or the plans' %}">{{ envelope.percent }} %</progress>
+        <span class="small gauge-figure">{% if envelope.left < 0 %}<strong>{% blocktranslate with percent=envelope.percent %}{{ percent }} % spent: over budget{% endblocktranslate %}</strong>{% else %}{% blocktranslate with percent=envelope.percent %}{{ percent }} % spent{% endblocktranslate %}{% endif %}</span>
       </p>
     {% endif %}
     <details class="form-section">

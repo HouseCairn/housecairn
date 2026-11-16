@@ -6,6 +6,7 @@ import io
 import time
 from collections.abc import Callable
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from django.apps import apps
@@ -144,6 +145,15 @@ class TestPaintingTheLivingRoom:
         file = signed_in.get(url("projects", alice_home) + "?export=csv")
         head, row = csv_rows(file)[:2]
         assert row[head.index("Used")] == "970.00"
+
+    def test_the_figure_of_a_row_gauge_shares_the_line_of_the_bar(
+        self, signed_in: Client, alice_home: Home, painted: Project
+    ) -> None:
+        html = signed_in.get(url("projects", alice_home)).content.decode()
+        gauge = html.split('<span class="gauge">', 1)[1].split("</span>\n  </span>", 1)[0]
+        assert '<progress class="over"' in gauge  # 121 %: beyond the plan
+        assert "gauge-figure" in gauge
+        assert "121 % used" in gauge
 
 
 class TestToPayIsCountedLineByLine:
@@ -908,6 +918,7 @@ class TestSummaryAtAGlance:
         assert "<progress" in top
         assert 'value="25"' in top
         assert "25 % spent" in top  # the words carry it, not the bar
+        assert "<progress class=" not in top  # within the envelope: the normal colour
 
     def test_the_details_hold_the_other_figures(
         self, signed_in: Client, alice: User, alice_home: Home
@@ -933,6 +944,7 @@ class TestSummaryAtAGlance:
         assert "150.00" in top
         assert "250 % spent: over budget" in top
         assert 'value="100"' in top  # the bar is full, not past it
+        assert '<progress class="over"' in top  # and in the warning colour
 
     def test_without_an_envelope_the_plans_are_the_reference(
         self, signed_in: Client, alice: User, alice_home: Home
@@ -956,3 +968,19 @@ class TestSummaryAtAGlance:
         top = self.top(self.page(signed_in, alice_home, language="fr"))
         for word in ("Enveloppe", "Dépensé", "Reste", "Dépassement", "dépensé"):
             assert word in top, word
+
+
+class TestGaugeStyle:
+    """Every gauge is one bar of the charter, with its figure on its own line."""
+
+    def test_the_stylesheet_draws_every_progress_with_the_tokens(self) -> None:
+        css = (
+            Path(__file__).parent.parent / "src/housecairn/static/css/components.css"
+        ).read_text()
+        rule = css.split("\nprogress {", 1)[1].split("}", 1)[0]
+        assert "height: 8px" in rule
+        assert "appearance: none" in rule
+        assert "var(--hc-color-surface-muted)" in rule
+        assert "var(--hc-color-primary)" in css.split("progress::-webkit-progress-value", 1)[1]
+        assert "var(--hc-color-warning)" in css.split("progress.over", 1)[1]
+        assert "forced-colors: active" in css  # still visible in a high-contrast mode

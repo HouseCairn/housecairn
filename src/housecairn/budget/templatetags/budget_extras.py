@@ -18,7 +18,12 @@ def gauge(amounts: Amounts) -> dict[str, Any]:
     if amounts.planned <= ZERO:
         return {"percent": None, "amounts": amounts}
     percent = int((amounts.engaged * 100 / amounts.planned).quantize(Decimal(1)))
-    return {"percent": percent, "shown": min(percent, 100), "amounts": amounts}
+    return {
+        "percent": percent,
+        "shown": min(percent, 100),
+        "over": percent > 100,
+        "amounts": amounts,
+    }
 
 
 @register.inclusion_tag("budget/_task_cost.html")
