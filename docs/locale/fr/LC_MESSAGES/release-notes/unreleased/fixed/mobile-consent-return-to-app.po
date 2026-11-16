@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Mobile app sign-in.** After Connect or Cancel on the consent page, the browser now returns to the mobile app. The page's Content Security Policy (`form-action`) blocked the redirect to the app, so the browser stayed on the site, while Connect had already connected the phone and sent its security email. Only the consent page allows the app's scheme; the other pages keep their policy."
+msgstr "**Connexion de l'app mobile.** Après Connecter ou Annuler sur la page de consentement, le navigateur revient maintenant dans l'app mobile. La politique de sécurité du contenu de la page (`form-action`) bloquait la redirection vers l'app : le navigateur restait sur le site, alors que Connecter avait déjà connecté le téléphone et envoyé son courriel de sécurité. Seule la page de consentement autorise le schéma de l'app ; les autres pages gardent leur politique."
+
