@@ -143,6 +143,22 @@ def parse_reference(value: Any) -> Reference:
     )
 
 
+def check_digest(home_id: uuid.UUID, reference: Reference) -> None:
+    """BadReferenceError when the file of the home under this id holds other bytes.
+
+    The phone and the server never disagree silently on a file: a reference whose `sha256` is
+    not the digest of the file uploaded under its id is refused (docs/adr/0077, need 10). A
+    file of another home is not looked at: it is not this home's file.
+    """
+    digest = (
+        SyncFile.objects.filter(pk=reference.file, home_id=home_id)
+        .values_list("sha256", flat=True)
+        .first()
+    )
+    if digest is not None and digest != reference.sha256:
+        raise BadReferenceError(_("sha256 is not the digest of the file uploaded under this id."))
+
+
 # ---------- the file id of a row ----------
 
 

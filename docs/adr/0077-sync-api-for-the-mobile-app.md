@@ -298,7 +298,10 @@ the server mode.
     gives for a row the server writes carries `sha256` when a phone sent the file. The id of a
     file held by another home or by a file of the web is `409` `file_conflict`, which does not
     say which; a digest that is not that of the body is `400` `malformed`; the type is decided
-    by the content, never by `Content-Type`.
+    by the content, never by `Content-Type`. A reference whose `sha256` differs from the
+    digest of the file the home holds under the same `file` is `400` `malformed` with the
+    `index` of the operation: no silent divergence between the phone and the server (a
+    reference to a file not uploaded yet is not compared).
 11. **Versions and limits announced.** `GET /sync/info` gives the server's version, the
     versions of the sync protocol it speaks, its features, the entity types it knows and its
     limits: operations per push (500), size of a push body (1 MiB), file size, and requests per

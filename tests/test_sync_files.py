@@ -622,6 +622,66 @@ class TestReferences:
         assert not (photos / f"{first_id}.jpg").exists()
         assert (photos / f"{second_id}.jpg").exists()
 
+    def test_a_reference_never_takes_the_file_of_another_home(
+        self,
+        alice: User,
+        bob: User,
+        phone: Connected,
+        alice_home: Home,
+        bob_home: Home,
+        room: Room,
+        media_root: Path,
+    ) -> None:
+        """Control: `columns_for` looks for the file in the home of the row (`home_id`)."""
+        data, file_id, row_id = image_bytes(), uuid.uuid4(), uuid.uuid4()
+        bobs = connect(bob, [bob_home])
+        assert put(bobs.access, bob_home.pk, file_id, data).status_code == 201
+        kept = SyncFile.objects.get(pk=file_id)
+        with TestCase.captureOnCommitCallbacks(execute=True):
+            answer = push(
+                phone.access,
+                alice_home.pk,
+                [photo_op(alice_home, room, row_id, reference(file_id, data))],
+            )
+        assert results(answer)[0]["status"] == "applied"
+        # The file of bob stays his: same home, still in the sync folder, never referred to.
+        after = SyncFile.objects.get(pk=file_id)
+        assert after.home_id == bob_home.pk
+        assert (after.stored, after.thumbnail) == (kept.stored, kept.thumbnail)
+        assert after.referenced_at is None
+        assert get(phone.access, alice_home.pk, file_id).status_code == 404
+        assert get(bobs.access, bob_home.pk, file_id).status_code == 200
+        # The photo of alice waits for a file of her own home: nothing taken, nothing on disk.
+        assert Photo.objects.get(pk=row_id).image.name == f"{alice_home.pk}/{file_id}"
+        assert not (media_root / "photos" / str(alice_home.pk)).exists()
+        assert not (media_root / "sync" / str(alice_home.pk)).exists()
+        assert (media_root / "sync" / str(bob_home.pk) / Path(kept.stored).name).exists()
+
+    def test_a_reference_with_another_digest_than_the_file_is_malformed(
+        self, phone: Connected, alice_home: Home, room: Room
+    ) -> None:
+        """No silent difference between the phone and the server about the bytes of a file."""
+        data, other, file_id = image_bytes(), image_bytes(size=(40, 40)), uuid.uuid4()
+        put(phone.access, alice_home.pk, file_id, data)
+        good = photo_op(alice_home, room, uuid.uuid4(), reference(file_id, data))
+        bad = photo_op(alice_home, room, uuid.uuid4(), reference(file_id, data, sha256=sha(other)))
+        answer = push(phone.access, alice_home.pk, [good, bad])
+        assert answer.status_code == 400
+        assert answer.json()["code"] == "malformed"
+        assert answer.json()["index"] == 1
+        assert not Photo.objects.exists()
+        assert SyncFile.objects.get(pk=file_id).referenced_at is None
+
+    def test_a_digest_is_not_compared_with_the_file_of_another_home(
+        self, bob: User, phone: Connected, alice_home: Home, bob_home: Home, room: Room
+    ) -> None:
+        """The file under that id is not this home's: the reference waits, as for any unknown."""
+        data, other, file_id = image_bytes(), image_bytes(size=(40, 40)), uuid.uuid4()
+        put(connect(bob, [bob_home]).access, bob_home.pk, file_id, data)
+        operation = photo_op(alice_home, room, uuid.uuid4(), reference(file_id, other))
+        answer = push(phone.access, alice_home.pk, [operation])
+        assert results(answer)[0]["status"] == "applied"
+
     def test_the_feed_gives_the_digest_of_a_file_of_the_phone(
         self, phone: Connected, alice_home: Home, room: Room
     ) -> None:
@@ -674,6 +734,16 @@ class TestOrphans:
         assert set(SyncFile.objects.values_list("pk", flat=True)) == {young, used}
         assert not (media_root / "sync" / str(alice_home.pk) / f"{old}.jpg").exists()
         assert (media_root / "sync" / str(alice_home.pk) / f"{young}.jpg").exists()
+
+    def test_a_file_of_6_days_is_kept(self, phone: Connected, alice_home: Home) -> None:
+        """The delay is 7 days: one day short of it, the file stays."""
+        file_id = uuid.uuid4()
+        put(phone.access, alice_home.pk, file_id, image_bytes())
+        SyncFile.objects.update(created_at=timezone.now() - datetime.timedelta(days=6))
+        assert files.purge() == 0
+        assert SyncFile.objects.filter(pk=file_id).exists()
+        SyncFile.objects.update(created_at=timezone.now() - datetime.timedelta(days=8))
+        assert files.purge() == 1
 
     def test_the_nightly_task_runs_it(self, phone: Connected, alice_home: Home) -> None:
         from housecairn.sync import tasks

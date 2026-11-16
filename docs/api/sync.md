@@ -324,7 +324,10 @@ A photo of a room or an item (`rooms.photo`, field `image`), an attachment of a 
 the SHA-256 of the bytes it uploads, in lower-case hexadecimal; `width` and `height` are given
 for an image only. A photo or a file made on the web is named by the id of its row, and has no
 `sha256`. A new photo, attachment or file of a project needs its reference: without it, or with
-a value that is not one, the push is `400` `malformed`.
+a value that is not one, the push is `400` `malformed`. So it is when the `sha256` of a reference
+is not the digest of the file the home already holds under that `file`: the phone and the server
+never disagree silently about the bytes of a file. The answer carries the `index` of the
+operation. A reference to a file the server does not have yet is not compared: it waits.
 
 The phone uploads the file **before** the push that refers to it:
 

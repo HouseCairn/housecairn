@@ -472,6 +472,7 @@ def _apply_row(
         if holder is not None and name == holder.field:
             try:
                 values[name] = sync_files.parse_reference(value)
+                sync_files.check_digest(home.pk, values[name])
             except sync_files.BadReferenceError as error:
                 raise MalformedError(op.index, str(error)) from None
             logged[name] = value
