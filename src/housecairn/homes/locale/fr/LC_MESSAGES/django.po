@@ -122,6 +122,9 @@ msgstr "Éléments"
 msgid "Tasks"
 msgstr "Tâches"
 
+msgid "The example home cannot be exported."
+msgstr "Le logement d'exemple ne peut pas être exporté."
+
 msgid "Email address"
 msgstr "Adresse e-mail"
 
@@ -211,6 +214,9 @@ msgstr "fournisseur de connexion exigé"
 
 msgid "archived at"
 msgstr "archivé le"
+
+msgid "Example home"
+msgstr "Logement d'exemple"
 
 msgid "home"
 msgstr "logement"
@@ -421,6 +427,9 @@ msgstr "Un logement garde toujours au moins un propriétaire."
 
 msgid "Choose another member of the home."
 msgstr "Choisissez un autre membre du logement."
+
+msgid "The example home has no other member."
+msgstr "Le logement d'exemple n'a pas d'autre membre."
 
 msgid "This person is already a member of the home."
 msgstr "Cette personne est déjà membre du logement."

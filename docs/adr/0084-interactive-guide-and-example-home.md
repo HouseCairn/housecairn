@@ -1,6 +1,6 @@
 # 0084. An interactive guide on an example home, one text for the web and the app
 
-- Status: proposed. That HouseCairn has an interactive guide with examples of use, in the web
+- Status: accepted. That HouseCairn has an interactive guide with examples of use, in the web
   application and in the mobile app, with the same content; that it is a guided walk on an
   **example home** (disposable, fictional values, real actions, deleted in one gesture); and the
   five scenarios are the maintainer's decisions of 2026-11-16. So are the answers to the
@@ -329,6 +329,10 @@ reuses the demo home's values wherever it has the same row.
 
 The file has three parts: `example` (the home and its rows), `scenarios` (titles, summaries,
 steps) and `version`, raised when the shape changes.
+
+The image of the application has no `design/` directory, so the server reads a copy of the file,
+`src/housecairn/guide/guide.json`, which `tests/test_guide_content.py` keeps byte-equal to
+`design/guide.json`: a change of the source is copied there in the same pull request.
 
 ### The example home, defined
 

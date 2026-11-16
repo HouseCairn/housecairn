@@ -24,12 +24,15 @@ from housecairn.homes.models import Home, Invitation
 from housecairn.instance.config import get_setting
 
 
-def homes_for_request(request: HttpRequest | Request) -> models.QuerySet[Home]:
+def homes_for_request(
+    request: HttpRequest | Request, *, include_example: bool = False
+) -> models.QuerySet[Home]:
     """Homes the request's user belongs to, narrowed by the API token if any.
 
     Includes homes that require a sign-in provider this session did not use:
     lists show them, locked. Anything that reads or changes a home goes
-    through `HomeScopedMixin`, which only opens the others.
+    through `HomeScopedMixin`, which only opens the others. The example home of the guide
+    is left out unless `include_example=True` (docs/adr/0084).
     """
     restrict_to: list[UUID] | None = None
     credential = credential_of(request)
@@ -39,7 +42,9 @@ def homes_for_request(request: HttpRequest | Request) -> models.QuerySet[Home]:
         connection = connection_of(request)
         assert connection is not None  # noqa: S101 - a connection credential has one
         restrict_to = list(connection.homes.values_list("id", flat=True))
-    return services.homes_for(request.user, restrict_to=restrict_to)
+    return services.homes_for(
+        request.user, restrict_to=restrict_to, include_example=include_example
+    )
 
 
 def open_homes_for_request(request: HttpRequest | Request) -> models.QuerySet[Home]:
@@ -67,6 +72,9 @@ class HomeScopedMixin:
     request: Any
     kwargs: dict[str, Any]
     home_url_kwarg = "home_id"
+    # Whether the home of the address may be the example home of the guide (docs/adr/0084):
+    # the web pages of a home say yes, the API never does.
+    include_example = False
 
     def get_homes(self) -> models.QuerySet[Home]:
         return open_homes_for_request(self.request)
@@ -78,7 +86,8 @@ class HomeScopedMixin:
         lift a requirement whose provider the instance no longer offers.
         """
         home = get_object_or_404(
-            homes_for_request(self.request), id=self.kwargs[self.home_url_kwarg]
+            homes_for_request(self.request, include_example=self.include_example),
+            id=self.kwargs[self.home_url_kwarg],
         )
         if not allow_locked:
             services.check_open(home, sso.signed_in_providers(self.request))
@@ -89,8 +98,11 @@ class WebHomeScopedMixin(LoginRequiredMixin, HomeScopedMixin):
     """Web views: sign-in required, then the same scoping as the API.
 
     A home the person may open, read from the address, becomes the current home
-    (`homes.current`): the sections then open on the home being looked at.
+    (`homes.current`): the sections then open on the home being looked at. These pages are
+    the ones that may open the example home of the guide (docs/adr/0084).
     """
+
+    include_example = True
 
     def get_home(self, *, allow_locked: bool = False) -> Home:
         home = super().get_home(allow_locked=allow_locked)

@@ -107,3 +107,113 @@ def test_image_counts_as_translated_when_its_alt_is(translated_alt: str, expecte
     ext.CountTranslatedImageAlt(document).apply()
     assert image["translated"] is expected
     assert "hc_source_alt" not in image.attributes
+
+
+# The guide in the documentation (docs/adr/0084): design/guide.json, printed by a directive.
+GUIDE = json.loads(ext.GUIDE_PATH.read_text(encoding="utf-8"))
+GLOSSARY = json.loads(ext.GLOSSARY_PATH.read_text(encoding="utf-8"))
+DOCS = Path(__file__).resolve().parents[1] / "docs"
+
+
+def _plain(found: list[Any]) -> str:
+    return "\n".join(node.astext() for node in found)
+
+
+def test_the_guide_directive_is_registered() -> None:
+    class Registry:
+        def __init__(self) -> None:
+            self.directives: list[str] = []
+
+        def __getattr__(self, name: str) -> Any:
+            if name == "add_directive":
+                return lambda directive_name, _cls: self.directives.append(directive_name)
+            return lambda *args, **kwargs: None
+
+    registry = Registry()
+    ext.setup(registry)  # type: ignore[arg-type]
+    assert "guide-scenarios" in registry.directives
+
+
+@pytest.mark.parametrize("language", ["en", "fr"])
+def test_the_guide_prints_five_scenarios_and_twenty_steps(language: str) -> None:
+    from docutils import nodes
+
+    found = ext.guide_nodes(language)
+    assert [section["ids"][0] for section in found] == [
+        "create-home",
+        "rooms-equipment",
+        "recurring-task",
+        "report-problem",
+        "project-budget",
+    ]
+    steps = [item for section in found for item in section.findall(nodes.list_item)]
+    assert len(steps) == 20
+    text = _plain(found)
+    # The words are those of the file, in the language of the build, never typed here.
+    for scenario in GUIDE["scenarios"]:
+        assert scenario["title"][language] in text
+        assert scenario["summary"][language] in text
+    for step in (step for scenario in GUIDE["scenarios"] for step in scenario["steps"]):
+        assert step["title"][language] in text
+    assert "{{" not in text
+
+
+def test_the_two_languages_print_different_texts() -> None:
+    assert _plain(ext.guide_nodes("en")) != _plain(ext.guide_nodes("fr"))
+
+
+@pytest.mark.parametrize("language", ["en", "fr"])
+def test_a_glossary_term_is_written_as_the_glossary_spells_it(language: str) -> None:
+    terms = {term["id"]: term for term in GLOSSARY["terms"]}
+    found = ext.guide_inline(
+        "x", {"en": "see {{today}}.", "fr": "voir {{today}}."}, language, terms
+    )
+    assert [node.astext() for node in found] == [
+        "see " if language == "en" else "voir ",
+        terms["today"][language],
+        ".",
+    ]
+    assert found[1].tagname == "strong"
+
+
+def test_every_step_links_to_the_page_of_its_screen() -> None:
+    from sphinx import addnodes
+
+    links = [
+        link["reftarget"]
+        for section in ext.guide_nodes("en")
+        for link in section.findall(addnodes.pending_xref)
+    ]
+    assert links == [
+        f"/screens/{step['screen']}"
+        for scenario in GUIDE["scenarios"]
+        for step in scenario["steps"]
+    ]
+    assert all((DOCS / (target.lstrip("/") + ".md")).is_file() for target in links)
+
+
+def test_an_unknown_glossary_term_fails_with_its_place() -> None:
+    broken = json.loads(json.dumps(GUIDE))
+    broken["scenarios"][0]["steps"][0]["explain"]["en"] = "Open {{no-such-term}}."
+    with pytest.raises(ext.GuideError, match=r"create-home\.1\.explain.*no-such-term"):
+        ext.guide_nodes("en", guide=broken)
+
+
+def test_a_text_missing_in_a_language_fails() -> None:
+    broken = json.loads(json.dumps(GUIDE))
+    del broken["scenarios"][1]["steps"][0]["title"]["fr"]
+    with pytest.raises(ext.GuideError, match=r"rooms-equipment\.1\.title.*'fr'"):
+        ext.guide_nodes("fr", guide=broken)
+
+
+def test_a_language_without_words_around_the_guide_fails() -> None:
+    with pytest.raises(ext.GuideError, match="'de'"):
+        ext.guide_nodes("de")
+
+
+def test_the_guide_page_prints_the_guide_and_is_in_the_table_of_contents() -> None:
+    page = (DOCS / "getting-started" / "guide.md").read_text(encoding="utf-8")
+    assert "```{guide-scenarios}" in page
+    index = (DOCS / "getting-started" / "index.md").read_text(encoding="utf-8")
+    toctree = index.split("```{toctree}")[1].split("```")[0]
+    assert "guide" in toctree.split()

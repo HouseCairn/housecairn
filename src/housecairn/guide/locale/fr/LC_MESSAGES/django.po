@@ -1,0 +1,31 @@
+# French translation of HouseCairn.
+# This file is distributed under the same license as HouseCairn (AGPL-3.0-only).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn\n"
+"Report-Msgid-Bugs-To: \n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Guide"
+msgstr "Guide"
+
+msgid "step"
+msgstr "étape"
+
+msgid "ticked at"
+msgstr "cochée le"
+
+msgid "tick of a step"
+msgstr "coche d'une étape"
+
+msgid "ticks of steps"
+msgstr "coches d'étapes"
+
+msgid "You already have an example home. Delete it to make another."
+msgstr "Vous avez déjà un logement d'exemple. Supprimez-le pour en créer un autre."

@@ -17,7 +17,8 @@ from django.utils.translation import gettext as _
 
 from housecairn.core.language import language_of
 from housecairn.core.links import external_url
-from housecairn.homes.models import WRITE_ROLES, Membership
+from housecairn.homes.models import WRITE_ROLES, Home, Membership
+from housecairn.homes.services import real_homes
 from housecairn.instance.config import get_setting
 from housecairn.notifications import devices, outbound, reminders, services
 from housecairn.notifications.models import Channel, Preference
@@ -41,7 +42,12 @@ def report_created(report_id: str) -> int:
     if report is None or report.home.archived_at is not None:
         return 0  # an archived home sends no alert (docs/adr/0079)
     people = (
-        Membership.objects.filter(home=report.home, role__in=WRITE_ROLES, user__is_active=True)
+        Membership.objects.filter(
+            # The example home of the guide sends no alert (docs/adr/0084).
+            home__in=real_homes(Home.objects.filter(pk=report.home_id)),
+            role__in=WRITE_ROLES,
+            user__is_active=True,
+        )
         .exclude(user_id=report.reporter_id)
         .values_list("user_id", flat=True)
     )

@@ -12,6 +12,7 @@ addresses of notification channels) are encrypted with a key derived from it, so
 that held both would give them all to whoever got a copy. Keep the key apart.
 """
 
+import contextlib
 import datetime
 import hashlib
 import io
@@ -23,13 +24,19 @@ import sqlite3
 import subprocess
 import tarfile
 import tempfile
+from collections.abc import Iterator
 from importlib import metadata
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
-from django.db import connection
+from django.db import DatabaseError, connection, connections, transaction
+from django.db.models import sql
+from django.db.models.deletion import Collector
+
+from housecairn.homes import files as home_files
 
 FORMAT = "housecairn-instance-backup"
 VERSION = 1
@@ -59,8 +66,175 @@ def postgres_environment() -> dict[str, str]:
     return env
 
 
-def dump_database(target: Path) -> str:
-    """Write the database into `target`; returns its kind (`sqlite` or `postgresql`)."""
+@contextlib.contextmanager
+def copy_connection(database: Path | str) -> Iterator[str]:
+    """A connection alias on a copy of the database, never on the live one.
+
+    SQLite: the file of the copy. PostgreSQL: the name of a scratch database. The settings are
+    those of the instance, without the options of its own connection (the copy is not opened
+    in WAL mode).
+    """
+    alias = f"backup_copy_{secrets.token_hex(4)}"
+    live = connections["default"]
+    settings_dict = dict(live.settings_dict)
+    settings_dict["NAME"] = str(database)
+    if connection.vendor == "sqlite":
+        settings_dict["OPTIONS"] = {}
+    # Set on the handler of the connections, not added to the settings: a connection of the
+    # moment, which no other code of the program can reach by name.
+    wrapper = type(live)(settings_dict, alias)
+    connections[alias] = wrapper
+    try:
+        yield alias
+    finally:
+        wrapper.close()
+        del connections[alias]
+
+
+def remove_example_homes(alias: str) -> list[UUID]:
+    """Remove the example homes of the database of `alias`, and what hangs off them.
+
+    The rows go by the deletion the application runs for a home, without its signals (they act
+    on the live database): the home, every row of a table that hangs off it, soft-deleted ones
+    included, the change log, and the entries of its audit log, whose `home_id` is no foreign
+    key. Returns the ids of the homes removed, so that their files are left out too.
+    """
+    from housecairn.audit.models import AuditEvent
+    from housecairn.homes.models import Home
+
+    database = connections[alias]
+    with database.cursor() as cursor:
+        columns = {
+            c.name for c in database.introspection.get_table_description(cursor, "homes_home")
+        }
+    if "is_example" not in columns:
+        return []  # a database of before the guide: it cannot hold the mark
+    homes = list(Home.all_objects.using(alias).filter(is_example=True))
+    if not homes:
+        return []
+    ids = [home.pk for home in homes]
+    with transaction.atomic(using=alias):
+        collector = Collector(using=alias)
+        collector.collect(homes)
+        collector.sort()
+        for fast in collector.fast_deletes:
+            fast._raw_delete(using=alias)
+        for model, instances in collector.data.items():
+            sql.DeleteQuery(model).delete_batch([instance.pk for instance in instances], alias)
+        AuditEvent.objects.using(alias).filter(home_id__in=ids)._raw_delete(using=alias)
+    return ids
+
+
+def clean_sqlite_copy(path: Path) -> list[UUID]:
+    """Take the example homes out of a copy of the database in a SQLite file.
+
+    Then the copy is written whole in its own file again: no WAL left aside, and no free page
+    that still holds a title of the removed rows.
+    """
+    with copy_connection(path) as alias:
+        ids = remove_example_homes(alias)
+    if ids:
+        raw = sqlite3.connect(path)
+        try:
+            raw.execute("PRAGMA journal_mode=DELETE")
+            raw.execute("VACUUM")
+        finally:
+            raw.close()
+    return ids
+
+
+def _pg_run(
+    program: str, arguments: list[str], env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(  # noqa: S603 - fixed arguments, the connection from the environment
+        [program, *arguments], env=env, capture_output=True, text=True, check=False
+    )
+
+
+def example_homes_in_pg_dump(dump: Path) -> list[UUID]:
+    """The example homes a PostgreSQL dump holds, read from the `homes_home` rows of the dump."""
+    program = shutil.which("pg_restore")
+    if program is None:
+        raise CommandError("pg_restore is not installed in this container.")
+    result = _pg_run(
+        program,
+        ["--data-only", "--table=homes_home", "--file=-", str(dump)],
+        postgres_environment(),
+    )
+    if result.returncode != 0:
+        raise CommandError(f"pg_restore failed: {result.stderr.strip()[:500]}")
+    return example_homes_in_copy_text(result.stdout)
+
+
+def example_homes_in_copy_text(text: str) -> list[UUID]:
+    """The ids of the rows of `homes_home` marked as example in the `COPY` block of a dump."""
+    columns: list[str] | None = None
+    found: list[UUID] = []
+    for line in text.splitlines():
+        if line.startswith("COPY "):
+            names = line[line.index("(") + 1 : line.index(")")]
+            columns = [name.strip().strip('"') for name in names.split(",")]
+        elif line == "\\.":
+            columns = None
+        elif columns is not None and "is_example" in columns:
+            cells = line.split("\t")
+            if cells[columns.index("is_example")] == "t":
+                found.append(UUID(cells[columns.index("id")]))
+    return found
+
+
+def clean_pg_dump(dump: Path, ids: list[UUID]) -> None:
+    """Leave the example homes out of a PostgreSQL dump, through a scratch database.
+
+    The dump is restored into a scratch database, the homes are removed there, and the
+    scratch database is dumped again in its place. It needs the right to create a database:
+    without it the backup stops, rather than keep a home that must never leave the instance.
+    """
+    restore = shutil.which("pg_restore")
+    program = shutil.which("pg_dump")
+    if restore is None or program is None:
+        raise CommandError("pg_dump and pg_restore are not installed in this container.")
+    quote = connection.ops.quote_name
+    scratch = f"{connection.settings_dict['NAME']}_backup_{secrets.token_hex(4)}"
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(f"CREATE DATABASE {quote(scratch)}")
+    except DatabaseError as exc:
+        raise CommandError(
+            f"{len(ids)} example home(s) must be left out of the backup, which takes a scratch "
+            "database, and the database user cannot create one. Delete the example home "
+            f"(Guide > Delete the example home) or allow CREATEDB: {str(exc)[:200]}"
+        ) from None
+    env = {**postgres_environment(), "PGDATABASE": scratch}
+    again = dump.with_name(dump.name + ".clean")
+    try:
+        result = _pg_run(
+            restore, ["--no-owner", "--exit-on-error", "--dbname", scratch, str(dump)], env
+        )
+        if result.returncode != 0:
+            raise CommandError(f"pg_restore failed: {result.stderr.strip()[:500]}")
+        with copy_connection(scratch) as alias:
+            remove_example_homes(alias)
+        result = _pg_run(
+            program, ["--format=custom", "--no-owner", f"--file={again}", scratch], env
+        )
+        if result.returncode != 0:
+            raise CommandError(f"pg_dump failed: {result.stderr.strip()[:500]}")
+        again.replace(dump)
+    finally:
+        again.unlink(missing_ok=True)
+        with connection.cursor() as cursor:
+            cursor.execute(f"DROP DATABASE IF EXISTS {quote(scratch)}")
+
+
+def dump_database(target: Path) -> tuple[str, list[UUID]]:
+    """Write the database into `target`, example homes left out (docs/adr/0084).
+
+    Returns its kind (`sqlite` or `postgresql`) and the ids of the example homes left out,
+    whose files the walk of the media leaves out too. This and the walk of `MEDIA_ROOT` are the
+    only places that copy data out of the instance. The exclusion is made on the copy, never on
+    the live database.
+    """
     vendor = connection.vendor
     if vendor == "sqlite":
         connection.ensure_connection()
@@ -69,7 +243,7 @@ def dump_database(target: Path) -> str:
             connection.connection.backup(destination)
         finally:
             destination.close()
-        return "sqlite"
+        return "sqlite", clean_sqlite_copy(target)
     if vendor == "postgresql":
         program = shutil.which("pg_dump")
         if program is None:
@@ -84,7 +258,10 @@ def dump_database(target: Path) -> str:
         if result.returncode != 0:
             # pg_dump says why on stderr (a server newer than the client, a refused login).
             raise CommandError(f"pg_dump failed: {result.stderr.strip()[:500]}")
-        return "postgresql"
+        ids = example_homes_in_pg_dump(target)
+        if ids:
+            clean_pg_dump(target, ids)
+        return "postgresql", ids
     raise CommandError(f"Backups of a {vendor} database are not supported.")  # pragma: no cover
 
 
@@ -134,7 +311,8 @@ class Command(BaseCommand):
             raise CommandError(f"{target} already exists; wait a second and run it again.")
         with tempfile.TemporaryDirectory(dir=output) as scratch:
             work = Path(scratch)
-            kind = dump_database(work / "database")
+            kind, left_out = dump_database(work / "database")
+            skipped = [d for home_id in left_out for d in home_files.home_directories(home_id)]
             parts = {"database": sha256(work / "database")}
             secret = data_dir() / SECRET_KEY_FILE
             media = Path(settings.MEDIA_ROOT)
@@ -150,6 +328,8 @@ class Command(BaseCommand):
                     for path in sorted(media.rglob("*")):
                         if path.is_symlink() or not path.is_file():
                             continue
+                        if any(path.is_relative_to(directory) for directory in skipped):
+                            continue  # a file of an example home never leaves the instance
                         name = "media/" + path.relative_to(media).as_posix()
                         archive.add(path, arcname=name, recursive=False)
                         parts[name] = sha256(path)

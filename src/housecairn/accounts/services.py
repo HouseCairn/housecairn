@@ -209,10 +209,13 @@ def homes_blocking_erasure(user: User) -> list[Any]:
     member is not in this list: it goes with the account.
     """
     from housecairn.homes.models import Home, Membership, Role
+    from housecairn.homes.services import real_homes
 
     owned = Membership.objects.filter(user=user, role=Role.OWNER).values("home_id")
     blocking = []
-    for home in Home.objects.filter(id__in=owned).order_by("name"):
+    # The example home of the guide is neither offered nor blocking: it has no other member
+    # (docs/adr/0084), and it goes with the account.
+    for home in real_homes(Home.objects.filter(id__in=owned)).order_by("name"):
         members = Membership.objects.filter(home=home)
         if (
             not members.filter(role=Role.OWNER).exclude(user=user).exists()
@@ -232,6 +235,7 @@ def delete_account(user: User, *, by_admin: User | None = None) -> None:
     to the account become empty.
     """
     from housecairn.audit import services as audit
+    from housecairn.guide import services as guide_services
     from housecairn.homes import services as home_services
     from housecairn.homes.models import Invitation, Membership
     from housecairn.instance.models import InstanceInvitation
@@ -270,7 +274,11 @@ def delete_account(user: User, *, by_admin: User | None = None) -> None:
             if not Membership.objects.filter(home=membership.home).exclude(user=user).exists()
         ]
         for home in alone:
-            home_services.erase_home(home)
+            if home.is_example:
+                # No row of erased home, no audit entry: it never reached a sync (docs/adr/0084).
+                guide_services.remove_example(user, home)
+            else:
+                home_services.erase_home(home)
         # Invitations to the address, accepted or not, are not kept after erasure.
         Invitation.all_objects.filter(email__iexact=user.email).delete()
         InstanceInvitation.all_objects.filter(email__iexact=user.email).delete()

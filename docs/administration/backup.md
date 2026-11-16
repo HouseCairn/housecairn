@@ -32,6 +32,14 @@ it off the machine, and remove old copies from `/data/backups/` yourself.
 
 **The secret key is not in the archive**, unless you add `--include-secret-key`.
 
+**The example home is not in the archive** either: a person who follows the guide works in an
+example home that never leaves the instance, so `backup_instance` removes it, with its rows, its
+audit entries and its files in every folder of `/data/media/`, from the copy of the database
+before it enters the archive (the live database is not touched). The command says how many it
+left out. With PostgreSQL the same cleaning is done on a scratch database made from the dump
+(the database role needs the right to create a database), and `backup_instance` stops with a
+message if it cannot ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)).
+
 ### The secret key
 
 The stored secrets (the SMTP password, the secrets of the sign-in providers added in the
@@ -112,6 +120,10 @@ With SQLite, stop the application, then restore the archive of
 docker compose run --rm housecairn python -m housecairn.entrypoint manage \
   restore_instance /data/backups/housecairn-20261110T120000Z.tar --yes
 ```
+
+A home that arrives marked as an example, in an archive written by another hand or by an older
+version, is erased by the restore with its rows, audit entries and files, and the command says
+so: an instance never holds an example home that it did not make itself.
 
 Every part is checked against the manifest first; a changed backup, a name that
 leaves its directory or a link is refused and nothing is replaced. The

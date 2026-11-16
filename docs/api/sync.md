@@ -77,6 +77,10 @@ yet is kept and shown as it is, never refused:
 }
 ```
 
+- The list is the real homes of the account: the example home of the guide
+  ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)) never appears in it, and the routes of
+  its changes, its snapshot, its pushes and its files answer 404 for it. A push that tries to write the
+  mark of an example is refused as forbidden: the mark is not a field of the protocol.
 - `role`: `owner`, `member` or `read_only`, the role of the account in the home.
 - `archived_at`: null, or the clock of the archiving.
 - `head`: the position of the last change of the home.

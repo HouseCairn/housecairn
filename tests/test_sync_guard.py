@@ -27,9 +27,11 @@ import pytest
 from django.apps import apps
 from django.db import connection, models, transaction
 
+from housecairn.accounts.models import User
+from housecairn.guide import services as guide_services
 from housecairn.homes.models import Home
 from housecairn.sync import changes
-from housecairn.sync.models import Change
+from housecairn.sync.models import Change, HomeHead, RowClocks
 from tests.test_export_registry import cascades_from_home, project_models
 
 pytestmark = pytest.mark.django_db
@@ -54,6 +56,7 @@ NOT_SYNCED = {
     "apitokens.AppConnection_homes": "which homes a connected app reaches",
     "calendar.Feed": "the secret address of a calendar feed of the web",
     "events.Event": "the instance log of events",
+    "guide.StepTick": "the steps of the guide ticked on the example home, which never leaves it",
     "homes.ExportJob": "an archive made for a download",
     "homes.ImportPreview": "a CSV file waiting for its confirmation",
     "homes.Invitation": "an invitation to a home, of the web",
@@ -191,6 +194,34 @@ def test_a_write_of_a_covered_model_records_a_change(alice_home: Home) -> None:
     """A write path of a covered model that skips `record_change` fails here."""
     problems = guard_problems(alice_home, COVERED_APPS, SCENARIOS, NOT_APPLICABLE)
     assert problems == [], "\n".join(problems)
+
+
+def test_a_write_of_an_example_home_records_no_change(alice: User) -> None:
+    """The same scenarios on an example home (docs/adr/0084): every one writes, none records.
+
+    The rule lives in `changes.record_change`, which every recorder of a change goes through
+    (`sync.rows`, `projects.changelog`, and in the sync API `pushing`, `repairs`, `retention`),
+    so the writers of every covered app stay silent on an example home.
+    """
+    example = guide_services.create_example_home(alice)
+    problems = []
+    for model in home_models():
+        label = model._meta.label
+        if model._meta.app_label not in COVERED_APPS:
+            continue
+        for kind in kinds_of(model):
+            scenario = SCENARIOS.get((label, kind))
+            if (label, kind) in NOT_APPLICABLE or scenario is None:
+                continue
+            spy = _WriteSpy(model._meta.db_table)
+            with transaction.atomic(), connection.execute_wrapper(spy):
+                scenario(example)
+            if not spy.wrote:
+                problems.append(f"{label} {kind}: the scenario writes nothing to the table")
+    assert problems == [], "\n".join(problems)
+    assert not Change.objects.filter(home=example).exists()
+    assert not HomeHead.objects.filter(home=example).exists()
+    assert not RowClocks.objects.filter(home=example).exists()
 
 
 # The guard itself: it fails when an app is listed without being covered

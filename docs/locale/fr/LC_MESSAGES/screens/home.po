@@ -27,6 +27,9 @@ msgstr "La page d'un logement, sur `/h/<home id>/` : son nom, votre rôle, sa de
 msgid "When the home requires signing in through a provider and your session did not, the page asks you to continue with that provider instead."
 msgstr "Quand le logement exige une connexion par un fournisseur que votre session n'a pas utilisé, la page vous propose de continuer avec ce fournisseur."
 
+msgid "An example home, the one that the guide makes ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)), opens like another home but never leaves the instance: it has no **Export all data**, no QR labels, no invitations and no calendar feed, it is not in the list of your homes of the connected apps, and nobody but you sees it ([Export and deletion](../administration/data.md#the-example-home))."
+msgstr "Un logement d'exemple, celui que fabrique le guide ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)), s'ouvre comme un autre logement mais ne quitte jamais l'instance : il n'a ni **Exporter toutes les données**, ni étiquettes QR, ni invitations, ni flux de calendrier, il ne figure pas dans la liste de vos logements des applications connectées, et personne d'autre que vous ne le voit ([Export et suppression](../administration/data.md#le-logement-d-exemple))."
+
 msgid "Name, currency and hemisphere"
 msgstr "Nom, devise et hémisphère"
 

@@ -81,6 +81,7 @@ def _cell(f: models.Field[Any, Any], row: models.Model, people: dict[Any, Any]) 
 
 
 def rows(home: Home, entity: CsvEntity) -> Iterator[list[str]]:
+    exports.refuse_example(home)
     section = _section(entity.section)
     columns = _columns(section)
     header = [f.name for f in columns]
@@ -101,7 +102,11 @@ def rows(home: Home, entity: CsvEntity) -> Iterator[list[str]]:
 
 
 def build_csv(home: Home, entity: CsvEntity) -> tuple[bytes, str]:
-    """The CSV of one table of the home, and its file name."""
+    """The CSV of one table of the home, and its file name.
+
+    The example home of the guide is refused (docs/adr/0084).
+    """
+    exports.refuse_example(home)
     out = io.StringIO()
     out.write(BOM)
     writer = csv.writer(out, lineterminator="\r\n")

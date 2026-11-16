@@ -35,6 +35,8 @@ _RELATED = ("room", "item__room", "article")
 
 
 def _require_write(actor: AnyUser, home: Home) -> None:
+    if home.is_example:
+        raise PermissionDenied  # the example home of the guide has no QR label (docs/adr/0084)
     if not home_services.can_write(actor, home):
         raise PermissionDenied
 

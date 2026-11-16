@@ -22,6 +22,9 @@ def record_event(
     payload: dict[str, Any],
     token: ApiToken | None = None,
 ) -> Event:
+    if home.is_example:
+        # The example home of the guide receives no event (docs/adr/0084).
+        raise PermissionDenied
     if not home_services.can_write(actor, home):
         raise PermissionDenied
     size = len(json.dumps(payload, separators=(",", ":")).encode("utf-8"))

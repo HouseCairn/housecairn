@@ -64,6 +64,12 @@ class OpenView(LoginRequiredMixin, View):
 class LabelsMixin(HomeRoomsMixin):
     """A page of one home's labels."""
 
+    def get_home(self, *, allow_locked: bool = False) -> Any:
+        home = super().get_home(allow_locked=allow_locked)
+        if home.is_example:
+            raise Http404  # the example home of the guide has no QR label (docs/adr/0084)
+        return home
+
     def get_label(self) -> Any:
         return get_object_or_404(services.labels_of(self.home), id=self.kwargs["label_id"])
 

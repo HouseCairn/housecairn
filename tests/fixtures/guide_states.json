@@ -1,0 +1,1159 @@
+{
+  "$description": "Vectors of the evaluator of the steps of the guide (docs/adr/0084, `guide.states`), pinned by the web (tests/test_guide_states.py) and by the mobile app, as it pins the recurrence vectors. A case is a sequence of snapshots of the rows of the example home, each with the steps ticked after it: a tick is stored as soon as its state is true and it stays, so `ticked` only grows. A row is `{entity, fields}`; a field is named as in the `where` of `guide.json` (a foreign key without `_id`), a decimal is a string. The rows are those of the example home only. Only steps that have a state appear; the four steps ticked by hand never do.",
+  "version": 1,
+  "cases": [
+    {
+      "name": "a home that is not an example ticks nothing",
+      "why": "Only the home with the mark ticks step 1.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": false
+              }
+            }
+          ],
+          "ticked": []
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rooms and equipment",
+      "why": "Rows, minimum counts and filters of scenario 2.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Bathroom"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Bathroom"
+              }
+            },
+            {
+              "entity": "rooms.item",
+              "fields": {
+                "kind": "surface",
+                "brand": "",
+                "room": "r1"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Bathroom"
+              }
+            },
+            {
+              "entity": "rooms.item",
+              "fields": {
+                "kind": "equipment",
+                "brand": "",
+                "room": "r1"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2",
+            "rooms-equipment.3"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Bathroom"
+              }
+            },
+            {
+              "entity": "rooms.item",
+              "fields": {
+                "kind": "equipment",
+                "brand": "Brewmark",
+                "room": "r1"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2",
+            "rooms-equipment.3",
+            "rooms-equipment.4"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a task, then one that comes back",
+      "why": "A task of any kind ticks 3.1; only a repeat other than once ticks 3.2.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "once",
+                "title": "Descaling"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "once",
+                "title": "Descaling"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "after_last",
+                "title": "Descaling"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1",
+            "recurring-task.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "fixed",
+                "title": "Descaling"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1",
+            "recurring-task.2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "marked done, then planned again: the tick stays",
+      "why": "ADR 0084: the done occurrence is planned again in the second snapshot, 3.3 stays.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "after_last",
+                "title": "Descaling"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1",
+            "recurring-task.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "after_last",
+                "title": "Descaling"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "done"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1",
+            "recurring-task.2",
+            "recurring-task.3"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "after_last",
+                "title": "Descaling"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1",
+            "recurring-task.2",
+            "recurring-task.3"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "recurring-task.1",
+            "recurring-task.2",
+            "recurring-task.3"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a room deleted afterwards",
+      "why": "A step ticked stays ticked even if its state goes away.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Bathroom"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a report, closed or turned into a task",
+      "why": "A report that is not open ticks 'Make it a task, or close it'.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "reports.report",
+              "fields": {
+                "status": "open"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "report-problem.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "reports.report",
+              "fields": {
+                "status": "task"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "report-problem.1",
+            "report-problem.3"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "reports.report",
+              "fields": {
+                "status": "resolved"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "report-problem.1",
+            "report-problem.3"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "reports.report",
+              "fields": {
+                "status": "no_action"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "report-problem.1",
+            "report-problem.3"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a report closed at once",
+      "why": "A report resolved the first time it is seen ticks both steps.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "reports.report",
+              "fields": {
+                "status": "resolved"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "report-problem.1",
+            "report-problem.3"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "the budget of a project",
+      "why": "Two lines above 0, two quotes, an accepted one with a line, a payment, an envelope.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "0",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "0"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "0"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1",
+            "project-budget.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "received",
+                "budget_line": null,
+                "amount": "100"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1",
+            "project-budget.2"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "received",
+                "budget_line": null,
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "accepted",
+                "budget_line": null,
+                "amount": "100"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1",
+            "project-budget.2",
+            "project-budget.3"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "received",
+                "budget_line": null,
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "accepted",
+                "budget_line": "l1",
+                "amount": "100"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1",
+            "project-budget.2",
+            "project-budget.3",
+            "project-budget.4"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "480"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "received",
+                "budget_line": null,
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "accepted",
+                "budget_line": "l1",
+                "amount": "100"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1",
+            "project-budget.2",
+            "project-budget.3",
+            "project-budget.4",
+            "project-budget.5"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "480"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "received",
+                "budget_line": null,
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "accepted",
+                "budget_line": "l1",
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.annualenvelope",
+              "fields": {
+                "amount": "6000"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.1",
+            "project-budget.2",
+            "project-budget.3",
+            "project-budget.4",
+            "project-budget.5",
+            "project-budget.6"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "a payment of 0.00 is not a payment",
+      "why": "`gt` compares numbers, not texts: 0.00 is not above 0, 0.01 is.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "0.00",
+                "paid": "0.00"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1.00",
+                "paid": "0.00"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1"
+          ]
+        },
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "0.00",
+                "paid": "0.00"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1.00",
+                "paid": "0.01"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "project-budget.5"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "everything of the example",
+      "why": "The whole example home ticks every step that has a state.",
+      "snapshots": [
+        {
+          "rows": [
+            {
+              "entity": "homes.home",
+              "fields": {
+                "is_example": true
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Kitchen"
+              }
+            },
+            {
+              "entity": "rooms.room",
+              "fields": {
+                "name": "Bathroom"
+              }
+            },
+            {
+              "entity": "rooms.item",
+              "fields": {
+                "kind": "equipment",
+                "brand": "Brewmark",
+                "room": "r1"
+              }
+            },
+            {
+              "entity": "tasks.task",
+              "fields": {
+                "repeat_mode": "after_last",
+                "title": "Descaling"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "done"
+              }
+            },
+            {
+              "entity": "tasks.occurrence",
+              "fields": {
+                "status": "planned"
+              }
+            },
+            {
+              "entity": "reports.report",
+              "fields": {
+                "status": "resolved"
+              }
+            },
+            {
+              "entity": "projects.project",
+              "fields": {
+                "title": "Bathroom"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "1200",
+                "paid": "480"
+              }
+            },
+            {
+              "entity": "projects.budgetline",
+              "fields": {
+                "planned": "3000",
+                "paid": "0"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "accepted",
+                "budget_line": "l2",
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.quote",
+              "fields": {
+                "status": "received",
+                "budget_line": null,
+                "amount": "100"
+              }
+            },
+            {
+              "entity": "projects.annualenvelope",
+              "fields": {
+                "amount": "6000"
+              }
+            }
+          ],
+          "ticked": [
+            "create-home.1",
+            "rooms-equipment.1",
+            "rooms-equipment.2",
+            "rooms-equipment.3",
+            "rooms-equipment.4",
+            "recurring-task.1",
+            "recurring-task.2",
+            "recurring-task.3",
+            "report-problem.1",
+            "report-problem.3",
+            "project-budget.1",
+            "project-budget.2",
+            "project-budget.3",
+            "project-budget.4",
+            "project-budget.5",
+            "project-budget.6"
+          ]
+        }
+      ]
+    }
+  ]
+}

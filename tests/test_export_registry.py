@@ -32,6 +32,9 @@ LEFT_OUT = {
     # The owners read it on the page of the home and from the API (`/audit/`);
     # docs/administration/data.md does not list it in the archive. Erased by `erase_home`.
     "audit.AuditEvent": "the audit log of the home",
+    # The ticks of the steps of the guide: they hang off the example home, which is never
+    # exported (docs/adr/0084), and go with it.
+    "guide.StepTick": "the steps of the guide done on the example home",
     # Which homes a token of a person may reach. The token is the person's and is revoked
     # once no home is left; the archive never carries a secret.
     "apitokens.ApiToken_homes": "the homes an API token reaches",

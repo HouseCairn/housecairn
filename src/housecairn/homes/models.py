@@ -60,6 +60,13 @@ class Home(BaseModel):
     # is listed apart, sends no reminder and has an empty calendar feed, but stays readable,
     # editable and exportable when opened.
     archived_at = models.DateTimeField(_("archived at"), null=True, blank=True, editable=False)
+    # The mark of the example home of the interactive guide (docs/adr/0084), set only by
+    # `guide.services.create_example_home`. No form, no API field and no sync operation writes
+    # it; a real home never becomes an example and the other way round. An example home never
+    # leaves the instance: no change, no export, no backup, no list of homes (`real_homes`).
+    is_example = models.BooleanField(
+        _("Example home"), default=False, db_default=False, editable=False
+    )
 
     class Meta:
         verbose_name = _("home")
