@@ -82,7 +82,7 @@ yet is kept and shown as it is, never refused:
 - `member_id`: the `id` of the entry of `members` that is the account of the connection, in this
   home. Look it up there to know who "me" is, for example to keep the reminders of the tasks
   whose `assignee_id` is this value. It is the same value as the account's own `id` in
-  `members`, so it tells nothing more about the account. Added after the first shape: a client
+  `members`, so it tells nothing more about the account. It is the account's id, like `members[].id` and `assignee_id`, not the membership id that the routes `/api/v1/homes/{home id}/members/{id}/` take. Added after the first shape: a client
   written before it ignores it.
 - `members`: the accounts of the home, with the name shown for them and their role, never
   their address. The rows name a person by this `id` (`assignee_id`, `completed_by_id`).

@@ -401,7 +401,9 @@ which would suggest an account.
 - It is the same value as the `id` already given in `members`, and the role of that entry is
   the `role` of the home: nothing new is exposed about the account (no address, no other
   identifier). The snapshot lists the same `members`, so a phone that reads both finds the same
-  entry.
+  entry. It is the id of the account, like `members[].id` and `assignee_id`, and not the
+  membership id that the routes `/api/v1/homes/{home id}/members/{id}/` take: a client that
+  passes one for the other gets a 404.
 - It is a key added to an object, and no existing key is renamed or removed: a client written
   before it ignores it (see Compatibility). Today the `id` of a member is the id of its account,
   so the value is the same in every home of the connection; a client reads it per home all the
