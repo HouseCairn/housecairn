@@ -1,10 +1,9 @@
-{% load i18n %}{# Signed out, the language of the pages: the language cookie (docs/adr/0074). Signed in, the display preferences decide. No `next`: the address of a page can hold a secret (an invitation link), and Django goes back to the page that posted (`Referer`, same origin), else to the start. #}
+{% load i18n %}{# Signed out, the language of the pages: the language cookie (docs/adr/0074). Signed in, the display preferences decide. One button per language, so that choosing it is the whole action: no list to open and no Change button. No `next`: the address of a page can hold a secret (an invitation link), and Django goes back to the page that posted (`Referer`, same origin), else to the start. #}
 {% get_current_language as LANGUAGE_CODE %}{% get_available_languages as LANGUAGES %}
 <form method="post" action="{% url 'set_language' %}" class="language-switch">
   {% csrf_token %}
-  <label for="language-switch">{% translate "Language" %}</label>
-  <select id="language-switch" name="language">
-    {% for code, name in LANGUAGES %}<option value="{{ code }}" lang="{{ code }}"{% if code == LANGUAGE_CODE %} selected{% endif %}>{{ name }}</option>{% endfor %}
-  </select>
-  <button type="submit" class="button-secondary">{% translate "Change" %}</button>
+  <span id="language-switch-label">{% translate "Language" %}</span>
+  <span class="language-switch-choices" role="group" aria-labelledby="language-switch-label">
+    {% for code, name in LANGUAGES %}{% get_language_info for code as info %}<button type="submit" name="language" value="{{ code }}" lang="{{ code }}" class="language-choice"{% if code == LANGUAGE_CODE %} aria-current="true"{% endif %}>{{ info.name_local|capfirst }}</button>{% endfor %}
+  </span>
 </form>

@@ -247,6 +247,7 @@ state of one report (*Ouvert*).
 | `add-photo` | Add a photo | Ajouter une photo | Add button |
 | `reports` | Reports | Signalements | Problems reported in a home |
 | `report-a-problem` | Report a problem | Signaler un problème | Opens the report form |
+| `reports-open` | Open | Ouverts | Filter of the reports |
 | `reports-closed` | Closed | Classés | Filter of the reports |
 | `reports-all` | All | Tous | Filter of the reports: every report (masculine) |
 | `reports-mine` | Mine | Les miens | Filter of the reports |

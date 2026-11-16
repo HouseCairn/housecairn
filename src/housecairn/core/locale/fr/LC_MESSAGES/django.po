@@ -582,9 +582,6 @@ msgstr "Changer de logement"
 msgid "Language"
 msgstr "Langue"
 
-msgid "Change"
-msgstr "Changer"
-
 msgid "Main navigation"
 msgstr "Navigation principale"
 

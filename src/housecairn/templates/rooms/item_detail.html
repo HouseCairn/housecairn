@@ -28,12 +28,11 @@
       {% endif %}
       {% if item.notes %}<div><dt>{% translate "Notes" %}</dt><dd class="prose">{{ item.notes|linebreaksbr }}</dd></div>{% endif %}
     </dl>
-    {% if can_write %}
-      <div class="button-row">
-        <a class="button button-secondary button-small" href="{% url_with_next 'rooms:item-edit' home_id=home.id item_id=item.id %}">{% translate "Edit the item" %}</a>
-      </div>
-    {% endif %}
-    <div class="button-row">{% load labels_extras %}{% object_tools "item" item %}</div>
+    {% load labels_extras %}
+    <div class="button-row">
+      {% if can_write %}<a class="button button-secondary button-small" href="{% url_with_next 'rooms:item-edit' home_id=home.id item_id=item.id %}">{% translate "Edit the item" %}</a>{% endif %}
+      {% object_tools "item" item %}
+    </div>
   </section>
 
   {% if item.links %}
@@ -55,11 +54,11 @@
   <h2>{% translate "Photos" %}</h2>
   {% if photos %}
     {% include "rooms/_photos.html" with photos=photos label=item.name %}
+  {% else %}
+    <p class="empty">{% translate "No photo yet." %}</p>
   {% endif %}
   {% if can_write %}
     <a class="button button-secondary button-block" href="{% url 'rooms:item-photo-add' home_id=home.id item_id=item.id %}">{% translate "Add a photo" %}</a>
-  {% elif not photos %}
-    <p class="empty">{% translate "No photo yet." %}</p>
   {% endif %}
 
   {% open_occurrences_for item as task_rows %}

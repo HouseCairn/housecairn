@@ -9,12 +9,11 @@
       <div><dt>{% translate "Type" %}</dt><dd>{{ room.get_kind_display }}</dd></div>
       {% if room.notes %}<div><dt>{% translate "Notes" %}</dt><dd class="prose">{{ room.notes|linebreaksbr }}</dd></div>{% endif %}
     </dl>
-    {% if can_write %}
-      <div class="button-row">
-        <a class="button button-secondary button-small" href="{% url_with_next 'rooms:edit' home_id=home.id room_id=room.id %}">{% translate "Edit the room" %}</a>
-      </div>
-    {% endif %}
-    <div class="button-row">{% load labels_extras %}{% object_tools "room" room %}</div>
+    {% load labels_extras %}
+    <div class="button-row">
+      {% if can_write %}<a class="button button-secondary button-small" href="{% url_with_next 'rooms:edit' home_id=home.id room_id=room.id %}">{% translate "Edit the room" %}</a>{% endif %}
+      {% object_tools "room" room %}
+    </div>
   </section>
 
   <h2>{% translate "Room memory" %}</h2>
@@ -124,6 +123,7 @@
   {% endif %}
   {% if can_write %}
     <a class="button button-secondary button-block" href="{% url_with_next 'tasks:create' home_id=home.id q_room=room.id %}">{% translate "Add a task" %}</a>
+    <a class="button button-secondary button-block" href="{% url_with_next 'tasks:templates' home_id=home.id q_room=room.id %}">{% translate "Add from a template" %}</a>
   {% endif %}
   {% load budget_extras %}{% room_budget room %}
 {% endblock content %}

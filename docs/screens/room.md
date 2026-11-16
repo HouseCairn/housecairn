@@ -5,7 +5,9 @@ the room is renamed or reordered, so it can be printed on a label.
 
 The page has these parts:
 
-- the **type** and the **notes** of the room, with **Edit the room**;
+- the **type** and the **notes** of the room, then one row of actions, each button as wide
+  as its text and the row going on to a second line when it must: **Edit the room**, the
+  [QR label](qr-label.md) and **Report a problem**;
 - the **room memory**: paint (colour, brand, reference, batch, and the tin left over
   with its quantity and place, from the [stock](stock.md)), floor and wall coverings and
   free notes, with **Edit the memory**. It is empty until you note something, and
@@ -19,7 +21,9 @@ The page has these parts:
   chips above the list keep one category (`?category=`). **Behind the walls** are the
   photos of pipes and cables taken before a wall was closed, to know where not to
   drill;
-- the **items** in the room, with **Add an item**.
+- the **items** in the room, with **Add an item**;
+- the open **tasks** of the room, with **Add a task** and **Add from a template**, which
+  opens the [library of templates](task-templates.md) with this room already chosen.
 
 **Delete the room** (in the edit form) asks for confirmation. Deleting a room
 also deletes its items and their photos; they disappear from every screen and

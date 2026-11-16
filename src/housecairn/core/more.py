@@ -29,6 +29,9 @@ class Entry:
     routes: tuple[str, ...] = ()
     # A count shown next to the label, "Reports (2)"; 0 shows nothing.
     badge: int = 0
+    # The icon of the page of More (`templates/components/icon.html`); the column of a
+    # computer shows the label alone.
+    icon: str = ""
 
 
 @dataclass(frozen=True)
@@ -57,12 +60,14 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
                 reverse("homes:detail", kwargs=kwargs),
                 _("Name, currency, hemisphere, export"),
                 ("homes:detail", "homes:edit", "homes:export", "homes:delete", "homes:audit"),
+                icon="home",
             ),
             Entry(
                 _("Household and roles"),
                 reverse("homes:household", kwargs=kwargs),
                 _("Who shares this home, and with which rights"),
                 ("homes:household", "homes:member", "homes:invite"),
+                icon="users",
             ),
             Entry(
                 _("Reports"),
@@ -70,18 +75,21 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
                 _("Problems reported in this home"),
                 ("reports:*",),
                 reports_waiting,
+                icon="flag",
             ),
             Entry(
                 _("Contractors"),
                 reverse("tasks:contractors", kwargs=kwargs),
                 _("The people and companies who work on the home"),
                 ("tasks:contractor*",),
+                icon="hardhat",
             ),
             Entry(
                 _("QR labels"),
                 reverse("labels:list", kwargs=kwargs),
                 _("Stickers that open a room, an item or an article"),
                 ("labels:*",),
+                icon="qr",
             ),
         ]
     home.append(
@@ -90,39 +98,45 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
             reverse("homes:list"),
             _("Add a home or open another one"),
             ("homes:list", "homes:create"),
+            icon="homes",
         )
     )
     me = [
-        Entry(_("Profile"), reverse("profile"), _("Your display name"), ("profile",)),
+        Entry(_("Profile"), reverse("profile"), _("Your display name"), ("profile",), icon="user"),
         Entry(
             _("Notifications"),
             reverse("notifications:index"),
             _("Where and when your reminders go"),
             ("notifications:*",),
+            icon="bell",
         ),
         Entry(
             _("Display preferences"),
             reverse("display-preferences"),
             _("Language, and how the Today screen is laid out for you"),
             ("display-preferences",),
+            icon="sliders",
         ),
         Entry(
             _("Calendar in another application"),
             reverse("calendar:feeds"),
             _("Secret calendar feeds"),
             ("calendar:feeds", "calendar:regenerate", "calendar:revoke"),
+            icon="calendar",
         ),
         Entry(
             _("API tokens"),
             reverse("api-tokens:list"),
             _("Let Home Assistant or another tool read, change or send events to your homes"),
             ("api-tokens:*",),
+            icon="key",
         ),
         Entry(
             _("Security and sign-in"),
             reverse("more-security"),
             _("Passkeys, password, email addresses, deleting your account"),
             ("more-security", "mfa_*", "account_*"),
+            icon="shield",
         ),
     ]
     result = [Group(HOME, pgettext_lazy("group of More", "Home"), home), Group(ME, _("Me"), me)]
@@ -137,6 +151,7 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
                         reverse("instance:overview"),
                         _("Accounts, invitations, settings, audit log"),
                         ("instance:*",),
+                        icon="server",
                     )
                 ],
             )
@@ -150,13 +165,15 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
                     _("Help"),
                     docs_page_url("", translation.get_language()),
                     _("A guide to every screen"),
+                    icon="help",
                 ),
                 Entry(
                     _("API documentation"),
                     reverse("api-docs"),
                     _("OpenAPI schema and test interface"),
+                    icon="code",
                 ),
-                Entry(_("About"), reverse("about"), "", ("about",)),
+                Entry(_("About"), reverse("about"), "", ("about",), icon="info"),
             ],
         )
     )
@@ -185,6 +202,7 @@ def for_page(
                     "url": e.url,
                     "text": e.text,
                     "badge": e.badge,
+                    "icon": e.icon,
                     "current": current(e, view_name),
                 }
                 for e in group.entries

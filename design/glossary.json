@@ -569,6 +569,19 @@
       ]
     },
     {
+      "id": "reports-open",
+      "concept": "Filter of the reports",
+      "en": "Open",
+      "fr": "Ouverts",
+      "web": [
+        {
+          "app": "reports",
+          "msgid": "Open",
+          "msgctxt": "reports filter"
+        }
+      ]
+    },
+    {
       "id": "reports-closed",
       "concept": "Filter of the reports",
       "en": "Closed",

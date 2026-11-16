@@ -5,24 +5,31 @@
   {% url 'tasks:list' home_id=home.id as parent %}{% back_link parent %}
   <h1>{% translate "Add from a template" %}</h1>
   <p class="small">{% translate "Common tasks of a home, with an indicative interval and its source. Tick those you need: each becomes a task of this home, which you can change like any other." %}</p>
-  <form method="post" class="card">
+  <form method="post">
     {% csrf_token %}
     {% next_field %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.templates.errors }}
     {% for equipment, templates in groups %}
-      <fieldset>
-        <legend>{{ equipment.name.get }}</legend>
-        {% for template in templates %}
-          <p>
-            <label><input type="checkbox" name="templates" value="{{ template.id }}"{% if forloop.first and forloop.parentloop.first %} id="{{ form.templates.auto_id }}_0"{% endif %}{% if form.templates.errors %} aria-invalid="true"{% endif %}{% if template.id in form.templates.value %} checked{% endif %}> {{ template.title.get }}</label>
-            <span class="small">{% include "tasks/_template_interval.html" %}{% if template.region %} · {% blocktranslate trimmed with region=template.region %}rule of {{ region }}{% endblocktranslate %}{% endif %} · <a href="{{ template.source_url }}" rel="noopener noreferrer nofollow">{% translate "source" %}</a></span>
-          </p>
-        {% endfor %}
-      </fieldset>
+      <section aria-labelledby="templates-group-{{ forloop.counter }}">
+        <h2 id="templates-group-{{ forloop.counter }}">{{ equipment.name.get }}</h2>
+        <div class="list">
+          {% for template in templates %}
+            <div class="row template-row">
+              <input type="checkbox" name="templates" value="{{ template.id }}" id="{% if forloop.first and forloop.parentloop.first %}{{ form.templates.auto_id }}_0{% else %}template-{{ template.id }}{% endif %}"{% if form.templates.errors %} aria-invalid="true"{% endif %}{% if template.id in form.templates.value %} checked{% endif %}>
+              <span class="row-body">
+                <label class="row-title" for="{% if forloop.first and forloop.parentloop.first %}{{ form.templates.auto_id }}_0{% else %}template-{{ template.id }}{% endif %}">{{ template.title.get }}</label>
+                <span class="row-text">{% include "tasks/_template_interval.html" %}{% if template.region %} · {% blocktranslate trimmed with region=template.region %}rule of {{ region }}{% endblocktranslate %}{% endif %} · <a class="template-source" href="{{ template.source_url }}" rel="noopener noreferrer nofollow">{% translate "source" %}</a></span>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
     {% endfor %}
-    <p>{{ form.room.label_tag }} {{ form.room }} {{ form.room.errors }}</p>
-    <p>{{ form.due_on.label_tag }} {{ form.due_on }} <span class="small">{{ form.due_on.help_text }}</span> {{ form.due_on.errors }}</p>
+    <section class="card template-where">
+      <p>{{ form.room.label_tag }} {{ form.room }} {{ form.room.errors }}</p>
+      <p>{{ form.due_on.label_tag }} {{ form.due_on }} <span class="small">{{ form.due_on.help_text }}</span> {{ form.due_on.errors }}</p>
+    </section>
     <button type="submit" class="button-block">{% translate "Add the tasks" %}</button>
     {% back_href parent as cancel %}<a class="button button-secondary button-block" href="{{ cancel }}">{% translate "Cancel" %}</a>
   </form>

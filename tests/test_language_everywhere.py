@@ -196,7 +196,10 @@ class TestSignedOut:
     def test_the_sign_in_page_offers_the_languages(self, client: Client) -> None:
         content = client.get(reverse("account_login")).content.decode()
         assert f'action="{reverse("set_language")}"' in content
-        assert '<option value="fr" lang="fr">Français</option>' in content
+        assert (
+            'name="language" value="fr" lang="fr" class="language-choice">Français</button>'
+            in content
+        )
 
     def test_choosing_a_language_signed_out_sets_the_cookie(self, client: Client) -> None:
         login = reverse("account_login")

@@ -450,11 +450,11 @@ msgstr "Modifier l'élément"
 msgid "Photos"
 msgstr "Photos"
 
-msgid "Add a photo"
-msgstr "Ajouter une photo"
-
 msgid "No photo yet."
 msgstr "Aucune photo pour l'instant."
+
+msgid "Add a photo"
+msgstr "Ajouter une photo"
 
 msgid "Tasks"
 msgstr "Tâches"
@@ -601,6 +601,9 @@ msgstr "Aucune photo dans cette catégorie."
 
 msgid "No item in this room yet."
 msgstr "Aucun élément dans cette pièce pour l'instant."
+
+msgid "Add from a template"
+msgstr "Ajouter depuis un modèle"
 
 msgid "Add the room"
 msgstr "Ajouter la pièce"

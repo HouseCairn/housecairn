@@ -9,6 +9,7 @@
       <div class="list">
         {% for entry in group.entries %}
           <a class="row" href="{{ entry.url }}">
+            {% if entry.icon %}{% include "components/icon.html" with name=entry.icon class="row-icon" %}{% endif %}
             <span class="row-body">
               <span class="row-title">{{ entry.label }}{% if entry.badge %} ({{ entry.badge }}){% endif %}</span>
               {% if entry.text %}<span class="row-text">{{ entry.text }}</span>{% endif %}
