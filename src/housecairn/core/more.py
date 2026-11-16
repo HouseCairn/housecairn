@@ -14,6 +14,7 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
+from housecairn.core import about_links
 from housecairn.core.help import docs_page_url
 
 HOME, ME, INSTANCE, HELP = "home", "me", "instance", "help"
@@ -32,6 +33,8 @@ class Entry:
     # The icon of the page of More (`templates/components/icon.html`); the column of a
     # computer shows the label alone.
     icon: str = ""
+    # The page is another site, opened in a new tab.
+    external: bool = False
 
 
 @dataclass(frozen=True)
@@ -173,6 +176,13 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
                     _("OpenAPI schema and test interface"),
                     icon="code",
                 ),
+                Entry(
+                    _("iOS app (TestFlight beta)"),
+                    about_links.TESTFLIGHT_URL,
+                    _("Join the beta on your iPhone"),
+                    icon="phone-download",
+                    external=True,
+                ),
                 Entry(_("About"), reverse("about"), "", ("about",), icon="info"),
             ],
         )
@@ -203,6 +213,7 @@ def for_page(
                     "text": e.text,
                     "badge": e.badge,
                     "icon": e.icon,
+                    "external": e.external,
                     "current": current(e, view_name),
                 }
                 for e in group.entries

@@ -10,8 +10,8 @@ from django.utils import translation
 
 from housecairn.core import about_links
 
-REAL = ("site", "docs", "app", "addon", "integration", "mobile")
-STORES = ("ios", "android")
+REAL = ("site", "docs", "app", "addon", "integration", "mobile", "ios")
+STORES = ("android",)
 
 
 class Tiles(HTMLParser):
@@ -72,7 +72,7 @@ def test_every_real_link_is_an_https_address_defined_in_the_module() -> None:
 
 
 @pytest.mark.django_db
-def test_the_six_real_links_are_present_with_a_safe_rel(client: Client) -> None:
+def test_the_seven_real_links_are_present_with_a_safe_rel(client: Client) -> None:
     links = [t for t in tiles(client) if t["href"]]
     assert [t["href"] for t in links] == [
         link.url for link in about_links.links() if link.key in REAL
@@ -85,24 +85,23 @@ def test_the_six_real_links_are_present_with_a_safe_rel(client: Client) -> None:
 @pytest.mark.django_db
 def test_the_stores_are_not_links_while_their_address_is_empty(client: Client) -> None:
     by_text = {(t["text"] or "").strip().removesuffix("Coming soon"): t for t in tiles(client)}
-    for name in ("iOS", "Android"):
-        tile = by_text[name]
-        assert tile["tag"] == "span"
-        assert tile["href"] is None
-        assert "Coming soon" in (tile["text"] or "")
-    assert len([t for t in tiles(client) if t["href"] is None]) == 2
+    tile = by_text["Android"]
+    assert tile["tag"] == "span"
+    assert tile["href"] is None
+    assert "Coming soon" in (tile["text"] or "")
+    assert len([t for t in tiles(client) if t["href"] is None]) == 1
 
 
 @pytest.mark.django_db
 def test_a_store_becomes_a_link_when_its_address_is_set(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setitem(about_links.STORE_URLS, "ios", "https://apps.example.com/housecairn")
+    monkeypatch.setitem(about_links.STORE_URLS, "android", "https://apps.example.com/housecairn")
     by_text = {(t["text"] or "").strip().removesuffix("Coming soon"): t for t in tiles(client)}
-    assert by_text["iOS"]["tag"] == "a"
-    assert by_text["iOS"]["href"] == "https://apps.example.com/housecairn"
-    assert "Coming soon" not in (by_text["iOS"]["text"] or "")
-    assert by_text["Android"]["href"] is None
+    assert by_text["Android"]["tag"] == "a"
+    assert by_text["Android"]["href"] == "https://apps.example.com/housecairn"
+    assert "Coming soon" not in (by_text["Android"]["text"] or "")
+    assert [t for t in tiles(client) if t["href"] is None] == []
 
 
 @pytest.mark.django_db

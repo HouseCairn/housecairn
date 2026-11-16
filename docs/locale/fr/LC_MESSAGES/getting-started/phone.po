@@ -36,6 +36,12 @@ msgstr "iPhone et iPad"
 msgid "In Safari, open the address of your instance and sign in. Tap **Share**, then **Add to Home Screen**, then **Add**. The name under the icon is the name of the instance."
 msgstr "Dans Safari, ouvrez l'adresse de votre instance et connectez-vous. Touchez **Partager**, puis **Sur l'écran d'accueil**, puis **Ajouter**. Le nom sous l'icône est celui de l'instance."
 
+msgid "iOS app (TestFlight beta)"
+msgstr "Application iOS (bêta TestFlight)"
+
+msgid "[Join the iOS beta via TestFlight](https://testflight.apple.com/join/eygTuxTT) (iPhone, TestFlight required). The installation above works without it."
+msgstr "[Rejoindre la bêta iOS via TestFlight](https://testflight.apple.com/join/eygTuxTT) (iPhone, TestFlight requis). L'installation ci-dessus fonctionne sans elle."
+
 msgid "Without a connection"
 msgstr "Sans connexion"
 
