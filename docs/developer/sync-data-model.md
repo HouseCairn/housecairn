@@ -61,7 +61,8 @@ with the places of their field (`12.50`). An application adjusts that for a mode
 `rows.register(model, rows.Spec(...))` in its `ready()`: columns left out (`homes.home` does not
 send `required_provider`, a rule of the instance), fields without a column (a photo sends its
 file as `image`, a reference with the size, type and dimensions of the stored picture, and no
-thumbnail), and fields that read as the clock of their own write (`homes.home.archived_at`: an
+thumbnail; an attachment and a file of a project send theirs as `file`, see `sync.files`), and
+fields that read as the clock of their own write (`homes.home.archived_at`: an
 archive made on the web is the clock of that write, and an empty value stays empty).
 
 A write made on the web gets a clock from the server's hybrid clock and the device id of the
@@ -199,8 +200,10 @@ What the two applications send is registered in `stock.syncing` and `reports.syn
 Values are those of the protocol: decimals as strings, dates `YYYY-MM-DD`, instants as clock
 strings, foreign keys by their column name (`article_id`). A movement does not carry its effect
 (`delta`), which is derived on read. A file field holds the name of the stored file, and the
-columns derived from a file (its type, its size, its thumbnail) are not fields: the lot of the
-files maps the name to the file reference of the protocol.
+columns derived from a file (its type, its size, its thumbnail) are not fields: the feed gives
+it as a file reference named by the id of its row, and a reference a phone pushes is kept in
+`extra`, until a lot maps them as lot M6 did for the photos, the attachments and the files of
+a project ([Sync API, Files](../api/sync.md#files)).
 
 A row that goes for good (the retention purge, the erasure of a home, the deletion of an account)
 leaves nothing behind: `stock.cascades` and `reports.cascades` remove the clocks of the children

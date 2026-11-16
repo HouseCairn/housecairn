@@ -63,6 +63,7 @@ NOT_SYNCED = {
     "sync.Change": "the log itself",
     "sync.HomeHead": "the log itself",
     "sync.RowClocks": "the log itself",
+    "sync.SyncFile": "the bytes of a file a phone uploaded; the row that refers to it syncs",
 }
 
 KINDS = ("save", "queryset_update", "soft_delete", "hard_delete")

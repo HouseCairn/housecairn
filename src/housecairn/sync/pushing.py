@@ -11,8 +11,10 @@ change is recorded first, which decides the fields that win, then only those are
 
 Once the operations are applied, `sync.repairs` runs the repair rules across rows and the
 effects the web runs once per new state (lot M5b), in the same transaction. Not here: the
-creation of a home (M5c) and the files (M6). A file reference in an operation is kept as a
-field the server does not know yet, in `extra`, until M6 maps it.
+creation of a home (M5c). The file field of a row that holds a file (`sync.files.HOLDERS`: a
+photo, an attachment, a file of a project) takes a file reference, which gives the row the file
+the phone uploaded under that id, or waits for it (lot M6). The file fields of the other types
+(the label of an article, the photo of a report) are still kept in `extra`.
 """
 
 import datetime
@@ -31,6 +33,7 @@ from django.utils.translation import gettext as _
 from housecairn.accounts.models import User
 from housecairn.homes.models import Home, Membership, Role
 from housecairn.sync import changes, clock, reading, repairs
+from housecairn.sync import files as sync_files
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, HomeHead, RowClocks
 
@@ -303,6 +306,9 @@ def columns_of(model: type[models.Model]) -> Columns:
             owned.update({f.attname, f.name})
     owned |= sync_rows.BOOKKEEPING - set(spec.send)
     owned |= sync_rows.derived(model)
+    holder = sync_files.holder_of(model)
+    if holder is not None:  # written by its file reference (`_file_columns`)
+        owned.discard(holder.field)
     return Columns(writable, frozenset(owned - {changes.DELETED_AT} - files))
 
 
@@ -458,10 +464,18 @@ def _apply_row(
     fields = _authors(op, columns, stored is None, str(pusher.user.pk))
     if not fields:
         return _result(op, None, {})  # it only named the author of the row: nothing to write
+    holder = sync_files.holder_of(model)
     values: dict[str, Any] = {}
     logged: dict[str, Any] = {}
     for name, value in fields.items():
         field = columns.writable.get(name)
+        if holder is not None and name == holder.field:
+            try:
+                values[name] = sync_files.parse_reference(value)
+            except sync_files.BadReferenceError as error:
+                raise MalformedError(op.index, str(error)) from None
+            logged[name] = value
+            continue
         if field is None:
             logged[name] = value  # unknown to the server, or a file until M6: `extra`
             continue
@@ -473,12 +487,19 @@ def _apply_row(
         )
     if stored is None:
         missing = [name for name in _required(model, columns) if values.get(name) is None]
+        if holder is not None and holder.field not in values:
+            missing.append(holder.field)  # a photo or an attachment is made with its file
         if missing:
             raise MalformedError(
                 op.index, _("A new row needs %(fields)s.") % {"fields": ", ".join(sorted(missing))}
             )
     _check_extra(op, {name: value for name, value in fields.items() if name not in values})
-    _check_references(home, columns, values)
+    _check_references(home, columns, {k: v for k, v in values.items() if k in columns.writable})
+    known: Any = columns.writable
+    taking: list[Any] = []
+    if holder is not None:
+        known = [*columns.writable, holder.field]
+        settle = _file_columns(model, home, holder, stored, settle, taking)
     recorded = sync_rows.apply_stamped(
         model,
         home.pk,
@@ -487,9 +508,13 @@ def _apply_row(
         logged,
         values,
         stamp=stamp,
-        known=columns.writable,
+        known=known,
         settle=settle,
     )
+    if taking:
+        written = model._base_manager.get(pk=op.row_id)
+        for take in taking:
+            take(written)
     if recorded.change is not None:
         session.note(op.entity, op.row_id, op.kind, op.fields, recorded.change.fields)
     result = _result(op, recorded, _lost(op, model, recorded))
@@ -497,6 +522,39 @@ def _apply_row(
     if texts:
         result["other_version"] = texts
     return result
+
+
+def _file_columns(
+    model: type[models.Model],
+    home: Home,
+    holder: sync_files.Holder,
+    stored: Any,
+    settle: Any,
+    taking: list[Any],
+) -> Any:
+    """A `settle` that writes the columns of the file a reference that won names.
+
+    The column of the file field holds the reference, which `sync.files.columns_for` turns
+    into the columns of the stored file, or of the file still to come. The files a row held
+    before a reference that names another file are removed once the push commits.
+    """
+
+    def settle_files(row: Any, won: dict[str, Any], kind: str) -> dict[str, Any]:
+        held = {} if settle is None else dict(settle(row, won, kind))
+        reference = won.get(holder.field)
+        if kind != changes.PUT or not isinstance(reference, sync_files.Reference):
+            return held
+        columns, take = sync_files.columns_for(model, home.pk, reference)
+        if stored is not None:
+            before = getattr(stored, holder.field).name or ""
+            if sync_files.file_id_of(before, stored.pk) != str(reference.file):
+                storage: Any = model._meta.get_field(holder.field).storage  # type: ignore[union-attr]
+                sync_files.replaced(model, storage, [before, stored.thumbnail.name or ""])
+        if take is not None:
+            taking.append(take)
+        return {**held, **columns}
+
+    return settle_files
 
 
 def _authors(op: Operation, columns: Columns, new: bool, account: str) -> dict[str, Any]:

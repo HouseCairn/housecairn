@@ -1,4 +1,5 @@
-"""The sync API, reading (lot M4 of docs/adr/0079): the homes, the feed and the snapshot.
+"""The sync API (docs/adr/0079): the homes, the feed and the snapshot (M4), the push (M5a), the
+homes made by a phone (M5c) and the files (M6).
 
 Every view is a `SyncAPIView`: only an access token of a connected app with the scope `sync`
 opens it, over the transport rule of docs/adr/0078, and its answers carry `HC-Sync: 1`. A home
@@ -11,11 +12,12 @@ home answers 410 `home_gone`, to the connections bound to it when it was erased 
 import hashlib
 import json
 import uuid
+from pathlib import PurePosixPath
 from typing import Any, cast
 
 from django.core.exceptions import RequestDataTooBig
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -39,7 +41,7 @@ from housecairn.homes.forms import HomeForm
 from housecairn.homes.models import Hemisphere, Home
 from housecairn.homes.scoping import allow, homes_for_request, open_homes_for_request
 from housecairn.sync import changes as sync_changes
-from housecairn.sync import clock, creating, limits, pushing, reading
+from housecairn.sync import clock, creating, files, limits, pushing, reading
 from housecairn.sync.models import Push
 
 READ_RATE_ACTION = limits.READ_ACTION
@@ -651,3 +653,217 @@ class SyncPushView(SyncAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response(answer)
+
+
+# ---------- files (lot M6 of docs/adr/0079) ----------
+
+OCTET_STREAM = "application/octet-stream"
+SHA256_HEADER = "HTTP_HC_SHA256"
+THUMBNAIL = "thumbnail"
+# A file is read from the request in pieces of this size, never more than the limit plus one.
+READ_CHUNK = 64 * 1024
+
+
+def file_too_large(limit: int) -> CodedError:
+    return CodedError(
+        status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+        _("A file holds at most %(bytes)s bytes.") % {"bytes": limit},
+        "too_large",
+    )
+
+
+def _file_body(request: Request) -> tuple[bytes, str]:
+    """The bytes of an upload and their digest, checked against `HC-Sha256`.
+
+    The length the request announces is checked first, and the body is read up to the limit
+    plus one byte only: a file above `file_max_bytes` is refused before it is read in full.
+    """
+    from housecairn.rooms import conf
+
+    limit = conf.photo_max_bytes()
+    declared = request.META.get(SHA256_HEADER, "")
+    if not isinstance(declared, str) or files.SHA256.fullmatch(declared) is None:
+        raise malformed(
+            _("HC-Sha256 is the SHA-256 of the file, 64 lower-case hexadecimal digits.")
+        )
+    try:
+        length = int(request.META.get("CONTENT_LENGTH") or 0)
+    except ValueError:
+        length = 0
+    if length > limit:
+        raise file_too_large(limit)
+    if length == 0:
+        raise malformed(_("The file is empty."))
+    media = request.content_type.split(";")[0].strip().lower()
+    if not media or media.startswith(("multipart/", "application/x-www-form-urlencoded")):
+        raise CodedError(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            _("The body is the file itself, sent as application/octet-stream or its own type."),
+            "unsupported_type",
+        )
+    stream = request._request
+    read = bytearray()
+    while len(read) <= limit:
+        chunk = stream.read(min(READ_CHUNK, limit + 1 - len(read)))
+        if not chunk:
+            break
+        read.extend(chunk)
+    if len(read) > limit:
+        raise file_too_large(limit)
+    data = bytes(read)
+    if not data:
+        raise malformed(_("The file is empty."))
+    if hashlib.sha256(data).hexdigest() != declared:
+        raise malformed(_("HC-Sha256 is not the SHA-256 of the bytes received."))
+    return data, declared
+
+
+def _file_response(located: files.Located, *, thumbnail: bool) -> FileResponse:
+    """The stored file or its thumbnail, sent as the web sends a photo or an attachment.
+
+    The type is the one found when the file was checked, never the sender's; the name is the
+    id. An image is shown inline, anything else is a download. `nosniff` and the sandboxed
+    policy stop a browser from running it.
+    """
+    name = located.thumbnail if thumbnail else located.name
+    content_type = "image/jpeg" if thumbnail else located.content_type
+    try:
+        handle = located.storage.open(name, "rb")
+    except (FileNotFoundError, ValueError):
+        raise exceptions.NotFound from None
+    response = FileResponse(handle, content_type=content_type)
+    extension = ".jpg" if thumbnail else PurePosixPath(located.name).suffix
+    disposition = "inline" if located.is_image else "attachment"
+    response["Content-Disposition"] = f'{disposition}; filename="{located.file_id}{extension}"'
+    response["X-Content-Type-Options"] = "nosniff"
+    response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+    response["Cache-Control"] = "private, max-age=3600"
+    return response
+
+
+class SyncFileView(SyncAPIView):
+    """`PUT` and `GET /api/v1/sync/homes/{h}/files/{file_id}`: the files of the phone."""
+
+    @extend_schema(
+        operation_id="sync_file_upload",
+        request={OCTET_STREAM: OpenApiTypes.BINARY},
+        parameters=[
+            OpenApiParameter(
+                "HC-Sha256",
+                str,
+                location=OpenApiParameter.HEADER,
+                required=True,
+                description="The SHA-256 of the body, 64 lower-case hexadecimal digits.",
+            )
+        ],
+        responses={
+            201: OpenApiResponse(description="The file is kept, under the phone's id."),
+            200: OpenApiResponse(description="The same bytes were uploaded before."),
+            400: OpenApiResponse(
+                description="`malformed`: `HC-Sha256` missing, or not the digest of the body."
+            ),
+            403: OpenApiResponse(
+                description="`forbidden` for a read-only member, or as for every route."
+            ),
+            404: OpenApiResponse(description="Not a home of this connection."),
+            409: OpenApiResponse(
+                description=(
+                    "`file_conflict`: the id holds other bytes, or is held by anything else. "
+                    "The answer does not say which."
+                )
+            ),
+            410: OpenApiResponse(description="`home_gone`."),
+            413: OpenApiResponse(
+                description=(
+                    "`too_large` above `file_max_bytes` of `info.limits`, refused before the "
+                    "body is read in full; `quota_exceeded` when the home has no room left."
+                )
+            ),
+            415: OpenApiResponse(
+                description="`unsupported_type`: not an image or a document the web accepts."
+            ),
+            **{code: REFUSED[code] for code in (401, 429)},
+        },
+        description=(
+            "Upload a file of the phone under the id the phone made, before the push whose "
+            "operation refers to it. An image is checked and written again as on the web (its "
+            "metadata dropped); a document must be one the web accepts for an attachment. "
+            "Sent again with the same bytes, it answers 200."
+        ),
+    )
+    def put(
+        self, request: Request, home_id: uuid.UUID, file_id: uuid.UUID, *args: Any, **kwargs: Any
+    ) -> Response:
+        _push_limited(request)
+        home = readable_home(request, home_id)
+        if not home_services.can_write(cast(User, request.user), home):
+            raise CodedError(
+                status.HTTP_403_FORBIDDEN, _("A read-only member sends no file."), "forbidden"
+            )
+        data, digest = _file_body(request)
+        try:
+            created = files.receive(home, file_id, data, digest)
+        except files.ConflictError:
+            raise CodedError(
+                status.HTTP_409_CONFLICT,
+                _("This file id is already taken by other bytes."),
+                "file_conflict",
+            ) from None
+        except files.UnsupportedError as error:
+            raise CodedError(
+                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, error.message, "unsupported_type"
+            ) from None
+        except files.QuotaError as error:
+            raise CodedError(
+                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, error.message, "quota_exceeded"
+            ) from None
+        return Response(
+            {"file": str(file_id), "sha256": digest},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    @extend_schema(
+        operation_id="sync_file_download",
+        parameters=[
+            OpenApiParameter(
+                "size",
+                str,
+                enum=[THUMBNAIL],
+                description="`thumbnail`: a small JPEG of an image, made by the server.",
+            )
+        ],
+        responses={
+            (200, OCTET_STREAM): OpenApiResponse(
+                OpenApiTypes.BINARY,
+                description=(
+                    "The file the server keeps, with its own type: an image inline, anything "
+                    "else as a download."
+                ),
+            ),
+            400: OpenApiResponse(description="`size` other than `thumbnail`."),
+            404: OpenApiResponse(
+                description=(
+                    "Not a home of this connection, or no file of that id in the home (not "
+                    "uploaded yet, or a thumbnail of a document)."
+                )
+            ),
+            410: OpenApiResponse(description="`home_gone`."),
+            **REFUSED,
+        },
+        description=(
+            "A file of the home by its id: one a phone uploaded, or the file of a photo, an "
+            "attachment or a file of a project made on the web, named by the id of its row."
+        ),
+    )
+    def get(
+        self, request: Request, home_id: uuid.UUID, file_id: uuid.UUID, *args: Any, **kwargs: Any
+    ) -> FileResponse:
+        _limited(request)
+        home = readable_home(request, home_id)
+        size = request.query_params.get("size")
+        if size not in (None, THUMBNAIL):
+            raise exceptions.ParseError(_("size is thumbnail, or left out."))
+        located = files.locate(home.pk, file_id)
+        if located is None or (size == THUMBNAIL and not located.thumbnail):
+            raise exceptions.NotFound
+        return _file_response(located, thumbnail=size == THUMBNAIL)

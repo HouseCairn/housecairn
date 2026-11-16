@@ -256,8 +256,16 @@ class TestFilesAndLinks:
         made = changes_of("projects.projectfile", stored.pk)[0].fields
         assert made["project_id"] == str(project.pk)
         assert made["is_image"] is True
-        assert "file" not in made
+        # The file is its reference, named by the id of the row (docs/adr/0077, need 10).
+        assert made["file"] == {
+            "file": str(stored.pk),
+            "size": stored.size_bytes,
+            "type": "image/jpeg",
+            "width": stored.width,
+            "height": stored.height,
+        }
         assert "thumbnail" not in made
+        assert "content_type" not in made
         services.delete_file(alice, stored)
         assert changes_of("projects.projectfile", stored.pk)[-1].kind == "delete"
 

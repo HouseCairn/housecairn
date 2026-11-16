@@ -21,8 +21,8 @@ msgstr ""
 msgid "Sync API"
 msgstr "API de synchronisation"
 
-msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, starts from a snapshot of the home when it has none, pushes what was typed on the phone, and creates on the server the homes the phone made. Sending files comes in a later version."
-msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, part d'un instantané du logement quand elle n'en a aucune, envoie ce qui a été saisi sur le téléphone et crée sur le serveur les logements faits sur le téléphone. L'envoi des fichiers vient dans une version ultérieure."
+msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, starts from a snapshot of the home when it has none, pushes what was typed on the phone, creates on the server the homes the phone made, and sends and fetches the files of its photos and attachments."
+msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, part d'un instantané du logement quand elle n'en a aucune, envoie ce qui a été saisi sur le téléphone, crée sur le serveur les logements faits sur le téléphone, et envoie et récupère les fichiers de ses photos et pièces jointes."
 
 msgid "Access"
 msgstr "Accès"
@@ -33,14 +33,14 @@ msgstr "Toutes les routes sauf `info` n'acceptent que le jeton d'accès d'une [a
 msgid "A connection reads the homes chosen when it was made, as long as its account is a member of them, with the account's role. A home it was not given, a home its account left, and a home that does not exist all answer `404`, never `403`. A home that requires a sign-in provider is read only by a connection made after signing in through it (`403` with `\"code\": \"sso_required\"` otherwise), as for an API token. An archived home is listed and read like the others."
 msgstr "Une connexion lit les logements choisis quand elle a été créée, tant que son compte en est membre, avec le rôle du compte. Un logement qui ne lui a pas été donné, un logement que son compte a quitté et un logement qui n'existe pas répondent tous `404`, jamais `403`. Un logement qui exige un fournisseur de connexion n'est lu que par une connexion créée après s'être connecté par lui (`403` avec `\"code\": \"sso_required\"` sinon), comme pour un jeton d'API. Un logement archivé est listé et lu comme les autres."
 
-msgid "Reads are limited to 600 a minute per connection, pushes to 60 a minute per connection, and snapshots to 6 a minute per connection (a snapshot also counts as a read), each counted apart; beyond that the answer is `429`. `GET /api/v1/sync/info`, with the access token of a connection, gives these limits in `limits`: `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push` and `push_bytes`."
-msgstr "Les lectures sont limitées à 600 par minute et par connexion, les envois à 60 par minute et par connexion, et les instantanés à 6 par minute et par connexion (un instantané compte aussi comme une lecture), chacun compté à part ; au-delà, la réponse est `429`. `GET /api/v1/sync/info`, avec le jeton d'accès d'une connexion, donne ces limites dans `limits` : `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push` et `push_bytes`."
+msgid "Reads are limited to 600 a minute per connection, pushes to 60 a minute per connection, and snapshots to 6 a minute per connection (a snapshot also counts as a read), each counted apart; beyond that the answer is `429`. An upload of a file counts as a push, a download as a read. `GET /api/v1/sync/info`, with the access token of a connection, gives these limits in `limits`: `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push`, `push_bytes` and `file_max_bytes`, the largest file the instance accepts (its setting of the largest file)."
+msgstr "Les lectures sont limitées à 600 par minute et par connexion, les envois à 60 par minute et par connexion, et les instantanés à 6 par minute et par connexion (un instantané compte aussi comme une lecture), chacun compté à part ; au-delà, la réponse est `429`. Le dépôt d'un fichier compte comme un envoi, son téléchargement comme une lecture. `GET /api/v1/sync/info`, avec le jeton d'accès d'une connexion, donne ces limites dans `limits` : `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push`, `push_bytes` et `file_max_bytes`, le fichier le plus gros que l'instance accepte (son réglage du fichier le plus gros)."
 
 msgid "Values"
 msgstr "Valeurs"
 
-msgid "The operations and rows are those of the mobile protocol: entity types `<app>.<model>` in lower case (`rooms.room`), field names those of the models with foreign keys by their column name (`room_id`), amounts as decimal strings, dates `YYYY-MM-DD`. A **clock** is a hybrid logical clock, 16 lower-case hexadecimal digits; a **device** is the id of the device that wrote, 16 bytes in base64url without padding. The server writes the changes made on the web as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference named by the id of its row, never by the name of the file the server stores."
-msgstr "Les opérations et les lignes sont celles du protocole mobile : types d'entité `<app>.<model>` en minuscules (`rooms.room`), noms de champs ceux des modèles, les clés étrangères par leur nom de colonne (`room_id`), montants en chaînes décimales, dates `YYYY-MM-DD`. Une **horloge** est une horloge logique hybride, 16 chiffres hexadécimaux en minuscules ; un **appareil** est l'identifiant de l'appareil qui a écrit, 16 octets en base64url sans remplissage. Le serveur écrit les modifications faites sur le web comme un seul appareil, dont `GET /api/v1/sync/info` donne l'identifiant. Un fichier est donné comme une référence nommée par l'identifiant de sa ligne, jamais par le nom du fichier que le serveur stocke."
+msgid "The operations and rows are those of the mobile protocol: entity types `<app>.<model>` in lower case (`rooms.room`), field names those of the models with foreign keys by their column name (`room_id`), amounts as decimal strings, dates `YYYY-MM-DD`. A **clock** is a hybrid logical clock, 16 lower-case hexadecimal digits; a **device** is the id of the device that wrote, 16 bytes in base64url without padding. The server writes the changes made on the web as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference, never by the name of the file the server stores ([Files](#files))."
+msgstr "Les opérations et les lignes sont celles du protocole mobile : types d'entité `<app>.<model>` en minuscules (`rooms.room`), noms de champs ceux des modèles, les clés étrangères par leur nom de colonne (`room_id`), montants en chaînes décimales, dates `YYYY-MM-DD`. Une **horloge** est une horloge logique hybride, 16 chiffres hexadécimaux en minuscules ; un **appareil** est l'identifiant de l'appareil qui a écrit, 16 octets en base64url sans remplissage. Le serveur écrit les modifications faites sur le web comme un seul appareil, dont `GET /api/v1/sync/info` donne l'identifiant. Un fichier est donné comme une référence, jamais par le nom du fichier que le serveur stocke ([Fichiers](#files))."
 
 msgid "A field that holds a code of a list takes one of the codes below; a code a phone does not know yet is kept and shown as it is, never refused:"
 msgstr "Un champ qui porte un code d'une liste prend l'un des codes ci-dessous ; un code qu'un téléphone ne connaît pas encore est gardé et affiché tel quel, jamais refusé :"
@@ -157,8 +157,8 @@ msgstr "`ops` : au plus 500 opérations du protocole, dans l'ordre où le télé
 msgid "The push is applied in one transaction, as a whole or not at all. An operation the server cannot read (a type, an id, a clock or a value out of form, a text that is not valid Unicode, a value that nests lists or objects more than 32 deep, a new row without the fields it needs, a write that breaks a rule of the data) makes the whole push `400` with `\"code\": \"malformed\"` and the `index` of the operation, and nothing is written. So does an operation that would leave a row with more than 64 fields the server does not know, or more than 64 KiB of them as JSON."
 msgstr "L'envoi s'applique en une transaction, en entier ou pas du tout. Une opération que le serveur ne peut pas lire (un type, un identifiant, une horloge ou une valeur hors format, un texte qui n'est pas de l'Unicode valide, une valeur qui imbrique listes ou objets sur plus de 32 niveaux, une nouvelle ligne sans les champs dont elle a besoin, une écriture qui enfreint une règle des données) rend tout l'envoi `400` avec `\"code\": \"malformed\"` et l'`index` de l'opération, et rien n'est écrit. De même pour une opération qui laisserait à une ligne plus de 64 champs inconnus du serveur, ou plus de 64 Kio de ces champs en JSON."
 
-msgid "**Each field is decided on its own**: a field is written only if the clock of the operation, then its device id, is greater than the ones the field holds; the server keeps a clock per field of every row, and a write made on the web gets one from the server's clock. A `put` of a row the server does not have creates it with the phone's id; the fields it does not set can be written by any later operation. A `delete` or a `restore` writes the field `deleted_at`; a `put` never brings back a deleted row, only a `restore` with a later clock does. A `delete` may come before the `put` of its row, from another phone: the server keeps it, the row then comes deleted, and the snapshot gives the deletion of a row the server does not have yet. A field the server has no column for (written by a newer app) is kept and given back to the other phones; a file reference is kept the same way until the server stores the files of the phone. The server writes who acted, whatever the operation says: `completed_by_id` and `closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no later operation changes. `assignee_id` may name any member of the home."
-msgstr "**Chaque champ se décide seul** : un champ n'est écrit que si l'horloge de l'opération, puis son identifiant d'appareil, est plus grande que celles que le champ porte ; le serveur garde une horloge par champ de chaque ligne, et une écriture faite sur le web en reçoit une de l'horloge du serveur. Un `put` d'une ligne que le serveur n'a pas la crée avec l'identifiant du téléphone ; les champs qu'il ne pose pas peuvent être écrits par toute opération ultérieure. Un `delete` ou un `restore` écrit le champ `deleted_at` ; un `put` ne ramène jamais une ligne supprimée, seul un `restore` d'horloge plus récente le fait. Un `delete` peut arriver avant le `put` de sa ligne, venu d'un autre téléphone : le serveur le garde, la ligne arrive alors supprimée, et l'instantané donne la suppression d'une ligne que le serveur n'a pas encore. Un champ sans colonne sur le serveur (écrit par une application plus récente) est gardé et rendu aux autres téléphones ; une référence de fichier est gardée de la même façon tant que le serveur ne stocke pas les fichiers du téléphone. Le serveur écrit qui a agi, quoi que dise l'opération : `completed_by_id` et `closed_by_id` sont le compte du téléphone, comme `reporter_id` d'un nouveau signalement, qu'aucune opération ultérieure ne change. `assignee_id` peut désigner tout membre du logement."
+msgid "**Each field is decided on its own**: a field is written only if the clock of the operation, then its device id, is greater than the ones the field holds; the server keeps a clock per field of every row, and a write made on the web gets one from the server's clock. A `put` of a row the server does not have creates it with the phone's id; the fields it does not set can be written by any later operation. A `delete` or a `restore` writes the field `deleted_at`; a `put` never brings back a deleted row, only a `restore` with a later clock does. A `delete` may come before the `put` of its row, from another phone: the server keeps it, the row then comes deleted, and the snapshot gives the deletion of a row the server does not have yet. A field the server has no column for (written by a newer app) is kept and given back to the other phones; so is, for now, the file reference of the label of an article and of the photo of a report. A photo, an attachment and a file of a project take the file their reference names ([Files](#files)). The server writes who acted, whatever the operation says: `completed_by_id` and `closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no later operation changes. `assignee_id` may name any member of the home."
+msgstr "**Chaque champ se décide seul** : un champ n'est écrit que si l'horloge de l'opération, puis son identifiant d'appareil, est plus grande que celles que le champ porte ; le serveur garde une horloge par champ de chaque ligne, et une écriture faite sur le web en reçoit une de l'horloge du serveur. Un `put` d'une ligne que le serveur n'a pas la crée avec l'identifiant du téléphone ; les champs qu'il ne pose pas peuvent être écrits par toute opération ultérieure. Un `delete` ou un `restore` écrit le champ `deleted_at` ; un `put` ne ramène jamais une ligne supprimée, seul un `restore` d'horloge plus récente le fait. Un `delete` peut arriver avant le `put` de sa ligne, venu d'un autre téléphone : le serveur le garde, la ligne arrive alors supprimée, et l'instantané donne la suppression d'une ligne que le serveur n'a pas encore. Un champ sans colonne sur le serveur (écrit par une application plus récente) est gardé et rendu aux autres téléphones ; c'est encore le cas de la référence de fichier de l'étiquette d'un article et de la photo d'un signalement. Une photo, une pièce jointe et un fichier de projet prennent le fichier que nomme leur référence ([Fichiers](#files)). Le serveur écrit qui a agi, quoi que dise l'opération : `completed_by_id` et `closed_by_id` sont le compte du téléphone, comme `reporter_id` d'un nouveau signalement, qu'aucune opération ultérieure ne change. `assignee_id` peut désigner tout membre du logement."
 
 msgid "**Rules across rows are repaired, not refused.** Once the operations are applied, in the same transaction, the server runs the rules the phone runs (mobile ADR 0003), each repair a change of its own with the server's clock, which the feed then gives:"
 msgstr "**Les règles entre lignes sont réparées, pas refusées.** Une fois les opérations appliquées, dans la même transaction, le serveur applique les règles qu'applique le téléphone (ADR mobile 0003), chaque réparation étant un changement à part avec l'horloge du serveur, que le flux donne ensuite :"
@@ -265,6 +265,84 @@ msgstr "L'horloge de l'opération a plus de 24 heures d'avance sur celle du serv
 msgid "A push to a home that was erased answers `410` with `\"code\": \"home_gone\"`, and applies nothing."
 msgstr "Un envoi vers un logement effacé répond `410` avec `\"code\": \"home_gone\"`, et n'applique rien."
 
+msgid "Files"
+msgstr "Fichiers"
+
+msgid "A photo of a room or an item (`rooms.photo`, field `image`), an attachment of a task (`tasks.attachment`, field `file`) and a file of a project (`projects.projectfile`, field `file`) hold a **file reference**:"
+msgstr "Une photo d'une pièce ou d'un équipement (`rooms.photo`, champ `image`), une pièce jointe d'une tâche (`tasks.attachment`, champ `file`) et un fichier d'un projet (`projects.projectfile`, champ `file`) portent une **référence de fichier** :"
+
+msgid "`file` is an id the phone makes for the file, a UUID that is not the id of the row; `sha256` is the SHA-256 of the bytes it uploads, in lower-case hexadecimal; `width` and `height` are given for an image only. A photo or a file made on the web is named by the id of its row, and has no `sha256`. A new photo, attachment or file of a project needs its reference: without it, or with a value that is not one, the push is `400` `malformed`."
+msgstr "`file` est un identifiant que le téléphone fabrique pour le fichier, un UUID qui n'est pas l'identifiant de la ligne ; `sha256` est le SHA-256 des octets qu'il dépose, en hexadécimal minuscule ; `width` et `height` ne sont donnés que pour une image. Une photo ou un fichier fait sur le web est nommé par l'identifiant de sa ligne, et n'a pas de `sha256`. Une nouvelle photo, pièce jointe ou un nouveau fichier de projet a besoin de sa référence : sans elle, ou avec une valeur qui n'en est pas une, l'envoi est `400` `malformed`."
+
+msgid "The phone uploads the file **before** the push that refers to it:"
+msgstr "Le téléphone dépose le fichier **avant** l'envoi qui y fait référence :"
+
+#, python-brace-format
+msgid "`PUT /api/v1/sync/homes/{h}/files/{file_id}`, the bytes of the file as the body (`Content-Type: application/octet-stream`, or the type of the file), with the header `HC-Sha256` holding their digest."
+msgstr "`PUT /api/v1/sync/homes/{h}/files/{file_id}`, les octets du fichier comme corps (`Content-Type: application/octet-stream`, ou le type du fichier), avec l'en-tête `HC-Sha256` qui porte leur empreinte."
+
+msgid "Answer"
+msgstr "Réponse"
+
+msgid "`201`"
+msgstr "`201`"
+
+#, python-brace-format
+msgid "The file is kept: `{\"file\": \"...\", \"sha256\": \"...\"}`."
+msgstr "Le fichier est gardé : `{\"file\": \"...\", \"sha256\": \"...\"}`."
+
+msgid "`200`"
+msgstr "`200`"
+
+msgid "The same bytes were uploaded before under this id: nothing changes."
+msgstr "Les mêmes octets ont déjà été déposés sous cet identifiant : rien ne change."
+
+msgid "`400` `malformed`"
+msgstr "`400` `malformed`"
+
+msgid "`HC-Sha256` missing, not 64 lower-case hexadecimal digits, or not the digest of the body; or an empty body."
+msgstr "`HC-Sha256` absent, autre chose que 64 chiffres hexadécimaux en minuscules, ou pas l'empreinte du corps ; ou un corps vide."
+
+msgid "`403` `forbidden`"
+msgstr "`403` `forbidden`"
+
+msgid "The account is a read-only member of the home."
+msgstr "Le compte est un membre en lecture seule du logement."
+
+msgid "`409` `file_conflict`"
+msgstr "`409` `file_conflict`"
+
+msgid "The id holds other bytes, or is held by anything else on the server (a file of another home, a file of the web). The answer does not say which."
+msgstr "L'identifiant porte d'autres octets, ou est pris par autre chose sur le serveur (un fichier d'un autre logement, un fichier du web). La réponse ne dit pas lequel."
+
+msgid "`413` `too_large`"
+msgstr "`413` `too_large`"
+
+msgid "The file is larger than `file_max_bytes`. A length announced above it is refused before the body is read."
+msgstr "Le fichier dépasse `file_max_bytes`. Une longueur annoncée au-delà est refusée avant que le corps soit lu."
+
+msgid "`413` `quota_exceeded`"
+msgstr "`413` `quota_exceeded`"
+
+msgid "The home has no room left for the file, or holds as many files as it may ([settings](../administration/settings.md))."
+msgstr "Le logement n'a plus de place pour le fichier, ou contient déjà autant de fichiers qu'il le peut ([réglages](../administration/settings.md))."
+
+msgid "`415` `unsupported_type`"
+msgstr "`415` `unsupported_type`"
+
+msgid "Not a file the web accepts: a JPEG, PNG or WebP image, or a PDF, text, Word, Excel or OpenDocument file. HEIC photos are refused, as on the web."
+msgstr "Pas un fichier que le web accepte : une image JPEG, PNG ou WebP, ou un fichier PDF, texte, Word, Excel ou OpenDocument. Les photos HEIC sont refusées, comme sur le web."
+
+msgid "The server checks the file as the web checks an attachment, by its content and never by the type the phone gives: an image is decoded and written again, which drops its metadata (the location of the photo included), and gets a thumbnail; a document is kept as it is. The server keeps its own copy and the phone keeps its own, so the bytes the server sends back are not those of the upload. The file counts in the quota of the home from its upload."
+msgstr "Le serveur contrôle le fichier comme le web contrôle une pièce jointe, par son contenu et jamais par le type que donne le téléphone : une image est décodée et réécrite, ce qui retire ses métadonnées (le lieu de la photo compris), et reçoit une miniature ; un document est gardé tel quel. Le serveur garde sa propre copie et le téléphone la sienne : les octets que le serveur renvoie ne sont donc pas ceux du dépôt. Le fichier compte dans le quota du logement dès son dépôt."
+
+msgid "When a row refers to a file the server has, the row takes it; a photo takes an image only. When the server does not have it yet (the upload failed, or another phone holds it), the push is applied all the same and the row waits: the web shows no picture and a download is `404`, until the upload comes and the row takes the file. A file that no row refers to within 7 days of its upload is removed by the nightly purge: a phone that pushes later than that uploads it again first, with the same id and bytes."
+msgstr "Quand une ligne fait référence à un fichier que le serveur a, la ligne le prend ; une photo ne prend qu'une image. Quand le serveur ne l'a pas encore (le dépôt a échoué, ou un autre téléphone le détient), l'envoi est appliqué quand même et la ligne attend : le web n'affiche pas d'image et un téléchargement répond `404`, jusqu'à ce que le dépôt arrive et que la ligne prenne le fichier. Un fichier auquel aucune ligne ne fait référence dans les 7 jours qui suivent son dépôt est supprimé par la purge de la nuit : un téléphone qui envoie plus tard le dépose d'abord à nouveau, avec le même identifiant et les mêmes octets."
+
+#, python-brace-format
+msgid "`GET /api/v1/sync/homes/{h}/files/{file_id}`, and `?size=thumbnail` for a small JPEG of an image (made by the server for its own pages; the app makes its thumbnails itself). The answer is the file the server keeps, with the type it found: an image inline, anything else as a download (`Content-Disposition`), with `X-Content-Type-Options: nosniff` and a policy that runs nothing. The file of a photo or an attachment made on the web is read by the id its reference gives. The answer is `404` for a file no row holds and never uploaded, or for the thumbnail of a document, and `400` for another `size`. A read-only member reads the files."
+msgstr "`GET /api/v1/sync/homes/{h}/files/{file_id}`, et `?size=thumbnail` pour un petit JPEG d'une image (fait par le serveur pour ses propres pages ; l'application fait ses miniatures elle-même). La réponse est le fichier que garde le serveur, avec le type qu'il a trouvé : une image en ligne, tout le reste en téléchargement (`Content-Disposition`), avec `X-Content-Type-Options: nosniff` et une politique qui n'exécute rien. Le fichier d'une photo ou d'une pièce jointe faite sur le web se lit par l'identifiant que donne sa référence. La réponse est `404` pour un fichier qu'aucune ligne ne porte et jamais déposé, ou pour la miniature d'un document, et `400` pour une autre `size`. Un membre en lecture seule lit les fichiers."
+
 msgid "Errors"
 msgstr "Erreurs"
 
@@ -346,6 +424,36 @@ msgstr "`410`"
 
 msgid "`after` is older than the oldest change kept."
 msgstr "`after` est plus ancien que la plus ancienne modification conservée."
+
+msgid "A file uploaded by a read-only member."
+msgstr "Un fichier déposé par un membre en lecture seule."
+
+msgid "`file_conflict`"
+msgstr "`file_conflict`"
+
+msgid "A file id that holds other bytes, or is held by anything else."
+msgstr "Un identifiant de fichier qui porte d'autres octets, ou pris par autre chose."
+
+msgid "`413`"
+msgstr "`413`"
+
+msgid "A file above `file_max_bytes`."
+msgstr "Un fichier au-delà de `file_max_bytes`."
+
+msgid "`quota_exceeded`"
+msgstr "`quota_exceeded`"
+
+msgid "A file the home has no room left for."
+msgstr "Un fichier pour lequel le logement n'a plus de place."
+
+msgid "`unsupported_type`"
+msgstr "`unsupported_type`"
+
+msgid "`415`"
+msgstr "`415`"
+
+msgid "A file that is not one the web accepts."
+msgstr "Un fichier que le web n'accepte pas."
 
 msgid "`home_gone`"
 msgstr "`home_gone`"

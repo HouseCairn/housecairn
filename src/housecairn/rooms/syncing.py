@@ -3,24 +3,17 @@
 from typing import Any
 
 from housecairn.rooms.models import Photo
-from housecairn.sync import rows
+from housecairn.sync import files, rows
 
 
 def photo_file(photo: Photo) -> dict[str, Any]:
-    """The file reference of a photo, as ADR 0077 (need 10) writes it, without the digest.
+    """The file reference of a photo, as ADR 0077 (need 10) writes it.
 
-    The phone's own id names a file it uploaded; a photo made on the web is named by its own
-    id. The size, type and dimensions of the stored image go in the reference, not as fields.
+    A file a phone sent is named by the phone's id, with the digest of what it sent; a photo
+    made on the web is named by its own id. The size, type and dimensions of the stored image
+    go in the reference, not as fields.
     """
-    return {
-        "image": {
-            "file": str(photo.pk),
-            "size": photo.size_bytes,
-            "type": photo.content_type,
-            "width": photo.width,
-            "height": photo.height,
-        }
-    }
+    return {"image": files.reference_of(photo, files.HOLDERS["rooms.photo"])}
 
 
 def register() -> None:
