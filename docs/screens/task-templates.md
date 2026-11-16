@@ -3,14 +3,16 @@
 The page **Add from a template**, at `/h/<home id>/tasks/templates/`, adds common tasks of
 a home from the library that comes with HouseCairn
 ([ADR 0049](../adr/0049-task-templates.md)). Owners and members open it from the list of
-tasks, under **Add a task**; read-only members do not see it. Its back link and
+tasks, or from the page of a [room](room.md), under **Add a task**; opened from a room, it
+has that room already chosen. Read-only members do not see it. Its back link and
 **Cancel** lead back to where it was opened.
 
-The templates are grouped by equipment: smoke alarms, carbon monoxide alarms, boiler,
-fireplace or stove, heat pump, forced-air heating, mechanical ventilation, hot water tank,
-water softener, gutters, bathroom, tumble dryer, electrical installation, septic tank.
-Each line gives the interval of the template and a link to its **source**, the public page
-the interval comes from. A template that follows the rule of one country says so, *rule of
+The templates are grouped by equipment, each group a list under its heading: smoke
+alarms, carbon monoxide alarms, boiler, fireplace or stove, heat pump, forced-air heating,
+mechanical ventilation, hot water tank, water softener, gutters, bathroom, tumble dryer,
+electrical installation, septic tank. Each line is one template, a row you tap anywhere
+to tick it; it gives the interval of the template and a link to its **source**, the public
+page the interval comes from. A template that follows the rule of one country says so, *rule of
 FR* for France, and its task explains what to do elsewhere.
 
 Tick the templates you need, choose a **Room** and a **First date** if you like, then

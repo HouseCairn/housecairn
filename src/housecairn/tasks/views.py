@@ -990,6 +990,12 @@ class TemplateAddView(HomeTasksMixin, FormView[Any]):
 
         return TemplateForm
 
+    def get_initial(self) -> dict[str, Any]:
+        """The room of the page it was opened from (`?room=`), when it is one of this home."""
+        raw = self.request.GET.get("room", "")
+        room = Room.objects.filter(home=self.home, pk=raw).first() if _is_uuid(raw) else None
+        return {"room": room} if room else {}
+
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["home"] = self.home

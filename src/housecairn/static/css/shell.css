@@ -355,8 +355,29 @@
   margin-top: var(--hc-space-6);
 }
 
-.language-switch select {
-  width: auto;
+.language-switch-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.language-choice {
+  min-width: var(--hc-layout-touch-target);
+  min-height: var(--hc-layout-touch-target);
+  padding: 0 var(--hc-space-3);
+  color: var(--hc-color-primary);
+  background: none;
+  border: 0;
+  font: inherit;
+  font-weight: var(--hc-font-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.language-choice[aria-current="true"] {
+  color: var(--hc-color-text);
+  font-weight: var(--hc-font-weight-heavy);
+  text-decoration: none;
 }
 
 .auth-panel > h1 {

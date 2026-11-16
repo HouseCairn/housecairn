@@ -34,7 +34,9 @@ of the instance.
 
 ## Before signing in
 
-The sign-in and sign-up pages end with **Language** and **Change**: the choice is kept in a
+The sign-in and sign-up pages end with **Language** and one button per language, the
+current one in bold: tapping a language applies it at once, with no list to open and no
+button to confirm. The choice is kept in a
 cookie of your browser until you sign in, then your own choice applies. A language chosen in
 your display preferences is also written to that cookie, so the sign-in page speaks it after
 you sign out.

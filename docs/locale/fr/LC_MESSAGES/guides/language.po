@@ -63,6 +63,6 @@ msgstr "En **Automatique**, ce qui vous est envoyé n'a pas de navigateur à int
 msgid "Before signing in"
 msgstr "Avant la connexion"
 
-msgid "The sign-in and sign-up pages end with **Language** and **Change**: the choice is kept in a cookie of your browser until you sign in, then your own choice applies. A language chosen in your display preferences is also written to that cookie, so the sign-in page speaks it after you sign out."
-msgstr "Les pages de connexion et d'inscription se terminent par **Langue** et **Changer** : le choix est gardé dans un cookie de votre navigateur jusqu'à la connexion, puis votre propre choix s'applique. Une langue choisie dans vos préférences d'affichage est aussi écrite dans ce cookie : la page de connexion la parle après la déconnexion."
+msgid "The sign-in and sign-up pages end with **Language** and one button per language, the current one in bold: tapping a language applies it at once, with no list to open and no button to confirm. The choice is kept in a cookie of your browser until you sign in, then your own choice applies. A language chosen in your display preferences is also written to that cookie, so the sign-in page speaks it after you sign out."
+msgstr "Les pages de connexion et d'inscription se terminent par **Langue** et un bouton par langue, la langue courante en gras : toucher une langue l'applique tout de suite, sans liste à ouvrir ni bouton de confirmation. Le choix est gardé dans un cookie de votre navigateur jusqu'à la connexion, puis votre propre choix s'applique. Une langue choisie dans vos préférences d'affichage est aussi écrite dans ce cookie : la page de connexion la parle après la déconnexion."
 

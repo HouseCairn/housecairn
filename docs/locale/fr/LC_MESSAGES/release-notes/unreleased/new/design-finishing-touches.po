@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Finishing touches of the screens.** Each entry of [More](../../../screens/more.md) has its icon. The page of [task templates](../../../screens/task-templates.md) is lists of rows under a heading per equipment, each row one box to tick, and it can be opened from a [room](../../../screens/room.md), with that room already chosen. An [item](../../../screens/item.md) with no photo shows a dashed frame under **Photos**, and the actions of a room and of an item are one row of buttons as wide as their text. The budget lines of a [project](../../../screens/project.md) name the planned amount with the same word as the other budget screens (in French, *Prévu* everywhere instead of *Prévue* on this one). On the sign-in page, each language is a button: tapping it applies it, and the **Change** button is gone."
+msgstr "**Finitions des écrans.** Chaque entrée de [Plus](../../../screens/more.md) a son icône. La page des [modèles de tâches](../../../screens/task-templates.md) est faite de listes de lignes sous un titre par équipement, chaque ligne étant une case à cocher, et elle peut être ouverte depuis une [pièce](../../../screens/room.md), avec cette pièce déjà choisie. Un [élément](../../../screens/item.md) sans photo montre un cadre en pointillés sous **Photos**, et les actions d'une pièce et d'un élément forment une rangée de boutons de la largeur de leur texte. Les lignes de budget d'un [projet](../../../screens/project.md) nomment le montant prévu avec le même mot que les autres écrans du budget (en français, *Prévu* partout au lieu de *Prévue* sur celui-ci). Sur la page de connexion, chaque langue est un bouton : le toucher l'applique, et le bouton **Changer** disparaît."
+

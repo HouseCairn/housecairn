@@ -27,8 +27,8 @@ msgstr "Une pièce, sur `/h/<home id>/rooms/<room id>/`. L'adresse reste la mêm
 msgid "The page has these parts:"
 msgstr "La page comporte ces parties :"
 
-msgid "the **type** and the **notes** of the room, with **Edit the room**;"
-msgstr "le **type** et les **notes** de la pièce, avec **Modifier la pièce** ;"
+msgid "the **type** and the **notes** of the room, then one row of actions, each button as wide as its text and the row going on to a second line when it must: **Edit the room**, the [QR label](qr-label.md) and **Report a problem**;"
+msgstr "le **type** et les **notes** de la pièce, puis une rangée d'actions, chaque bouton de la largeur de son texte, la rangée passant à une deuxième ligne quand il le faut : **Modifier la pièce**, l'[étiquette QR](qr-label.md) et **Signaler un problème** ;"
 
 msgid "the **room memory**: paint (colour, brand, reference, batch, and the tin left over with its quantity and place, from the [stock](stock.md)), floor and wall coverings and free notes, with **Edit the memory**. It is empty until you note something, and nothing in it is required;"
 msgstr "la **mémoire de la pièce** : peinture (couleur, marque, référence, lot, et le pot restant avec sa quantité et son emplacement, tirés du [matériel](stock.md)), revêtements de sol et de mur et notes libres, avec **Modifier la mémoire**. Elle est vide tant que vous ne notez rien, et rien n'y est obligatoire ;"
@@ -39,8 +39,11 @@ msgstr "le **matériel** qui concerne la pièce : les articles rattachés à ell
 msgid "**Photos** of the room in one list, with **Add a photo**, see [Add a photo](photo-form.md). Each photo shows its category (**General**, **Behind the walls**, **Before the work**, **After the work** or **Other**), and the chips above the list keep one category (`?category=`). **Behind the walls** are the photos of pipes and cables taken before a wall was closed, to know where not to drill;"
 msgstr "Les **photos** de la pièce en une seule liste, avec **Ajouter une photo**, voir [Ajouter une photo](photo-form.md). Chaque photo affiche sa catégorie (**Général**, **Derrière les murs**, **Avant les travaux**, **Après les travaux** ou **Autre**), et les pastilles au-dessus de la liste gardent une catégorie (`?category=`). **Derrière les murs** désigne les photos de tuyaux et de câbles prises avant la fermeture d'un mur, pour savoir où ne pas percer ;"
 
-msgid "the **items** in the room, with **Add an item**."
-msgstr "les **éléments** de la pièce, avec **Ajouter un élément**."
+msgid "the **items** in the room, with **Add an item**;"
+msgstr "les **éléments** de la pièce, avec **Ajouter un élément** ;"
+
+msgid "the open **tasks** of the room, with **Add a task** and **Add from a template**, which opens the [library of templates](task-templates.md) with this room already chosen."
+msgstr "les **tâches** ouvertes de la pièce, avec **Ajouter une tâche** et **Ajouter depuis un modèle**, qui ouvre la [bibliothèque de modèles](task-templates.md) avec cette pièce déjà choisie."
 
 msgid "**Delete the room** (in the edit form) asks for confirmation. Deleting a room also deletes its items and their photos; they disappear from every screen and from the API."
 msgstr "**Supprimer la pièce** (dans le formulaire de modification) demande confirmation. Supprimer une pièce supprime aussi ses éléments et leurs photos ; ils disparaissent de tous les écrans et de l'API."
@@ -71,4 +74,7 @@ msgstr "Les membres et les propriétaires modifient la pièce ; les membres en l
 
 #~ msgid "the **room memory**: paint (colour, brand, reference, batch, what is left in stock), floor and wall coverings and free notes, with **Edit the memory**. It is empty until you note something, and nothing in it is required;"
 #~ msgstr "la **mémoire de la pièce** : peinture (couleur, marque, référence, lot, ce qu'il en reste), revêtements de sol et de mur et notes libres, avec **Modifier la mémoire**. Elle est vide tant que vous ne notez rien, et rien n'y est obligatoire ;"
+
+#~ msgid "the **type** and the **notes** of the room, with **Edit the room**;"
+#~ msgstr "le **type** et les **notes** de la pièce, avec **Modifier la pièce** ;"
 

@@ -281,3 +281,33 @@ html:has(.undo-region .undo-banner) {
 .button-done {
   min-height: var(--hc-layout-touch-target-lg);
 }
+
+/* Add from a template: the library as lists of rows, one per template. The label is
+   stretched over the whole row, so that the row is the target of its box (44 px at
+   least); the link to the source, a link inside a sentence, stays above it. */
+.template-row {
+  position: relative;
+  cursor: pointer;
+}
+
+.template-row .row-title {
+  /* A label: take the colour and the spacing of the title of any other row. */
+  margin-bottom: 0;
+  color: var(--hc-color-text);
+}
+
+.template-row .row-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.template-row:has(input:focus-visible) {
+  outline: 3px solid var(--hc-color-focus);
+  outline-offset: -3px;
+}
+
+.template-row .template-source {
+  position: relative;
+  z-index: 1;
+}

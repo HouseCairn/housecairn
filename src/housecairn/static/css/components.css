@@ -66,6 +66,11 @@
   min-width: 0;
 }
 
+/* The icon at the start of a row (More): the colour of the links, not the text. */
+.row-icon {
+  color: var(--hc-color-primary);
+}
+
 .row-title {
   display: block;
   font-weight: var(--hc-font-weight-medium);
@@ -310,6 +315,10 @@ button:hover,
 .button-block {
   display: flex;
   width: 100%;
+}
+
+.button-block + .button-block {
+  margin-top: var(--hc-space-2);
 }
 
 .button-small {

@@ -7,8 +7,11 @@ The page shows what you noted: brand and model, serial number, purchase and inst
 dates, the manufacturer's warranty (a label with its end tells whether it is still running,
 then its duration, its start and who gives it), the maintenance
 contract (its provider is a link to the [sheet](contractor.md) of the contractor, then the
-number and the link of the contract), notes, then the links and the photos of the item. Only
-what is filled in is shown. **Edit the item** opens the [item form](item-form.md).
+number and the link of the contract), notes, then the links and the photos of the item; an item with no photo shows a dashed
+frame, *No photo yet.*, and **Add a photo** under it. Only
+what is filled in is shown. The actions are one row of buttons, each as wide as its text,
+going on to a second line when it must: **Edit the item**, which opens the
+[item form](item-form.md), the QR label and **Report a problem**.
 
 The maintenance log and the cost of ownership of an item arrive with the tasks:
 there is no tab for them yet.

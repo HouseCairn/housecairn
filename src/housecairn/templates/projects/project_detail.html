@@ -76,7 +76,7 @@
       <thead>
         <tr>
           <th scope="col">{% translate "Line" %}</th>
-          <th scope="col">{% translate "Planned" %}</th>
+          <th scope="col">{% translate "Planned" context "amount" %}</th>
           <th scope="col">{% translate "Committed" %}</th>
           <th scope="col">{% translate "Paid" %}</th>
           <th scope="col">{% translate "Gap" %}</th>
@@ -88,7 +88,7 @@
             <th scope="row">
               {% if can_write %}<a class="row-link" href="{% url_with_next 'projects:line-edit' home_id=home.id line_id=summary.line.id %}">{{ summary.line.label }}</a>{% else %}{{ summary.line.label }}{% endif %}<br><span class="small">{{ summary.line.get_nature_display }}</span>
             </th>
-            <td data-label="{% translate 'Planned' %}">{{ summary.amounts.planned|money:home.currency }}</td>
+            <td data-label="{% translate 'Planned' context 'amount' %}">{{ summary.amounts.planned|money:home.currency }}</td>
             <td data-label="{% translate 'Committed' %}">{{ summary.amounts.committed|money:home.currency }}</td>
             <td data-label="{% translate 'Paid' %}">{{ summary.amounts.paid|money:home.currency }}</td>
             <td data-label="{% translate 'Gap' %}">{% budget_gap summary.amounts home.currency %}</td>
@@ -98,7 +98,7 @@
       <tfoot>
         <tr>
           <th scope="row">{% translate "Total" %}</th>
-          <td data-label="{% translate 'Planned' %}">{{ total.planned|money:home.currency }}</td>
+          <td data-label="{% translate 'Planned' context 'amount' %}">{{ total.planned|money:home.currency }}</td>
           <td data-label="{% translate 'Committed' %}">{{ total.committed|money:home.currency }}</td>
           <td data-label="{% translate 'Paid' %}">{{ total.paid|money:home.currency }}</td>
           <td data-label="{% translate 'Gap' %}">{% budget_gap total home.currency %}</td>

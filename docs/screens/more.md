@@ -3,7 +3,7 @@
 Everything that is not a daily gesture, at `/more/`, reached from the last
 entry of the navigation bar on a phone. On a computer, More has no page of its
 own: the same entries are unfolded in the column on the left, under the four
-sections. The entries come in four groups:
+sections. Each entry has its icon, a title and a line that says what it opens. The entries come in four groups:
 
 - **Home**, about the home you are viewing (the [current home](my-home.md#the-current-home), on the More page):
   its [settings](home.md) (name, currency, hemisphere, export),
