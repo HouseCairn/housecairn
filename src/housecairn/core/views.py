@@ -1,7 +1,6 @@
 import hashlib
 import json
 from functools import cache
-from importlib import metadata
 from pathlib import Path
 from typing import Any, cast
 from urllib.parse import urlencode
@@ -26,6 +25,7 @@ from django.views.generic import TemplateView
 from housecairn.core import about_links, more, offline, services
 from housecairn.core.language import shipped
 from housecairn.core.prefix import STATIC_PATH
+from housecairn.core.version import application_version
 from housecairn.instance.config import instance_name
 
 
@@ -95,12 +95,8 @@ class AboutView(TemplateView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        try:
-            version = metadata.version("housecairn")
-        except metadata.PackageNotFoundError:  # pragma: no cover - run from a bare checkout
-            version = "dev"
         context.update(
-            version=version,
+            version=application_version(),
             source_url=settings.HOUSECAIRN_SOURCE_URL,
             about_links=about_links.links(),
             open_data=OPEN_DATA,

@@ -773,13 +773,11 @@ td {
   height: 4.5rem;
 }
 
-/* The version of the application: one tap or click selects the whole number, to copy it. */
+/* The version of the application: a click or a long press selects the whole line, to copy it. */
 .about-version {
   margin: 0 0 var(--hc-space-2);
   font-weight: var(--hc-font-weight-heavy);
-}
-
-.about-version-number {
+  -webkit-user-select: all;
   user-select: all;
 }
 

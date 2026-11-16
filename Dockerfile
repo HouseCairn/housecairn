@@ -42,7 +42,8 @@ WORKDIR /app
 # Dependencies first, in their own layer: they change less often than the code.
 # The postgres extra is included so the same image serves both databases. The
 # project itself is not installed as a package: its source is on PYTHONPATH,
-# which avoids downloading an unlocked build backend.
+# which avoids downloading an unlocked build backend. Without its metadata, the
+# application reads its version in this pyproject.toml (core/version.py).
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev --extra postgres --no-install-project
 
