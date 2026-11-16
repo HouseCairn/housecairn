@@ -110,12 +110,17 @@ the server's homes and goes with one gesture.
 
 **One point of passage per way out.**
 
-- *Writes:* every write of a row of a home goes through `sync.rows` (ADR 0079), the only caller
-  of `changes.record_change`. For a row of a home with the mark it records nothing, so the
-  example has no `pos`, no field clock and no tombstone. The guard of ADR 0079
-  (`tests/test_sync_guard.py`, `COVERED_APPS`) keeps its meaning: it asserts that a write of a
-  **real** home records a change. A second pass of the same scenarios on an example home asserts
-  that it records none. `guide.StepTick` is listed in the guard's `NOT_SYNCED`, with its reason.
+- *Writes:* the rule lives in **`changes.record_change` itself**, the one function every
+  recorder of a change goes through. It has several callers (`sync.rows`, `projects.changelog`,
+  and in the sync API `sync.pushing`, `sync.repairs` and `sync.retention`), so a rule placed in
+  one of them would leave the others open: a retention sweep, for instance, records a change after
+  it purges soft-deleted rows of any home. For a row of a home with the mark `record_change`
+  returns without recording, so the example has no `pos`, no field clock and no tombstone, whoever
+  calls. The guard of ADR 0079 (`tests/test_sync_guard.py`, `COVERED_APPS`) keeps its meaning: it
+  asserts that a write of a **real** home records a change. A second pass of the same scenarios on
+  an example home asserts that it records none, and one test per other caller (push, repair,
+  retention) asserts the same on an example home. `guide.StepTick` is listed in the guard's
+  `NOT_SYNCED`, with its reason.
 - *Reads of the homes of an account:* `homes.services.homes_for` and
   `homes.scoping.homes_for_request` leave example homes out **by default**. The caller that wants
   them says `include_example=True`, and there are two: the web pages of the example home itself
@@ -143,8 +148,12 @@ Web (the instance is the server of the app):
 **The instance backup leaves it out.** The first draft of this record let the example home ride
 in the copy of the database; the maintainer decided the opposite and this record replaces it. The
 exclusion is applied **on the copy**, never on the live database, before the copy enters the
-archive: the rows of the example homes are removed from the copy, and the files under
-`media/<home id>/` of those homes are not archived. How it is done on each engine (SQLite's
+archive: the rows of the example homes are removed from the copy, and the files of those homes
+are not archived. The files of a home are not in one directory:
+`homes.files` keeps them in `MEDIA_ROOT/<folder>/<home id>/` for every folder an app declares
+(`MEDIA_FOLDERS`: today `homes` and `exports`), and `home_directories(home_id)` lists them all.
+The exclusion goes through `home_directories`, never through a path written in the backup, so a
+folder an app declares later is left out too. How it is done on each engine (SQLite's
 online backup, `pg_dump`) is settled by the first web lot; what it must satisfy is the two tests
 below. A restore of an instance backup, and **Restore a home**, never create an example home:
 whatever a file carries, the mark is read as false, and a home that arrives marked is erased
@@ -164,7 +173,7 @@ otherwise, each test making an example home with every row of the file through t
 
 | Rule | Test |
 | --- | --- |
-| a write records no change | `test_a_write_of_an_example_home_records_no_change` (in `test_sync_guard.py`, the same scenarios on an example home) |
+| a write records no change | `test_a_write_of_an_example_home_records_no_change` (in `test_sync_guard.py`, the same scenarios on an example home, through `sync.rows` and `projects.changelog`); `test_a_push_records_nothing_for_the_example_home`, `test_a_repair_records_nothing_for_the_example_home` and `test_a_retention_sweep_records_nothing_for_the_example_home`, one per other caller of `record_change` |
 | no snapshot, no list | `test_the_sync_homes_list_leaves_out_the_example_home`, `test_the_api_homes_list_leaves_out_the_example_home` |
 | four routes closed | `test_the_four_sync_routes_answer_404_for_the_example_home` |
 | a pushed mark is refused | `test_a_pushed_is_example_is_rejected_as_forbidden` |
@@ -180,19 +189,44 @@ otherwise, each test making an example home with every row of the file through t
 | **not in the instance backup** | `tests/test_example_home_backup.py::test_the_instance_backup_leaves_out_the_example_home` |
 | **a restore creates none** | `tests/test_example_home_backup.py::test_a_restore_never_creates_an_example_home` |
 
-The backup test makes a database holding a real home and an example home, both with files, runs
-`backup_instance`, and reads the archive: no row and no file of the example home, the real home
-whole. The restore test restores a database in which a home is marked, and expects no example home
+The backup test makes a database holding a real home and an example home, each with **a file in
+every folder of `MEDIA_FOLDERS`** (`homes` and `exports`), runs `backup_instance`, and reads the
+archive: no row and no file of the example home, in any folder, the real home whole. The restore
+test restores a database in which a home is marked, and expects no example home
 afterwards.
 
-A **guard test**, like the one of ADR 0079, parses the apps `sync`, `notifications`, `calendar`,
-`events`, `apitokens` and `labels` and fails on a read of `Home.objects`, `Home.all_objects` or
-`Membership.objects` that does not go through `homes_for`, `homes_for_request` or `real_homes`,
-unless the site is in a list of audited reads in the test, each with its reason (the way
-`NOT_SYNCED` says why a table is not synced). It also fails on an `include_example=True` outside
-the two callers above. A new way out cannot forget the rule. The app adds a property test: after
-random writes on an example home and a real one, the `op_log` holds only rows of the real one, and
-the snapshot and the export hold nothing of the example.
+A **guard test**, like the one of ADR 0079, parses **every app of the package** (not a list of
+apps, so that a new app is covered from its first commit) and fails on a read of `Home.objects`,
+`Home.all_objects` or `Membership.objects` that does not go through `homes_for`,
+`homes_for_request` or `real_homes`, unless the site is in a list of audited reads in the test,
+each with its reason (the way `NOT_SYNCED` says why a table is not synced). It also fails on an
+`include_example=True` outside the two callers above. The audit made for this record, on the code
+of `main`, sorts the existing reads in three groups:
+
+- *Must filter, and W1 changes them:* `accounts/services.py` (the homes of which the user is the only owner,
+  offered for export and checked before an account is deleted: an example home is neither offered
+  nor does it block the deletion, and it goes with the account), `notifications` (reminders and
+  alerts), `calendar`, `events`, `apitokens`, `labels`, `homes/api.py`, `sync` (lists and routes).
+- *Read the members of one home already resolved:* `homes/views.py`, `homes/services.py` (members,
+  roles, invitations), `homes/current.py`, `sync/reading.py`, `sync/pushing.py`, `tasks/services.py`,
+  `audit/services.py` (the owner check on a given home). They take a home from a caller that has
+  already filtered, so they are admitted.
+- *Must see every home on purpose:* `homes/quotas.py` (the disk really held, example homes
+  included; the administrator's list shows identifiers and numbers, never a name),
+  `homes/restore.py` (an identifier already taken), `homes/services.py` (erasing a home),
+  `sync/changes.py` and `sync/files.py` (a row lock, nothing read out), `instance/providers.py`
+  and `instance/views.py` (a provider cannot be removed while any home requires it), `demo/` and
+  `load_demo_data` (they make homes).
+
+`homes/jobs.py` and `homes/csv_export.py` read no list of homes: they receive one home, and
+the refusal for an example home is in `start_export` and in the CSV export themselves, covered by
+`test_export_and_csv_refuse_the_example_home`. Every site of the second and third groups is in
+the test's list with its reason, so that **a new read of the homes of an account cannot slip past
+the rule unnoticed**: it fails the test until it filters or is audited. The guard cannot see a
+way out that reads no `Home` or `Membership`, such as a new file store or a new network call;
+that case rests on the named tests above, one per way out, and on the review of the lot. The app
+adds a property test: after random writes on an example home and a real one, the `op_log` holds
+only rows of the real one, and the snapshot and the export hold nothing of the example.
 
 ### How a step ticks by itself
 
@@ -325,8 +359,8 @@ sync, the export or the backup rule are the sensitive ones.
 
 | Lot | Content | Files | Depends on |
 | --- | --- | --- | --- |
-| **W1. Example home, rules** | `Home.is_example` and its migration; `real_homes` and the default of `homes_for` and `homes_for_request`; app `guide` with `services` (`create_example_home`, `fill_example`, `remove_example`), `states` (the evaluator, reads `guide.json`), `StepTick`; the waiver of `delete_home`; the rule in `sync.rows`, the exports, the CSV, `notifications`, `calendar`, `events`, `apitokens`, `labels`, All homes, search; the exclusion in `backup_instance` and the cleaning of `restore_instance`; the guard tests and the tests of the table above; the vectors `tests/fixtures/guide_states.json`; glossary terms and catalogs | `homes/models.py`, `homes/services.py`, `homes/scoping.py`, `guide/`, `sync/`, `instance/management/commands/backup_instance.py`, `instance/management/commands/restore_instance.py`, `core/`, `design/glossary.json`, `design/patterns.md`, `tests/`, `docs/administration/backup.md`, `docs/administration/data.md`, `docs/api/`, `docs/screens/home.md` | this record merged |
-| **W2. Guide screens** | `/guide/` and `/guide/<scenario>/`, the pre-filled forms (a query string), the banner, the delete button and its confirmation, the entries (More, welcome page, empty Today), `core/help.py`, `parity.EXEMPT` | `guide/views.py`, `guide/templates/`, `core/help.py`, `core/templates/`, `parity.py`, `docs/screens/` and its catalogs under `docs/locale/fr/LC_MESSAGES/screens/` | W1 |
+| **W1. Example home, rules** | `Home.is_example` and its migration; `real_homes` and the default of `homes_for` and `homes_for_request`; app `guide` with `services` (`create_example_home`, `fill_example`, `remove_example`), `states` (the evaluator, reads `guide.json`), `StepTick`; the waiver of `delete_home`; the rule in `changes.record_change`, the exports and their job, the CSV, the sole-owner list and the deletion of an account, `notifications`, `calendar`, `events`, `apitokens`, `labels`, All homes, search; the exclusion in `backup_instance` and the cleaning of `restore_instance`; the guard tests (every app parsed, the list of audited reads) and the tests of the table above; the vectors `tests/fixtures/guide_states.json`; glossary terms and catalogs | `homes/models.py`, `homes/services.py`, `homes/scoping.py`, `homes/api.py`, `homes/jobs.py`, `homes/csv_export.py`, `homes/exports.py`, `homes/restore.py`, `homes/views.py`, `accounts/services.py`, `guide/`, `sync/` (`changes.py` and its callers), `notifications/`, `calendar/`, `events/`, `apitokens/`, `labels/`, `instance/management/commands/backup_instance.py`, `instance/management/commands/restore_instance.py`, `core/`, `design/glossary.json`, `design/patterns.md`, `tests/`, `docs/administration/backup.md`, `docs/administration/data.md`, `docs/api/`, `docs/screens/home.md` | this record merged |
+| **W2. Guide screens** | `/guide/` and `/guide/<scenario>/`, the pre-filled forms (a query string), the banner, the delete button and its confirmation, the entries (More, welcome page, empty Today), `core/help.py`, `parity.EXEMPT` | `guide/views.py`, `homes/views.py`, `templates/guide/`, `templates/homes/`, `templates/` (the start page, More, Today), `core/help.py`, `parity.py`, `docs/screens/` and its catalogs under `docs/locale/fr/LC_MESSAGES/screens/` | W1 |
 | **W3. Guide in the documentation** | a Sphinx directive that prints `guide.json` in the language of the build; `docs/getting-started/guide.md` and its entry in the table of contents | `docs/_ext/`, `docs/getting-started/guide.md`, `docs/getting-started/index.md`, `docs/locale/fr/LC_MESSAGES/getting-started/` (`index.po`, `guide.po`) | this record merged (no file in common with W1 or W2: runs next to W1) |
 | **A1. Alignment** | `guide.json`, `glossary.json` and the vectors as elements of `tool/web_alignment.py`, copied byte for byte; both JSON files declared as assets of the app | `tool/web_alignment.py`, `tool/web_alignment.json`, `tool/test_web_alignment.py`, `pubspec.yaml`, `design/guide.json`, `design/glossary.json`, `test/fixtures/` | a release with W1 |
 | **A2. Example home on the phone** | `is_example` column and migration (schema 8); `create_example_home`, `fill_example`, `remove_example`; the evaluator in Dart on the vectors, with the `StepTick` table; no `op_log` for the rule; the exclusion in the engine, the relay, the export and the upload; the property test; "last active home" | `lib/data/`, `lib/sync/`, `lib/domain/guide.dart`, `test/` | A1 |
@@ -339,7 +373,9 @@ The guide is read by the app from `design/`, not from its assets, hence the decl
 
 Order: this record, then **W1 and W3 side by side** (W3 reads only the file), W2 after W1; A1
 after the first release that carries W1, A2, A3. Parallelism by the project's rule: W1 and W2
-both touch `core/` and the templates, so they do not run together.
+share `core/`, the `guide/` application (W1 its services and states, W2 its views), and
+`docs/screens/home.md` (W1 the mark, W2 the banner and the delete button), and W2 reads what W1
+adds to `homes/` and `core/`; they do not run together. W1 and W3 share no file.
 
 **Screens of `docs/screens/`**: added `guide.md` (the five scenarios with their progress and
 **Delete the example home**) and `guide-scenario.md` (the steps of one scenario). Changed:
