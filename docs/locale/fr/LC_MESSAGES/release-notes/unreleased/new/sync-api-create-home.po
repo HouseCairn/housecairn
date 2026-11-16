@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Sync API: homes made on the phone.** `POST /api/v1/sync/homes/` creates on the server a home the mobile app made, with the phone's id, the account of the connection its owner, and adds it to the homes of the connection ([Sync API](../../../api/sync.md#creating-a-home)). It needs the scope `homes.create` and the right **May create homes** given when the phone was connected. Sent again with the same fields, it gives the same home; an id held by anything else is `409` `id_taken`, which does not say what holds it."
+msgstr "**API de synchronisation : les logements faits sur le téléphone.** `POST /api/v1/sync/homes/` crée sur le serveur un logement fait par l'app mobile, avec l'id du téléphone, le compte de la connexion pour propriétaire, et l'ajoute aux logements de la connexion ([API de synchronisation](../../../api/sync.md#creating-a-home)). Il faut la portée `homes.create` et le droit **Peut créer des logements** donné à la connexion du téléphone. Envoyé de nouveau avec les mêmes champs, il rend le même logement ; un id que détient autre chose donne `409` `id_taken`, sans dire ce qui le détient."
+

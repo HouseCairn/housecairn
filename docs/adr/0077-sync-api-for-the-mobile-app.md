@@ -17,6 +17,12 @@
   [ADR 0079](0079-lots-of-the-server-mode-of-the-mobile-app.md#decisions-of-2026-11-15-for-lot-m5b),
   one of which departs from need 6: a rule of the data no repair rule covers still makes the
   push `400` `malformed`.
+  Lot M5c builds `POST /sync/homes/` and makes three points of its row precise: the home sent
+  again answers 200 only when it is already one of the connection's homes (an id held by a home
+  of the account that consent did not give the phone is a 409, so that replaying never binds a
+  home the person did not choose); every 409 is the same `id_taken`, whoever holds the id; the
+  403 is `cannot_create_homes`, when the token lacks the scope `homes.create` or the connection
+  the right `may_create_homes`. The `hemisphere` may be left out, `north`, as on the web.
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and
@@ -100,7 +106,7 @@ between local addresses only).
 | --- | --- | --- |
 | `GET /api/v1/sync/info` | | without a token: `{"sync": [1], "oauth": {"authorize", "token", "revoke", "client_id"}}`, nothing else, and `"oauth": null` when the instance turned the mobile app off; with one: also `{"server": "0.3.1", "server_device": b64, "features": [...], "limits": {...}, "connection": {"id", "may_create_homes"}}` |
 | `GET /api/v1/sync/homes/` | | the homes bound to the connection: `{"homes": [{"id", "name", "role", "archived_at", "head", "members": [{"id", "name", "role"}]}], "gone": [{"id", "at"}]}` |
-| `POST /api/v1/sync/homes/` | `{"id", "name", "currency", "hemisphere"}` | 201 the home, created with the phone's id and bound to the connection; 200 if the same id and fields exist; 409 with other fields; 403 without the right to create homes |
+| `POST /api/v1/sync/homes/` | `{"id", "name", "currency", "hemisphere"}` | 201 the home, as `GET /sync/homes/` lists it, created with the phone's id and bound to the connection; 200 if the same id and fields are a home of the connection; 409 `id_taken` with other fields, or when anything else holds the id, without saying what; 403 `cannot_create_homes` without the scope `homes.create` or the right to create homes |
 | `GET /api/v1/sync/homes/{h}/changes?after={pos}&limit={n}` | | `{"changes": [{"pos", "device", "op"}], "head", "more"}` in `pos` order, `device` the device id of the change in `b64`; 410 `cursor_expired` when `after` is older than the oldest change kept |
 | `GET /api/v1/sync/homes/{h}/snapshot` | | JSON lines: one row per line with every field and its clock, tombstones within the retention included, then `{"members": [...]}`, then `{"covers": pos}` |
 | `POST /api/v1/sync/homes/{h}/push` | `{"push": n, "sv": n, "ops": [op, ...]}` | `{"head", "results": [...]}`, see below; 409 `push_conflict` when the push number was used with other bytes |
@@ -109,7 +115,8 @@ between local addresses only).
 
 Errors are those of the API today (`{"detail": ...}`), with a `code` (`cursor_expired`,
 `push_conflict`, `too_large`, `sync_version`, `home_gone`, `sync_needs_connection`,
-`insecure_transport`) so that the app words them itself.
+`insecure_transport`, and for a new home `id_taken` and `cannot_create_homes`) so that the app
+words them itself.
 
 **A home that was erased.** Every route under `/api/v1/sync/homes/{h}/` answers 410 `home_gone`
 when `h` is in the table of erased homes and was bound to the connection when it was erased, its

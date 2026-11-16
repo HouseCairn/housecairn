@@ -132,9 +132,17 @@ def _require_owner(user: AnyUser, home: Home) -> None:
 
 @transaction.atomic
 def create_home(
-    owner: User, *, name: str, currency: str = "EUR", hemisphere: str = Hemisphere.NORTH
+    owner: User,
+    *,
+    name: str,
+    currency: str = "EUR",
+    hemisphere: str = Hemisphere.NORTH,
+    home_id: UUID | None = None,
 ) -> Home:
+    """A new home, `owner` its owner. `home_id`: the id a phone made (docs/adr/0077)."""
     home = Home(name=name, currency=currency, hemisphere=hemisphere)
+    if home_id is not None:
+        home.id = home_id
     home.full_clean()
     sync_rows.save(home)
     Membership.objects.create(home=home, user=owner, role=Role.OWNER)
