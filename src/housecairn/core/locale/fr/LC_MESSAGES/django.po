@@ -487,8 +487,8 @@ msgstr[0] "Il y a %(counter)s erreur :"
 msgstr[1] "Il y a %(counter)s erreurs :"
 
 #, python-format
-msgid "version %(version)s"
-msgstr "version %(version)s"
+msgid "Version %(version)s"
+msgstr "Version %(version)s"
 
 msgid "Free software under the AGPL-3.0 licence."
 msgstr "Logiciel libre sous licence AGPL-3.0."

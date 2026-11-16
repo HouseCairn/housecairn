@@ -7,7 +7,8 @@
   <section class="card card-center">
     <img class="about-logo" src="{% static 'img/brand/housecairn-icon.svg' %}" alt="" width="72" height="72">
     <h2>HouseCairn</h2>
-    <p class="small">HouseCairn, by Robvred · {% blocktranslate %}version {{ version }}{% endblocktranslate %}</p>
+    <p class="about-version"><span class="about-version-number">{% blocktranslate %}Version {{ version }}{% endblocktranslate %}</span></p>
+    <p class="small">HouseCairn, by Robvred</p>
     <p class="small">{% translate "Free software under the AGPL-3.0 licence." %} <a href="{{ source_url }}">{% translate "Source code and security reports on GitHub." %}</a></p>
     <p class="small">{% translate "Developed with an AI agent, under human review." %}</p>
   </section>

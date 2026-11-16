@@ -773,6 +773,16 @@ td {
   height: 4.5rem;
 }
 
+/* The version of the application: one tap or click selects the whole number, to copy it. */
+.about-version {
+  margin: 0 0 var(--hc-space-2);
+  font-weight: var(--hc-font-weight-heavy);
+}
+
+.about-version-number {
+  user-select: all;
+}
+
 /* The links of the About screen (core/about_links.py): a wrapped row of icons with their
    label, 44 px tall at least; a store without an address is the same tile, muted, no link. */
 .about-links {

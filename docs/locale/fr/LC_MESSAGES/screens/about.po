@@ -21,8 +21,8 @@ msgstr ""
 msgid "About"
 msgstr "À propos"
 
-msgid "The version of the instance, the licence (AGPL-3.0), a link to the source code and security reports, and the statement that HouseCairn is developed with an AI agent under human review. It is at `/about/` and does not need an account."
-msgstr "La version de l'instance, la licence (AGPL-3.0), un lien vers le code source et le signalement de sécurité, et la mention que HouseCairn est développé avec un agent IA, sous revue humaine. La page est à l'adresse `/about/` et ne demande pas de compte."
+msgid "The version of the application (for example `Version 0.4.1`, read from the installed package and selectable in one tap to copy it into a report), the licence (AGPL-3.0), a link to the source code and security reports, and the statement that HouseCairn is developed with an AI agent under human review. It is at `/about/` and does not need an account."
+msgstr "La version de l'application (par exemple `Version 0.4.1`, lue dans le paquet installé et sélectionnable d'un seul appui pour la copier dans un signalement), la licence (AGPL-3.0), un lien vers le code source et le signalement de sécurité, et la mention que HouseCairn est développé avec un agent IA, sous revue humaine. La page est à l'adresse `/about/` et ne demande pas de compte."
 
 msgid "Under **Open data**, the open databases the [barcode lookup](../administration/barcodes.md) reads (Open Products Facts, then Open Food Facts) and their licences: the Open Database License (ODbL) for their data, Creative Commons Attribution-ShareAlike 3.0 for the photos."
 msgstr "Sous **Données ouvertes**, les bases ouvertes que lit la [recherche par code-barres](../administration/barcodes.md) (Open Products Facts, puis Open Food Facts) et leurs licences : la licence ODbL pour leurs données, Creative Commons Attribution - Partage dans les mêmes conditions 3.0 pour les photos."

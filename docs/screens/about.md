@@ -1,6 +1,6 @@
 # About
 
-The version of the instance, the licence (AGPL-3.0), a link to the source code
+The version of the application (for example `Version 0.4.1`, read from the installed package and selectable in one tap to copy it into a report), the licence (AGPL-3.0), a link to the source code
 and security reports, and the statement that HouseCairn is developed with an AI
 agent under human review. It is at `/about/` and does not need an account.
 
