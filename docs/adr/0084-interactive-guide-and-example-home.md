@@ -91,8 +91,13 @@ signed-in person; it needs no setting and sends nothing anywhere.
   **Cancel**; in the app, a dialog), not a page of its own, and **no name to type**. The service
   `delete_home` hands a home with the mark to `remove_example`, which waives the typed name and the
   offer to export, and nothing else (a real home keeps both, tested). It erases the rows, the
-  files and the ticks (they hang off the home), and writes **no** row of erased home and no audit
-  entry: the home never reached a sync, so no connected app has to be told it is gone.
+  files and the ticks (they hang off the home), **and the audit entries of its `home_id`**
+  (`AuditEvent.home_id` is a plain `UUIDField`, not a foreign key, so the cascade of `Home` does not
+  reach it; `erase_home` deletes them by hand, and so does `remove_example`). The entries written
+  during the life of the home (`home.created`, `report.created` with the title of the report,
+  `invitation.*`, `member.*`) exist until then; what is guaranteed is that none survives the
+  deletion. It writes **no** row of erased home and no new audit entry: the home never reached a
+  sync, so no connected app has to be told it is gone.
 - **Left out of the counts.** The example home is not a home for the rule "the last active home
   cannot be deleted" (the app), not counted in a limit of homes, hidden from **All homes** of Today
   and from search across homes, and does not appear in `GET /api/v1/homes/`. Its guide has no API
@@ -148,10 +153,11 @@ Web (the instance is the server of the app):
 **The instance backup leaves it out.** The first draft of this record let the example home ride
 in the copy of the database; the maintainer decided the opposite and this record replaces it. The
 exclusion is applied **on the copy**, never on the live database, before the copy enters the
-archive: the rows of the example homes are removed from the copy, and the files of those homes
+archive: the rows of the example homes are removed from the copy, **with the `AuditEvent` rows of
+their `home_id`** (they carry no foreign key, and hold titles such as that of a report), and the files of those homes
 are not archived. The files of a home are not in one directory:
 `homes.files` keeps them in `MEDIA_ROOT/<folder>/<home id>/` for every folder an app declares
-(`MEDIA_FOLDERS`: today `homes` and `exports`), and `home_directories(home_id)` lists them all.
+(`MEDIA_FOLDERS`, which holds every folder registered once the apps are loaded), and `home_directories(home_id)` lists them all.
 The exclusion goes through `home_directories`, never through a path written in the backup, so a
 folder an app declares later is left out too. How it is done on each engine (SQLite's
 online backup, `pg_dump`) is settled by the first web lot; what it must satisfy is the two tests
@@ -177,7 +183,7 @@ otherwise, each test making an example home with every row of the file through t
 | no snapshot, no list | `test_the_sync_homes_list_leaves_out_the_example_home`, `test_the_api_homes_list_leaves_out_the_example_home` |
 | four routes closed | `test_the_four_sync_routes_answer_404_for_the_example_home` |
 | a pushed mark is refused | `test_a_pushed_is_example_is_rejected_as_forbidden` |
-| no erased-home row | `test_removing_the_example_home_leaves_no_erased_home` |
+| no erased-home row, no audit entry | `test_removing_the_example_home_leaves_no_erased_home` (creates a report in the example home first, then reads `AuditEvent` after the deletion and expects none for its `home_id`) |
 | no export, no CSV | `test_export_and_csv_refuse_the_example_home` |
 | no calendar | `test_the_calendar_feeds_leave_the_example_home_out` |
 | no message | `test_no_reminder_push_apprise_webhook_event_or_alert_is_sent_for_it` |
@@ -190,8 +196,10 @@ otherwise, each test making an example home with every row of the file through t
 | **a restore creates none** | `tests/test_example_home_backup.py::test_a_restore_never_creates_an_example_home` |
 
 The backup test makes a database holding a real home and an example home, each with **a file in
-every folder of `MEDIA_FOLDERS`** (`homes` and `exports`), runs `backup_instance`, and reads the
-archive: no row and no file of the example home, in any folder, the real home whole. The restore
+every folder in `MEDIA_FOLDERS` once the apps are loaded** (the test loops over `MEDIA_FOLDERS`, so
+a folder registered later is covered), and an act that writes an audit entry on each (creating a
+report). It runs `backup_instance` and reads the archive: no row, no file and no `AuditEvent` of
+the example home, in any folder, the real home whole. The restore
 test restores a database in which a home is marked, and expects no example home
 afterwards.
 
@@ -208,7 +216,7 @@ of `main`, sorts the existing reads in three groups:
   nor does it block the deletion, and it goes with the account), `notifications` (reminders and
   alerts), `calendar`, `events`, `apitokens`, `labels`, `homes/api.py`, `sync` (lists and routes).
 - *Read the members of one home already resolved:* `homes/views.py`, `homes/services.py` (members,
-  roles, invitations), `homes/current.py`, `sync/reading.py`, `sync/pushing.py`, `tasks/services.py`,
+  roles, invitations), `homes/current.py`, `sync/reading.py`, `sync/pushing.py`, `sync/repairs.py` (the `Home.objects.get` on a home already resolved), `tasks/services.py`,
   `audit/services.py` (the owner check on a given home). They take a home from a caller that has
   already filtered, so they are admitted.
 - *Must see every home on purpose:* `homes/quotas.py` (the disk really held, example homes
@@ -359,7 +367,7 @@ sync, the export or the backup rule are the sensitive ones.
 
 | Lot | Content | Files | Depends on |
 | --- | --- | --- | --- |
-| **W1. Example home, rules** | `Home.is_example` and its migration; `real_homes` and the default of `homes_for` and `homes_for_request`; app `guide` with `services` (`create_example_home`, `fill_example`, `remove_example`), `states` (the evaluator, reads `guide.json`), `StepTick`; the waiver of `delete_home`; the rule in `changes.record_change`, the exports and their job, the CSV, the sole-owner list and the deletion of an account, `notifications`, `calendar`, `events`, `apitokens`, `labels`, All homes, search; the exclusion in `backup_instance` and the cleaning of `restore_instance`; the guard tests (every app parsed, the list of audited reads) and the tests of the table above; the vectors `tests/fixtures/guide_states.json`; glossary terms and catalogs | `homes/models.py`, `homes/services.py`, `homes/scoping.py`, `homes/api.py`, `homes/jobs.py`, `homes/csv_export.py`, `homes/exports.py`, `homes/restore.py`, `homes/views.py`, `accounts/services.py`, `guide/`, `sync/` (`changes.py` and its callers), `notifications/`, `calendar/`, `events/`, `apitokens/`, `labels/`, `instance/management/commands/backup_instance.py`, `instance/management/commands/restore_instance.py`, `core/`, `design/glossary.json`, `design/patterns.md`, `tests/`, `docs/administration/backup.md`, `docs/administration/data.md`, `docs/api/`, `docs/screens/home.md` | this record merged |
+| **W1. Example home, rules** | `Home.is_example` and its migration; `real_homes` and the default of `homes_for` and `homes_for_request`; app `guide` with `services` (`create_example_home`, `fill_example`, `remove_example`), `states` (the evaluator, reads `guide.json`), `StepTick`; the waiver of `delete_home`; the rule in `changes.record_change`, the exports and their job, the CSV, the sole-owner list and the deletion of an account, `notifications`, `calendar`, `events`, `apitokens`, `labels`, All homes, search; the exclusion in `backup_instance` and the cleaning of `restore_instance`; the guard tests (every app parsed, the list of audited reads) and the tests of the table above; the vectors `tests/fixtures/guide_states.json`; glossary terms and catalogs | `homes/models.py`, `homes/services.py`, `homes/scoping.py`, `homes/api.py`, `homes/jobs.py`, `homes/csv_export.py`, `homes/exports.py`, `homes/restore.py`, `homes/views.py`, `accounts/services.py`, `audit/`, `guide/`, `sync/` (`changes.py` and its callers), `notifications/`, `calendar/`, `events/`, `apitokens/`, `labels/`, `instance/management/commands/backup_instance.py`, `instance/management/commands/restore_instance.py`, `core/`, `design/glossary.json`, `design/patterns.md`, `tests/`, `docs/administration/backup.md`, `docs/administration/data.md`, `docs/api/`, `docs/screens/home.md` | this record merged |
 | **W2. Guide screens** | `/guide/` and `/guide/<scenario>/`, the pre-filled forms (a query string), the banner, the delete button and its confirmation, the entries (More, welcome page, empty Today), `core/help.py`, `parity.EXEMPT` | `guide/views.py`, `homes/views.py`, `templates/guide/`, `templates/homes/`, `templates/` (the start page, More, Today), `core/help.py`, `parity.py`, `docs/screens/` and its catalogs under `docs/locale/fr/LC_MESSAGES/screens/` | W1 |
 | **W3. Guide in the documentation** | a Sphinx directive that prints `guide.json` in the language of the build; `docs/getting-started/guide.md` and its entry in the table of contents | `docs/_ext/`, `docs/getting-started/guide.md`, `docs/getting-started/index.md`, `docs/locale/fr/LC_MESSAGES/getting-started/` (`index.po`, `guide.po`) | this record merged (no file in common with W1 or W2: runs next to W1) |
 | **A1. Alignment** | `guide.json`, `glossary.json` and the vectors as elements of `tool/web_alignment.py`, copied byte for byte; both JSON files declared as assets of the app | `tool/web_alignment.py`, `tool/web_alignment.json`, `tool/test_web_alignment.py`, `pubspec.yaml`, `design/guide.json`, `design/glossary.json`, `test/fixtures/` | a release with W1 |
