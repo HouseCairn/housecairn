@@ -2,6 +2,8 @@
 {% if percent is None %}
   <span class="small">{% if amounts.engaged %}{% translate "No budget set" %}{% else %}—{% endif %}</span>
 {% else %}
-  <progress max="100" value="{{ shown }}" aria-label="{% translate 'Used against planned' %}">{{ percent }} %</progress>
-  <span class="small">{% blocktranslate %}{{ percent }} % used{% endblocktranslate %}</span>
+  <span class="gauge">
+    <progress{% if over %} class="over"{% endif %} max="100" value="{{ shown }}" aria-label="{% translate 'Used against planned' %}">{{ percent }} %</progress>
+    <span class="small gauge-figure">{% blocktranslate %}{{ percent }} % used{% endblocktranslate %}</span>
+  </span>
 {% endif %}

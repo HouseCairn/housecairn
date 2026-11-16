@@ -294,6 +294,7 @@ platform.
 | 11 | Reorder a list | Change the order, with up and down buttons | Edit on the list, then drag handles | drag handles after a long press | The edit mode of iOS lists |
 | 12 | Choose several rows (compare projects) | check boxes in the rows | Select in the bar, then check marks | long press, then check marks | The selection mode of each platform |
 | 13 | Large text in the bar of the sections | the labels grow with the browser | the labels keep their size; a long press shows the label large (Large Content Viewer) | the labels keep their size; a long press shows it in a tooltip | Five labels side by side at 360 px; the platform's own help for large text |
+| 14 | Undated tasks on Today | only the undated tasks in season, under *In season* | *In season* as the web, and the other undated tasks under *No date* | the same as iPhone | A task with no date and no season is not lost to the list *All*; showing it on Today is the safer error |
 
 A new adaptation is added to this table first, in a pull request of this repository, with its
 reason; then the app follows it. An app screen that draws a control differently from the web
@@ -306,9 +307,6 @@ fixes it. A lot that closes a gap removes its row.
 
 | Pattern | Web | App | Lot |
 | --- | --- | --- | --- |
-| Record page and actions | follows it | a task opens as a form, its actions are not on the page | D2 |
-| Label and value, figures | follows it | values stacked under their labels (budget, project, stock item, item) | D3 |
-| Forms | follows it | dates as text and a button, Material pickers on iOS | D5 |
 | Filters and search | follows it | no search on rooms and projects, no sheet "Filters" | D13 |
 
 ## The check of the app's labels

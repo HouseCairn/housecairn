@@ -1170,3 +1170,81 @@ label.row:has(input:focus-visible) {
 .button-details[open] > summary {
   margin-bottom: var(--hc-space-2);
 }
+
+/* Gauges: every <progress> of the site is 8 px high, fully rounded, primary on the muted
+   surface, warning beyond 100 %. The figure stays in text beside it, on the same line. */
+progress {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  flex: 1 1 4rem;
+  min-width: 4rem;
+  height: 8px;
+  margin: 0;
+  border: 0;
+  border-radius: var(--hc-radius-pill);
+  background: var(--hc-color-surface-muted);
+  color: var(--hc-color-primary);
+  overflow: hidden;
+}
+
+progress::-webkit-progress-bar {
+  background: var(--hc-color-surface-muted);
+  border-radius: var(--hc-radius-pill);
+}
+
+progress::-webkit-progress-value {
+  background: var(--hc-color-primary);
+  border-radius: var(--hc-radius-pill);
+}
+
+progress::-moz-progress-bar {
+  background: var(--hc-color-primary);
+  border-radius: var(--hc-radius-pill);
+}
+
+progress.over {
+  color: var(--hc-color-warning);
+}
+
+progress.over::-webkit-progress-value {
+  background: var(--hc-color-warning);
+}
+
+progress.over::-moz-progress-bar {
+  background: var(--hc-color-warning);
+}
+
+.gauge {
+  display: flex;
+  align-items: center;
+  gap: var(--hc-space-2);
+  margin: var(--hc-space-1) 0 0;
+}
+
+.gauge-figure {
+  flex: none;
+  white-space: nowrap;
+}
+
+@media (forced-colors: active) {
+  progress {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    forced-color-adjust: none;
+  }
+
+  progress::-webkit-progress-bar {
+    background: Canvas;
+  }
+
+  progress::-webkit-progress-value,
+  progress.over::-webkit-progress-value {
+    background: Highlight;
+  }
+
+  progress::-moz-progress-bar,
+  progress.over::-moz-progress-bar {
+    background: Highlight;
+  }
+}
