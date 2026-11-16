@@ -16,6 +16,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from housecairn.core import navigation
+from housecairn.homes import exports
 from housecairn.tasks import forms, services, vcard
 from housecairn.tasks.models import Contractor
 from housecairn.tasks.views import HomeTasksMixin
@@ -129,4 +130,6 @@ class ContractorVcardView(HomeContractorsMixin, View):
     http_method_names = ["get", "head"]
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        # The example home of the guide never leaves the instance (docs/adr/0084).
+        exports.refuse_example(self.home)
         return vcard.response(self.get_contractor())

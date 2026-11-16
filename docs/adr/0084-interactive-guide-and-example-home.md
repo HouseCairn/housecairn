@@ -144,8 +144,9 @@ Web (the instance is the server of the app):
 - `GET /api/v1/sync/homes/` and `GET /api/v1/homes/` do not list it, and the routes under
   `/api/v1/sync/homes/{h}/` (changes, snapshot, push, files) answer 404 for it, as for a home the
   connection never had; a pushed `is_example` is `rejected` with `forbidden`;
-- **Export all data** and the tables as CSV refuse it, and **Restore a home** never makes one (an
-  archive carries no `is_example`; the field reads false);
+- **Export all data**, the tables as CSV, the CSV of every budget page (`?export=csv`) and the
+  contact file of a contractor (`.vcf`) refuse it, and their buttons are not shown for it; **Restore
+  a home** never makes one (an archive carries no `is_example`; the field reads false);
 - the reminders, the web push, Apprise, the calendar feeds, the webhooks, the Home Assistant
   events (`events`), the QR labels and the API tokens skip it, and the consent page of the app
   lists only real homes.
@@ -185,6 +186,8 @@ otherwise, each test making an example home with every row of the file through t
 | a pushed mark is refused | `test_a_pushed_is_example_is_rejected_as_forbidden` |
 | no erased-home row, no audit entry | `test_removing_the_example_home_leaves_no_erased_home` (creates a report in the example home first, then reads `AuditEvent` after the deletion and expects none for its `home_id`) |
 | no export, no CSV | `test_export_and_csv_refuse_the_example_home` |
+| no CSV of a budget page | `test_the_csv_of_the_budget_refuses_the_example_home` (one case per page) |
+| no contact file | `test_the_contact_file_of_a_contractor_refuses_the_example_home` |
 | no calendar | `test_the_calendar_feeds_leave_the_example_home_out` |
 | no message | `test_no_reminder_push_apprise_webhook_event_or_alert_is_sent_for_it` |
 | no label, no token | `test_labels_and_api_tokens_cannot_reach_the_example_home` |

@@ -312,44 +312,65 @@ def test_export_and_csv_refuse_the_example_home(alice: User, example: Home, clie
     assert client.get(csv_url).status_code == 403
 
 
-def budget_csv_routes(home: Home) -> list[str]:
-    """Every web route of the budget that answers `?export=csv`."""
-    room = Room.objects.filter(home=home).first()
-    assert room is not None
-    kwargs = {"home_id": home.pk}
-    return [
-        reverse("budget:overview", kwargs=kwargs),
-        reverse("budget:rooms", kwargs=kwargs),
-        reverse("budget:room", kwargs={**kwargs, "room_id": room.pk}),
-        reverse("budget:projects", kwargs=kwargs),
-        reverse("budget:tasks", kwargs=kwargs),
-    ]
+BUDGET_CSV_ROUTES = ("overview", "rooms", "room", "projects", "tasks")
 
 
+def budget_url(name: str, home: Home) -> str:
+    """A web page of the budget; each answers `?export=csv` with the same figures."""
+    kwargs: dict[str, Any] = {"home_id": home.pk}
+    if name == "room":
+        room = Room.objects.filter(home=home).first()
+        assert room is not None
+        kwargs["room_id"] = room.pk
+    return reverse(f"budget:{name}", kwargs=kwargs)
+
+
+@pytest.mark.parametrize("name", BUDGET_CSV_ROUTES)
 def test_the_csv_of_the_budget_refuses_the_example_home(
-    alice: User, alice_home: Home, example: Home, client: Client
+    name: str, alice: User, alice_home: Home, example: Home, client: Client
 ) -> None:
-    """The five pages of the budget serve `?export=csv`: none may do it for the example home."""
+    """Every page of the budget serves `?export=csv`; none may do it for the example home.
+
+    The guard of reads lets the page itself open (it is how the guide shows the budget), so
+    this way out is only seen by a test of the route."""
     client.force_login(alice)
-    for url in budget_csv_routes(example):
-        assert client.get(url).status_code == 200, url  # the page itself still opens
-        refused = client.get(url, {"export": "csv"})
-        assert refused.status_code == 403, url
-        assert b"text/csv" not in refused.headers.get("Content-Type", "").encode(), url
-        assert "Descaling" not in refused.content.decode(), url
-    room = Room.objects.create(home=alice_home, name="Kitchen")
-    kwargs = {"home_id": alice_home.pk}
-    real = [
-        reverse("budget:overview", kwargs=kwargs),
-        reverse("budget:rooms", kwargs=kwargs),
-        reverse("budget:room", kwargs={**kwargs, "room_id": room.pk}),
-        reverse("budget:projects", kwargs=kwargs),
-        reverse("budget:tasks", kwargs=kwargs),
-    ]
-    for url in real:
-        served = client.get(url, {"export": "csv"})
-        assert served.status_code == 200, url
-        assert served.headers["Content-Type"].startswith("text/csv"), url
+    url = budget_url(name, example)
+    page = client.get(url)
+    assert page.status_code == 200
+    assert "export=csv" not in page.content.decode()  # no button that would be refused
+    refused = client.get(url, {"export": "csv"})
+    assert refused.status_code == 403
+    assert not refused.headers.get("Content-Type", "").startswith("text/csv")
+    assert "Content-Disposition" not in refused.headers
+    Room.objects.create(home=alice_home, name="Kitchen")
+    real = budget_url(name, alice_home)
+    assert "export=csv" in client.get(real).content.decode()
+    served = client.get(real, {"export": "csv"})
+    assert served.status_code == 200
+    assert served.headers["Content-Type"].startswith("text/csv")
+
+
+def test_the_contact_file_of_a_contractor_refuses_the_example_home(
+    alice: User, alice_home: Home, example: Home, client: Client, api_client: APIClient
+) -> None:
+    """A contractor of the example opens, but its .vcf is not served, on the web or the API."""
+    contractor = task_services.contractors_of(example).first()
+    assert contractor is not None
+    client.force_login(alice)
+    ids = {"home_id": example.pk, "contractor_id": contractor.pk}
+    sheet = client.get(reverse("tasks:contractor-detail", kwargs=ids))
+    assert sheet.status_code == 200
+    assert reverse("tasks:contractor-vcard", kwargs=ids) not in sheet.content.decode()
+    refused = client.get(reverse("tasks:contractor-vcard", kwargs=ids))
+    assert refused.status_code == 403
+    assert "Content-Disposition" not in refused.headers
+    api_client.force_authenticate(alice)
+    assert api_client.get(reverse("api-v1:home-contractor-vcard", kwargs=ids)).status_code == 404
+    mine = task_services.create_contractor(alice, alice_home, name="Plumber")
+    real = {"home_id": alice_home.pk, "contractor_id": mine.pk}
+    served = client.get(reverse("tasks:contractor-vcard", kwargs=real))
+    assert served.status_code == 200
+    assert served.headers["Content-Type"].startswith("text/vcard")
 
 
 def test_a_restore_of_a_home_never_makes_an_example_home(alice: User, alice_home: Home) -> None:
