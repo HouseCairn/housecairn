@@ -32,7 +32,7 @@
       <p class="nav-group" id="nav-group-{{ group.key }}">{{ group.label }}</p>
       <ul class="nav-sublist" aria-labelledby="nav-group-{{ group.key }}">
         {% for entry in group.entries %}
-          <li><a class="nav-sublink" href="{{ entry.url }}"{% if entry.current %} aria-current="page"{% endif %}>{{ entry.label }}{% if entry.badge %} ({{ entry.badge }}){% endif %}</a></li>
+          <li><a class="nav-sublink" href="{{ entry.url }}"{% if entry.external %} target="_blank" rel="noopener noreferrer"{% endif %}{% if entry.current %} aria-current="page"{% endif %}>{{ entry.label }}{% if entry.badge %} ({{ entry.badge }}){% endif %}{% if entry.external %}<span class="sr-only"> {% translate "(opens in a new tab)" %}</span>{% endif %}</a></li>
         {% endfor %}
       </ul>
     {% endfor %}

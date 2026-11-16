@@ -33,8 +33,8 @@ msgstr "**Moi** : votre [profil](profile.md) (le nom que les autres voient), vos
 msgid "**Instance**, for an administrator only: [instance administration](instance.md)."
 msgstr "**Instance**, pour un administrateur seulement : l'[administration de l'instance](instance.md)."
 
-msgid "**Help**: this documentation, the documentation of the API and the [About](about.md) page."
-msgstr "**Aide** : cette documentation, la documentation de l'API et la page [À propos](about.md)."
+msgid "**Help**: this documentation, the documentation of the API, **iOS app (TestFlight beta)** (opens the page to join the beta in a new tab; see [Install on a phone](../getting-started/phone.md)) and the [About](about.md) page."
+msgstr "**Aide** : cette documentation, la documentation de l'API, **Application iOS (bêta TestFlight)** (ouvre la page pour rejoindre la bêta dans un nouvel onglet ; voir [Installer sur un téléphone](../getting-started/phone.md)) et la page [À propos](about.md)."
 
 msgid "**Sign out** comes last. The actions that cannot be taken back, deleting your account or a home, are not on More: they are at the bottom of their own page."
 msgstr "**Se déconnecter** vient en dernier. Les actions sans retour, supprimer votre compte ou un logement, ne sont pas dans Plus : elles sont en bas de leur propre page."
@@ -47,4 +47,7 @@ msgstr "**Se déconnecter** vient en dernier. Les actions sans retour, supprimer
 
 #~ msgid "Everything that is not a daily gesture, at `/more/`, reached from the last entry of the navigation bar: your homes, your [profile](profile.md) (the name other people see), your [display preferences](display-preferences.md), your [notifications](notifications.md), instance administration (for an administrator), account security (authenticator app, recovery codes, passkeys), your password, your email addresses (when the instance sends email), the documentation of the API, deleting your account, the About page and sign-out."
 #~ msgstr "Tout ce qui n'est pas un geste quotidien, sur `/more/`, atteint par la dernière entrée de la barre de navigation : vos logements, votre [profil](profile.md) (le nom que les autres voient), vos [préférences d'affichage](display-preferences.md), vos [notifications](notifications.md), l'administration de l'instance (pour un administrateur), la sécurité du compte (application d'authentification, codes de secours, clés d'accès), votre mot de passe, vos adresses e-mail (quand l'instance envoie des e-mails), la documentation de l'API, la suppression de votre compte, la page À propos et la déconnexion."
+
+#~ msgid "**Help**: this documentation, the documentation of the API and the [About](about.md) page."
+#~ msgstr "**Aide** : cette documentation, la documentation de l'API et la page [À propos](about.md)."
 

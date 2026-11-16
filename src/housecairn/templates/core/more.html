@@ -8,10 +8,10 @@
       <h2 id="more-{{ group.key }}">{{ group.label }}</h2>
       <div class="list">
         {% for entry in group.entries %}
-          <a class="row" href="{{ entry.url }}">
+          <a class="row" href="{{ entry.url }}"{% if entry.external %} target="_blank" rel="noopener noreferrer"{% endif %}>
             {% if entry.icon %}{% include "components/icon.html" with name=entry.icon class="row-icon" %}{% endif %}
             <span class="row-body">
-              <span class="row-title">{{ entry.label }}{% if entry.badge %} ({{ entry.badge }}){% endif %}</span>
+              <span class="row-title">{{ entry.label }}{% if entry.badge %} ({{ entry.badge }}){% endif %}{% if entry.external %}<span class="sr-only"> {% translate "(opens in a new tab)" %}</span>{% endif %}</span>
               {% if entry.text %}<span class="row-text">{{ entry.text }}</span>{% endif %}
             </span>
             {% include "components/icon.html" with name="chevron" class="chevron" %}

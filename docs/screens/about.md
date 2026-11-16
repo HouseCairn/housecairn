@@ -12,9 +12,10 @@ License (ODbL) for their data, Creative Commons Attribution-ShareAlike 3.0 for t
 
 Under **Links**, a row of icons with their label leads to the project website, the
 documentation, the application code, the Home Assistant app, the Home Assistant integration
-and the mobile application, each on its own site. The **iOS** and **Android** icons are
-marked **Coming soon** and are not links: the mobile application is not published in a
-store yet. The icons are drawn in the page; nothing is loaded from those sites until you
+and the mobile application, each on its own site. **iOS app (TestFlight beta)** opens the
+page to join the beta in a new tab (iPhone, TestFlight required). The **Android** icon is
+marked **Coming soon** and is not a link: the application is not published in a store
+yet. The icons are drawn in the page; nothing is loaded from those sites until you
 follow a link.
 
 Once signed in, the link at the top leads back to [More](more.md), on a phone.
