@@ -317,6 +317,10 @@ button:hover,
   width: 100%;
 }
 
+.button-block + .button-block {
+  margin-top: var(--hc-space-2);
+}
+
 .button-small {
   min-height: var(--hc-layout-touch-target);
   padding: var(--hc-space-2) var(--hc-space-3);

@@ -290,6 +290,12 @@ html:has(.undo-region .undo-banner) {
   cursor: pointer;
 }
 
+.template-row .row-title {
+  /* A label: take the colour and the spacing of the title of any other row. */
+  margin-bottom: 0;
+  color: var(--hc-color-text);
+}
+
 .template-row .row-title::after {
   content: "";
   position: absolute;

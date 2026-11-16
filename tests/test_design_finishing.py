@@ -86,6 +86,19 @@ class TestTemplatesPage:
         css = (ICONS.parents[2] / "static" / "css" / "tasks.css").read_text()
         assert ".template-row .row-title::after" in css
 
+    def test_the_titles_keep_the_colour_of_every_other_row_title(self) -> None:
+        css = (ICONS.parents[2] / "static" / "css" / "tasks.css").read_text()
+        rule = re.search(r"\.template-row \.row-title \{([^}]*)\}", css)
+        assert rule, "the title of a template row must override the global label rule"
+        assert "color: var(--hc-color-text);" in rule.group(1)
+        assert "margin-bottom: 0;" in rule.group(1)
+
+    def test_the_two_buttons_at_the_end_are_spaced(self) -> None:
+        css = (ICONS.parents[2] / "static" / "css" / "components.css").read_text()
+        assert re.search(
+            r"\.button-block \+ \.button-block \{\s*margin-top: var\(--hc-space-2\);", css
+        )
+
     def test_the_room_of_the_page_it_was_opened_from_is_chosen(
         self, signed_in: Client, owner_room: Room
     ) -> None:
