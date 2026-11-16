@@ -15,4 +15,10 @@ and its brand, its next task and its manufacturer's warranty; a row opens the
 - **Room** keeps the items of one room: `/h/<home id>/items/?room=<room id>`. The two filters
   add up; **Search** applies both.
 
-Items are added from the page of their [room](room.md). Read-only members see the same list.
+- **Add an item**, under the list, opens the [item form](item-form.md) with **Room** to
+  choose: `/h/<home id>/items/new/`. When the list is filtered on a room, that room is
+  already chosen: `/h/<home id>/items/new/?room=<room id>`. Once saved, the new item opens.
+  A home with no room shows **Add a room** instead, since an item lives in a room.
+
+Items can also be added from the page of their [room](room.md). Read-only members see the
+same list, without the button.

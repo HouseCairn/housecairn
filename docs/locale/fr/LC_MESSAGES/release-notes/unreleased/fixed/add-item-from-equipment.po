@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Add an item from the Equipment list.** The Equipment list (Rooms, Equipment) now ends with **Add an item**, which was missing: the item form opens with the room to choose, or already set when the list is filtered on a room. Read-only members do not see it ([Equipment](../../../screens/equipment.md))."
+msgstr "**Ajouter un élément depuis la liste des équipements.** La liste des équipements (Pièces, Équipements) se termine désormais par **Ajouter un élément**, qui manquait : le formulaire s'ouvre avec la pièce à choisir, ou déjà choisie quand la liste est filtrée sur une pièce. Les membres en lecture seule ne le voient pas ([Équipements](../../../screens/equipment.md))."

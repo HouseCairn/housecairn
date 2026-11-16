@@ -35,8 +35,16 @@
       {% endfor %}
     </ul>
   {% elif everything %}
-    <p class="empty">{% translate "No item yet. Add one from the page of a room." %}</p>
+    <p class="empty">{% translate "No item yet." %}</p>
   {% else %}
     <p class="empty">{% translate "No item matches." %}</p>
+  {% endif %}
+  {% if can_write %}
+    {% if rooms %}
+      <a class="button button-secondary button-block" href="{% url_with_next 'rooms:item-add' home_id=home.id q_room=room.id %}">{% translate "Add an item" %}</a>
+    {% else %}
+      {# An item lives in a room: with none, the first step is the room. #}
+      <a class="button button-secondary button-block" href="{% url_with_next 'rooms:create' home_id=home.id %}">{% translate "Add a room" %}</a>
+    {% endif %}
   {% endif %}
 {% endblock content %}

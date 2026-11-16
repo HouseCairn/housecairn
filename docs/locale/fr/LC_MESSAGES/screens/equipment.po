@@ -36,6 +36,9 @@ msgstr "Le champ de recherche cherche le texte dans le nom, la marque, le modèl
 msgid "**Room** keeps the items of one room: `/h/<home id>/items/?room=<room id>`. The two filters add up; **Search** applies both."
 msgstr "**Pièce** garde les éléments d'une pièce : `/h/<home id>/items/?room=<room id>`. Les deux filtres s'additionnent ; **Rechercher** applique les deux."
 
-msgid "Items are added from the page of their [room](room.md). Read-only members see the same list."
-msgstr "Les éléments s'ajoutent depuis la page de leur [pièce](room.md). Les membres en lecture seule voient la même liste."
+msgid "**Add an item**, under the list, opens the [item form](item-form.md) with **Room** to choose: `/h/<home id>/items/new/`. When the list is filtered on a room, that room is already chosen: `/h/<home id>/items/new/?room=<room id>`. Once saved, the new item opens. A home with no room shows **Add a room** instead, since an item lives in a room."
+msgstr "**Ajouter un élément**, sous la liste, ouvre le [formulaire d'élément](item-form.md) avec **Pièce** à choisir : `/h/<home id>/items/new/`. Quand la liste est filtrée sur une pièce, cette pièce est déjà choisie : `/h/<home id>/items/new/?room=<room id>`. Une fois enregistré, le nouvel élément s'ouvre. Un logement sans pièce affiche **Ajouter une pièce** à la place, puisqu'un élément vit dans une pièce."
+
+msgid "Items can also be added from the page of their [room](room.md). Read-only members see the same list, without the button."
+msgstr "Les éléments peuvent aussi s'ajouter depuis la page de leur [pièce](room.md). Les membres en lecture seule voient la même liste, sans le bouton."
 

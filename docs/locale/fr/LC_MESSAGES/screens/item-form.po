@@ -21,8 +21,8 @@ msgstr ""
 msgid "Add or edit an item"
 msgstr "Ajouter ou modifier un élément"
 
-msgid "The form to add an item to a room, at `/h/<home id>/rooms/<room id>/items/new/`, and to edit one, at `/h/<home id>/items/<item id>/edit/`."
-msgstr "Le formulaire pour ajouter un élément à une pièce, sur `/h/<home id>/rooms/<room id>/items/new/`, et pour en modifier un, sur `/h/<home id>/items/<item id>/edit/`."
+msgid "The form to add an item to a room, at `/h/<home id>/rooms/<room id>/items/new/` (from the page of a room) or `/h/<home id>/items/new/` (from the [Equipment](equipment.md) list, with `?room=<room id>` to preselect the room), and to edit one, at `/h/<home id>/items/<item id>/edit/`."
+msgstr "Le formulaire pour ajouter un élément à une pièce, sur `/h/<home id>/rooms/<room id>/items/new/` (depuis la page d'une pièce) ou `/h/<home id>/items/new/` (depuis la liste [Équipements](equipment.md), avec `?room=<room id>` pour présélectionner la pièce), et pour en modifier un, sur `/h/<home id>/items/<item id>/edit/`."
 
 msgid "Field"
 msgstr "Champ"

@@ -66,6 +66,7 @@ PARITY: dict[str, tuple[str, ...]] = {
     "rooms:move": ("api-v1:home-room-reorder",),
     "rooms:items": ("api-v1:home-item-list",),
     "rooms:item-create": ("api-v1:home-item-list",),
+    "rooms:item-add": ("api-v1:home-item-list",),
     "rooms:item-detail": ("api-v1:home-item-detail",),
     "rooms:item-edit": ("api-v1:home-item-detail",),
     "rooms:item-delete": ("api-v1:home-item-detail",),
