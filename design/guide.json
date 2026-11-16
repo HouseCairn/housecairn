@@ -1,0 +1,448 @@
+{
+  "$description": "The interactive guide of Housecairn: five scenarios done for real on an example home, the same text in the web application, the mobile app and the documentation (docs/adr/0084-interactive-guide-and-example-home.md). One source, English and French side by side; the mobile app keeps a byte-for-byte copy, as it does of the task templates. `{{id}}` in a text is a term of design/glossary.json, written by each reader in its own language and its own case: a label of a screen is never typed here. `screen` is the name of a page of docs/screens/, which each platform maps to its real screen. `done_when` is the state of the data of the example home that ticks a step by itself; a step with `manual: true` has none and is ticked by hand. `suggest` names a row of `example` to pre-fill the form with (`suggest_fields` limits it to some fields). `example` is the example home: each row has a `stage`, the scenario (1 to 5) in which the person makes it; the guide adds the rows of the earlier scenarios on request, and these rows are also the end state each scenario aims at. tests/test_design_guide.py checks the file.",
+  "version": 1,
+  "example": {
+    "home": {
+      "key": "home",
+      "stage": 1,
+      "name": { "en": "Example house", "fr": "Maison d'exemple" },
+      "currency": "EUR",
+      "hemisphere": "north"
+    },
+    "rows": [
+      {
+        "key": "room.kitchen",
+        "entity": "rooms.room",
+        "stage": 2,
+        "fields": { "name": { "en": "Kitchen", "fr": "Cuisine" }, "kind": "kitchen" }
+      },
+      {
+        "key": "room.bathroom",
+        "entity": "rooms.room",
+        "stage": 2,
+        "fields": { "name": { "en": "Bathroom", "fr": "Salle de bain" }, "kind": "bathroom" }
+      },
+      {
+        "key": "item.machine",
+        "entity": "rooms.item",
+        "stage": 2,
+        "fields": {
+          "room": "room.kitchen",
+          "name": { "en": "Espresso machine", "fr": "Machine expresso" },
+          "kind": "equipment",
+          "brand": "Brewmark",
+          "model": "BM-200"
+        }
+      },
+      {
+        "key": "task.descaling",
+        "entity": "tasks.task",
+        "stage": 3,
+        "fields": {
+          "title": { "en": "Descaling", "fr": "Détartrage" },
+          "room": "room.kitchen",
+          "item": "item.machine",
+          "procedure": {
+            "en": "Run the descaling programme, then rinse twice.",
+            "fr": "Lancer le programme de détartrage, puis rincer deux fois."
+          },
+          "repeat_mode": "after_last",
+          "repeat_unit": "month",
+          "repeat_interval": 3,
+          "estimated_minutes": 15,
+          "due_offset_days": 0
+        }
+      },
+      {
+        "key": "occurrence.descaling-done",
+        "entity": "tasks.occurrence",
+        "stage": 3,
+        "fields": { "task": "task.descaling", "status": "done", "completed_offset_days": 0 }
+      },
+      {
+        "key": "report.tap",
+        "entity": "reports.report",
+        "stage": 4,
+        "fields": {
+          "title": { "en": "The kitchen tap drips", "fr": "Le robinet de la cuisine goutte" },
+          "room": "room.kitchen",
+          "status": "resolved"
+        }
+      },
+      {
+        "key": "project.bathroom",
+        "entity": "projects.project",
+        "stage": 5,
+        "fields": {
+          "title": { "en": "Redo the bathroom", "fr": "Refaire la salle de bain" },
+          "goal": {
+            "en": "A walk-in shower instead of the bathtub.",
+            "fr": "Une douche à l'italienne à la place de la baignoire."
+          },
+          "rooms": ["room.bathroom"],
+          "status": "planned"
+        }
+      },
+      {
+        "key": "line.tiles",
+        "entity": "projects.budgetline",
+        "stage": 5,
+        "fields": {
+          "project": "project.bathroom",
+          "label": { "en": "Tiles", "fr": "Carrelage et faïence" },
+          "nature": "material",
+          "planned": "1200",
+          "paid": "480"
+        }
+      },
+      {
+        "key": "line.plumber",
+        "entity": "projects.budgetline",
+        "stage": 5,
+        "fields": {
+          "project": "project.bathroom",
+          "label": { "en": "Plumber (shower)", "fr": "Plombier (douche)" },
+          "nature": "labour",
+          "planned": "3000",
+          "paid": "0"
+        }
+      },
+      {
+        "key": "contractor.linden",
+        "entity": "tasks.contractor",
+        "stage": 5,
+        "fields": {
+          "name": { "en": "Linden Plumbing", "fr": "Plomberie des Tilleuls" },
+          "trade": "plumber"
+        }
+      },
+      {
+        "key": "contractor.bath",
+        "entity": "tasks.contractor",
+        "stage": 5,
+        "fields": {
+          "name": { "en": "Bath Services", "fr": "Bains Services" },
+          "trade": "plumber"
+        }
+      },
+      {
+        "key": "quote.linden",
+        "entity": "projects.quote",
+        "stage": 5,
+        "fields": {
+          "project": "project.bathroom",
+          "contractor": "contractor.linden",
+          "budget_line": "line.plumber",
+          "status": "accepted",
+          "amount": "2850",
+          "issued_offset_days": -12,
+          "valid_days": 90
+        }
+      },
+      {
+        "key": "quote.bath",
+        "entity": "projects.quote",
+        "stage": 5,
+        "fields": {
+          "project": "project.bathroom",
+          "contractor": "contractor.bath",
+          "status": "received",
+          "amount": "3400",
+          "issued_offset_days": -8,
+          "valid_days": 90
+        }
+      },
+      {
+        "key": "envelope",
+        "entity": "projects.annualenvelope",
+        "stage": 5,
+        "fields": { "year": "current", "amount": "6000" }
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "create-home",
+      "title": { "en": "Create a home", "fr": "Créer un logement" },
+      "summary": {
+        "en": "Start with a home. This one is an example that you delete in one tap.",
+        "fr": "Commencez par un logement. Celui-ci est un exemple, que vous supprimez d'un geste."
+      },
+      "steps": [
+        {
+          "id": "create-home.1",
+          "title": { "en": "Add the example home", "fr": "Ajouter le logement d'exemple" },
+          "explain": {
+            "en": "A home holds all the rest: rooms, tasks, projects. The form is filled in: press the button at the bottom.",
+            "fr": "Un logement contient tout le reste : pièces, tâches, projets. Le formulaire est rempli : appuyez sur le bouton en bas."
+          },
+          "screen": "new-home",
+          "suggest": "home",
+          "done_when": { "entity": "homes.home", "min": 1, "where": { "is_example": true } }
+        },
+        {
+          "id": "create-home.2",
+          "title": { "en": "Look at its settings", "fr": "Regarder ses réglages" },
+          "explain": {
+            "en": "Open the settings of the home: the name, the currency (euro here) and the hemisphere, which tells when spring starts.",
+            "fr": "Ouvrez les réglages du logement : le nom, la devise (l'euro ici) et l'hémisphère, qui dit quand commence le printemps."
+          },
+          "screen": "home",
+          "manual": true
+        },
+        {
+          "id": "create-home.3",
+          "title": { "en": "Find your way around", "fr": "S'y retrouver" },
+          "explain": {
+            "en": "Four sections: {{today}} for what to do, {{rooms}} for where, {{projects}} for the works, {{budget}} for how much.",
+            "fr": "Quatre sections : {{today}} pour quoi faire, {{rooms}} pour où, {{projects}} pour les travaux, {{budget}} pour combien."
+          },
+          "screen": "today",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "id": "rooms-equipment",
+      "title": { "en": "Add rooms and equipment", "fr": "Ajouter des pièces et des équipements" },
+      "summary": {
+        "en": "Describe where things are, so that every task has a place.",
+        "fr": "Décrivez où sont les choses, pour que chaque tâche ait sa place."
+      },
+      "steps": [
+        {
+          "id": "rooms-equipment.1",
+          "title": { "en": "Add a room", "fr": "Ajouter une pièce" },
+          "explain": {
+            "en": "Start with the room you know best. Pick its type: the name fills in by itself.",
+            "fr": "Commencez par la pièce que vous connaissez le mieux. Choisissez son type : le nom se remplit tout seul."
+          },
+          "screen": "room-form",
+          "suggest": "room.kitchen",
+          "done_when": { "entity": "rooms.room", "min": 1 }
+        },
+        {
+          "id": "rooms-equipment.2",
+          "title": { "en": "Add a second room", "fr": "Ajouter une deuxième pièce" },
+          "explain": {
+            "en": "The project of the last scenario takes place in the bathroom, so add it now.",
+            "fr": "Le projet du dernier scénario se passe dans la salle de bain, ajoutez-la maintenant."
+          },
+          "screen": "room-form",
+          "suggest": "room.bathroom",
+          "done_when": { "entity": "rooms.room", "min": 2 }
+        },
+        {
+          "id": "rooms-equipment.3",
+          "title": { "en": "Add a piece of equipment", "fr": "Ajouter un équipement" },
+          "explain": {
+            "en": "Equipment is something that needs upkeep, like a boiler or a coffee machine. Put it in the kitchen.",
+            "fr": "Un équipement demande de l'entretien, comme une chaudière ou une machine à café. Mettez-le dans la cuisine."
+          },
+          "screen": "item-form",
+          "suggest": "item.machine",
+          "suggest_fields": ["room", "name", "kind"],
+          "done_when": { "entity": "rooms.item", "min": 1, "where": { "kind": "equipment" } }
+        },
+        {
+          "id": "rooms-equipment.4",
+          "title": { "en": "Note its brand and model", "fr": "Noter sa marque et son modèle" },
+          "explain": {
+            "en": "With the brand and the model, you can find its manual or order a part later.",
+            "fr": "Avec la marque et le modèle, vous retrouverez sa notice ou commanderez une pièce plus tard."
+          },
+          "screen": "item-form",
+          "suggest": "item.machine",
+          "suggest_fields": ["brand", "model"],
+          "done_when": {
+            "entity": "rooms.item",
+            "min": 1,
+            "where": { "kind": "equipment", "brand": { "set": true } }
+          }
+        }
+      ]
+    },
+    {
+      "id": "recurring-task",
+      "title": { "en": "Plan a recurring task", "fr": "Planifier une tâche récurrente" },
+      "summary": {
+        "en": "A task that comes back by itself, so that you do not have to remember it.",
+        "fr": "Une tâche qui revient toute seule, pour ne pas avoir à y penser."
+      },
+      "steps": [
+        {
+          "id": "recurring-task.1",
+          "title": { "en": "Add a task", "fr": "Ajouter une tâche" },
+          "explain": {
+            "en": "Only the title is required. Pick the room and the equipment, so that the task is easy to find.",
+            "fr": "Seul le titre est obligatoire. Choisissez la pièce et l'équipement, pour retrouver la tâche facilement."
+          },
+          "screen": "task-form",
+          "suggest": "task.descaling",
+          "suggest_fields": ["title", "room", "item"],
+          "done_when": { "entity": "tasks.task", "min": 1 }
+        },
+        {
+          "id": "recurring-task.2",
+          "title": { "en": "Make it come back", "fr": "La faire revenir" },
+          "explain": {
+            "en": "In {{repeat}}, ask for every 3 months after the last time, and give a first date.",
+            "fr": "Dans {{repeat}}, demandez tous les 3 mois après la dernière fois, et donnez une première date."
+          },
+          "screen": "task-form",
+          "suggest": "task.descaling",
+          "suggest_fields": ["repeat_mode", "repeat_unit", "repeat_interval", "due_offset_days"],
+          "done_when": {
+            "entity": "tasks.task",
+            "min": 1,
+            "where": { "repeat_mode": { "not": "once" } }
+          }
+        },
+        {
+          "id": "recurring-task.3",
+          "title": { "en": "Mark it done", "fr": "La marquer faite" },
+          "explain": {
+            "en": "When it is done, press {{done}} on {{today}}. The next time is planned for you.",
+            "fr": "Quand c'est fait, appuyez sur {{done}} dans {{today}}. La fois suivante est planifiée pour vous."
+          },
+          "screen": "today",
+          "done_when": { "entity": "tasks.occurrence", "min": 1, "where": { "status": "done" } }
+        },
+        {
+          "id": "recurring-task.4",
+          "title": { "en": "Undo a mistake", "fr": "Annuler une erreur" },
+          "explain": {
+            "en": "Pressed {{done}} by mistake? {{undo}}, in the bar that appears, brings the task back.",
+            "fr": "Appuyé sur {{done}} par erreur ? {{undo}}, dans la barre qui apparaît, remet la tâche."
+          },
+          "screen": "today",
+          "optional": true,
+          "manual": true
+        }
+      ]
+    },
+    {
+      "id": "report-problem",
+      "title": { "en": "Report a problem", "fr": "Signaler un problème" },
+      "summary": {
+        "en": "Anyone in the household can say that something is wrong, in a few seconds.",
+        "fr": "Chacun au foyer peut dire que quelque chose ne va pas, en quelques secondes."
+      },
+      "steps": [
+        {
+          "id": "report-problem.1",
+          "title": { "en": "Report a problem", "fr": "Signaler un problème" },
+          "explain": {
+            "en": "Use {{report-a-problem}}. Answer {{what-is-wrong}} in one line, then say where.",
+            "fr": "Utilisez {{report-a-problem}}. Répondez à {{what-is-wrong}} en une ligne, puis dites où."
+          },
+          "screen": "report-form",
+          "suggest": "report.tap",
+          "suggest_fields": ["title", "room"],
+          "done_when": { "entity": "reports.report", "min": 1 }
+        },
+        {
+          "id": "report-problem.2",
+          "title": { "en": "Open the report", "fr": "Ouvrir le signalement" },
+          "explain": {
+            "en": "The report shows who sent it, where, and when. Everyone can follow it.",
+            "fr": "Le signalement montre qui l'a envoyé, où et quand. Chacun peut le suivre."
+          },
+          "screen": "report",
+          "manual": true
+        },
+        {
+          "id": "report-problem.3",
+          "title": { "en": "Make it a task, or close it", "fr": "En faire une tâche, ou le classer" },
+          "explain": {
+            "en": "Turn the report into a task to plan the repair, or close it if nothing is needed.",
+            "fr": "Transformez le signalement en tâche pour planifier la réparation, ou classez-le si rien n'est à faire."
+          },
+          "screen": "report",
+          "done_when": { "entity": "reports.report", "min": 1, "where": { "status": { "not": "open" } } }
+        }
+      ]
+    },
+    {
+      "id": "project-budget",
+      "title": { "en": "Follow a project and its budget", "fr": "Suivre un projet et son budget" },
+      "summary": {
+        "en": "Works have a cost: plan it, compare quotes, then watch what is paid.",
+        "fr": "Des travaux ont un coût : prévoyez-le, comparez les devis, puis suivez ce qui est payé."
+      },
+      "steps": [
+        {
+          "id": "project-budget.1",
+          "title": { "en": "Add a project", "fr": "Ajouter un projet" },
+          "explain": {
+            "en": "A project is works with an end, such as redoing a bathroom. Choose its room.",
+            "fr": "Un projet, ce sont des travaux qui ont une fin, comme refaire une salle de bain. Choisissez sa pièce."
+          },
+          "screen": "project-form",
+          "suggest": "project.bathroom",
+          "done_when": { "entity": "projects.project", "min": 1 }
+        },
+        {
+          "id": "project-budget.2",
+          "title": { "en": "Plan the cost", "fr": "Prévoir le coût" },
+          "explain": {
+            "en": "Add one line for each cost, with its {{amount-planned}} amount: here the tiles and the plumber.",
+            "fr": "Ajoutez une ligne par coût, avec son montant {{amount-planned}} : ici le carrelage et le plombier."
+          },
+          "screen": "budget-line-form",
+          "suggest": "line.plumber",
+          "done_when": { "entity": "projects.budgetline", "min": 2, "where": { "planned": { "gt": 0 } } }
+        },
+        {
+          "id": "project-budget.3",
+          "title": { "en": "Enter two quotes", "fr": "Saisir deux devis" },
+          "explain": {
+            "en": "Add the {{quotes}} you receive, one for each plumber, to compare them side by side.",
+            "fr": "Ajoutez les {{quotes}} reçus, un par plombier, pour les comparer côte à côte."
+          },
+          "screen": "quote-form",
+          "suggest": "quote.bath",
+          "done_when": { "entity": "projects.quote", "min": 2 }
+        },
+        {
+          "id": "project-budget.4",
+          "title": { "en": "Accept one", "fr": "En accepter un" },
+          "explain": {
+            "en": "Accept a quote on its line: its amount now counts as {{committed}}.",
+            "fr": "Acceptez un devis sur sa ligne : son montant compte maintenant comme {{committed}}."
+          },
+          "screen": "quote-form",
+          "suggest": "quote.linden",
+          "done_when": {
+            "entity": "projects.quote",
+            "min": 1,
+            "where": { "status": "accepted", "budget_line": { "set": true } }
+          }
+        },
+        {
+          "id": "project-budget.5",
+          "title": { "en": "Record a payment", "fr": "Noter un paiement" },
+          "explain": {
+            "en": "When you pay, fill in {{paid}} on the line. The project shows what is left.",
+            "fr": "Quand vous payez, remplissez {{paid}} sur la ligne. Le projet montre ce qu'il reste."
+          },
+          "screen": "budget-line-form",
+          "suggest": "line.tiles",
+          "suggest_fields": ["paid"],
+          "done_when": { "entity": "projects.budgetline", "min": 1, "where": { "paid": { "gt": 0 } } }
+        },
+        {
+          "id": "project-budget.6",
+          "title": { "en": "Set the yearly envelope", "fr": "Fixer l'enveloppe de l'année" },
+          "explain": {
+            "en": "{{envelope}} is what you set aside for the year. {{budget}} compares it with the plan.",
+            "fr": "{{envelope}} : la somme mise de côté pour l'année. {{budget}} la compare au prévu."
+          },
+          "screen": "projects",
+          "suggest": "envelope",
+          "done_when": { "entity": "projects.annualenvelope", "min": 1 }
+        }
+      ]
+    }
+  ]
+}
