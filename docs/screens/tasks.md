@@ -13,15 +13,16 @@ the [task](task.md); **Done** on the right of the row marks it done in one tap,
 for every task, without reloading the page, and a banner at the bottom offers
 **Undo** right after, as on [Today](today.md).
 
-- The first selector switches between **To do** and **Done**. **Done** is the
+- Two tabs, **To do** and **Done**, switch between what is to do and the
   [history](history.md): what was done or skipped, the most recent first, with its
-  filters and its real cost. With **To do**, the second selector keeps the tasks of
-  one room.
+  filters and its real cost. With **To do**, **Filters** keeps the tasks of one room;
+  it says how many filters apply, as in **Filters (1)**, and the list follows the choice
+  without a button. Without JavaScript, a **Filter** button appears in the sheet.
 - A task can be hidden until a few days before its date (see
   [Tasks and recurrence](../guides/tasks-and-recurrence.md)). The page tells how
   many are hidden and **Show them** lists them anyway.
 - The list shows 30 rows at a time.
-- The **tabs** above the selectors are those of [Today](today.md): **Today**, **All**
+- The first **tabs**, above the filters, are those of [Today](today.md): **Today**, **All**
   and **Calendar**. The [contractors](contractors.md) and the
   [display preferences](display-preferences.md) are in [More](more.md).
 - **Add a task** opens the [task form](task-form.md).

@@ -101,7 +101,18 @@ class RoomListView(HomeRoomsMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         rooms = list(services.rooms_of(self.home))
         reorder = self.can_write and self.request.GET.get("reorder") == "1" and len(rooms) > 1
-        return super().get_context_data(**self.page(rooms=rooms, reorder=reorder), **kwargs)
+        # What is typed in the search field replaces the list in place, rooms and items together
+        # (the same answer as the Search page, which the form still opens without script).
+        query = self.request.GET.get("q", "").strip()[:120]
+        return super().get_context_data(
+            **self.page(
+                rooms=rooms,
+                reorder=reorder,
+                query=query,
+                results=services.search(self.home, query) if query else None,
+            ),
+            **kwargs,
+        )
 
 
 class RoomFormMixin(HomeRoomsMixin, FormView[Any]):
@@ -336,6 +347,7 @@ class ItemListView(HomeRoomsMixin, TemplateView):
                 rooms=rooms,
                 room=room,
                 query=query,
+                filters_count=1 if room else 0,
                 everything=room is None and not query.strip(),
             ),
             **kwargs,

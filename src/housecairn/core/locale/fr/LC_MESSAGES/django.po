@@ -480,11 +480,23 @@ msgstr "{count} résultats"
 msgid "{count} results, showing the first {shown}"
 msgstr "{count} résultats, les {shown} premiers sont affichés"
 
+msgid "Filters"
+msgstr "Filtres"
+
 #, python-format
 msgid "There is %(counter)s error:"
 msgid_plural "There are %(counter)s errors:"
 msgstr[0] "Il y a %(counter)s erreur :"
 msgstr[1] "Il y a %(counter)s erreurs :"
+
+#, python-format
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] "%(counter)s résultat"
+msgstr[1] "%(counter)s résultats"
+
+msgid "Search"
+msgstr "Rechercher"
 
 #, python-format
 msgid "Version %(version)s"

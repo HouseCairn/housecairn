@@ -1,45 +1,49 @@
 {% extends "base.html" %}
-{% load i18n tabs navigation %}
+{% load i18n tabs navigation live %}
 {% block head_title %}{% translate "Rooms" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Rooms" %}</h1>
   {% tab_bar "rooms" %}
-  <form method="get" action="{% url 'rooms:search' home_id=home.id %}" class="search-form" role="search">
-    <label for="search-q">{% translate "Search rooms and items" %}</label>
-    <div class="search-row">
-      <input id="search-q" type="search" name="q" maxlength="120" autocomplete="off">
-      <button type="submit" class="button-secondary">{% translate "Search" %}</button>
-    </div>
+  <form method="get" action="{% url 'rooms:search' home_id=home.id %}" class="filter-bar" role="search" {% live_form %}>
+    {% if reorder %}<input type="hidden" name="reorder" value="1">{% endif %}
+    {% translate "Search rooms and items" as search_label %}{% include "components/search_box.html" with id="search-q" label=search_label value=query live=True %}
   </form>
-  {% if rooms %}
-    <ul class="card-list">
-      {% for room in rooms %}
-        <li>
-          {% if reorder %}
-            <form method="post" action="{% url 'rooms:move' home_id=home.id room_id=room.id %}" class="row">
-              {% csrf_token %}
-              <span class="row-body">
-                <span class="row-title">{{ room.name }}</span>
-                <span class="row-text">{{ room.get_kind_display }}</span>
-              </span>
-              <button type="submit" name="direction" value="up" class="button-icon" aria-label="{% blocktranslate with name=room.name %}Move {{ name }} up{% endblocktranslate %}"{% if forloop.first %} disabled{% endif %}>↑</button>
-              <button type="submit" name="direction" value="down" class="button-icon" aria-label="{% blocktranslate with name=room.name %}Move {{ name }} down{% endblocktranslate %}"{% if forloop.last %} disabled{% endif %}>↓</button>
-            </form>
-          {% else %}
-            <a class="row" href="{% url_with_next 'rooms:detail' home_id=home.id room_id=room.id %}">
-              <span class="row-body">
-                <span class="row-title">{{ room.name }}</span>
-                <span class="row-text">{{ room.get_kind_display }} · {% blocktranslate count counter=room.item_count %}{{ counter }} item{% plural %}{{ counter }} items{% endblocktranslate %}</span>
-              </span>
-              {% include "components/icon.html" with name="chevron" class="chevron" %}
-            </a>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
+  {% if query %}{% include "components/results_status.html" with count=results.count %}{% else %}{% include "components/results_status.html" with count=rooms|length %}{% endif %}
+  <div id="results">
+  {% if query %}
+    {% include "rooms/_search_results.html" %}
   {% else %}
-    <p class="empty">{% translate "No room yet." %}</p>
+    {% if rooms %}
+      <ul class="card-list">
+        {% for room in rooms %}
+          <li>
+            {% if reorder %}
+              <form method="post" action="{% url 'rooms:move' home_id=home.id room_id=room.id %}" class="row">
+                {% csrf_token %}
+                <span class="row-body">
+                  <span class="row-title">{{ room.name }}</span>
+                  <span class="row-text">{{ room.get_kind_display }}</span>
+                </span>
+                <button type="submit" name="direction" value="up" class="button-icon" aria-label="{% blocktranslate with name=room.name %}Move {{ name }} up{% endblocktranslate %}"{% if forloop.first %} disabled{% endif %}>↑</button>
+                <button type="submit" name="direction" value="down" class="button-icon" aria-label="{% blocktranslate with name=room.name %}Move {{ name }} down{% endblocktranslate %}"{% if forloop.last %} disabled{% endif %}>↓</button>
+              </form>
+            {% else %}
+              <a class="row" href="{% url_with_next 'rooms:detail' home_id=home.id room_id=room.id %}">
+                <span class="row-body">
+                  <span class="row-title">{{ room.name }}</span>
+                  <span class="row-text">{{ room.get_kind_display }} · {% blocktranslate count counter=room.item_count %}{{ counter }} item{% plural %}{{ counter }} items{% endblocktranslate %}</span>
+                </span>
+                {% include "components/icon.html" with name="chevron" class="chevron" %}
+              </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">{% translate "No room yet." %}</p>
+    {% endif %}
   {% endif %}
+  </div>
   {% if can_write %}
     <div class="button-row">
       <a class="button button-secondary" href="{% url_with_next 'rooms:create' home_id=home.id %}">{% translate "Add a room" %}</a>

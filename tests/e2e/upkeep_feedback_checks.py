@@ -64,15 +64,20 @@ def items(browser: Browser, base: str) -> None:
         machine = page.locator("[data-item-list] li", has_text="Espresso machine")
         check(machine.count() == 1, f"{label}: the espresso machine is listed")
         check("Descal" in (machine.inner_text()), f"{label}: with its next task")
+        # The text filters as it is typed, with no button, and the address follows.
         page.fill("#items-q", "espresso")
-        page.click(".search-form button[type=submit]")
-        check(page.locator("[data-item-list] li").count() == 1, f"{label}: the text filters")
+        expect(page).to_have_url(re.compile(r".*q=espresso"), timeout=5000)
+        expect(page.locator("[data-item-list] li")).to_have_count(1, timeout=5000)
+        check(True, f"{label}: the text filters as it is typed")
         page.goto(f"{home}items/")
+        # The room is in the sheet of filters, "Filters (1)" once chosen, and filters at once.
+        page.click(".filters-summary")
         options = page.locator("#items-room option").all_text_contents()
         check(len(options) >= 3, f"{label}: every room to choose from")
         page.select_option("#items-room", index=1)
-        page.click(".search-form button[type=submit]")
-        check("room=" in page.url, f"{label}: the room filters")
+        expect(page).to_have_url(re.compile(r".*room=.+"), timeout=5000)
+        expect(page.locator("#filters-count")).to_have_text(re.compile(r"\(1\)"), timeout=5000)
+        check(True, f"{label}: the room filters at once")
         context.close()
 
 

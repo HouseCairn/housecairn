@@ -216,36 +216,6 @@ html:has(.undo-region .undo-banner) {
   margin-bottom: var(--hc-space-4);
 }
 
-.history-filters {
-  margin-bottom: var(--hc-space-3);
-}
-
-.history-filter-fields {
-  border: 1px solid var(--hc-color-border);
-  border-radius: var(--hc-radius-md);
-  background: var(--hc-color-surface);
-}
-
-.history-filter-fields > summary {
-  min-height: var(--hc-layout-touch-target);
-  padding: var(--hc-space-3) var(--hc-space-4);
-  font-weight: var(--hc-font-weight-bold);
-  cursor: pointer;
-}
-
-.history-filter-grid {
-  display: grid;
-  gap: var(--hc-space-1) var(--hc-space-3);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-  padding: 0 var(--hc-space-4) var(--hc-space-2);
-}
-
-.history-filter-grid .button-row,
-.history-filter-fields > .button-row {
-  grid-column: 1 / -1;
-  padding: 0 var(--hc-space-4) var(--hc-space-3);
-}
-
 .history-total {
   margin: 0 0 var(--hc-space-2);
   color: var(--hc-color-text-muted);

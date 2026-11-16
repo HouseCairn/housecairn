@@ -30,8 +30,8 @@ msgstr "**Ajouter une pièce** ouvre le [formulaire de la pièce](room-form.md).
 msgid "**Change the order** shows an up and a down button per room instead of the links; **Done** goes back. The order is the one of the list, here and in the API."
 msgstr "**Changer l'ordre** affiche un bouton monter et un bouton descendre par pièce à la place des liens ; **Terminé** revient en arrière. L'ordre est celui de la liste, ici et dans l'API."
 
-msgid "The search field looks for a name among the rooms and the items of the home: `/h/<home id>/search/?q=<text>`. Rooms and items are listed apart, each linking to its page. The search ignores case and looks for the text anywhere in the name."
-msgstr "Le champ de recherche cherche un nom parmi les pièces et les éléments du logement : `/h/<home id>/search/?q=<texte>`. Les pièces et les éléments sont listés à part, chacun lié à sa page. La recherche ignore la casse et cherche le texte n'importe où dans le nom."
+msgid "The search field looks for a name among the rooms and the items of the home. It has a magnifier and no button: what you type replaces the list of rooms, in place, with the rooms and the items found, listed apart, each linking to its page (`/h/<home id>/rooms/?q=<text>`); empty the field to get the list back. Without JavaScript, Enter opens the [search](search.md) page. The search ignores case and looks for the text anywhere in the name."
+msgstr "Le champ de recherche cherche un nom parmi les pièces et les éléments du logement. Il a une loupe et aucun bouton : ce que vous tapez remplace, sur place, la liste des pièces par les pièces et les éléments trouvés, listés à part, chacun lié à sa page (`/h/<home id>/rooms/?q=<texte>`) ; videz le champ pour retrouver la liste. Sans JavaScript, Entrée ouvre la page de [recherche](search.md). La recherche ignore la casse et cherche le texte n'importe où dans le nom."
 
 msgid "Read-only members see the same list and none of the buttons that change it."
 msgstr "Les membres en lecture seule voient la même liste et aucun des boutons qui la modifient."

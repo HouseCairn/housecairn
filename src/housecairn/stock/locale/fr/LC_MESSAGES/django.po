@@ -226,6 +226,14 @@ msgstr "La quantité doit être supérieure à zéro."
 msgid "Only %(available)s in stock."
 msgstr "Il n'y en a que %(available)s en stock."
 
+msgctxt "stock filter"
+msgid "All"
+msgstr "Tous"
+
+msgctxt "stock filter"
+msgid "Low stock"
+msgstr "Stock bas"
+
 msgid "This file is too large."
 msgstr "Ce fichier est trop volumineux."
 
@@ -358,14 +366,11 @@ msgstr "Ajouter l'article"
 msgid "Delete the stock item"
 msgstr "Supprimer l'article"
 
+msgid "Filter the stock"
+msgstr "Filtrer le matériel"
+
 msgid "Search by name, reference or supplier"
 msgstr "Rechercher par nom, référence ou fournisseur"
-
-msgid "Search"
-msgstr "Rechercher"
-
-msgid "Low stock only"
-msgstr "Stock bas seulement"
 
 msgid "Low"
 msgstr "Basse"

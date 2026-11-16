@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Filters in tabs, search as you type, one target a row.** A filter of state is now a tab, with the current one marked: **Open**, **Closed**, **All** and **Mine** on the [reports](../../../screens/reports.md), **To do** and **Done** on the [tasks](../../../screens/tasks.md), **All** and **Low stock** on the [stock](../../../screens/stock.md). Several criteria are folded under **Filters (2)**, a sheet that says how many apply, on the [projects](../../../screens/projects.md), the [history](../../../screens/history.md) and the [equipment](../../../screens/equipment.md). The search fields have a magnifier and no button: the list follows what you type, after a short pause, and the address keeps the words. The [rooms](../../../screens/rooms.md) search shows its results in place. The year of the [budget](../../../screens/budget.md) follows its choice, without **Show**, and the repeated **By room**, **By project** and **By task** links are gone from its summary. A row is one link over its whole width: the tasks of a [project](../../../screens/project.md) no longer carry a **Take out** button (it is on the page of the task), a budget line opens its form from its name, and the rows of the budget tables open their room, project or task from anywhere. **Compare projects** turns the rows into boxes to tick. The two forms for a project's tasks are two buttons. Without JavaScript, everything still works: Enter sends a search, and a **Filter** or **Show** button appears where a choice needs one."
+msgstr "**Filtres en onglets, recherche à la frappe, une seule cible par ligne.** Un filtre d'état est désormais un onglet, l'onglet courant étant marqué : **Ouverts**, **Classés**, **Tous** et **Les miens** sur les [signalements](../../../screens/reports.md), **À faire** et **Faites** sur les [tâches](../../../screens/tasks.md), **Tous** et **Stock bas** sur le [matériel](../../../screens/stock.md). Plusieurs critères sont repliés sous **Filtres (2)**, une feuille qui dit combien s'appliquent, sur les [projets](../../../screens/projects.md), l'[historique](../../../screens/history.md) et les [équipements](../../../screens/equipment.md). Les champs de recherche ont une loupe et aucun bouton : la liste suit ce que vous tapez, après une courte pause, et l'adresse garde les mots. La recherche des [pièces](../../../screens/rooms.md) montre ses résultats sur place. L'année du [budget](../../../screens/budget.md) suit son choix, sans **Afficher**, et les liens répétés **Par pièce**, **Par projet** et **Par tâche** ont disparu de son résumé. Une ligne est un seul lien sur toute sa largeur : les tâches d'un [projet](../../../screens/project.md) n'ont plus de bouton **Retirer** (il est sur la page de la tâche), une ligne de budget ouvre son formulaire depuis son nom, et les lignes des tableaux du budget ouvrent leur pièce, leur projet ou leur tâche de n'importe où. **Comparer les projets** change les lignes en cases à cocher. Les deux formulaires des tâches d'un projet sont deux boutons. Sans JavaScript, tout fonctionne encore : Entrée envoie une recherche, et un bouton **Filtrer** ou **Afficher** apparaît là où un choix en a besoin."

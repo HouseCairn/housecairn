@@ -27,11 +27,14 @@ msgstr "Les projets d'un logement, à `/h/<id du logement>/projects/`. **Projets
 msgid "A project is a piece of work with an end, such as redoing the bathroom. Three tabs split the projects by status: **In progress** (in progress and planned, the root of the section, at `/h/<home id>/projects/`), **Ideas** (`?view=ideas`) and **Finished** (finished and abandoned, `?view=finished`). Within a tab the list groups the projects by status. It is a plain list, not a board. A row shows the title, the planned budget and, in words, where the budget stands: **... left**, **Over budget by ...** or **On budget**. A row opens the [project](project.md)."
 msgstr "Un projet est un chantier qui a une fin, comme refaire la salle de bain. Trois onglets répartissent les projets par statut : **En cours** (en cours et planifiés, la racine de la section, sur `/h/<id du logement>/projects/`), **Idées** (`?view=ideas`) et **Terminés** (terminés et abandonnés, `?view=finished`). Dans un onglet, la liste groupe les projets par statut. C'est une simple liste, pas un tableau. Une ligne montre le titre, le budget prévu et, en toutes lettres, où en est le budget : **... restants**, **Budget dépassé de ...** ou **Budget respecté**. Une ligne ouvre le [projet](project.md)."
 
-msgid "**The filters** at the head narrow the list by words of the title or the goal, status, room and priority: `/h/<home id>/projects/?status=in_progress&room=<room id>`. A filter that is not valid is ignored."
-msgstr "**Les filtres**, en tête, restreignent la liste par mots du titre ou de l'objectif, statut, pièce et priorité : `/h/<id du logement>/projects/?status=in_progress&room=<id de la pièce>`. Un filtre invalide est ignoré."
+msgid "**The search field** at the head looks in the title and the goal. It has a magnifier and no button: the list follows what you type, after a short pause, and the address keeps the words (`/h/<home id>/projects/?q=<text>`), so that Back and a bookmark find them. Without JavaScript, press Enter."
+msgstr "**Le champ de recherche**, en tête, cherche dans le titre et l'objectif. Il a une loupe et aucun bouton : la liste suit ce que vous tapez, après une courte pause, et l'adresse garde les mots (`/h/<home id>/projects/?q=<texte>`), pour que Retour et un signet les retrouvent. Sans JavaScript, appuyez sur Entrée."
 
-msgid "**Compare the ticked projects** opens the [comparison](project-compare.md) of the projects whose box is ticked."
-msgstr "**Comparer les projets cochés** ouvre la [comparaison](project-compare.md) des projets dont la case est cochée."
+msgid "**Filters** holds the status, the room and the priority, and says how many are applied, as in **Filters (2)**: `/h/<home id>/projects/?status=in_progress&room=<room id>`. The list follows each choice; without JavaScript, a **Filter** button appears in the sheet. A filter that is not valid is ignored."
+msgstr "**Filtres** contient le statut, la pièce et la priorité, et dit combien sont appliqués, comme dans **Filtres (2)** : `/h/<home id>/projects/?status=in_progress&room=<room id>`. La liste suit chaque choix ; sans JavaScript, un bouton **Filtrer** apparaît dans la feuille. Un filtre invalide est ignoré."
+
+msgid "**Compare projects** (shown when the list has two projects or more) turns the rows into boxes: tick a row anywhere to select it, then **Compare the ticked projects** opens the [comparison](project-compare.md); **Cancel** goes back to the plain list."
+msgstr "**Comparer les projets** (affiché quand la liste compte au moins deux projets) change les lignes en cases : cochez une ligne n'importe où pour la sélectionner, puis **Comparer les projets cochés** ouvre la [comparaison](project-compare.md) ; **Annuler** revient à la liste simple."
 
 msgid "**Add a project** opens the [project form](project-form.md)."
 msgstr "**Ajouter un projet** ouvre le [formulaire de projet](project-form.md)."
@@ -44,4 +47,10 @@ msgstr "Le [budget](budget.md) compare l'enveloppe aux projets et à l'entretien
 
 msgid "Read-only members see the same list and none of the buttons that change it."
 msgstr "Les membres en lecture seule voient la même liste et aucun des boutons qui modifient."
+
+#~ msgid "**The filters** at the head narrow the list by words of the title or the goal, status, room and priority: `/h/<home id>/projects/?status=in_progress&room=<room id>`. A filter that is not valid is ignored."
+#~ msgstr "**Les filtres**, en tête, restreignent la liste par mots du titre ou de l'objectif, statut, pièce et priorité : `/h/<id du logement>/projects/?status=in_progress&room=<id de la pièce>`. Un filtre invalide est ignoré."
+
+#~ msgid "**Compare the ticked projects** opens the [comparison](project-compare.md) of the projects whose box is ticked."
+#~ msgstr "**Comparer les projets cochés** ouvre la [comparaison](project-compare.md) des projets dont la case est cochée."
 

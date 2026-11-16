@@ -21,6 +21,6 @@ msgstr ""
 msgid "Search"
 msgstr "Recherche"
 
-msgid "The results of the search field of the [rooms](rooms.md), at `/h/<home id>/search/?q=<text>`: the rooms and the items of the home whose name contains the text, up to 50 of each. Without text, no result is shown."
-msgstr "Les résultats du champ de recherche des [pièces](rooms.md), sur `/h/<home id>/search/?q=<texte>` : les pièces et les éléments du logement dont le nom contient le texte, 50 de chaque au plus. Sans texte, aucun résultat n'est affiché."
+msgid "The results of the search field of the [rooms](rooms.md) without JavaScript (with it, the results replace the list of rooms in place), at `/h/<home id>/search/?q=<text>`: the rooms and the items of the home whose name contains the text, up to 50 of each. Without text, no result is shown."
+msgstr "Les résultats du champ de recherche des [pièces](rooms.md) sans JavaScript (avec lui, les résultats remplacent la liste des pièces sur place), sur `/h/<home id>/search/?q=<texte>` : les pièces et les éléments du logement dont le nom contient le texte, 50 de chaque au plus. Sans texte, aucun résultat n'est affiché."
 

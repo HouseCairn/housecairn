@@ -308,7 +308,7 @@ fixes it. A lot that closes a gap removes its row.
 | Record page and actions | follows it | a task opens as a form, its actions are not on the page | D2 |
 | Label and value, figures | follows it | values stacked under their labels (budget, project, stock item, item) | D3 |
 | Forms | follows it | dates as text and a button, Material pickers on iOS | D5 |
-| Filters and search | pills of 28 px (reports), lists and a Filter button (projects), search buttons | no search on rooms and projects | D7 |
+| Filters and search | follows it | no search on rooms and projects, no sheet "Filters" | D13 |
 
 ## The check of the app's labels
 

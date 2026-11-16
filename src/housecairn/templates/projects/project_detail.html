@@ -27,21 +27,17 @@
   {% if tasks %}
     <ul class="card-list">
       {% for link, occurrence in tasks %}
-        <li class="row">
-          <a class="row-body" href="{% url_with_next 'tasks:detail' home_id=home.id task_id=link.task_id %}">
-            <span class="row-title">{{ link.task.title }}</span>
-            <span class="row-text">
-              {% if occurrence %}{% if occurrence.due_on %}{% blocktranslate with day=occurrence.due_on|day %}Due {{ day }}{% endblocktranslate %}{% else %}{% translate "No date" %}{% endif %}{% else %}{% translate "Done" context "task" %}{% endif %}
-              {% if link.task.room %} · {{ link.task.room.name }}{% endif %}
+        <li>
+          <a class="row" href="{% url_with_next 'tasks:detail' home_id=home.id task_id=link.task_id %}">
+            <span class="row-body">
+              <span class="row-title">{{ link.task.title }}</span>
+              <span class="row-text">
+                {% if occurrence %}{% if occurrence.due_on %}{% blocktranslate with day=occurrence.due_on|day %}Due {{ day }}{% endblocktranslate %}{% else %}{% translate "No date" %}{% endif %}{% else %}{% translate "Done" context "task" %}{% endif %}
+                {% if link.task.room %} · {{ link.task.room.name }}{% endif %}
+              </span>
             </span>
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
           </a>
-          {% if can_write %}
-            <form method="post" action="{% url 'projects:task-detach' home_id=home.id project_id=project.id task_id=link.task_id %}">
-              {% csrf_token %}
-              {% next_field %}
-              <button type="submit" class="button-secondary button-small">{% translate "Take out" %}<span class="visually-hidden"> {{ link.task.title }}</span></button>
-            </form>
-          {% endif %}
         </li>
       {% endfor %}
     </ul>
@@ -49,23 +45,27 @@
     <p class="empty">{% translate "No task in this project yet." %}</p>
   {% endif %}
   {% if can_write %}
-    <form method="post" action="{% url 'projects:task-add' home_id=home.id project_id=project.id %}" class="card">
-      {% csrf_token %}
-      {% next_field %}
-      <h3>{% translate "Add a task to the project" %}</h3>
-      {% include "components/form_errors.html" with form=task_form only %}
-      {{ task_form.as_p }}
-      <button type="submit" class="button-block">{% translate "Add the task" %}</button>
-    </form>
-    {% if attach_form.fields.task.queryset.exists or attach_form.is_bound %}
-      <form method="post" action="{% url 'projects:task-attach' home_id=home.id project_id=project.id %}" class="card">
+    <details class="button-details"{% if task_form.is_bound %} open{% endif %}>
+      <summary class="button button-secondary button-block">{% translate "Add a task to the project" %}</summary>
+      <form method="post" action="{% url 'projects:task-add' home_id=home.id project_id=project.id %}" class="card">
         {% csrf_token %}
         {% next_field %}
-        <h3>{% translate "Put an existing task in the project" %}</h3>
-        {% include "components/form_errors.html" with form=attach_form only %}
-        {{ attach_form.as_p }}
-        <button type="submit" class="button-secondary button-block">{% translate "Put it in the project" %}</button>
+        {% include "components/form_errors.html" with form=task_form only %}
+        {{ task_form.as_p }}
+        <button type="submit" class="button-block">{% translate "Add the task" %}</button>
       </form>
+    </details>
+    {% if attach_form.fields.task.queryset.exists or attach_form.is_bound %}
+      <details class="button-details"{% if attach_form.is_bound %} open{% endif %}>
+        <summary class="button button-secondary button-block">{% translate "Put an existing task in the project" %}</summary>
+        <form method="post" action="{% url 'projects:task-attach' home_id=home.id project_id=project.id %}" class="card">
+          {% csrf_token %}
+          {% next_field %}
+          {% include "components/form_errors.html" with form=attach_form only %}
+          {{ attach_form.as_p }}
+          <button type="submit" class="button-secondary button-block">{% translate "Put it in the project" %}</button>
+        </form>
+      </details>
     {% endif %}
   {% endif %}
 
@@ -86,8 +86,7 @@
         {% for summary in lines %}
           <tr>
             <th scope="row">
-              {{ summary.line.label }}<br><span class="small">{{ summary.line.get_nature_display }}</span>
-              {% if can_write %}<br><a class="small" href="{% url_with_next 'projects:line-edit' home_id=home.id line_id=summary.line.id %}">{% translate "Edit" %}<span class="visually-hidden"> {{ summary.line.label }}</span></a>{% endif %}
+              {% if can_write %}<a class="row-link" href="{% url_with_next 'projects:line-edit' home_id=home.id line_id=summary.line.id %}">{{ summary.line.label }}</a>{% else %}{{ summary.line.label }}{% endif %}<br><span class="small">{{ summary.line.get_nature_display }}</span>
             </th>
             <td data-label="{% translate 'Planned' %}">{{ summary.amounts.planned|money:home.currency }}</td>
             <td data-label="{% translate 'Committed' %}">{{ summary.amounts.committed|money:home.currency }}</td>

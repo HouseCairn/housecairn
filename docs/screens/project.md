@@ -5,17 +5,19 @@ One [project](projects.md), at `/h/<home id>/projects/<project id>/`.
 - **The top** shows the status, the priority and the state of the budget in words, then the
   goal, the rooms concerned, the estimated duration and the preferred season.
   **Edit the project** opens the [form](project-form.md).
-- **Tasks** lists the tasks of the project with their date. **Add a task to the project**
-  makes a new task, which is a task like any other (it also shows in **Tasks** and **Today**)
-  and whose page names its project. **Put an existing task in the project** takes one that
-  is in no project yet: a task is in one project at most. **Take out** removes a task from
-  the project and keeps the task.
+- **Tasks** lists the tasks of the project with their date; a row opens the task, from anywhere
+  on the row. **Add a task to the project** opens a small form and makes a new task, which is a
+  task like any other (it also shows in **Tasks** and **Today**) and whose page names its
+  project. **Put an existing task in the project** opens another: it takes a task that
+  is in no project yet, a task being in one project at most. **Take out** is on the page of the
+  task, which names its project: it removes the task from the project and keeps the task.
 - **Budget** is a table of budget lines, in the currency of the home: **Planned** and
   **Paid** are typed; **Committed** is the sum of the quotes accepted on the line; **Gap** is
   the planned amount less the more of committed and paid, said in words (**... left**,
   **Over budget by ...**, **On budget**), never by colour alone. The last row is the total, whose gap is the sum of the gaps of the
   lines.
-  **Add a budget line** and **Edit** open the [budget line form](budget-line-form.md).
+  **Add a budget line** and the name of a line (a row opens its form, for members who may write)
+  open the [budget line form](budget-line-form.md).
 - **Quotes** lists the quotes with the contractor, the amount, the status (requested,
   received, accepted, rejected), the line an accepted quote is committed on, the dates, the
   files and the Paperless-ngx document if one is noted. **Accept the quote** commits its

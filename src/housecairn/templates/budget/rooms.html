@@ -5,6 +5,8 @@
   <h1>{% translate "Budget by room" %}</h1>
   {% include "budget/_nav.html" %}
   {% include "budget/_year.html" %}
+  <div id="results">
+  {% include "budget/_csv.html" %}
   <p class="small">{% blocktranslate with year=year|unlocalize %}Projects counted in {{ year }}, shared evenly between their rooms, and the upkeep of {{ year }}.{% endblocktranslate %}</p>
   {% if report.lines %}
     <table class="table-stack">
@@ -15,7 +17,7 @@
       <tbody>
         {% for line in report.lines %}
           <tr>
-            <th scope="row">{% if line.id %}<a href="{% url_with_next 'budget:room' home_id=home.id room_id=line.id q_year=year %}">{{ line.label }}</a>{% else %}{% translate "No room" %}{% endif %}</th>
+            <th scope="row">{% if line.id %}<a class="row-link" href="{% url_with_next 'budget:room' home_id=home.id room_id=line.id q_year=year %}">{{ line.label }}</a>{% else %}{% translate "No room" %}{% endif %}</th>
             {% include "budget/_row_amounts.html" with amounts=line.amounts %}
           </tr>
         {% endfor %}
@@ -27,4 +29,5 @@
   {% else %}
     <p class="empty">{% translate "No budget yet for this year. Give a project a budget line, or a task an estimate." %}</p>
   {% endif %}
+  </div>
 {% endblock content %}

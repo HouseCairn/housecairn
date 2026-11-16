@@ -793,6 +793,13 @@ msgstr[1] "%(n)d ans après la dernière fois"
 msgid "from %(start)s to %(end)s"
 msgstr "de %(start)s à %(end)s"
 
+msgid "To do"
+msgstr "À faire"
+
+msgctxt "task filter"
+msgid "Done"
+msgstr "Faites"
+
 msgid "Task added"
 msgstr "Tâche ajoutée"
 
@@ -870,9 +877,6 @@ msgstr "Sans date"
 msgid "Search the history"
 msgstr "Rechercher dans l'historique"
 
-msgid "Filters"
-msgstr "Filtres"
-
 msgid "Search"
 msgstr "Rechercher"
 
@@ -893,10 +897,6 @@ msgstr "Résultat"
 
 msgid "Done or skipped"
 msgstr "Faites ou ignorées"
-
-msgctxt "task filter"
-msgid "Done"
-msgstr "Faites"
 
 msgid "From"
 msgstr "Du"
@@ -1259,12 +1259,6 @@ msgstr "Supprimer la tâche"
 
 msgid "Filter the tasks"
 msgstr "Filtrer les tâches"
-
-msgid "Show"
-msgstr "Afficher"
-
-msgid "To do"
-msgstr "À faire"
 
 msgid "Nothing to do. Add a task to start."
 msgstr "Rien à faire. Ajoutez une tâche pour commencer."

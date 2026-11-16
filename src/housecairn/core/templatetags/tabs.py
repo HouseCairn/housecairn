@@ -9,6 +9,7 @@ a tab is shown only to the people who may open it.
 
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import urlencode
 from uuid import UUID
 
 from django import template
@@ -209,3 +210,39 @@ def tab_bar(context: template.Context, group: str) -> dict[str, Any]:
     match = getattr(request, "resolver_match", None)
     view = match.view_name if match else ""
     return {"label": label, "tabs": build(context, request, view)}
+
+
+@register.inclusion_tag("components/tabs.html", takes_context=True)
+def filter_tabs(
+    context: template.Context,
+    label: Any,
+    param: str,
+    current: str,
+    choices: Any,
+    default: str = "",
+    keep: str = "",
+) -> dict[str, Any]:
+    """Segmented tabs for a filter of state (design/patterns.md, "Filters and search").
+
+    One tab per `(value, title)` of `choices`; each is a link to the same page with `?<param>=`
+    set to its value (left out for the `default` one), so that the filter works without script.
+    Only the parameters named in `keep` (comma separated) follow from one tab to another, such
+    as the words searched; the page number never does. The bar has the id `filter-tabs`, which
+    `{% live_form %}` swaps along with the list, so that the links keep the words and the filters.
+    """
+    request = context["request"]
+    kept = {name for name in keep.split(",") if name}
+    tabs = []
+    for value, title in choices:
+        params = [
+            (name, text)
+            for name, text in request.GET.items()
+            if name in kept and name != param and text
+        ]
+        if value != default:
+            params.append((param, value))
+        query = urlencode(params)
+        tabs.append(
+            Tab(title, f"{request.path}?{query}" if query else request.path, value == current)
+        )
+    return {"label": label, "tabs": tabs, "ident": "filter-tabs"}

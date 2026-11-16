@@ -1,0 +1,32 @@
+{% load i18n navigation %}{# What a search for rooms and items found. `query`, `results`. #}
+{% if query %}
+  {% if results.rooms %}
+    <h2>{% translate "Rooms" %}</h2>
+    <ul class="card-list">
+      {% for room in results.rooms %}
+        <li>
+          <a class="row" href="{% url_with_next 'rooms:detail' home_id=home.id room_id=room.id %}">
+            <span class="row-body"><span class="row-title">{{ room.name }}</span><span class="row-text">{{ room.get_kind_display }}</span></span>
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if results.items %}
+    <h2>{% translate "Items" %}</h2>
+    <ul class="card-list">
+      {% for item in results.items %}
+        <li>
+          <a class="row" href="{% url_with_next 'rooms:item-detail' home_id=home.id item_id=item.id %}">
+            <span class="row-body"><span class="row-title">{{ item.name }}</span><span class="row-text">{{ item.room.name }}</span></span>
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if not results %}
+    <p class="empty">{% blocktranslate %}Nothing matches “{{ query }}”.{% endblocktranslate %}</p>
+  {% endif %}
+{% endif %}

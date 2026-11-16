@@ -1,0 +1,2 @@
+{% load i18n %}{# The button of a sheet of filters, "Filters (2)": `count` is how many are applied. The count is its own element so that a search in place can swap it (hx-select-oob). #}
+<summary class="button button-secondary filters-summary">{% translate "Filters" %}<span id="filters-count" class="filters-count">{% if count %} ({{ count }}){% endif %}</span></summary>

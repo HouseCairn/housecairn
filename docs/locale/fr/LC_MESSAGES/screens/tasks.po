@@ -27,8 +27,8 @@ msgstr "Les tâches d'un logement, sur `/h/<home id>/tasks/` : l'onglet **Toutes
 msgid "Each row is one time a task has to be done (an occurrence): its title, the room and the item it concerns, and when. The oldest dates come first, so the arrears stay on top and are shown in red (**2 days late**); a task with no date comes last. A task made from a report that has a photo carries a **Photo** label next to its date (a read-only member sees it for their own reports only). A row opens the [task](task.md); **Done** on the right of the row marks it done in one tap, for every task, without reloading the page, and a banner at the bottom offers **Undo** right after, as on [Today](today.md)."
 msgstr "Chaque ligne est une fois où une tâche doit être faite (une occurrence) : son titre, la pièce et l'élément concernés, et quand. Les dates les plus anciennes viennent d'abord, si bien que l'arriéré reste en tête et s'affiche en rouge (**2 jours de retard**) ; une tâche sans date vient en dernier. Une tâche faite à partir d'un signalement qui a une photo porte une étiquette **Photo** près de sa date (un membre en lecture seule la voit pour ses propres signalements seulement). Une ligne ouvre la [tâche](task.md) ; **Fait** à droite de la ligne la marque faite d'un geste, pour toutes les tâches, sans recharger la page, et un bandeau en bas propose **Annuler** juste après, comme sur [Aujourd'hui](today.md)."
 
-msgid "The first selector switches between **To do** and **Done**. **Done** is the [history](history.md): what was done or skipped, the most recent first, with its filters and its real cost. With **To do**, the second selector keeps the tasks of one room."
-msgstr "Le premier sélecteur passe de **À faire** à **Fait**. **Fait** est l'[historique](history.md) : ce qui a été fait ou ignoré, le plus récent d'abord, avec ses filtres et son coût réel. Avec **À faire**, le second sélecteur garde les tâches d'une pièce."
+msgid "Two tabs, **To do** and **Done**, switch between what is to do and the [history](history.md): what was done or skipped, the most recent first, with its filters and its real cost. With **To do**, **Filters** keeps the tasks of one room; it says how many filters apply, as in **Filters (1)**, and the list follows the choice without a button. Without JavaScript, a **Filter** button appears in the sheet."
+msgstr "Deux onglets, **À faire** et **Faites**, passent de ce qui est à faire à l'[historique](history.md) : ce qui a été fait ou ignoré, le plus récent d'abord, avec ses filtres et son coût réel. Avec **À faire**, **Filtres** garde les tâches d'une pièce ; il dit combien de filtres s'appliquent, comme dans **Filtres (1)**, et la liste suit le choix sans bouton. Sans JavaScript, un bouton **Filtrer** apparaît dans la feuille."
 
 msgid "A task can be hidden until a few days before its date (see [Tasks and recurrence](../guides/tasks-and-recurrence.md)). The page tells how many are hidden and **Show them** lists them anyway."
 msgstr "Une tâche peut être masquée jusqu'à quelques jours avant sa date (voir [Tâches et récurrence](../guides/tasks-and-recurrence.md)). La page indique combien sont masquées et **Les afficher** les liste malgré tout."
@@ -36,8 +36,8 @@ msgstr "Une tâche peut être masquée jusqu'à quelques jours avant sa date (vo
 msgid "The list shows 30 rows at a time."
 msgstr "La liste affiche 30 lignes à la fois."
 
-msgid "The **tabs** above the selectors are those of [Today](today.md): **Today**, **All** and **Calendar**. The [contractors](contractors.md) and the [display preferences](display-preferences.md) are in [More](more.md)."
-msgstr "Les **onglets** au-dessus des sélecteurs sont ceux d'[Aujourd'hui](today.md) : **Aujourd'hui**, **Toutes** et **Calendrier**. Les [intervenants](contractors.md) et les [préférences d'affichage](display-preferences.md) sont dans [Plus](more.md)."
+msgid "The first **tabs**, above the filters, are those of [Today](today.md): **Today**, **All** and **Calendar**. The [contractors](contractors.md) and the [display preferences](display-preferences.md) are in [More](more.md)."
+msgstr "Les premiers **onglets**, au-dessus des filtres, sont ceux d'[Aujourd'hui](today.md) : **Aujourd'hui**, **Toutes** et **Calendrier**. Les [intervenants](contractors.md) et les [préférences d'affichage](display-preferences.md) sont dans [Plus](more.md)."
 
 msgid "**Add a task** opens the [task form](task-form.md)."
 msgstr "**Ajouter une tâche** ouvre le [formulaire de tâche](task-form.md)."
@@ -50,4 +50,7 @@ msgstr "Les membres en lecture seule voient la même liste et aucun des boutons 
 
 #~ msgid "**Today** and **History** above the selectors open the [Today](today.md) screen and the [history](history.md)."
 #~ msgstr "**Aujourd'hui** et **Historique** au-dessus des sélecteurs ouvrent l'écran [Aujourd'hui](today.md) et l'[historique](history.md)."
+
+#~ msgid "The first selector switches between **To do** and **Done**. **Done** is the [history](history.md): what was done or skipped, the most recent first, with its filters and its real cost. With **To do**, the second selector keeps the tasks of one room."
+#~ msgstr "Le premier sélecteur passe de **À faire** à **Fait**. **Fait** est l'[historique](history.md) : ce qui a été fait ou ignoré, le plus récent d'abord, avec ses filtres et son coût réel. Avec **À faire**, le second sélecteur garde les tâches d'une pièce."
 

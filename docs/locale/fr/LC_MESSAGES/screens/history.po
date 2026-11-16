@@ -27,8 +27,8 @@ msgstr "Ce qui a été fait ou ignoré dans un logement : le filtre **Fait** de 
 msgid "People are named by their [display name](profile.md), never by their address."
 msgstr "Les personnes sont nommées par leur [nom d'affichage](profile.md), jamais par leur adresse."
 
-msgid "The form at the top narrows the list. It is folded under **Filters** (open when a filter is active), so the list stays in reach on a phone. All fields are optional:"
-msgstr "Le formulaire du haut restreint la liste. Il est replié sous **Filtres** (ouvert quand un filtre est actif), pour que la liste reste à portée sur téléphone. Tous les champs sont facultatifs :"
+msgid "The search field at the top narrows the list as you type: it has a magnifier and no button, and the list follows after a short pause. The other fields are folded under **Filters**, which says how many are applied, as in **Filters (2)**, so the list stays in reach on a phone. The list follows each choice too, and the address keeps the filters, so that Back and a bookmark find them again. Without JavaScript, press Enter in the search field, or use the **Filter** button of the sheet. All fields are optional:"
+msgstr "Le champ de recherche du haut restreint la liste au fil de la frappe : il a une loupe et aucun bouton, et la liste suit après une courte pause. Les autres champs sont repliés sous **Filtres**, qui dit combien sont appliqués, comme dans **Filtres (2)**, pour que la liste reste à portée sur téléphone. La liste suit aussi chaque choix, et l'adresse garde les filtres, pour que Retour et un signet les retrouvent. Sans JavaScript, appuyez sur Entrée dans le champ de recherche, ou utilisez le bouton **Filtrer** de la feuille. Tous les champs sont facultatifs :"
 
 msgid "**Search** looks in the task title and in the note written when it was closed."
 msgstr "**Rechercher** cherche dans le titre de la tâche et dans la note écrite à sa clôture."
@@ -50,4 +50,7 @@ msgstr "L'export de l'historique (CSV, dossier PDF) viendra dans une version ult
 
 #~ msgid "The tabs above it are those of [Today](today.md)."
 #~ msgstr "Les onglets au-dessus sont ceux d'[Aujourd'hui](today.md)."
+
+#~ msgid "The form at the top narrows the list. It is folded under **Filters** (open when a filter is active), so the list stays in reach on a phone. All fields are optional:"
+#~ msgstr "Le formulaire du haut restreint la liste. Il est replié sous **Filtres** (ouvert quand un filtre est actif), pour que la liste reste à portée sur téléphone. Tous les champs sont facultatifs :"
 

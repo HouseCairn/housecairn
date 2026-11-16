@@ -1,0 +1,2 @@
+{% load i18n l10n %}{# The file of the page, for the year shown. #}
+<p><a class="button button-secondary button-small" href="?{% if kind != 'projects' %}year={{ year|unlocalize }}&amp;{% endif %}export=csv">{% translate "Download as CSV" %}</a></p>

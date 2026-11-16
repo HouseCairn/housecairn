@@ -11,9 +11,11 @@ and its brand, its next task and its manufacturer's warranty; a row opens the
 - The label of the warranty gives its end: *warranty until* while it runs, *warranty ended*
   once it is over. An item with no end of warranty has no label.
 - The search field looks for the text in the name, the brand, the model and the serial
-  number, ignoring case: `/h/<home id>/items/?q=<text>`.
-- **Room** keeps the items of one room: `/h/<home id>/items/?room=<room id>`. The two filters
-  add up; **Search** applies both.
+  number, ignoring case: `/h/<home id>/items/?q=<text>`. It has a magnifier and no button: the
+  list follows what you type. Without JavaScript, press Enter.
+- **Filters** holds **Room**, which keeps the items of one room:
+  `/h/<home id>/items/?room=<room id>`; the button says **Filters (1)** once a room is chosen.
+  The two filters add up, and the list follows the choice.
 
 - **Add an item**, under the list, opens the [item form](item-form.md) with **Room** to
   choose: `/h/<home id>/items/new/`. When the list is filtered on a room, that room is

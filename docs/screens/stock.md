@@ -10,8 +10,10 @@ fallen to the threshold or below. A row opens the [stock item](stock-item.md).
   name is required.
 - The search field looks for the text anywhere in the name, in the manufacturer
   reference or in the name or reference of a supplier, ignoring case:
-  `/h/<home id>/stock/?q=<text>`.
-- **Low stock only** keeps the items at or below their threshold:
-  `/h/<home id>/stock/?low=1`. An item with no threshold is never low.
+  `/h/<home id>/stock/?q=<text>`. It has a magnifier and no button: the list follows what
+  you type. Without JavaScript, press Enter.
+- Two tabs, **All** and **Low stock**, switch between every item and the items at or below
+  their threshold: `/h/<home id>/stock/?low=1`. An item with no threshold is never low. The
+  words searched stay when you change tab.
 
 Read-only members see the same list and none of the buttons that change it.
