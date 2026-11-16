@@ -3,9 +3,8 @@
 - Status: proposed. That HouseCairn has an interactive guide with examples of use, in the web
   application and in the mobile app, with the same content; that it is a guided walk on an
   **example home** (disposable, fictional values, real actions, deleted in one gesture); and the
-  five scenarios are the maintainer's decisions of 2026-11-16. The rest is what this record
-  proposes, with the points it cannot settle alone listed in
-  [Open questions](#open-questions).
+  five scenarios are the maintainer's decisions of 2026-11-16. So are the answers to the
+  questions the first draft left open, in [Decisions of the maintainer](#decisions-of-the-maintainer).
 - Date: 2026-11-16
 - Related: [0006](0006-home-scoping.md) (home scoping), [0013](0013-internationalization.md)
   (languages), [0049](0049-task-templates.md) (a file shared with the app),
@@ -45,9 +44,9 @@ the action, and comes back to a guide page that shows the step ticked. There is 
 coach mark and no blocked screen: the screens are the ordinary ones, so the guide cannot go out
 of date against them, and a person who leaves in the middle loses nothing.
 
-The guide is a **reading of the data of one home**. It stores no "current step": each time its page
-opens, the state of the example home decides what is ticked. The only thing it stores is the tick
-of a step with no state (below).
+The guide is a **reading of the data of one home**. It stores no "current step". What it stores
+is the **tick** of each step, once the step is done (below): the state of the example home
+decides when a step ticks, and a tick, once stored, stays.
 
 ### Where it opens
 
@@ -68,10 +67,11 @@ signed-in person; it needs no setting and sends nothing anywhere.
   example and the other way round.
 - **Made by the person, in scenario 1.** Step 1 opens the form of [Add a home](../screens/new-home.md)
   pre-filled with the name, currency and hemisphere of the example (the "What the home has" list
-  unticked, so that no template task is added yet); the person presses **Save**, and the service
+  unticked, so that no template task is added yet); the person presses the button that creates the home, and the service
   sees the guide's flag and sets the mark. The example home therefore starts empty and the
   person fills it scenario after scenario, the form of each step pre-filled with the values of
-  the file on request ("Fill in for me" is a button; the person still presses **Save**).
+  the file on request ("Fill in for me" is a button; the person still presses the button that
+  saves the form).
 - **Catching up.** A person who opens scenario 3 without having done scenario 2 gets "Add what
   the earlier scenarios make": the service `guide.fill_example(home, up_to=n)` adds the rows of the
   file whose `stage` is below `n` that are missing, through the ordinary services, in the language of
@@ -85,11 +85,14 @@ signed-in person; it needs no setting and sends nothing anywhere.
   home** on every page of the home, the word "Example" next to its name in the home selector and
   in **My homes**, and on the page of the home. The wording is for the card of the screens; the terms are
   added to the glossary by the first web lot (`guide` and `example-home`).
-- **Deleted in one gesture.** One button, **Delete the example home**, on the guide page and in
-  the banner. The service `delete_home` waives the typed name and the offer to export for a home
-  with the mark, and nothing else (a real home keeps both); it erases the rows, the files and the
-  manual ticks (they hang off the home and are deleted with it). One confirmation on the same
-  page, not a page of its own ([Open question 2](#open-questions)).
+- **Deleted in one gesture: one press and one confirmation on the same page.** One button,
+  **Delete the example home**, on the guide page and in the banner. Pressing it shows a
+  confirmation on the same page (in the web, in place of the button, with **Delete** and
+  **Cancel**; in the app, a dialog), not a page of its own, and **no name to type**. The service
+  `delete_home` hands a home with the mark to `remove_example`, which waives the typed name and the
+  offer to export, and nothing else (a real home keeps both, tested). It erases the rows, the
+  files and the ticks (they hang off the home), and writes **no** row of erased home and no audit
+  entry: the home never reached a sync, so no connected app has to be told it is gone.
 - **Left out of the counts.** The example home is not a home for the rule "the last active home
   cannot be deleted" (the app), not counted in a limit of homes, hidden from **All homes** of Today
   and from search across homes, and does not appear in `GET /api/v1/homes/`. Its guide has no API
@@ -97,25 +100,56 @@ signed-in person; it needs no setting and sends nothing anywhere.
 - **Demonstration instance.** Nothing changes: the guide works on the public accounts, and the
   nightly reset erases an example home like any other.
 
-### Server mode and sync: the example never leaves its device
+### Server mode, sync and backups: the example never leaves its device
 
-**The rule: a row of an example home is never an operation, never in a snapshot and never in an
-archive.** It exists on the device where it was made, and on the web the device is the instance.
+**The rule: a row of an example home is never an operation, never in a snapshot, never in an
+export and never in a backup of the server.** It exists on the device where it was made, and on
+the web the device is the instance. In the app, **the guide is available in server mode too**:
+the example home stays **local to the phone and is never sent to the server**; it sits beside
+the server's homes and goes with one gesture.
+
+**One point of passage per way out.**
+
+- *Writes:* every write of a row of a home goes through `sync.rows` (ADR 0079), the only caller
+  of `changes.record_change`. For a row of a home with the mark it records nothing, so the
+  example has no `pos`, no field clock and no tombstone. The guard of ADR 0079
+  (`tests/test_sync_guard.py`, `COVERED_APPS`) keeps its meaning: it asserts that a write of a
+  **real** home records a change. A second pass of the same scenarios on an example home asserts
+  that it records none. `guide.StepTick` is listed in the guard's `NOT_SYNCED`, with its reason.
+- *Reads of the homes of an account:* `homes.services.homes_for` and
+  `homes.scoping.homes_for_request` leave example homes out **by default**. The caller that wants
+  them says `include_example=True`, and there are two: the web pages of the example home itself
+  (the `/h/<home id>/` views) and the guide. Everything else gets none: the sync API, the API of
+  homes, the calendar feeds, the labels, the choice of homes of an API token or of a connected
+  app, the exports, All homes. The one filter is `homes.services.real_homes(homes)`; the reads
+  that do not go through `homes_for` (`Membership` in `notifications`) use it too.
+- *Instance backup:* `backup_instance` is the **single point of passage** of a backup of the
+  server. Its `dump_database` and its walk of `/data/media/` are the only places that copy data
+  out of the instance, and they leave the example homes out (below).
+- *Erasing:* `remove_example` writes no `ErasedHome` (above), whereas `erase_home` of a real home
+  keeps writing it (ADR 0077).
 
 Web (the instance is the server of the app):
 
-- the function every write path calls to record a change (`sync`, ADR 0079 lot M3a) returns
-  without writing when the home of the row has the mark, so the example has no `pos`, no field
-  clock and no tombstone;
-- `GET /api/v1/sync/homes/` does not list it, and the routes under `/sync/homes/{h}/` (changes,
-  snapshot, push, files) answer 404 for it, as for a home the connection never had; a pushed
-  `is_example` is `rejected` with `forbidden`;
-- **Export all data** and the tables as CSV refuse it, **Restore a home** never makes one
-  (an archive carries no `is_example`; the field reads false), and the instance-wide backup
-  of ADR 0048 is left as it is, a copy of the database that carries the row like any other
-  ([Open question 3](#open-questions));
-- the reminders, the web push, Apprise, the calendar feeds, the webhooks and the Home Assistant
-  events (`events`) skip it, and the consent page of the app lists only real homes.
+- `GET /api/v1/sync/homes/` and `GET /api/v1/homes/` do not list it, and the routes under
+  `/api/v1/sync/homes/{h}/` (changes, snapshot, push, files) answer 404 for it, as for a home the
+  connection never had; a pushed `is_example` is `rejected` with `forbidden`;
+- **Export all data** and the tables as CSV refuse it, and **Restore a home** never makes one (an
+  archive carries no `is_example`; the field reads false);
+- the reminders, the web push, Apprise, the calendar feeds, the webhooks, the Home Assistant
+  events (`events`), the QR labels and the API tokens skip it, and the consent page of the app
+  lists only real homes.
+
+**The instance backup leaves it out.** The first draft of this record let the example home ride
+in the copy of the database; the maintainer decided the opposite and this record replaces it. The
+exclusion is applied **on the copy**, never on the live database, before the copy enters the
+archive: the rows of the example homes are removed from the copy, and the files under
+`media/<home id>/` of those homes are not archived. How it is done on each engine (SQLite's
+online backup, `pg_dump`) is settled by the first web lot; what it must satisfy is the two tests
+below. A restore of an instance backup, and **Restore a home**, never create an example home:
+whatever a file carries, the mark is read as false, and a home that arrives marked is erased
+(tested). A backup made before this record cannot carry the mark, since the column does not exist
+there.
 
 App (every way of ADR 0010 of the app):
 
@@ -123,17 +157,42 @@ App (every way of ADR 0010 of the app):
   family sync through the relay and "My Housecairn server". The repository writes its rows without
   `op_log` and without `field_clock`; the sync engine, the relay snapshot, the encrypted export and
   the upload of "keep this phone's homes" skip it. A phone in server mode keeps this one local
-  home beside the server's homes ([Open question 1](#open-questions)).
+  home beside the server's homes.
 
-**The test, in both repositories.** `tests/test_example_home_never_leaves.py` (web) makes an example
-home with every row of the file through the services, then asserts, for each way out: no row in
-the change tables of `sync`; 404 on the four routes; no home in `GET /sync/homes/`; the export, the
-CSV tables and the calendar feed refuse or are empty; no notification sent. A **guard test**, like
-the one of ADR 0079, parses the apps `sync`, `notifications`, `calendar`, `events`, `apitokens` and
-`labels` and fails on a read of `Home.objects` that does not go through `Home.objects.real()`, so
-that a new way out cannot forget the rule. The app adds a property test: after random writes on an
-example home and a real one, the `op_log` holds only rows of the real one, and the snapshot and
-the export hold nothing of the example.
+**The tests, one per rule.** In the web, `tests/test_example_home_never_leaves.py` unless said
+otherwise, each test making an example home with every row of the file through the services:
+
+| Rule | Test |
+| --- | --- |
+| a write records no change | `test_a_write_of_an_example_home_records_no_change` (in `test_sync_guard.py`, the same scenarios on an example home) |
+| no snapshot, no list | `test_the_sync_homes_list_leaves_out_the_example_home`, `test_the_api_homes_list_leaves_out_the_example_home` |
+| four routes closed | `test_the_four_sync_routes_answer_404_for_the_example_home` |
+| a pushed mark is refused | `test_a_pushed_is_example_is_rejected_as_forbidden` |
+| no erased-home row | `test_removing_the_example_home_leaves_no_erased_home` |
+| no export, no CSV | `test_export_and_csv_refuse_the_example_home` |
+| no calendar | `test_the_calendar_feeds_leave_the_example_home_out` |
+| no message | `test_no_reminder_push_apprise_webhook_event_or_alert_is_sent_for_it` |
+| no label, no token | `test_labels_and_api_tokens_cannot_reach_the_example_home` |
+| nothing writes the mark | `test_no_form_and_no_api_writes_is_example` |
+| one per account | `test_one_example_home_per_account` |
+| catching up ticks nothing ahead | `test_fill_example_ticks_nothing_ahead` |
+| deleting waives only for it | `test_a_real_home_still_needs_its_name_and_offers_its_export` |
+| **not in the instance backup** | `tests/test_example_home_backup.py::test_the_instance_backup_leaves_out_the_example_home` |
+| **a restore creates none** | `tests/test_example_home_backup.py::test_a_restore_never_creates_an_example_home` |
+
+The backup test makes a database holding a real home and an example home, both with files, runs
+`backup_instance`, and reads the archive: no row and no file of the example home, the real home
+whole. The restore test restores a database in which a home is marked, and expects no example home
+afterwards.
+
+A **guard test**, like the one of ADR 0079, parses the apps `sync`, `notifications`, `calendar`,
+`events`, `apitokens` and `labels` and fails on a read of `Home.objects`, `Home.all_objects` or
+`Membership.objects` that does not go through `homes_for`, `homes_for_request` or `real_homes`,
+unless the site is in a list of audited reads in the test, each with its reason (the way
+`NOT_SYNCED` says why a table is not synced). It also fails on an `include_example=True` outside
+the two callers above. A new way out cannot forget the rule. The app adds a property test: after
+random writes on an example home and a real one, the `op_log` holds only rows of the real one, and
+the snapshot and the export hold nothing of the example.
 
 ### How a step ticks by itself
 
@@ -147,21 +206,31 @@ the web (Django) and the app (Drift) evaluate it the same way:
   `{"set": true|false}`; a foreign key is named without `_id` (`budget_line`);
 - `min`: how many rows must match; the rows are those of the example home only.
 
-Both platforms evaluate it on every open of the guide; the web (`guide.states`) writes the
-vectors (`tests/fixtures/guide_states.json`: rows in, steps ticked out) and the app pins them, as
-it pins the recurrence vectors. The test of this record already checks every field and value
-against the models, that the whole example ticks every step that has a state, and that the rows of
-earlier scenarios tick nothing of a later one.
+**A tick is stored as soon as its state is true, and it stays.** Both platforms evaluate the
+states on every page of the example home (the banner is on each of them) and on the guide pages;
+each step whose state is true and that has no tick yet gets one. The guide never goes backwards:
+a step ticked stays ticked even if its state goes away afterwards, a deleted room, or a task
+marked done and then undone. That is what keeps step 3.3 ticked after step 3.4, which the guide
+itself proposes. A state made true and undone between two pages is not seen; this is a walk, not
+an exam. The web (`guide.states`) writes the vectors (`tests/fixtures/guide_states.json`) and
+the app pins them, as it pins the recurrence vectors. A vector is a sequence of snapshots of the
+rows, each with the steps ticked after it, so that persistence is pinned too: one case has the
+done occurrence of 3.3 planned again in its second snapshot, and 3.3 is still ticked in the
+expected output. The test of this record already checks every field and value against the
+models, that the whole example ticks every step that has a state, and that the rows of earlier
+scenarios tick nothing of a later one. The web adds `tests/test_guide_states.py`:
+`test_a_step_ticks_the_first_time_its_state_is_true` and
+`test_a_tick_stays_when_its_state_goes_away`, both on the vectors.
 
 | Step | Screen | Ticked by |
 | --- | --- | --- |
 | 1.1 Add the example home | [new-home](../screens/new-home.md) | a home with the mark exists |
-| 1.2 Look at its settings | [home](../screens/home.md) | by hand |
+| 1.2 Look at the home's settings | [home](../screens/home.md) | by hand |
 | 1.3 Find your way around | [today](../screens/today.md) | by hand |
 | 2.1 Add a room | [room-form](../screens/room-form.md) | at least 1 room |
 | 2.2 Add a second room | [room-form](../screens/room-form.md) | at least 2 rooms |
 | 2.3 Add a piece of equipment | [item-form](../screens/item-form.md) | an item of kind `equipment` |
-| 2.4 Note its brand and model | [item](../screens/item.md) | an item of kind `equipment` with a brand |
+| 2.4 Note its brand and model | [item-form](../screens/item-form.md) | an item of kind `equipment` with a brand |
 | 3.1 Add a task | [task-form](../screens/task-form.md) | at least 1 task |
 | 3.2 Make it come back | [task-form](../screens/task-form.md) | a task whose `repeat_mode` is not `once` |
 | 3.3 Mark it done | [today](../screens/today.md) | an occurrence with `status` `done` |
@@ -174,20 +243,18 @@ earlier scenarios tick nothing of a later one.
 | 5.3 Enter two quotes | [quote-form](../screens/quote-form.md) | at least 2 quotes |
 | 5.4 Accept one | [quote-form](../screens/quote-form.md) | a quote `accepted` with a `budget_line` |
 | 5.5 Record a payment | [budget-line-form](../screens/budget-line-form.md) | a budget line with `paid` above 0 |
-| 5.6 Set the yearly envelope | [budget](../screens/budget.md) | an annual envelope exists |
+| 5.6 Set the yearly envelope | [projects](../screens/projects.md) (**Set the envelope**) | an annual envelope exists |
 
 **Four steps have no state of their own** and carry a checkbox ticked by hand: 1.2, 1.3, 3.4 and
-4.2. They are reading steps (look at a screen) or an undo that leaves no trace once done. The tick
-is a row `guide.ManualTick(home, step_id)` on the web and a row of a local table in the app, both
-tied to the example home so that deleting it deletes them; it is never synced. A state can be
-ticked by something other than the guide (a person who already has a repeating task on another
-example home is not an issue, since the rows are those of **this** home); the guide never unticks
-a step that was ticked and whose state is gone later (a deleted room), so that deleting a row does
-not make the walk go backwards.
+4.2. They are reading steps (look at a screen) or an undo that leaves no trace once done. Their tick
+is a row `guide.StepTick(home, step_id, ticked_at)` on the web and a row of a local table in the
+app, the same row that a state writes, tied to the example home so that deleting it deletes them;
+it is never synced. A state can be ticked by something other than the guide (the rows are those
+of **this** home, so another home is not an issue).
 
 Two cautions of the step states. The template tasks that "What the home has" adds when a home is
 created would tick 3.1, so the form of step 1 leaves the list unticked. And a state ticks as soon
-as it is true, whoever made the row: this is a walk, not an exam.
+as it is true, whoever made the row.
 
 ### One source for the content
 
@@ -213,7 +280,8 @@ needs (the guide, the example home, **Add a home**, **Add a project**, **Add a b
 scenario; every text in both languages, short (60 characters for a title, 130 for a sentence) and
 free of the words of a developer; every screen is a page of `docs/screens/`; each step has a state
 or is manual; every entity, field and value of a state is a model, a field and a choice of the web
-(the field `is_example` is the only one that does not exist yet); the rows of the example point to
+(the field `is_example` is the only one that does not exist yet); a step on a read-only screen
+(the budget, the history) carries neither a state nor a pre-fill; the rows of the example point to
 rows of the same or an earlier stage; amounts are decimal strings in euros; and the example
 reuses the demo home's values wherever it has the same row.
 
@@ -234,7 +302,7 @@ the test pins the equality, so that there is one value in one place:
 | 2 | Equipment, in the kitchen | Espresso machine, Brewmark BM-200 | Machine expresso, Brewmark BM-200 |
 | 3 | Task, kitchen, on the machine | Descaling, 3 months after the last time, 15 minutes | Détartrage, 3 mois après la dernière fois, 15 minutes |
 | 3 | Occurrence | done once, the next one planned by the service | faite une fois, la suivante planifiée par le service |
-| 4 | Report, kitchen | The kitchen tap drips (resolved) | Le robinet de la cuisine goutte (classé) |
+| 4 | Report, kitchen | The kitchen tap drips (resolved) | Le robinet de la cuisine goutte (résolu) |
 | 5 | Project, bathroom | Redo the bathroom, planned | Refaire la salle de bain, prévu |
 | 5 | Budget line, materials | Tiles, planned 1,200.00, paid 480.00 | Carrelage et faïence, prévu 1 200,00, payé 480,00 |
 | 5 | Budget line, labour | Plumber (shower), planned 3,000.00, paid 0.00 | Plombier (douche), prévu 3 000,00, payé 0,00 |
@@ -250,41 +318,47 @@ file says `due_offset_days`, `issued_offset_days`), like the demo, in the time z
 (ADR 0032). The texts of a row are in the language of the person who makes the home (ADR 0074)
 and are data from then on, not translated afterwards.
 
-## Plan: cards, files, order
+## Plan: lots, files, order
 
-Web (`HouseCairn/housecairn`), then app (`HouseCairn/housecairn-mobile`). A card that touches the
-sync or the export rule is on the default model with a review by another; the others by the
-usual rule.
+Web (`HouseCairn/housecairn`), then app (`HouseCairn/housecairn-mobile`). The lots that touch the
+sync, the export or the backup rule are the sensitive ones.
 
-| Card | Content | Files | Depends on |
+| Lot | Content | Files | Depends on |
 | --- | --- | --- | --- |
-| **W1. Example home, rules** | `Home.is_example` and its migration; `Home.objects.real()`; app `guide` with `services` (`create_example_home`, `fill_example`, `remove_example`), `states` (the evaluator, reads `guide.json`), `ManualTick`; `delete_home` waiver; the rule in `sync`, the export, the CSV, `notifications`, `calendar`, `events`, `apitokens`, All homes, search; the guard test and `test_example_home_never_leaves.py`; the vectors `tests/fixtures/guide_states.json`; glossary terms and catalogs | `homes/models.py`, `homes/services.py`, `guide/`, `sync/`, `core/`, `design/glossary.json`, `design/patterns.md`, `tests/` | this record merged |
-| **W2. Guide screens** | `/guide/` and `/guide/<scenario>/`, the pre-filled forms (a query string), the banner, the delete button, the entries (More, welcome page, empty Today), `core/help.py`, `parity.EXEMPT` | `guide/views.py`, `guide/templates/`, `core/help.py`, `core/templates/`, `parity.py`, `docs/screens/` | W1 |
-| **W3. Guide in the documentation** | a Sphinx directive that prints `guide.json` in the language of the build; `docs/getting-started/guide.md` | `docs/_ext/`, `docs/getting-started/guide.md`, `docs/locale/fr/` | this record merged (files apart from W1: runs next to it) |
-| **A1. Alignment** | `guide.json` and the vectors as an element of `tool/web_alignment.py`; the glossary copy refreshed | `tool/web_alignment.py`, `tool/web_alignment.json`, `design/guide.json`, `test/fixtures/` | a release with W1 |
-| **A2. Example home on the phone** | `is_example` column and migration (schema 8); `create_example_home`, `fill_example`, `remove_example`; the evaluator in Dart on the vectors; no `op_log` for the rule; the exclusion in the engine, the relay, the export and the upload; the property test; "last active home" | `lib/data/`, `lib/sync/`, `lib/domain/guide.dart`, `test/` | A1 |
-| **A3. Guide screens on the phone** | the guide pages, the pre-filled forms, the entries, the chrome strings (ARB keys, English and French) | `lib/ui/guide_screens.dart`, `lib/ui/sections.dart`, `lib/l10n/`, `test/` | A2 |
+| **W1. Example home, rules** | `Home.is_example` and its migration; `real_homes` and the default of `homes_for` and `homes_for_request`; app `guide` with `services` (`create_example_home`, `fill_example`, `remove_example`), `states` (the evaluator, reads `guide.json`), `StepTick`; the waiver of `delete_home`; the rule in `sync.rows`, the exports, the CSV, `notifications`, `calendar`, `events`, `apitokens`, `labels`, All homes, search; the exclusion in `backup_instance` and the cleaning of `restore_instance`; the guard tests and the tests of the table above; the vectors `tests/fixtures/guide_states.json`; glossary terms and catalogs | `homes/models.py`, `homes/services.py`, `homes/scoping.py`, `guide/`, `sync/`, `instance/management/commands/backup_instance.py`, `instance/management/commands/restore_instance.py`, `core/`, `design/glossary.json`, `design/patterns.md`, `tests/`, `docs/administration/backup.md`, `docs/administration/data.md`, `docs/api/`, `docs/screens/home.md` | this record merged |
+| **W2. Guide screens** | `/guide/` and `/guide/<scenario>/`, the pre-filled forms (a query string), the banner, the delete button and its confirmation, the entries (More, welcome page, empty Today), `core/help.py`, `parity.EXEMPT` | `guide/views.py`, `guide/templates/`, `core/help.py`, `core/templates/`, `parity.py`, `docs/screens/` and its catalogs under `docs/locale/fr/LC_MESSAGES/screens/` | W1 |
+| **W3. Guide in the documentation** | a Sphinx directive that prints `guide.json` in the language of the build; `docs/getting-started/guide.md` and its entry in the table of contents | `docs/_ext/`, `docs/getting-started/guide.md`, `docs/getting-started/index.md`, `docs/locale/fr/LC_MESSAGES/getting-started/` (`index.po`, `guide.po`) | this record merged (no file in common with W1 or W2: runs next to W1) |
+| **A1. Alignment** | `guide.json`, `glossary.json` and the vectors as elements of `tool/web_alignment.py`, copied byte for byte; both JSON files declared as assets of the app | `tool/web_alignment.py`, `tool/web_alignment.json`, `tool/test_web_alignment.py`, `pubspec.yaml`, `design/guide.json`, `design/glossary.json`, `test/fixtures/` | a release with W1 |
+| **A2. Example home on the phone** | `is_example` column and migration (schema 8); `create_example_home`, `fill_example`, `remove_example`; the evaluator in Dart on the vectors, with the `StepTick` table; no `op_log` for the rule; the exclusion in the engine, the relay, the export and the upload; the property test; "last active home" | `lib/data/`, `lib/sync/`, `lib/domain/guide.dart`, `test/` | A1 |
+| **A3. Guide screens on the phone** | the guide pages, the pre-filled forms, the confirmation dialog, the entries, the chrome strings (ARB keys, English and French) | `lib/ui/guide_screens.dart`, `lib/ui/sections.dart`, `lib/l10n/`, `test/` | A2 |
 
-Order: this record, then **W1 and W3 side by side** (W3 reads only the file), W2 after W1; A1 after
-the first release that carries W1, A2, A3. Parallelism by the project's rule: W1 and W2 both touch
-`core/` and the templates, so they do not run together.
+The app has no release of its own: `design/guide.json` and `design/glossary.json` reach it as
+byte-for-byte copies of the web's, so that the glossary terms a text cites exist on both sides.
+The guide is read by the app from `design/`, not from its assets, hence the declaration in
+`pubspec.yaml`.
+
+Order: this record, then **W1 and W3 side by side** (W3 reads only the file), W2 after W1; A1
+after the first release that carries W1, A2, A3. Parallelism by the project's rule: W1 and W2
+both touch `core/` and the templates, so they do not run together.
 
 **Screens of `docs/screens/`**: added `guide.md` (the five scenarios with their progress and
 **Delete the example home**) and `guide-scenario.md` (the steps of one scenario). Changed:
 `start-page.md` (the welcome card), `more.md` (Guide in Help), `homes.md` (the mark and the order
-of the list), `home.md` (the banner, **Delete the example home** with no typed name, no export),
-`new-home.md` (opened from the guide: pre-filled, "What the home has" unticked), `today.md` (the
-card of an empty Today), `room-form.md`, `item-form.md`, `task-form.md`, `report-form.md`,
-`project-form.md`, `budget-line-form.md`, `quote-form.md` (the pre-fill from the guide); in the
-app, `spec.md` (Homes: the example is never synced) and `plan.md`. Release notes: one fragment
-**new** with W2 and one with A3. This record changes nothing a person sees, so it has no fragment.
+of the list), `home.md` (the banner, **Delete the example home** with one confirmation, no typed
+name, no export), `new-home.md` (opened from the guide: pre-filled, "What the home has"
+unticked), `today.md` (the card of an empty Today), `room-form.md`, `item-form.md`,
+`task-form.md`, `report-form.md`, `project-form.md`, `projects.md` (the envelope, pre-filled from
+the guide), `budget-line-form.md`, `quote-form.md` (the pre-fill from the guide); in the app,
+`spec.md` (Homes: the example is never synced) and `plan.md`. Release notes: one fragment **new**
+with W2 and one with A3. This record changes nothing a person sees, so it has no fragment.
 
 ## Consequences
 
 - The guide adds no table to a real home: one column on `Home`, and one small table of ticks
   that hangs off the example home.
-- A new way out for a home (a new export, a new integration) must go through `Home.objects.real()`;
-  the guard test fails otherwise. This is the cost of the rule.
+- A new way out for a home (a new export, a new integration) must go through `homes_for` or
+  `real_homes()`; the guard test fails otherwise. This is the cost of the rule. The instance
+  backup is no longer one `sqlite3` online backup: it takes one more step on the copy.
 - The mark is a column of the web model that the sync protocol ignores. A phone that pushes
   `homes.home` with `is_example` is refused; an older phone never sends it.
 - The guide text is public, in two languages, in `design/`: it holds no personal data, and every
@@ -292,26 +366,25 @@ app, `spec.md` (Homes: the example is never synced) and `plan.md`. Release notes
 - The guide cannot get a new language by a catalog: a third language is a third key in the file,
   and the test asks for it everywhere.
 
-## Open questions
+## Decisions of the maintainer
 
-1. **Server mode in the app.** Does the guide exist on a phone connected to a server, given that
-   "everything is on the server"? *Recommended*: yes, with the example home local to the phone and
-   never uploaded (the rule above); it is the only local home allowed in that way, and it goes
-   with one gesture. The alternative, sending the guide to the web, would break the rule.
-2. **Deleting in one gesture.** One tap with no confirmation, or one tap and one confirmation?
-   *Recommended*: one tap and a confirmation on the same page (a dialog), no typed name; the data
-   cannot come back (files are erased), the person made some of it, and a stray tap in a banner
-   is easy.
-3. **The instance backup.** `backup_instance` copies the database, so an example home rides in it.
-   *Recommended*: leave it (a copy of the instance, not an export of real homes) and say so in
-   the page of the backup. The alternative, stripping example homes from the copy, adds a step
-   to a command that today is one `sqlite3` online backup.
-4. **Scope of the mark.** `is_example` on `Home` is the proposal. A separate table of example
-   homes would leave `Home` alone but every query of homes would join it. *Recommended*: the
-   column.
-5. **Catching up.** Is "Add what the earlier scenarios make" wanted, or must the scenarios be
-   done in order? *Recommended*: keep it, so that a person who comes for the budget is not
-   blocked by the rooms.
-6. **The word "site".** This record reads "the site" as the web application and adds the guide
-   to the documentation site as a third reader. *Recommended*: keep the third reader, it costs one
-   Sphinx directive and no translation.
+The first draft of this record asked six questions. The maintainer answered them on 2026-11-16;
+the answers are decisions, and the sections above carry them.
+
+1. **Server mode in the app.** The guide is available on a phone connected to a server. The
+   example home stays **local to the phone and is never sent to the server**; it is the only
+   local home allowed beside the server's homes, and it goes with one gesture.
+2. **Deleting in one gesture.** One press of **Delete the example home** and one confirmation on
+   the same page, **no name to type**.
+3. **The instance backup.** The example home is **left out of the backups of the server**. The
+   first draft proposed to leave it in the copy of the database; this is replaced. The single
+   point of passage is `backup_instance` (its `dump_database` and its walk of the media), and
+   the tests that guarantee it are `test_the_instance_backup_leaves_out_the_example_home` and
+   `test_a_restore_never_creates_an_example_home`.
+4. **Scope of the mark.** A column **`Home.is_example`** (boolean, default false).
+5. **Catching up.** "Add what the earlier scenarios make" is **kept**, so that a person who comes
+   for the budget is not blocked by the rooms.
+6. **The word "site".** "The site" is the web application, and the documentation reads the same
+   file as a third reader (one Sphinx directive, no translation).
+7. **A tick is stored as soon as it is true.** The guide never goes backwards, even if the
+   action is undone afterwards (`StepTick`, [how a step ticks](#how-a-step-ticks-by-itself)).

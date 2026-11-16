@@ -173,8 +173,8 @@
           "id": "create-home.1",
           "title": { "en": "Add the example home", "fr": "Ajouter le logement d'exemple" },
           "explain": {
-            "en": "A home holds everything else: rooms, tasks, projects. The form is already filled in, so press {{save}}.",
-            "fr": "Un logement contient tout le reste : pièces, tâches, projets. Le formulaire est déjà rempli, appuyez sur {{save}}."
+            "en": "A home holds all the rest: rooms, tasks, projects. The form is filled in: press the button at the bottom.",
+            "fr": "Un logement contient tout le reste : pièces, tâches, projets. Le formulaire est rempli : appuyez sur le bouton en bas."
           },
           "screen": "new-home",
           "suggest": "home",
@@ -184,8 +184,8 @@
           "id": "create-home.2",
           "title": { "en": "Look at its settings", "fr": "Regarder ses réglages" },
           "explain": {
-            "en": "Open {{home-settings}}: the name, the currency (euro here) and the hemisphere, which tells when spring starts.",
-            "fr": "Ouvrez {{home-settings}} : le nom, la devise (l'euro ici) et l'hémisphère, qui dit quand commence le printemps."
+            "en": "Open the settings of the home: the name, the currency (euro here) and the hemisphere, which tells when spring starts.",
+            "fr": "Ouvrez les réglages du logement : le nom, la devise (l'euro ici) et l'hémisphère, qui dit quand commence le printemps."
           },
           "screen": "home",
           "manual": true
@@ -214,8 +214,8 @@
           "id": "rooms-equipment.1",
           "title": { "en": "Add a room", "fr": "Ajouter une pièce" },
           "explain": {
-            "en": "Start with the room you know best. Only the name is required.",
-            "fr": "Commencez par la pièce que vous connaissez le mieux. Seul le nom est obligatoire."
+            "en": "Start with the room you know best. Pick its type: the name fills in by itself.",
+            "fr": "Commencez par la pièce que vous connaissez le mieux. Choisissez son type : le nom se remplit tout seul."
           },
           "screen": "room-form",
           "suggest": "room.kitchen",
@@ -251,7 +251,7 @@
             "en": "With the brand and the model, you can find its manual or order a part later.",
             "fr": "Avec la marque et le modèle, vous retrouverez sa notice ou commanderez une pièce plus tard."
           },
-          "screen": "item",
+          "screen": "item-form",
           "suggest": "item.machine",
           "suggest_fields": ["brand", "model"],
           "done_when": {
@@ -333,8 +333,8 @@
           "id": "report-problem.1",
           "title": { "en": "Report a problem", "fr": "Signaler un problème" },
           "explain": {
-            "en": "Use {{report-a-problem}}. Say {{what-is-wrong}} in one line, and {{where}}.",
-            "fr": "Utilisez {{report-a-problem}}. Dites {{what-is-wrong}} en une ligne, et {{where}}."
+            "en": "Use {{report-a-problem}}. Answer {{what-is-wrong}} in one line, then say where.",
+            "fr": "Utilisez {{report-a-problem}}. Répondez à {{what-is-wrong}} en une ligne, puis dites où."
           },
           "screen": "report-form",
           "suggest": "report.tap",
@@ -438,7 +438,7 @@
             "en": "{{envelope}} is what you set aside for the year. {{budget}} compares it with the plan.",
             "fr": "{{envelope}} : la somme mise de côté pour l'année. {{budget}} la compare au prévu."
           },
-          "screen": "budget",
+          "screen": "projects",
           "suggest": "envelope",
           "done_when": { "entity": "projects.annualenvelope", "min": 1 }
         }

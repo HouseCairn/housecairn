@@ -24,6 +24,15 @@ PLACEHOLDER = re.compile(r"\{\{([a-z0-9-]+)\}\}")
 DERIVED = {"due_offset_days", "completed_offset_days", "issued_offset_days", "valid_days"}
 # Fields that the lot of the web side adds (ADR 0084): the test reads them as existing.
 PLANNED = {("homes.home", "is_example")}
+# Screens of docs/screens/ that only read: no form, nothing to write (the budget sets nothing).
+READ_ONLY_SCREENS = {
+    "budget",
+    "budget-projects",
+    "budget-rooms",
+    "budget-tasks",
+    "history",
+    "audit",
+}
 # Words of the guide's sentences: nothing a household would not say.
 JARGON = ("api", "uuid", "sync", "webhook", "htmx", "token", "json", "csv", "oauth")
 
@@ -149,6 +158,14 @@ def test_sentences_are_short_and_plain(place: str, text: dict[str, str]) -> None
 def test_every_screen_has_its_page() -> None:
     for _, step in steps():
         assert (SCREENS / f"{step['screen']}.md").is_file(), f"{step['id']}: {step['screen']}"
+
+
+def test_a_read_only_screen_carries_no_state_and_no_pre_fill() -> None:
+    """A screen that only reads is never where a row is written (the envelope: projects)."""
+    for _, step in steps():
+        if step["screen"] in READ_ONLY_SCREENS:
+            assert "done_when" not in step, step["id"]
+            assert "suggest" not in step, step["id"]
 
 
 def test_a_step_is_ticked_by_a_state_or_by_hand() -> None:
