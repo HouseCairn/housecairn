@@ -156,6 +156,19 @@ grep -q '<html lang="fr">' "$french" || fail "the sign-in page is not served in 
 grep -q 'Se connecter' "$french" || fail "the French sign-in page is not translated (no compiled catalog?)"
 pass "GET /accounts/login/ with Accept-Language: fr is served in French (compiled catalog in the image)"
 
+# The About screen shows the version of pyproject.toml, the only source of the
+# number, although the image does not install the project as a package.
+expected=$(python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["project"]["version"])' \
+  "$(dirname "$0")/../../pyproject.toml")
+case "$expected" in "" | dev) fail "no version in pyproject.toml" ;; esac
+about=$(mktemp)
+code=$(http_get /about/ "$about")
+[ "$code" = 200 ] || fail "GET /about/ answered $code"
+if grep -q 'Version dev' "$about"; then fail "the About screen shows Version dev"; fi
+grep -qF "<p class=\"about-version\">Version $expected</p>" "$about" \
+  || fail "the About screen does not show Version $expected"
+pass "GET /about/ shows Version $expected, the version of pyproject.toml"
+
 css=$(grep -o -m 1 '/static/css/app\.[0-9a-f]*\.css' "$body")
 [ -n "$css" ] || fail "no hashed stylesheet in the sign-in page"
 headers=$(mktemp)

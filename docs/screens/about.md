@@ -1,8 +1,10 @@
 # About
 
-The version of the instance, the licence (AGPL-3.0), a link to the source code
-and security reports, and the statement that HouseCairn is developed with an AI
-agent under human review. It is at `/about/` and does not need an account.
+The version of the application (for example `Version 0.4.1`, the `version` of
+`pyproject.toml`, selectable to copy it into a report), the licence (AGPL-3.0), a
+link to the source code and security reports, and the statement that HouseCairn is
+developed with an AI agent under human review. It is at `/about/` and does not need
+an account.
 
 Under **Open data**, the open databases the [barcode lookup](../administration/barcodes.md)
 reads (Open Products Facts, then Open Food Facts) and their licences: the Open Database
