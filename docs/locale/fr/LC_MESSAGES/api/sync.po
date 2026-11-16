@@ -21,8 +21,8 @@ msgstr ""
 msgid "Sync API"
 msgstr "API de synchronisation"
 
-msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, starts from a snapshot of the home when it has none, and pushes what was typed on the phone. Creating a home from the phone and sending files come in a later version."
-msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, part d'un instantané du logement quand elle n'en a aucune, et envoie ce qui a été saisi sur le téléphone. La création d'un logement depuis le téléphone et l'envoi des fichiers viennent dans une version ultérieure."
+msgid "The mobile app keeps its homes on a HouseCairn server through the sync API, under `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the operations of the mobile app's protocol, in clear, home by home: the app reads what changed since its last position, starts from a snapshot of the home when it has none, pushes what was typed on the phone, and creates on the server the homes the phone made. Sending files comes in a later version."
+msgstr "L'application mobile garde ses logements sur un serveur HouseCairn par l'API de synchronisation, sous `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). Elle échange les opérations du protocole de l'application mobile, en clair, logement par logement : l'application lit ce qui a changé depuis sa dernière position, part d'un instantané du logement quand elle n'en a aucune, envoie ce qui a été saisi sur le téléphone et crée sur le serveur les logements faits sur le téléphone. L'envoi des fichiers vient dans une version ultérieure."
 
 msgid "Access"
 msgstr "Accès"
@@ -75,6 +75,33 @@ msgstr "`members` : les comptes du logement, avec le nom affiché pour eux et le
 
 msgid "`gone`: the homes erased while they were bound to this connection, and when. The app erases them on the phone. A connection whose account had already left the home when it was erased is not told."
 msgstr "`gone` : les logements effacés alors qu'ils étaient liés à cette connexion, et quand. L'application les efface du téléphone. Une connexion dont le compte avait déjà quitté le logement au moment de l'effacement n'est pas prévenue."
+
+msgid "Creating a home"
+msgstr "Créer un logement"
+
+msgid "`POST /api/v1/sync/homes/`, with a JSON body (`Content-Type: application/json`):"
+msgstr "`POST /api/v1/sync/homes/`, avec un corps JSON (`Content-Type: application/json`) :"
+
+msgid "The app sends the homes of the phone this way when the person keeps the phone's homes on the server, then pushes their rows. The server creates the home with the phone's `id`, the account of the connection its owner, and adds it to the homes of the connection. The answer is `201` with the home as `GET /api/v1/sync/homes/` lists it (`role`, `head`, `member_id`, `members`). The creation is the first change of the home: `changes` and `snapshot` give the row `homes.home`, written with the server's clock."
+msgstr "L'application envoie ainsi les logements du téléphone quand la personne garde les logements du téléphone sur le serveur, puis envoie leurs lignes. Le serveur crée le logement avec l'`id` du téléphone, le compte de la connexion pour propriétaire, et l'ajoute aux logements de la connexion. La réponse est `201` avec le logement tel que `GET /api/v1/sync/homes/` le liste (`role`, `head`, `member_id`, `members`). La création est la première modification du logement : `changes` et `snapshot` rendent la ligne `homes.home`, écrite avec l'horloge du serveur."
+
+msgid "`id`: a UUID in its canonical text form, made by the phone."
+msgstr "`id` : un UUID sous sa forme textuelle canonique, fait par le téléphone."
+
+msgid "`name`, `currency`, `hemisphere`: checked as the web checks a new home. The name is trimmed, 120 characters at most, not empty; the currency an ISO 4217 code in capitals (`EUR`); the hemisphere `north` or `south`, `north` when left out. A field the web would refuse is `400` with `\"code\": \"malformed\"` and `fields`, the messages for each field; a body that is not such an object is `400` `malformed` too."
+msgstr "`name`, `currency`, `hemisphere` : contrôlés comme le web contrôle un nouveau logement. Le nom est rogné des espaces, 120 caractères au plus, non vide ; la devise un code ISO 4217 en capitales (`EUR`) ; l'hémisphère `north` ou `south`, `north` s'il est omis. Un champ que le web refuserait donne `400` avec `\"code\": \"malformed\"` et `fields`, les messages de chaque champ ; un corps qui n'est pas un tel objet donne aussi `400` `malformed`."
+
+msgid "**Sent again**: the same `id` with the same fields, for a home the connection already has, answers `200` with the home, and nothing is written. The app can send it again when it lost the first answer."
+msgstr "**Envoyé de nouveau** : le même `id` avec les mêmes champs, pour un logement que la connexion a déjà, répond `200` avec le logement, et rien n'est écrit. L'application peut l'envoyer de nouveau quand elle a perdu la première réponse."
+
+msgid "**The id is taken**: the same `id` with other fields, or an `id` held by anything else on the server (a home of another account, a home of the account that the connection was not given, a deleted or erased home, a row of a home), is `409` with `\"code\": \"id_taken\"`. The answer is the same in every case: it does not say who holds the id."
+msgstr "**L'id est pris** : le même `id` avec d'autres champs, ou un `id` que détient autre chose sur le serveur (un logement d'un autre compte, un logement du compte que la connexion n'a pas reçu, un logement supprimé ou effacé, une ligne d'un logement), donne `409` avec `\"code\": \"id_taken\"`. La réponse est la même dans tous les cas : elle ne dit pas qui détient l'id."
+
+msgid "**The right to create homes**: the access token needs the scope `homes.create`, which the app asks for when the person sends the phone's homes, and the connection the right **May create homes**, ticked at consent and shown on [Connected apps](../screens/api-tokens.md#connected-apps). Without either, `403` with `\"code\": \"cannot_create_homes\"`."
+msgstr "**Le droit de créer des logements** : le jeton d'accès doit avoir la portée `homes.create`, que l'application demande quand la personne envoie les logements du téléphone, et la connexion le droit **Peut créer des logements**, coché au consentement et affiché sous [Applications connectées](../screens/api-tokens.md#connected-apps). Sans l'un ou l'autre, `403` avec `\"code\": \"cannot_create_homes\"`."
+
+msgid "Creations count with the pushes, 60 a minute per connection."
+msgstr "Les créations comptent avec les envois, 60 par minute et par connexion."
 
 msgid "The changes"
 msgstr "Les modifications"
@@ -260,8 +287,8 @@ msgstr "`malformed`"
 msgid "`400`"
 msgstr "`400`"
 
-msgid "A push whose body or one of its operations cannot be read; with `index` for an operation."
-msgstr "Un envoi dont le corps ou une opération ne peut pas être lu ; avec `index` pour une opération."
+msgid "A push whose body or one of its operations cannot be read; with `index` for an operation. A new home whose body cannot be read, or with `fields` for a field the web refuses."
+msgstr "Un envoi dont le corps ou une opération ne peut pas être lu ; avec `index` pour une opération. Un nouveau logement dont le corps ne peut pas être lu, ou avec `fields` pour un champ que le web refuse."
 
 msgid "`too_large`"
 msgstr "`too_large`"
@@ -283,6 +310,15 @@ msgstr "`409`"
 
 msgid "A push number used before with another body."
 msgstr "Un numéro d'envoi déjà utilisé avec un autre corps."
+
+msgid "A new home whose id is held, by a home with other fields or by anything else on the server."
+msgstr "Un nouveau logement dont l'id est détenu, par un logement aux autres champs ou par autre chose sur le serveur."
+
+msgid "`cannot_create_homes`"
+msgstr "`cannot_create_homes`"
+
+msgid "A new home sent without the scope `homes.create` or the right to create homes."
+msgstr "Un nouveau logement envoyé sans la portée `homes.create` ou sans le droit de créer des logements."
 
 msgid "`wrong_device`"
 msgstr "`wrong_device`"

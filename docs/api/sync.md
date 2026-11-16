@@ -3,9 +3,9 @@
 The mobile app keeps its homes on a HouseCairn server through the sync API, under
 `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the
 operations of the mobile app's protocol, in clear, home by home: the app reads what changed
-since its last position, starts from a snapshot of the home when it has none, and pushes what
-was typed on the phone. Creating a home from the phone and sending files come in a later
-version.
+since its last position, starts from a snapshot of the home when it has none, pushes what was
+typed on the phone, and creates on the server the homes the phone made. Sending files
+comes in a later version.
 
 ## Access
 
@@ -89,6 +89,47 @@ yet is kept and shown as it is, never refused:
 - `gone`: the homes erased while they were bound to this connection, and when. The app erases
   them on the phone. A connection whose account had already left the home when it was erased
   is not told.
+
+## Creating a home
+
+`POST /api/v1/sync/homes/`, with a JSON body (`Content-Type: application/json`):
+
+```json
+{
+  "id": "5b7e8a1c-2d3f-4a5b-9c6d-7e8f9a0b1c2d",
+  "name": "Main house",
+  "currency": "EUR",
+  "hemisphere": "north"
+}
+```
+
+The app sends the homes of the phone this way when the person keeps the phone's homes on the
+server, then pushes their rows. The server creates the home with the phone's `id`, the account
+of the connection its owner, and adds it to the homes of the connection. The answer is `201`
+with the home as `GET /api/v1/sync/homes/` lists it (`role`, `head`, `member_id`, `members`).
+The creation is the first change of the home: `changes` and `snapshot` give the row
+`homes.home`, written with the server's clock.
+
+- `id`: a UUID in its canonical text form, made by the phone.
+- `name`, `currency`, `hemisphere`: checked as the web checks a new home. The name is trimmed,
+  120 characters at most, not empty; the currency an ISO 4217 code in capitals (`EUR`); the
+  hemisphere `north` or `south`, `north` when left out. A field the web would refuse is `400`
+  with `"code": "malformed"` and `fields`, the messages for each field; a body that is not such
+  an object is `400` `malformed` too.
+- **Sent again**: the same `id` with the same fields, for a home the connection already has,
+  answers `200` with the home, and nothing is written. The app can send it again when it lost
+  the first answer.
+- **The id is taken**: the same `id` with other fields, or an `id` held by anything else on the
+  server (a home of another account, a home of the account that the connection was not given,
+  a deleted or erased home, a row of a home), is `409` with `"code": "id_taken"`. The answer is
+  the same in every case: it does not say who holds the id.
+- **The right to create homes**: the access token needs the scope `homes.create`, which the app
+  asks for when the person sends the phone's homes, and the connection the right **May create
+  homes**, ticked at consent and shown on
+  [Connected apps](../screens/api-tokens.md#connected-apps). Without either, `403` with
+  `"code": "cannot_create_homes"`.
+
+Creations count with the pushes, 60 a minute per connection.
 
 ## The changes
 
@@ -274,10 +315,12 @@ itself:
 | Code | Status | When |
 | --- | --- | --- |
 | `sync_needs_connection` | `403` | An API token, a session or no credential. |
-| `malformed` | `400` | A push whose body or one of its operations cannot be read; with `index` for an operation. |
+| `malformed` | `400` | A push whose body or one of its operations cannot be read; with `index` for an operation. A new home whose body cannot be read, or with `fields` for a field the web refuses. |
 | `too_large` | `400` | A push of more than 500 operations or 1 MiB. |
 | `sync_version` | `400` | A push from an app whose schema version is below the server's lowest. |
 | `push_conflict` | `409` | A push number used before with another body. |
+| `id_taken` | `409` | A new home whose id is held, by a home with other fields or by anything else on the server. |
+| `cannot_create_homes` | `403` | A new home sent without the scope `homes.create` or the right to create homes. |
 | `wrong_device` | `409` | A device id other than the one the connection pushed with, or one of another connection. |
 | `insecure_transport` | `403` | Plain HTTP outside the local network. |
 | `sso_required` | `403` | The home requires a sign-in provider the connection was not made with. |

@@ -22,6 +22,31 @@ msgstr "Cette position est plus ancienne que la plus ancienne modification conse
 msgid "%(name)s is a whole number, 0 or more."
 msgstr "%(name)s est un nombre entier, 0 ou plus."
 
+msgid "The body is not a home."
+msgstr "Le contenu n'est pas un logement."
+
+msgid "The body is not JSON."
+msgstr "Le contenu n'est pas du JSON."
+
+msgid "The body is a JSON object."
+msgstr "Le contenu est un objet JSON."
+
+msgid "id is a UUID in its canonical text form."
+msgstr "id est un UUID sous sa forme textuelle canonique."
+
+#, python-format
+msgid "%(name)s is a text."
+msgstr "%(name)s est un texte."
+
+msgid "A field of the home is not valid."
+msgstr "Un champ du logement n'est pas valide."
+
+msgid "This connection may not create homes."
+msgstr "Cette connexion ne peut pas créer de logements."
+
+msgid "This id is already taken."
+msgstr "Cet identifiant est déjà pris."
+
 msgid "limit is 1 or more."
 msgstr "limit vaut 1 ou plus."
 
@@ -34,12 +59,6 @@ msgstr "Ce numéro de push a déjà servi avec un autre contenu."
 #, python-format
 msgid "A push holds at most %(ops)s operations and %(bytes)s bytes."
 msgstr "Un push contient au plus %(ops)s opérations et %(bytes)s octets."
-
-msgid "The body is not JSON."
-msgstr "Le contenu n'est pas du JSON."
-
-msgid "The body is a JSON object."
-msgstr "Le contenu est un objet JSON."
 
 #, python-format
 msgid "%(name)s is a whole number."
@@ -122,10 +141,6 @@ msgstr "%(name)s est un montant, une chaîne décimale."
 #, python-format
 msgid "%(name)s is a date, YYYY-MM-DD."
 msgstr "%(name)s est une date, AAAA-MM-JJ."
-
-#, python-format
-msgid "%(name)s is a text."
-msgstr "%(name)s est un texte."
 
 #, python-format
 msgid "%(name)s cannot be written by a push."

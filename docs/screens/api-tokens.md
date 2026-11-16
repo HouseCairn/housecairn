@@ -59,7 +59,8 @@ if needed (passkey, second factor or sign-in provider included). The page shows 
 address, says that the phone will see and change everything in the homes you choose, as you
 can, and lists your homes with the same rules as the token form: a home that requires a sign-in
 provider can be ticked only after signing in through it. **May create homes** is shown, and
-ticked, only when the app asked for it, to send its own homes to the server. Under **Name given
+ticked, only when the app asked for it, to send its own homes to the server; a home the phone
+creates is added to its homes, with you as its owner. Under **Name given
 by the app**, the page shows the name the phone sent: a label chosen by whoever started the
 sign-in, never the identity of the app. **Connect** sends you back to the app; **Cancel** tells
 the app you refused. On plain HTTP, which only a local address allows, the page says that the
