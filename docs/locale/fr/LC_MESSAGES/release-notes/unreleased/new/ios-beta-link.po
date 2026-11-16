@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Shortcut to the iOS app beta.** **More** (under **Help**) and [About](../../../screens/about.md) have an **iOS app (TestFlight beta)** entry that opens the page to join the beta, in a new tab (iPhone, TestFlight required). It is also mentioned in [Install on a phone](../../../getting-started/phone.md). Nothing is loaded from that site until you follow the link. See [More](../../../screens/more.md)."
+msgstr "**Raccourci vers la bêta de l'application iOS.** **Plus** (sous **Aide**) et [À propos](../../../screens/about.md) ont une entrée **Application iOS (bêta TestFlight)** qui ouvre la page pour rejoindre la bêta, dans un nouvel onglet (iPhone, TestFlight requis). Elle est aussi mentionnée dans [Installer sur un téléphone](../../../getting-started/phone.md). Rien n'est chargé depuis ce site tant que vous ne suivez pas le lien. Voir [Plus](../../../screens/more.md)."
+

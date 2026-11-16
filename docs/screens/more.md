@@ -19,8 +19,9 @@ sections. Each entry has its icon, a title and a line that says what it opens. T
   [Security and sign-in](security-and-sign-in.md).
 - **Instance**, for an administrator only:
   [instance administration](instance.md).
-- **Help**: this documentation, the documentation of the API and the
-  [About](about.md) page.
+- **Help**: this documentation, the documentation of the API, **iOS app (TestFlight
+  beta)** (opens the page to join the beta in a new tab; see
+  [Install on a phone](../getting-started/phone.md)) and the [About](about.md) page.
 
 **Sign out** comes last. The actions that cannot be taken back, deleting your
 account or a home, are not on More: they are at the bottom of their own page.

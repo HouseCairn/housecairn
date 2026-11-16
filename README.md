@@ -167,6 +167,7 @@ default.
   the Home Assistant integration (HACS).
 - [housecairn-mobile](https://github.com/HouseCairn/housecairn-mobile): the
   phone app for iOS and Android, in development, not on the stores yet.
+  [Join the iOS beta via TestFlight](https://testflight.apple.com/join/eygTuxTT) (iPhone, TestFlight required).
 - [website](https://github.com/HouseCairn/website): the site
   <https://housecairn.app>.
 

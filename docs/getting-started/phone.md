@@ -15,6 +15,11 @@ offers **Install app** (Chrome and Edge, at the bottom of the screen or in the â
 In Safari, open the address of your instance and sign in. Tap **Share**, then **Add to
 Home Screen**, then **Add**. The name under the icon is the name of the instance.
 
+## iOS app (TestFlight beta)
+
+[Join the iOS beta via TestFlight](https://testflight.apple.com/join/eygTuxTT) (iPhone, TestFlight required). The
+installation above works without it.
+
 ## Without a connection
 
 Today and the task list of your home are kept on the phone each time you open them with a

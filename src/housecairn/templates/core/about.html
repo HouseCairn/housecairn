@@ -23,7 +23,7 @@
       {% for link in about_links %}
         <li>
           {% if link.available %}
-            <a class="about-link" href="{{ link.url }}" rel="noopener noreferrer">{% include "components/icon.html" with name=link.icon %}<span>{{ link.label }}</span></a>
+            <a class="about-link" href="{{ link.url }}"{% if link.new_tab %} target="_blank"{% endif %} rel="noopener noreferrer">{% include "components/icon.html" with name=link.icon %}<span>{{ link.label }}</span>{% if link.new_tab %}<span class="sr-only"> {% translate "(opens in a new tab)" %}</span>{% endif %}</a>
           {% else %}
             <span class="about-link about-link-soon">{% include "components/icon.html" with name=link.icon %}<span>{{ link.label }}</span><span class="pill pill-ghost">{% translate "Coming soon" %}</span></span>
           {% endif %}

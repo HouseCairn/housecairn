@@ -30,6 +30,9 @@ msgstr "Intégration Home Assistant"
 msgid "Mobile application"
 msgstr "Application mobile"
 
+msgid "iOS app (TestFlight beta)"
+msgstr "Application iOS (bêta TestFlight)"
+
 msgid "Core"
 msgstr "Cœur"
 
@@ -156,6 +159,9 @@ msgstr "Documentation de l'API"
 
 msgid "OpenAPI schema and test interface"
 msgstr "Schéma OpenAPI et interface de test"
+
+msgid "Join the beta on your iPhone"
+msgstr "Rejoindre la bêta sur votre iPhone"
 
 msgid "About"
 msgstr "À propos"
@@ -524,6 +530,9 @@ msgstr "Les photos d'Open Products Facts et d'Open Food Facts sont sous licence 
 
 msgid "Links"
 msgstr "Liens"
+
+msgid "(opens in a new tab)"
+msgstr "(s'ouvre dans un nouvel onglet)"
 
 msgid "Coming soon"
 msgstr "Bientôt"
