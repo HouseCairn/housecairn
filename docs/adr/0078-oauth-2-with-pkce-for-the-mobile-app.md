@@ -262,6 +262,15 @@ A new connection sends the account the security email of
 account"), once oauthlib has accepted the request and given a code, and is recorded in the
 audit log.
 
+**Content Security Policy.** The browser applies `form-action` to the redirect that follows
+Connect or Cancel, so with the policy of every page (`'self'`,
+[ADR 0011](0011-no-external-resources-and-csp.md)) it blocks the way back to the app once the
+code is given. The consent page, and only it, adds the scheme of the registered redirect URI,
+`app.housecairn.mobile:`, by django-csp's per-view update; the origins of the sign-in
+providers ([ADR 0041](0041-sign-in-providers-in-the-interface.md)) stay. A source cannot carry
+a path for a URI that is not `scheme://host`, so the scheme is the narrowest source a browser
+accepts; never a wildcard.
+
 ### Lifetimes
 
 - authorization code: 60 seconds, once;

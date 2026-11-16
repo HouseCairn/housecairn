@@ -9,6 +9,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from allauth.core import ratelimit
+from csp.decorators import csp_update
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
@@ -25,7 +26,7 @@ from oauthlib.oauth2.rfc6749.errors import InvalidRequestError
 from housecairn.accounts.models import User
 from housecairn.apitokens import connections, transport
 from housecairn.apitokens.forms import ConsentForm
-from housecairn.apitokens.oauth import SCOPE_HOMES_CREATE
+from housecairn.apitokens.oauth import REDIRECT_URI, SCOPE_HOMES_CREATE
 from housecairn.homes import services as home_services
 from housecairn.homes import sso
 
@@ -45,7 +46,15 @@ def _refused(request: HttpRequest, *, page: bool) -> HttpResponse | None:
     return JsonResponse({"detail": reason, "code": code}, status=403)
 
 
+# Browsers apply `form-action` to the redirect that follows Connect and Cancel: without the app's
+# scheme in it, the browser blocks the way back to the app once the code is given. A source
+# expression cannot carry a path for a URI that is not `scheme://host`, so the scheme of the one
+# registered redirect URI is the narrowest source a browser accepts; no other page gets it.
+APP_FORM_ACTION = f"{urlsplit(REDIRECT_URI).scheme}:"
+
+
 @method_decorator(never_cache, name="dispatch")
+@method_decorator(csp_update({"form-action": [APP_FORM_ACTION]}), name="dispatch")
 class ConsentView(dot_views.AuthorizationView):  # type: ignore[misc]
     """The page of Housecairn where a person connects a phone, never skipped."""
 

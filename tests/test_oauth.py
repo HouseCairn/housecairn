@@ -4,6 +4,7 @@
 from collections.abc import Iterator
 from datetime import timedelta
 from typing import Any
+from urllib.parse import urlsplit
 
 import pytest
 from django.conf import settings
@@ -28,7 +29,7 @@ from housecairn.apitokens.models import (
 from housecairn.apitokens.oauth import CLIENT_ID, REDIRECT_URI
 from housecairn.audit.models import AuditEvent
 from housecairn.homes.models import Home, Membership, Role
-from housecairn.instance import settings_services
+from housecairn.instance import providers, settings_services
 from tests.oauth_support import (
     authorize_params,
     code_of,
@@ -862,3 +863,84 @@ class TestCsrf:
         assert answer.status_code == 200, answer.content
         phone.connection.refresh_from_db()
         assert phone.connection.revoked_at is not None
+
+
+def _form_action(response: Any) -> list[str]:
+    """The sources of `form-action` in the policy of a response, one by one."""
+    policy = response["Content-Security-Policy"]
+    directive = next(p for p in policy.split(";") if p.strip().startswith("form-action"))
+    return directive.split()[1:]
+
+
+class TestConsentFormAction:
+    """Browsers apply `form-action` to the redirect that follows a form: the consent page lets
+    Connect and Cancel lead back to the app's scheme, and no other page does."""
+
+    def _page(self, client: Client, **extra: str) -> Any:
+        _verifier, challenge = pkce_pair()
+        return client.get(
+            reverse("oauth2_provider:authorize"), authorize_params(challenge, **extra), secure=True
+        )
+
+    def test_the_page_allows_the_scheme_of_the_registered_redirect_uri_only(
+        self, client: Client, alice: User
+    ) -> None:
+        client.force_login(alice)
+        page = self._page(client)
+        assert page.status_code == 200
+        assert _form_action(page) == ["'self'", "app.housecairn.mobile:"]
+        assert REDIRECT_URI.startswith("app.housecairn.mobile:")
+        assert not any("*" in source for source in _form_action(page))
+
+    @pytest.mark.parametrize("allow", [True, False])
+    def test_connect_and_cancel_lead_where_the_page_allows(
+        self, client: Client, alice: User, alice_home: Home, allow: bool
+    ) -> None:
+        client.force_login(alice)
+        page = self._page(client)
+        answer, _verifier = consent(client, [alice_home], allow=allow)
+        assert answer.status_code == 302
+        target = urlsplit(answer["Location"])
+        assert f"{target.scheme}:" in _form_action(page)
+        assert ("code=" in target.query) is allow
+        assert ("error=access_denied" in target.query) is not allow
+
+    def test_a_refusal_of_the_toolkit_leads_where_the_page_allows(
+        self, client: Client, alice: User, alice_home: Home
+    ) -> None:
+        client.force_login(alice)
+        verifier, _challenge = pkce_pair()
+        params = authorize_params(verifier, code_challenge_method="plain")
+        page = client.get(reverse("oauth2_provider:authorize"), params, secure=True)
+        data = {**params, "homes": [str(alice_home.id)], "allow": "1"}
+        answer = client.post(reverse("oauth2_provider:authorize"), data, secure=True)
+        assert "error=invalid_request" in answer["Location"]
+        assert f"{urlsplit(answer['Location']).scheme}:" in _form_action(page)
+
+    def test_the_page_shown_again_keeps_the_scheme(
+        self, client: Client, alice: User, bob_home: Home
+    ) -> None:
+        client.force_login(alice)
+        answer, _verifier = consent(client, [bob_home])
+        assert answer.status_code == 200
+        assert _form_action(answer) == ["'self'", "app.housecairn.mobile:"]
+
+    def test_the_origins_of_the_providers_are_kept(
+        self, client: Client, alice: User, monkeypatch: Any
+    ) -> None:
+        monkeypatch.setattr(providers, "form_action_origins", lambda: ["https://id.example.com"])
+        client.force_login(alice)
+        assert _form_action(self._page(client)) == [
+            "'self'",
+            "app.housecairn.mobile:",
+            "https://id.example.com",
+        ]
+        assert _form_action(client.get(reverse("index"), secure=True)) == [
+            "'self'",
+            "https://id.example.com",
+        ]
+
+    def test_other_pages_keep_their_policy(self, client: Client, alice: User) -> None:
+        assert _form_action(client.get(reverse("account_login"), secure=True)) == ["'self'"]
+        client.force_login(alice)
+        assert _form_action(client.get(reverse("index"), secure=True)) == ["'self'"]
