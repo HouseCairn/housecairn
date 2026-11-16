@@ -122,9 +122,11 @@ def get(scene: dict[str, Any], path: str, **params: Any) -> Any:
 def test_the_homes(scene: dict[str, Any]) -> None:
     case = EXAMPLES["homes"]
     body = get(scene, "/api/v1/sync/homes/").json()
-    same_shape(body, case["example"], "", frozenset({"members"}))
+    same_shape(body, case["example"], "", frozenset({"member_id", "members"}))
     (home,) = body["homes"]
-    assert set(home) == {*case["example"]["homes"][0], "members"}
+    assert set(home) == {*case["example"]["homes"][0], "member_id", "members"}
+    assert kind(home["member_id"]) == "uuid"
+    assert home["member_id"] in {member["id"] for member in home["members"]}
     for member in home["members"]:
         assert set(member) == {"id", "name", "role"}
         assert kind(member["id"]) == "uuid"

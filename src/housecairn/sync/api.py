@@ -151,6 +151,12 @@ class SyncHomesView(SyncAPIView):
                                 allow_null=True, help_text="An HLC, 16 hexadecimal digits."
                             ),
                             "head": serializers.IntegerField(),
+                            "member_id": serializers.UUIDField(
+                                help_text=(
+                                    "The `id` of the entry of `members` that is the account "
+                                    "of the connection."
+                                )
+                            ),
                             "members": _MEMBER,
                         },
                         many=True,
@@ -166,7 +172,8 @@ class SyncHomesView(SyncAPIView):
         },
         description=(
             "The homes bound to the connection that its account may open, archived ones "
-            "included, with the account's role, the members (never their address) and the "
+            "included, with the account's role, the members (never their address), which of them "
+            "is the account (`member_id`) and the "
             "position of the last change (`head`); `gone` lists the homes erased while they "
             "were bound to this connection."
         ),

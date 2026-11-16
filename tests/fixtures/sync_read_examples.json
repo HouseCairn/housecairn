@@ -22,7 +22,8 @@
       ]
     },
     "additions": {
-      "homes[].members": "docs/adr/0077 need 9: the members of a home are in GET /sync/homes/ and in the snapshot, with their display name and role, never their address"
+      "homes[].members": "docs/adr/0077 need 9: the members of a home are in GET /sync/homes/ and in the snapshot, with their display name and role, never their address",
+      "homes[].member_id": "docs/adr/0077, decision of 2026-11-16: the id of the entry of members that is the account of the connection, so that the phone knows which reminders are its own"
     }
   },
   "changes": {

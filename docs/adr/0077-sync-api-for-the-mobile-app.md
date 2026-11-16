@@ -389,6 +389,26 @@ The questions it left open are decided as follows.
    new row does not set has the zero clock, so that any later write of it wins, rather than the
    time of the insert.
 
+### Decision of 2026-11-16: the member of the connection in each home
+
+A phone must know which entry of `members` is its own account, to keep the reminders of the
+tasks assigned to it (`assignee_id`). Each home of `GET /sync/homes/` gets one more key,
+**`member_id`**: the `id` of the entry of `members` whose account is the one of the connection,
+in that home. The name follows the rows, which name a person by `assignee_id` and
+`completed_by_id`, and says what it is (a member of the home) rather than `me` or `user_id`,
+which would suggest an account.
+
+- It is the same value as the `id` already given in `members`, and the role of that entry is
+  the `role` of the home: nothing new is exposed about the account (no address, no other
+  identifier). The snapshot lists the same `members`, so a phone that reads both finds the same
+  entry.
+- It is a key added to an object, and no existing key is renamed or removed: a client written
+  before it ignores it (see Compatibility). Today the `id` of a member is the id of its account,
+  so the value is the same in every home of the connection; a client reads it per home all the
+  same and never assumes it.
+- Tests: an account in two homes, a read-only member, and a second account of the same home
+  each get their own value.
+
 ### Compatibility
 
 - The resources of `/api/v1/`, their fields, their order and the API tokens do not change,
@@ -397,6 +417,8 @@ The questions it left open are decided as follows.
   is. `GET /api/v1/homes/` keeps listing archived homes, with `archived_at` added, so the
   integration sees what it saw before. The successor of an occurrence gets a deterministic id
   instead of a random one; both are UUIDs and no client may read a meaning in them.
+- `member_id` on a home (2026-11-16) is added to the answer of `GET /sync/homes/`; no key of
+  it changes.
 - A change made through the resources is a change of the feed like any other: a phone sees
   what Home Assistant or a script did.
 

@@ -66,6 +66,9 @@ msgstr "`archived_at` : null, ou l'horloge de l'archivage."
 msgid "`head`: the position of the last change of the home."
 msgstr "`head` : la position de la dernière modification du logement."
 
+msgid "`member_id`: the `id` of the entry of `members` that is the account of the connection, in this home. Look it up there to know who \"me\" is, for example to keep the reminders of the tasks whose `assignee_id` is this value. It is the same value as the account's own `id` in `members`, so it tells nothing more about the account. Added after the first shape: a client written before it ignores it."
+msgstr "`member_id` : l'`id` de l'entrée de `members` qui est le compte de la connexion, dans ce logement. Cherchez-le-y pour savoir qui est « moi », par exemple pour garder les rappels des tâches dont l'`assignee_id` vaut cette valeur. C'est la même valeur que l'`id` du compte dans `members` : elle n'apprend rien de plus sur le compte. Ajouté après la première forme : un client écrit avant l'ignore."
+
 msgid "`members`: the accounts of the home, with the name shown for them and their role, never their address. The rows name a person by this `id` (`assignee_id`, `completed_by_id`)."
 msgstr "`members` : les comptes du logement, avec le nom affiché pour eux et leur rôle, jamais leur adresse. Les lignes désignent une personne par cet `id` (`assignee_id`, `completed_by_id`)."
 

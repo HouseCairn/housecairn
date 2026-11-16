@@ -197,6 +197,9 @@ def home_entry(home: Home, user: User) -> dict[str, Any]:
         "role": role,
         "archived_at": _instant_text(entry, home.archived_at),
         "head": head_of(home.pk).pos,
+        # The `id` of the entry of `members` that is the account of the connection: the phone
+        # picks its own reminders by it (docs/adr/0077, decision of 2026-11-16).
+        "member_id": str(user.pk),
         "members": members_of(home),
     }
 
