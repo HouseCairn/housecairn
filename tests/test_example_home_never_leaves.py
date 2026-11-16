@@ -312,6 +312,46 @@ def test_export_and_csv_refuse_the_example_home(alice: User, example: Home, clie
     assert client.get(csv_url).status_code == 403
 
 
+def budget_csv_routes(home: Home) -> list[str]:
+    """Every web route of the budget that answers `?export=csv`."""
+    room = Room.objects.filter(home=home).first()
+    assert room is not None
+    kwargs = {"home_id": home.pk}
+    return [
+        reverse("budget:overview", kwargs=kwargs),
+        reverse("budget:rooms", kwargs=kwargs),
+        reverse("budget:room", kwargs={**kwargs, "room_id": room.pk}),
+        reverse("budget:projects", kwargs=kwargs),
+        reverse("budget:tasks", kwargs=kwargs),
+    ]
+
+
+def test_the_csv_of_the_budget_refuses_the_example_home(
+    alice: User, alice_home: Home, example: Home, client: Client
+) -> None:
+    """The five pages of the budget serve `?export=csv`: none may do it for the example home."""
+    client.force_login(alice)
+    for url in budget_csv_routes(example):
+        assert client.get(url).status_code == 200, url  # the page itself still opens
+        refused = client.get(url, {"export": "csv"})
+        assert refused.status_code == 403, url
+        assert b"text/csv" not in refused.headers.get("Content-Type", "").encode(), url
+        assert "Descaling" not in refused.content.decode(), url
+    room = Room.objects.create(home=alice_home, name="Kitchen")
+    kwargs = {"home_id": alice_home.pk}
+    real = [
+        reverse("budget:overview", kwargs=kwargs),
+        reverse("budget:rooms", kwargs=kwargs),
+        reverse("budget:room", kwargs={**kwargs, "room_id": room.pk}),
+        reverse("budget:projects", kwargs=kwargs),
+        reverse("budget:tasks", kwargs=kwargs),
+    ]
+    for url in real:
+        served = client.get(url, {"export": "csv"})
+        assert served.status_code == 200, url
+        assert served.headers["Content-Type"].startswith("text/csv"), url
+
+
 def test_a_restore_of_a_home_never_makes_an_example_home(alice: User, alice_home: Home) -> None:
     """An archive carries no mark; whatever its document says, the field reads false."""
     import zipfile

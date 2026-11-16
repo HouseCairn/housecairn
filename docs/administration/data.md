@@ -289,7 +289,7 @@ and go with the home.
 The guide makes an example home for a person who asks for it, so that they can try the
 application without touching their own data ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)).
 It is a home like another one, marked as an example, and it **never leaves the instance**: it is
-not exported (the archive, the job that makes it and the tables for a spreadsheet refuse it), not
+not exported (the archive, the job that makes it, the tables for a spreadsheet and the CSV of the budget pages refuse it), not
 in a backup of the instance (see [Backup](backup.md)), not in the sync API or its snapshot, not in
 the list of homes or of the homes of an API token, not in a calendar feed or in the QR labels,
 and it sends no reminder, alert or event. It has no other member and cannot be shared. It is

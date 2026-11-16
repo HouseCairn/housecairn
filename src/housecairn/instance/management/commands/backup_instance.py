@@ -352,6 +352,8 @@ class Command(BaseCommand):
         self.stderr.write(
             f"database ({kind}), {files} files" + (", secret key" if "secret_key" in parts else "")
         )
+        if left_out:
+            self.stderr.write(f"{len(left_out)} example home(s) left out of the backup.")
         if "secret_key" not in parts:
             # Where the key in use comes from: its file only if the file holds it.
             where = secret if _holds_the_key(secret) else "SECRET_KEY"

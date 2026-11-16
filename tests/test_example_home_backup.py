@@ -69,10 +69,15 @@ def instance(
     return data
 
 
+def run_backup_saying(output: Path) -> tuple[Path, str]:
+    """The archive made, and what the command wrote on its error output."""
+    out, err = io.StringIO(), io.StringIO()
+    call_command("backup_instance", "--output", str(output), stdout=out, stderr=err)
+    return Path(out.getvalue().strip()), err.getvalue()
+
+
 def run_backup(output: Path) -> Path:
-    out = io.StringIO()
-    call_command("backup_instance", "--output", str(output), stdout=out, stderr=io.StringIO())
-    return Path(out.getvalue().strip())
+    return run_backup_saying(output)[0]
 
 
 def run_restore(archive: Path, target: Path) -> str:
@@ -192,6 +197,18 @@ def test_a_backup_without_an_example_home_is_what_it_was(
         database = tmp_path / "database"
         database.write_bytes(tar.extractfile("database").read())  # type: ignore[union-attr]
     assert rows_of(database, alice_home.pk) == live_rows(alice_home)
+
+
+@on_sqlite
+@pytest.mark.django_db(transaction=True)
+def test_the_backup_says_how_many_example_homes_it_left_out(
+    instance: Path, tmp_path: Path, alice: User, alice_home: Home
+) -> None:
+    _archive, said = run_backup_saying(tmp_path / "none")
+    assert "example home" not in said
+    make_example(alice)
+    _archive, said = run_backup_saying(tmp_path / "one")
+    assert "1 example home(s) left out of the backup." in said
 
 
 def forged_backup(output: Path, media: Path) -> Path:
@@ -390,6 +407,103 @@ def test_a_postgresql_dump_with_an_example_home_goes_through_a_scratch_database(
     assert target.read_bytes() == f"dump of {scratch}".encode()
     assert not list(tmp_path.glob("*.clean"))
     assert ["--no-owner", "--exit-on-error", "--dbname", scratch, str(target)] == calls[2][1]
+
+
+def postgresql_backup(output: Path, media: Path, *, ids: list[uuid.UUID]) -> Path:
+    """A backup that says it holds a PostgreSQL dump; `ids` have a file in every folder."""
+    output.mkdir(parents=True, exist_ok=True)
+    database = output / "database"
+    database.write_bytes(b"a pg_dump")
+    parts = {"database": backup_instance.sha256(database)}
+    archive = output / "postgresql.tar"
+    with tarfile.open(archive, "w") as tar:
+        tar.add(database, arcname="database")
+        for home_id in ids:
+            for directory in files.home_directories(home_id, media):
+                directory.mkdir(parents=True, exist_ok=True)
+                path = directory / "a-file.bin"
+                path.write_bytes(b"x" * 16)
+                name = "media/" + path.relative_to(media).as_posix()
+                tar.add(path, arcname=name, recursive=False)
+                parts[name] = backup_instance.sha256(path)
+        manifest = json.dumps(
+            {
+                "format": backup_instance.FORMAT,
+                "version": backup_instance.VERSION,
+                "database": "postgresql",
+                "application_version": "test",
+                "made_at": "2026-11-16T00:00:00+00:00",
+                "parts": parts,
+            }
+        ).encode()
+        info = tarfile.TarInfo("manifest.json")
+        info.size = len(manifest)
+        tar.addfile(info, io.BytesIO(manifest))
+    return archive
+
+
+def test_a_postgresql_restore_erases_the_example_homes_it_brings_back(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, settings: Any
+) -> None:
+    """pg_restore puts the dump on the live database; the example homes are then removed
+    from it, through a connection of their own, and their files never reach the media root."""
+    real, example = uuid.uuid4(), uuid.uuid4()
+    source = tmp_path / "source-media"
+    archive = postgresql_backup(tmp_path / "backup", source, ids=[real, example])
+    events: list[tuple[str, Any]] = []
+
+    def which(name: str) -> str:
+        return f"/usr/bin/{name}"
+
+    def run(args: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        events.append(("run", [Path(args[0]).name, *args[1:-1]]))
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    class Copy:
+        def __init__(self, name: Any) -> None:
+            events.append(("copy", str(name)))
+
+        def __enter__(self) -> str:
+            return "restored-alias"
+
+        def __exit__(self, *exc: object) -> None:
+            return None
+
+    def remove(alias: str) -> list[uuid.UUID]:
+        events.append(("remove", alias))
+        return [example]
+
+    from housecairn.instance.management.commands import restore_instance
+
+    monkeypatch.setattr(restore_instance.shutil, "which", which)
+    monkeypatch.setattr(restore_instance.subprocess, "run", run)
+    monkeypatch.setattr(restore_instance, "copy_connection", Copy)
+    monkeypatch.setattr(restore_instance, "remove_example_homes", remove)
+    monkeypatch.setattr(restore_instance, "postgres_environment", lambda: {})
+
+    target = tmp_path / "restored"
+    out = io.StringIO()
+    call_command(
+        "restore_instance",
+        str(archive),
+        "--yes",
+        "--media-root",
+        str(target / "media"),
+        "--data-dir",
+        str(target / "data"),
+        stdout=out,
+    )
+
+    # The dump goes onto the live database first; then the live database is cleaned.
+    assert [kind for kind, _what in events] == ["run", "copy", "remove"]
+    assert events[0][1][:3] == ["pg_restore", "--clean", "--if-exists"]
+    assert events[1] == ("copy", str(settings.DATABASES["default"]["NAME"]))
+    assert events[2] == ("remove", "restored-alias")
+    assert "1 example home(s) in the backup were left out" in out.getvalue()
+    # The files of the example home are gone from every folder, those of the real home stay.
+    assert not [p for p in (target / "media").rglob("*") if str(example) in p.as_posix()]
+    kept = [p for p in (target / "media").rglob("*") if p.is_file() and str(real) in p.as_posix()]
+    assert len(kept) == len(files.MEDIA_FOLDERS)
 
 
 def test_a_postgresql_backup_stops_when_no_scratch_database_can_be_made(

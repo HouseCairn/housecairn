@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView
 
 from housecairn.budget import csvfile, services
-from housecairn.homes import current
+from housecairn.homes import current, exports
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.homes.scoping import WebHomeScopedMixin
@@ -65,6 +65,8 @@ class BudgetPage(WebHomeScopedMixin, TemplateView):
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if request.GET.get("export") == "csv":
+            # The example home of the guide never leaves the instance (docs/adr/0084).
+            exports.refuse_example(self.home)
             head, rows = self.table()
             return csvfile.response(self.kind, head, rows, year=self.year)
         return super().get(request, *args, **kwargs)
