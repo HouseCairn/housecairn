@@ -14,11 +14,15 @@ def per_minute(action: str) -> int:
 
 
 def announced() -> dict[str, int]:
-    """What a phone must stay under: reads, snapshots and pushes per minute per connection."""
+    """What a phone must stay under: reads, snapshots and pushes per minute per connection,
+    the size of a push, and the size of a file (the instance setting `file_max_bytes`)."""
+    from housecairn.rooms import conf
+
     return {
         "reads_per_minute": per_minute(READ_ACTION),
         "snapshots_per_minute": per_minute(SNAPSHOT_ACTION),
         "pushes_per_minute": per_minute(PUSH_ACTION),
         "ops_per_push": pushing.MAX_OPS,
         "push_bytes": pushing.MAX_BODY_BYTES,
+        "file_max_bytes": conf.photo_max_bytes(),
     }

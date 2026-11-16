@@ -23,6 +23,12 @@
   home the person did not choose); every 409 is the same `id_taken`, whoever holds the id; the
   403 is `cannot_create_homes`, when the token lacks the scope `homes.create` or the connection
   the right `may_create_homes`. The `hemisphere` may be left out, `north`, as on the web.
+  Lot M6 builds the files ([need 10](#how-the-eleven-needs-are-met)) and makes them precise:
+  the rows that take a file are a photo, an attachment and a file of a project (the label of an
+  article and the photo of a report keep their reference in `extra`, a lot of their own); the
+  errors of an upload are `400` `malformed` (a digest missing or wrong), `403` `forbidden` (a
+  read-only member), `409` `file_conflict`, `413` `too_large` or `quota_exceeded`, `415`
+  `unsupported_type`; and `info` gives `file_max_bytes` in `limits`.
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and
@@ -110,13 +116,13 @@ between local addresses only).
 | `GET /api/v1/sync/homes/{h}/changes?after={pos}&limit={n}` | | `{"changes": [{"pos", "device", "op"}], "head", "more"}` in `pos` order, `device` the device id of the change in `b64`; 410 `cursor_expired` when `after` is older than the oldest change kept |
 | `GET /api/v1/sync/homes/{h}/snapshot` | | JSON lines: one row per line with every field and its clock, tombstones within the retention included, then `{"members": [...]}`, then `{"covers": pos}` |
 | `POST /api/v1/sync/homes/{h}/push` | `{"push": n, "sv": n, "ops": [op, ...]}` | `{"head", "results": [...]}`, see below; 409 `push_conflict` when the push number was used with other bytes |
-| `PUT /api/v1/sync/homes/{h}/files/{file_id}` | octet-stream, `Content-Type`, `HC-Sha256` | 201; 200 if the same bytes exist; 409 with other bytes; 413 above the limit |
+| `PUT /api/v1/sync/homes/{h}/files/{file_id}` | octet-stream, `Content-Type`, `HC-Sha256` | 201; 200 if the same bytes exist; 409 `file_conflict` with other bytes, or when anything else holds the id; 413 `too_large` above the limit, `quota_exceeded` over the quota of the home; 415 `unsupported_type`; 403 `forbidden` for a read-only member |
 | `GET /api/v1/sync/homes/{h}/files/{file_id}` | | the file, and `?size=thumbnail` for an image |
 
 Errors are those of the API today (`{"detail": ...}`), with a `code` (`cursor_expired`,
 `push_conflict`, `too_large`, `sync_version`, `home_gone`, `sync_needs_connection`,
-`insecure_transport`, and for a new home `id_taken` and `cannot_create_homes`) so that the app
-words them itself.
+`insecure_transport`, for a new home `id_taken` and `cannot_create_homes`, and for a file
+`file_conflict`, `quota_exceeded` and `unsupported_type`) so that the app words them itself.
 
 **A home that was erased.** Every route under `/api/v1/sync/homes/{h}/` answers 410 `home_gone`
 when `h` is in the table of erased homes and was bound to the connection when it was erased, its
@@ -279,14 +285,32 @@ the server mode.
     its own. A file no row references, live or deleted within the retention, is removed after
     7 days. `?size=thumbnail` is a convenience of the server for its own pages; the phone makes
     its thumbnails itself, as in the protocol.
+    **As built (lot M6).** The rows that take a file are `rooms.photo` (field `image`, an image
+    only), `tasks.attachment` and `projects.projectfile` (field `file`, an image or a document
+    of the allow-list of the attachments, [ADR 0034](0034-task-attachments.md)); the label of
+    an article and the photo of a report keep their reference in `extra`, until a lot of their
+    own. An upload waits under `MEDIA_ROOT/sync/<home>/` and counts in the quota of the home;
+    the row that refers to it takes it, moved into the folder of its app under the phone's id
+    (`<home>/<file id><extension>`), so the id of the file of a row is read from the name of
+    its stored file and a file made on the web keeps the id of its row. A row whose file has
+    not arrived holds `<home>/<file id>` and no file; the upload gives it the file without a
+    change of the feed, since the reference of the row does not change. The reference the feed
+    gives for a row the server writes carries `sha256` when a phone sent the file. The id of a
+    file held by another home or by a file of the web is `409` `file_conflict`, which does not
+    say which; a digest that is not that of the body is `400` `malformed`; the type is decided
+    by the content, never by `Content-Type`. A reference whose `sha256` differs from the
+    digest of the file the home holds under the same `file` is `400` `malformed` with the
+    `index` of the operation: no silent divergence between the phone and the server (a
+    reference to a file not uploaded yet is not compared).
 11. **Versions and limits announced.** `GET /sync/info` gives the server's version, the
     versions of the sync protocol it speaks, its features, the entity types it knows and its
     limits: operations per push (500), size of a push body (1 MiB), file size, and requests per
     minute per connection (60 pushes and 600 reads, under the rate limits of
     [ADR 0042](0042-rate-limits-quotas-language-and-instance-name.md); the snapshot, built in
-    memory from every row, is held to 6 a minute on top of the reads). `info` gives them, with a
-    connection's token, as `limits`: `reads_per_minute`, `snapshots_per_minute`,
-    `pushes_per_minute`, `ops_per_push` and `push_bytes`. **A field the server
+    memory from every row, is held to 6 a minute on top of the reads; an upload counts as a
+    push, a download as a read). `info` gives them, with a connection's token, as `limits`:
+    `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push`,
+    `push_bytes` and `file_max_bytes`. **A field the server
     does not know is kept** (the maintainer's decision, and protocol section 2.2: "a receiver
     MUST keep fields it does not know"): the server stores it in `extra`, a JSON value per row
     kept by the `sync` app with, for each unknown field, its value, clock and device; it merges

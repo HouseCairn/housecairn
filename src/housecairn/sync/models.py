@@ -172,3 +172,39 @@ class ErasedHomeConnection(models.Model):
 
     def __str__(self) -> str:
         return f"{self.erased_id} for {self.connection_id}"
+
+
+class SyncFile(models.Model):
+    """A file a phone uploaded under an id it made (docs/adr/0077, need 10; lot M6).
+
+    The bytes are checked and stored as the web stores them (an image re-encoded, a document
+    from the allow-list), first under `MEDIA_ROOT/sync/<home>/<id>`, then, once a row refers to
+    the file, in the folder of that row's app, still under the phone's id (`sync.files`). The
+    row keeps the digest of what the phone sent, so that the same upload sent again is
+    recognised and other bytes under the same id are refused. A file no row ever referred to is
+    removed after 7 days by the nightly purge.
+    """
+
+    id = models.UUIDField(primary_key=True, editable=False)
+    home = models.ForeignKey(
+        "homes.Home", on_delete=models.CASCADE, related_name="+", editable=False
+    )
+    # SHA-256 of the bytes the phone sent, in lower-case hexadecimal (header `HC-Sha256`).
+    sha256 = models.CharField(max_length=64, editable=False)
+    # The name in the storage of the sync app while no row refers to the file; empty after.
+    stored = models.CharField(max_length=200, blank=True, editable=False)
+    thumbnail = models.CharField(max_length=200, blank=True, editable=False)
+    content_type = models.CharField(max_length=100, editable=False)
+    is_image = models.BooleanField(default=False, editable=False)
+    size_bytes = models.PositiveIntegerField(editable=False)
+    width = models.PositiveIntegerField(null=True, editable=False)
+    height = models.PositiveIntegerField(null=True, editable=False)
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    # When a row first referred to the file: a file never referred to is an orphan.
+    referenced_at = models.DateTimeField(null=True, editable=False)
+
+    class Meta:
+        indexes = [models.Index(fields=["referenced_at", "created_at"], name="sync_file_orphans")]
+
+    def __str__(self) -> str:
+        return str(self.id)

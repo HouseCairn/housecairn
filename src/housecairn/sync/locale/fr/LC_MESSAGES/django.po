@@ -83,6 +83,50 @@ msgid "This version of the app reads but does not write: update it."
 msgstr "Cette version de l'application lit mais n'écrit pas : mettez-la à jour."
 
 #, python-format
+msgid "A file holds at most %(bytes)s bytes."
+msgstr "Un fichier contient au plus %(bytes)s octets."
+
+msgid "HC-Sha256 is the SHA-256 of the file, 64 lower-case hexadecimal digits."
+msgstr "HC-Sha256 est le SHA-256 du fichier, 64 chiffres hexadécimaux en minuscules."
+
+msgid "The file is empty."
+msgstr "Le fichier est vide."
+
+msgid "The body is the file itself, sent as application/octet-stream or its own type."
+msgstr "Le corps est le fichier lui-même, envoyé en application/octet-stream ou sous son propre type."
+
+msgid "HC-Sha256 is not the SHA-256 of the bytes received."
+msgstr "HC-Sha256 n’est pas le SHA-256 des octets reçus."
+
+msgid "A read-only member sends no file."
+msgstr "Un membre en lecture seule n’envoie aucun fichier."
+
+msgid "This file id is already taken by other bytes."
+msgstr "Cet identifiant de fichier est déjà pris par d’autres octets."
+
+msgid "size is thumbnail, or left out."
+msgstr "size vaut thumbnail, ou est omis."
+
+#, python-format
+msgid "%(name)s of a file is a whole number."
+msgstr "%(name)s d’un fichier est un nombre entier."
+
+msgid "A file is a reference: file, sha256, size and type."
+msgstr "Un fichier est une référence : file, sha256, size et type."
+
+msgid "file is a UUID in its canonical text form."
+msgstr "file est un UUID sous sa forme textuelle canonique."
+
+msgid "sha256 is 64 lower-case hexadecimal digits."
+msgstr "sha256 compte 64 chiffres hexadécimaux en minuscules."
+
+msgid "type of a file is a media type."
+msgstr "type d’un fichier est un type de média."
+
+msgid "sha256 is not the digest of the file uploaded under this id."
+msgstr "sha256 n'est pas l'empreinte du fichier déposé sous cet identifiant."
+
+#, python-format
 msgid "%(name)s is a UUID in its canonical text form."
 msgstr "%(name)s est un UUID sous sa forme textuelle canonique."
 

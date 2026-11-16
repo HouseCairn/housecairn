@@ -8,7 +8,9 @@ What leaves the server is the data of the protocol and nothing else: the fields 
 (`sync.rows`), their clocks and devices, the position of a change. Never the columns the server
 keeps for itself (`created_at` of the log, `tombstoned_at`, the `floor` and the clock of a
 home), never the name of a stored file: a file field that the change log keeps by the name of
-its file until lot M6 is given as a file reference named by the id of its row.
+its file (the label of an article, the photo of a report) is given as a file reference named by
+the id of its row. A photo, an attachment and a file of a project send their reference
+themselves (`sync.files`, lot M6).
 """
 
 import datetime
@@ -139,7 +141,7 @@ def public_fields(
     return {
         name: (
             file_reference(model, name, row, row_id)
-            # A stored file name; a reference a phone pushed is kept as it came (until M6).
+            # A stored file name; a reference a phone pushed is kept as it came (`extra`).
             if name in file_names and isinstance(value, str)
             else value
         )

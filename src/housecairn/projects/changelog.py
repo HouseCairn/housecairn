@@ -10,8 +10,8 @@ Fields of the protocol are the columns of the model, a foreign key by its column
 (`project_id`); amounts are decimal strings, dates `YYYY-MM-DD`. Not carried: the id, the home,
 the times the server keeps (`created_at`, `updated_at`), `deleted_at` (a deletion or a
 restoration), where the reading of a link's page stands (not data of the home, as in the
-export), and the stored files of a `ProjectFile`, whose references the lot of the files maps
-(docs/adr/0079, M6).
+export), and the stored file of a `ProjectFile`, carried as its file reference instead
+(`file`, docs/adr/0077 need 10, lot M6 of docs/adr/0079).
 """
 
 import datetime
@@ -22,7 +22,7 @@ from typing import Any
 
 from django.db import models
 
-from housecairn.sync import changes, clock
+from housecairn.sync import changes, clock, files
 from housecairn.sync.models import RowClocks
 from housecairn.sync.rows import entity_of, link_fields, link_row_id
 
@@ -33,7 +33,9 @@ Stored = tuple[Values, datetime.datetime | None]
 _SKIPPED = frozenset({"id", "home", "created_at", "updated_at", "deleted_at"})
 # Columns of a model that are not data of the protocol, with the reason above.
 NOT_CARRIED: dict[str, frozenset[str]] = {
-    "projects.projectfile": frozenset({"file", "thumbnail"}),
+    "projects.projectfile": frozenset(
+        {"file", "thumbnail", "content_type", "size_bytes", "width", "height"}
+    ),
     "projects.projectlink": frozenset({"preview_state", "preview_started_at"}),
 }
 
@@ -62,9 +64,13 @@ def to_json(field: models.Field[Any, Any], value: Any) -> Any:
 
 def values_of(instance: models.Model) -> Values:
     """The carried fields of a row as it is in memory, by column name."""
-    return {
+    values = {
         f.attname: to_json(f, getattr(instance, f.attname)) for f in carried_fields(type(instance))
     }
+    holder = files.holder_of(type(instance))
+    if holder is not None:
+        values[holder.field] = files.reference_of(instance, holder)
+    return values
 
 
 def stored(instance: models.Model) -> Stored | None:
@@ -82,7 +88,11 @@ def stored(instance: models.Model) -> Stored | None:
     )
     if row is None:
         return None
-    return {f.attname: to_json(f, row[f.attname]) for f in fields}, row["updated_at"]
+    values = {f.attname: to_json(f, row[f.attname]) for f in fields}
+    holder = files.holder_of(model)
+    if holder is not None:
+        values[holder.field] = files.reference_of(model._base_manager.get(pk=instance.pk), holder)
+    return values, row["updated_at"]
 
 
 def saved(instance: models.Model, before: Stored | None = None) -> None:

@@ -50,6 +50,9 @@ LEFT_OUT = {
     "sync.HomeHead": "the position of the change log of the home",
     "sync.Change": "the changes of the home, for the sync API",
     "sync.RowClocks": "the clock of every field of a row of the home",
+    # A file a phone uploaded (docs/adr/0077, need 10): the row that refers to it takes the
+    # file, which the export carries with the row; one no row refers to is purged in 7 days.
+    "sync.SyncFile": "the uploads of a phone, and their digest",
 }
 
 # Not data of a home: of the instance, or of a person (erased with the account,

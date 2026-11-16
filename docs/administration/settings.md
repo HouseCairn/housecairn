@@ -191,7 +191,8 @@ the interface (see [Single sign-on](oidc.md)).
 - **Files of a home**: the largest file (in bytes, as `HOUSECAIRN_PHOTO_MAX_BYTES` always was),
   the space and the number of files each home may hold. They are measured on disk, thumbnails
   and deleted files included until they are purged, and checked by every way to add a photo,
-  an attachment or a label, in the screens and the API. Over a quota, the upload is refused
+  an attachment or a label, in the screens and the API, the files the mobile app uploads
+  included. Over a quota, the upload is refused
   with a message that gives the numbers. **Instance administration, Files of the homes**
   shows what each home takes, by its identifier only (see
   [Files of the homes](../screens/instance-usage.md)).

@@ -170,7 +170,7 @@ def test_a_purge_with_nothing_to_remove_removes_nothing(alice_home: Home) -> Non
 
 def test_the_task_returns_what_it_removed(alice_home: Home) -> None:
     change_made_at(alice_home, timezone.now() - 401 * DAYS)
-    assert tasks.purge() == {"changes": 1, "tombstones": 0, "rows": 0, "pushes": 0}
+    assert tasks.purge() == {"changes": 1, "tombstones": 0, "rows": 0, "pushes": 0, "files": 0}
 
 
 def test_the_schedule_is_created_once_and_runs_every_day() -> None:

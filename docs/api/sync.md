@@ -4,8 +4,8 @@ The mobile app keeps its homes on a HouseCairn server through the sync API, unde
 `/api/v1/sync/` ([ADR 0077](../adr/0077-sync-api-for-the-mobile-app.md)). It exchanges the
 operations of the mobile app's protocol, in clear, home by home: the app reads what changed
 since its last position, starts from a snapshot of the home when it has none, pushes what was
-typed on the phone, and creates on the server the homes the phone made. Sending files
-comes in a later version.
+typed on the phone, creates on the server the homes the phone made, and sends and fetches
+the files of its photos and attachments.
 
 ## Access
 
@@ -26,9 +26,10 @@ like the others.
 
 Reads are limited to 600 a minute per connection, pushes to 60 a minute per connection, and
 snapshots to 6 a minute per connection (a snapshot also counts as a read), each counted apart;
-beyond that the answer is `429`. `GET /api/v1/sync/info`, with the access token of a connection,
-gives these limits in `limits`: `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`,
-`ops_per_push` and `push_bytes`.
+beyond that the answer is `429`. An upload of a file counts as a push, a download as a read.
+`GET /api/v1/sync/info`, with the access token of a connection, gives these limits in `limits`:
+`reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push`, `push_bytes`
+and `file_max_bytes`, the largest file the instance accepts (its setting of the largest file).
 
 ## Values
 
@@ -37,8 +38,8 @@ lower case (`rooms.room`), field names those of the models with foreign keys by 
 name (`room_id`), amounts as decimal strings, dates `YYYY-MM-DD`. A **clock** is a hybrid
 logical clock, 16 lower-case hexadecimal digits; a **device** is the id of the device that
 wrote, 16 bytes in base64url without padding. The server writes the changes made on the web
-as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference named by
-the id of its row, never by the name of the file the server stores.
+as one device, whose id `GET /api/v1/sync/info` gives. A file is given as a reference, never by
+the name of the file the server stores ([Files](#files)).
 
 A field that holds a code of a list takes one of the codes below; a code a phone does not know
 yet is kept and shown as it is, never refused:
@@ -236,8 +237,9 @@ by any later operation. A `delete` or a `restore` writes the field `deleted_at`;
 brings back a deleted row, only a `restore` with a later clock does. A `delete` may come before
 the `put` of its row, from another phone: the server keeps it, the row then comes deleted, and
 the snapshot gives the deletion of a row the server does not have yet. A field the server has no column for (written by a newer app) is kept and given back to
-the other phones; a file reference is kept the same way until the server stores the files of
-the phone. The server writes who acted, whatever the operation says: `completed_by_id` and
+the other phones; so is, for now, the file reference of the label of an article and of the
+photo of a report. A photo, an attachment and a file of a project take the file their
+reference names ([Files](#files)). The server writes who acted, whatever the operation says: `completed_by_id` and
 `closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no
 later operation changes. `assignee_id` may name any member of the home.
 
@@ -307,6 +309,64 @@ The codes of a rejected operation:
 
 A push to a home that was erased answers `410` with `"code": "home_gone"`, and applies nothing.
 
+## Files
+
+A photo of a room or an item (`rooms.photo`, field `image`), an attachment of a task
+(`tasks.attachment`, field `file`) and a file of a project (`projects.projectfile`, field
+`file`) hold a **file reference**:
+
+```json
+{"file": "3c1d9e2a-7b4f-4c8d-9e1a-2b3c4d5e6f70", "sha256": "9f86d081...", "size": 48213,
+ "type": "image/jpeg", "width": 1280, "height": 960}
+```
+
+`file` is an id the phone makes for the file, a UUID that is not the id of the row; `sha256` is
+the SHA-256 of the bytes it uploads, in lower-case hexadecimal; `width` and `height` are given
+for an image only. A photo or a file made on the web is named by the id of its row, and has no
+`sha256`. A new photo, attachment or file of a project needs its reference: without it, or with
+a value that is not one, the push is `400` `malformed`. So it is when the `sha256` of a reference
+is not the digest of the file the home already holds under that `file`: the phone and the server
+never disagree silently about the bytes of a file. The answer carries the `index` of the
+operation. A reference to a file the server does not have yet is not compared: it waits.
+
+The phone uploads the file **before** the push that refers to it:
+
+`PUT /api/v1/sync/homes/{h}/files/{file_id}`, the bytes of the file as the body
+(`Content-Type: application/octet-stream`, or the type of the file), with the header
+`HC-Sha256` holding their digest.
+
+| Answer | When |
+| --- | --- |
+| `201` | The file is kept: `{"file": "...", "sha256": "..."}`. |
+| `200` | The same bytes were uploaded before under this id: nothing changes. |
+| `400` `malformed` | `HC-Sha256` missing, not 64 lower-case hexadecimal digits, or not the digest of the body; or an empty body. |
+| `403` `forbidden` | The account is a read-only member of the home. |
+| `409` `file_conflict` | The id holds other bytes, or is held by anything else on the server (a file of another home, a file of the web). The answer does not say which. |
+| `413` `too_large` | The file is larger than `file_max_bytes`. A length announced above it is refused before the body is read. |
+| `413` `quota_exceeded` | The home has no room left for the file, or holds as many files as it may ([settings](../administration/settings.md)). |
+| `415` `unsupported_type` | Not a file the web accepts: a JPEG, PNG or WebP image, or a PDF, text, Word, Excel or OpenDocument file. HEIC photos are refused, as on the web. |
+
+The server checks the file as the web checks an attachment, by its content and never by the
+type the phone gives: an image is decoded and written again, which drops its metadata (the
+location of the photo included), and gets a thumbnail; a document is kept as it is. The
+server keeps its own copy and the phone keeps its own, so the bytes the server sends back are
+not those of the upload. The file counts in the quota of the home from its upload.
+
+When a row refers to a file the server has, the row takes it; a photo takes an image only.
+When the server does not have it yet (the upload failed, or another phone holds it), the push
+is applied all the same and the row waits: the web shows no picture and a download is `404`,
+until the upload comes and the row takes the file. A file that no row refers to within 7 days
+of its upload is removed by the nightly purge: a phone that pushes later than that uploads it
+again first, with the same id and bytes.
+
+`GET /api/v1/sync/homes/{h}/files/{file_id}`, and `?size=thumbnail` for a small JPEG of an
+image (made by the server for its own pages; the app makes its thumbnails itself). The answer
+is the file the server keeps, with the type it found: an image inline, anything else as a
+download (`Content-Disposition`), with `X-Content-Type-Options: nosniff` and a policy that runs
+nothing. The file of a photo or an attachment made on the web is read by the id its reference
+gives. The answer is `404` for a file no row holds and never uploaded, or for the thumbnail of
+a document, and `400` for another `size`. A read-only member reads the files.
+
 ## Errors
 
 Errors are those of the rest of the API, `{"detail": "..."}`, with a `code` the app words
@@ -325,4 +385,9 @@ itself:
 | `insecure_transport` | `403` | Plain HTTP outside the local network. |
 | `sso_required` | `403` | The home requires a sign-in provider the connection was not made with. |
 | `cursor_expired` | `410` | `after` is older than the oldest change kept. |
+| `forbidden` | `403` | A file uploaded by a read-only member. |
+| `file_conflict` | `409` | A file id that holds other bytes, or is held by anything else. |
+| `too_large` | `413` | A file above `file_max_bytes`. |
+| `quota_exceeded` | `413` | A file the home has no room left for. |
+| `unsupported_type` | `415` | A file that is not one the web accepts. |
 | `home_gone` | `410` | The home was erased while it was bound to this connection and its account was still a member. To any other connection, the same home is a `404`. |

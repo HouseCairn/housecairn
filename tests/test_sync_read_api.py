@@ -508,11 +508,12 @@ class TestSnapshotRateLimit:
             "pushes_per_minute": 60,
             "ops_per_push": 500,
             "push_bytes": 1024 * 1024,
+            "file_max_bytes": 10 * 1024 * 1024,
         }
 
 
 class TestSchema:
-    def test_the_three_reads_declare_what_a_client_hostile_or_late_gets(self, alice: User) -> None:
+    def test_the_four_reads_declare_what_a_client_hostile_or_late_gets(self, alice: User) -> None:
         client = Client()
         client.force_login(alice)
         schema = client.get(
@@ -523,7 +524,7 @@ class TestSchema:
             for path, item in schema["paths"].items()
             if path.startswith("/api/v1/sync/homes") and "get" in item
         }
-        assert len(reads) == 3, sorted(reads)
+        assert len(reads) == 4, sorted(reads)
         for path, responses in reads.items():
             assert {"401", "403", "429"} <= set(responses), path
             assert all(responses[code]["description"] for code in ("401", "403", "429")), path

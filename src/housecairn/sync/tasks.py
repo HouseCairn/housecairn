@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import DatabaseError
 from django.utils import timezone
 
-from housecairn.sync import retention
+from housecairn.sync import files, retention
 
 SCHEDULE = "housecairn.sync.purge"
 PURGE_HOUR = 3
@@ -30,11 +30,13 @@ def next_run(now: datetime.datetime | None = None) -> datetime.datetime:
 def purge() -> dict[str, int]:
     """Remove what the retention has expired; the counts go to the task result."""
     done = retention.purge()
+    orphans = files.purge()
     return {
         "changes": done.changes,
         "tombstones": done.tombstones,
         "rows": done.rows,
         "pushes": done.pushes,
+        "files": orphans,
     }
 
 

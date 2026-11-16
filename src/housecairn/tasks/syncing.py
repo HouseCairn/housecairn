@@ -2,25 +2,18 @@
 
 from typing import Any
 
-from housecairn.sync import rows
+from housecairn.sync import files, rows
 from housecairn.tasks.models import Attachment
 
 
 def attachment_file(attachment: Attachment) -> dict[str, Any]:
-    """The file reference of an attachment, as ADR 0077 (need 10) writes it, without the digest.
+    """The file reference of an attachment, as ADR 0077 (need 10) writes it.
 
-    As for a photo, an attachment made on the web is named by its own id, and the size, type and
-    dimensions of the stored file go in the reference, not as fields.
+    As for a photo, a file a phone sent is named by the phone's id, an attachment made on the
+    web by its own id, and the size, type and dimensions of the stored file go in the
+    reference, not as fields.
     """
-    return {
-        "file": {
-            "file": str(attachment.pk),
-            "size": attachment.size_bytes,
-            "type": attachment.content_type,
-            "width": attachment.width,
-            "height": attachment.height,
-        }
-    }
+    return {"file": files.reference_of(attachment, files.HOLDERS["tasks.attachment"])}
 
 
 def register() -> None:
