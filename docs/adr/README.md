@@ -82,3 +82,4 @@ later record supersedes it.
 | [0081](0081-materials-of-a-task-calculated-from-its-stock.md) | The materials of a task are calculated from its priced stock items | 2026-11-15 |
 | [0082](0082-sheets-saved-field-by-field.md) | The sheets of records are saved field by field, through their own form | 2026-11-15 |
 | [0083](0083-barcode-lookup.md) | Barcode lookup: Open Products Facts then Open Food Facts, behind a list of providers | 2026-11-15 |
+| [0084](0084-interactive-guide-and-example-home.md) | An interactive guide on an example home, one text for the web and the app | 2026-11-16 |
