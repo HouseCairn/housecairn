@@ -16,6 +16,10 @@
   catalog, and the `release-fragments` directive of the release notes shows them,
   translated, under the heading of their category. Two pull requests never edit
   the same release notes file nor the same catalog (scripts/release_notes.py).
+- The `guide-scenarios` directive prints the interactive guide, design/guide.json,
+  in the language of the build (docs/adr/0084). The text is read from the file,
+  never copied; a term of design/glossary.json cited as `{{id}}` is written as the
+  glossary spells it in that language, and an unknown one fails the build.
 """
 
 import json
@@ -44,6 +48,8 @@ REPO_DIR = DOCS_DIR.parent
 GENERATED_DIR = DOCS_DIR / "_generated"
 SCHEMA_PATH = GENERATED_DIR / "openapi.json"
 REPOSITORY_URL = "https://github.com/HouseCairn/housecairn/blob/main/"
+GUIDE_PATH = REPO_DIR / "design" / "guide.json"
+GLOSSARY_PATH = REPO_DIR / "design" / "glossary.json"
 
 # Language of each build and the path of its site below the root: English is
 # the source, at the root; French is under /fr/.
@@ -90,6 +96,13 @@ UI_STRINGS = {
         "ai": "Développé avec un agent de programmation IA, sous revue humaine.",
     },
 }
+# Words around the text of the guide, per language (the text itself is in the file).
+GUIDE_STRINGS = {
+    "en": {"colon": ": ", "scenario": "Scenario", "screen": "Screen", "optional": "Optional"},
+    "fr": {"colon": " : ", "scenario": "Scénario", "screen": "Écran", "optional": "Facultatif"},
+}
+# A term of the glossary in a text of the guide: {{today}}.
+GUIDE_TERM = re.compile(r"\{\{([a-z0-9-]+)\}\}")
 HTTP_METHODS = ("get", "put", "post", "delete", "options", "head", "patch", "trace")
 
 # A Markdown link or image target: ](target) or ](target "title").
@@ -269,6 +282,123 @@ class OpenAPIReference(SphinxDirective):
         return box
 
 
+class GuideError(Exception):
+    """The guide file or the glossary cannot be printed (a mistake of the file)."""
+
+
+def _guide_text(place: str, text: dict[str, str], language: str) -> str:
+    if language not in text or not text[language].strip():
+        raise GuideError(f"guide.json, {place}: no text in language {language!r}")
+    return text[language]
+
+
+def guide_inline(
+    place: str, text: dict[str, str], language: str, terms: dict[str, dict[str, str]]
+) -> list[nodes.Node]:
+    """A text of the guide, its glossary terms in bold as the glossary spells them."""
+    written = _guide_text(place, text, language)
+    result: list[nodes.Node] = []
+    position = 0
+    for match in GUIDE_TERM.finditer(written):
+        term = terms.get(match[1])
+        if term is None:
+            raise GuideError(
+                f"guide.json, {place}: {{{{{match[1]}}}}} is not a term of design/glossary.json"
+            )
+        if match.start() > position:
+            result.append(nodes.Text(written[position : match.start()]))
+        result.append(nodes.strong(term[language], term[language]))
+        position = match.end()
+    if position < len(written):
+        result.append(nodes.Text(written[position:]))
+    return result
+
+
+def _guide_paragraph(children: list[nodes.Node]) -> nodes.paragraph:
+    paragraph = nodes.paragraph("", "", *children)
+    # Read from design/guide.json: not in the translation catalogs.
+    paragraph["translatable"] = False
+    return paragraph
+
+
+def _guide_section(identifier: str, title: str) -> nodes.section:
+    section = nodes.section(ids=[nodes.make_id(identifier)])
+    heading = nodes.title(title, title)
+    heading["translatable"] = False
+    section += heading
+    return section
+
+
+def guide_nodes(
+    language: str,
+    guide: dict[str, Any] | None = None,
+    glossary: dict[str, Any] | None = None,
+) -> list[nodes.Node]:
+    """The five scenarios of the guide as sections, each with its steps as a numbered list.
+
+    Each step names its screen as a reference to the page of docs/screens/, resolved (and
+    checked) by the build.
+    """
+    if language not in GUIDE_STRINGS:
+        raise GuideError(f"no words around the guide in language {language!r}")
+    guide = guide if guide is not None else json.loads(GUIDE_PATH.read_text(encoding="utf-8"))
+    glossary = (
+        glossary if glossary is not None else json.loads(GLOSSARY_PATH.read_text(encoding="utf-8"))
+    )
+    terms = {term["id"]: term for term in glossary["terms"]}
+    words = GUIDE_STRINGS[language]
+    sections: list[nodes.Node] = []
+    for number, scenario in enumerate(guide["scenarios"], start=1):
+        title = _guide_text(f"{scenario['id']}.title", scenario["title"], language)
+        section = _guide_section(
+            scenario["id"], f"{words['scenario']} {number}{words['colon']}{title}"
+        )
+        section += _guide_paragraph(
+            guide_inline(f"{scenario['id']}.summary", scenario["summary"], language, terms)
+        )
+        steps = nodes.enumerated_list(enumtype="arabic")
+        for step in scenario["steps"]:
+            item = nodes.list_item(ids=[nodes.make_id(step["id"])])
+            step_title = _guide_text(f"{step['id']}.title", step["title"], language)
+            head: list[nodes.Node] = [nodes.strong(step_title, step_title)]
+            if step.get("optional"):
+                head.append(nodes.Text(f" ({words['optional']})"))
+            head.append(nodes.Text(". "))
+            head += guide_inline(f"{step['id']}.explain", step["explain"], language, terms)
+            item += _guide_paragraph(head)
+            link = addnodes.pending_xref(
+                "",
+                nodes.inline("", ""),
+                refdomain="std",
+                reftype="doc",
+                reftarget=f"/screens/{step['screen']}",
+                refexplicit=False,
+                refwarn=True,
+            )
+            item += _guide_paragraph([nodes.Text(f"{words['screen']}{words['colon']}"), link])
+            steps += item
+        section += steps
+        sections.append(section)
+    return sections
+
+
+class GuideScenarios(SphinxDirective):
+    """Print design/guide.json in the language of the build."""
+
+    has_content = False
+
+    def run(self) -> list[nodes.Node]:
+        for path in (GUIDE_PATH, GLOSSARY_PATH):
+            self.env.note_dependency(str(path))
+        try:
+            found = guide_nodes(self.config.language)
+        except GuideError as error:
+            raise self.error(str(error)) from error
+        for section in found:
+            self.state.document.note_implicit_target(section)
+        return found
+
+
 class RememberImageAlt(SphinxTransform):
     """Keep the source alternative text of images, before Sphinx translates it."""
 
@@ -408,6 +538,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
     app.connect("builder-inited", generate_schema)
     app.connect("html-page-context", page_context)
     app.add_directive("openapi-reference", OpenAPIReference)
+    app.add_directive("guide-scenarios", GuideScenarios)
     app.add_node(release_fragments)
     app.add_directive("release-fragments", ReleaseFragments)
     app.connect("env-get-outdated", outdate_release_notes)

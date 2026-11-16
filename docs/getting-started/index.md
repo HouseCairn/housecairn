@@ -1,6 +1,6 @@
 # Getting started
 
-Install HouseCairn with Docker Compose, then create the first administrator and install the application on your phone.
+Install HouseCairn with Docker Compose, then create the first administrator, install the application on your phone and follow the guide.
 
 ```{toctree}
 :maxdepth: 1
@@ -8,4 +8,5 @@ Install HouseCairn with Docker Compose, then create the first administrator and 
 install
 first-start
 phone
+guide
 ```
