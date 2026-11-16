@@ -8,6 +8,11 @@ for owners, the **Home audit log**; they are the same on those three pages.
 When the home requires signing in through a provider and your session did not,
 the page asks you to continue with that provider instead.
 
+An example home, the one that the guide makes ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)),
+opens like another home but never leaves the instance: it has no **Export all data**, no QR labels,
+no invitations and no calendar feed, it is not in the list of your homes of the connected apps, and
+nobody but you sees it ([Export and deletion](../administration/data.md#the-example-home)).
+
 ## Name, currency and hemisphere
 
 Owners and members open **Name, currency and hemisphere** (`/h/<home id>/edit/`) to change

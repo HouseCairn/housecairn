@@ -263,6 +263,11 @@ state of one report (*Ouvert*).
 | `ideas` | Ideas | Idées | Tab of Projects |
 | `finished-tab` | Finished | Terminés | Tab of Projects |
 | `quotes` | Quotes | Devis | Quotes of a project |
+| `guide` | Guide | Guide | Entry of Help: the interactive guide, a walk on an example home |
+| `example-home` | Example home | Logement d'exemple | The disposable home of the guide: fictional values, never leaves the instance or the device |
+| `add-home` | Add a home | Ajouter un logement | Action: add a home; the guide's way to the example home |
+| `add-project` | Add a project | Ajouter un projet | Action: add a project |
+| `add-budget-line` | Add a budget line | Ajouter une ligne de budget | Action: add a budget line to a project |
 
 ## Platform adaptations
 

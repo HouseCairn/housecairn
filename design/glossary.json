@@ -764,6 +764,66 @@
           "msgid": "Quotes"
         }
       ]
+    },
+    {
+      "id": "guide",
+      "concept": "Entry of Help: the interactive guide, a walk on an example home",
+      "en": "Guide",
+      "fr": "Guide",
+      "web": [
+        {
+          "app": "guide",
+          "msgid": "Guide"
+        }
+      ]
+    },
+    {
+      "id": "example-home",
+      "concept": "The disposable home of the guide: fictional values, never leaves the instance or the device",
+      "en": "Example home",
+      "fr": "Logement d'exemple",
+      "web": [
+        {
+          "app": "homes",
+          "msgid": "Example home"
+        }
+      ]
+    },
+    {
+      "id": "add-home",
+      "concept": "Action: add a home; the guide's way to the example home",
+      "en": "Add a home",
+      "fr": "Ajouter un logement",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Add a home"
+        }
+      ]
+    },
+    {
+      "id": "add-project",
+      "concept": "Action: add a project",
+      "en": "Add a project",
+      "fr": "Ajouter un projet",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Add a project"
+        }
+      ]
+    },
+    {
+      "id": "add-budget-line",
+      "concept": "Action: add a budget line to a project",
+      "en": "Add a budget line",
+      "fr": "Ajouter une ligne de budget",
+      "web": [
+        {
+          "app": "core",
+          "msgid": "Add a budget line"
+        }
+      ]
     }
   ]
 }

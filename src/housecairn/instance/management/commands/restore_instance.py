@@ -23,14 +23,19 @@ import tarfile
 import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
+from uuid import UUID
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
+from housecairn.homes import files
 from housecairn.instance.management.commands.backup_instance import (
     FORMAT,
     VERSION,
+    clean_sqlite_copy,
+    copy_connection,
     postgres_environment,
+    remove_example_homes,
 )
 
 WITH_ANOTHER_KEY = (
@@ -139,6 +144,9 @@ class Command(BaseCommand):
                 if digest.hexdigest() != expected:
                     raise CommandError(f"The backup was changed: {name}.")
             database = work / "parts" / "database"
+            # A home that arrives marked as an example is erased (docs/adr/0084): the backup
+            # of an instance never holds one, whatever a file carries.
+            left_out: list[UUID] = []
             if manifest.get("database") == "sqlite":
                 target = options["database_file"] or Path(
                     str(settings.DATABASES["default"]["NAME"])
@@ -152,6 +160,7 @@ class Command(BaseCommand):
                     raise CommandError(
                         f"{target} exists: add --yes to replace it (it is kept aside)."
                     )
+                left_out = clean_sqlite_copy(database)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 for suffix in ("", "-wal", "-shm"):
                     _set_aside(Path(f"{target}{suffix}"), stamp)
@@ -185,9 +194,15 @@ class Command(BaseCommand):
                 )
                 if result.returncode != 0:
                     raise CommandError(f"pg_restore failed: {result.stderr.strip()[:500]}")
+                with copy_connection(str(settings.DATABASES["default"]["NAME"])) as alias:
+                    left_out = remove_example_homes(alias)
             else:
                 raise CommandError("The backup names a database this instance does not know.")
             restored_media = work / "parts" / "media"
+            for home_id in left_out:
+                # Every folder an app declares, never a path written here.
+                for directory in files.home_directories(home_id, restored_media):
+                    shutil.rmtree(directory, ignore_errors=True)
             if media.exists() and any(media.iterdir()) and not options["yes"]:
                 raise CommandError(
                     f"{media} is not empty: add --yes to replace it (it is kept aside)."
@@ -204,9 +219,11 @@ class Command(BaseCommand):
                 _set_aside(key_file, stamp)
                 shutil.move(str(secret), str(key_file))
                 key_file.chmod(0o600)
-        files = sum(1 for name in parts if name.startswith("media/"))
+        files_count = sum(1 for name in parts if name.startswith("media/"))
         key = "secret key, " if "secret_key" in parts else ""
-        self.stdout.write(f"Restored: database, {key}{files} files.")
+        self.stdout.write(f"Restored: database, {key}{files_count} files.")
+        if left_out:
+            self.stdout.write(f"{len(left_out)} example home(s) in the backup were left out.")
         if "secret_key" not in parts:
             key_file = target_data / SECRET_KEY_FILE
             self.stdout.write(

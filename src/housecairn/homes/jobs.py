@@ -110,6 +110,7 @@ def start_export(actor: Any, home: Home) -> ExportJob:
 
     from housecairn.audit import services as audit
 
+    exports.refuse_example(home)
     exports.check_owner(actor, home)
     purge_expired()
     keep_hours = settings.HOUSECAIRN_EXPORT_KEEP_HOURS

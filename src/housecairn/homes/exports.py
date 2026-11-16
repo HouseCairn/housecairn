@@ -27,10 +27,11 @@ from typing import IO, Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import SuspiciousFileOperation
+from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import gettext as _
 
 from housecairn.accounts.names import person_name
 from housecairn.homes import services
@@ -376,8 +377,19 @@ def _write_file(archive: zipfile.ZipFile, name: str, source: Path, entries: dict
     entries[name] = {"sha256": hashing.digest.hexdigest(), "size": hashing.size}
 
 
+class ExampleHomeError(PermissionDenied):
+    """The example home of the guide is never exported (docs/adr/0084)."""
+
+
+def refuse_example(home: Home) -> None:
+    """Refuse the export of the example home: it never leaves the instance."""
+    if home.is_example:
+        raise ExampleHomeError(_("The example home cannot be exported."))
+
+
 def write_archive(home: Home, target: IO[bytes]) -> dict[str, Any]:
     """Write the archive of `home` into `target`; return its manifest."""
+    refuse_example(home)
     docs, files = documents(home)
     entries: dict[str, Any] = {}
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
@@ -431,8 +443,7 @@ def media_directory(home: Home) -> Path:
 
 
 def check_owner(actor: Any, home: Home) -> None:
-    from django.core.exceptions import PermissionDenied
-
+    refuse_example(home)
     if not services.is_owner(actor, home):
         raise PermissionDenied
 

@@ -24,9 +24,12 @@ def register_media_folder(name: str) -> None:
         MEDIA_FOLDERS.append(name)
 
 
-def home_directories(home_id: UUID) -> list[Path]:
-    """The directory of the home in each declared folder (they may not exist)."""
-    root = Path(settings.MEDIA_ROOT)
+def home_directories(home_id: UUID, root: Path | None = None) -> list[Path]:
+    """The directory of the home in each declared folder (they may not exist).
+
+    `root`: another `MEDIA_ROOT`, for a backup being checked or restored elsewhere.
+    """
+    root = Path(settings.MEDIA_ROOT) if root is None else root
     return [root / folder / str(home_id) for folder in MEDIA_FOLDERS]
 
 

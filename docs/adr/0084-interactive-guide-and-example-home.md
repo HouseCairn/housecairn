@@ -1,6 +1,6 @@
 # 0084. An interactive guide on an example home, one text for the web and the app
 
-- Status: proposed. That HouseCairn has an interactive guide with examples of use, in the web
+- Status: accepted. That HouseCairn has an interactive guide with examples of use, in the web
   application and in the mobile app, with the same content; that it is a guided walk on an
   **example home** (disposable, fictional values, real actions, deleted in one gesture); and the
   five scenarios are the maintainer's decisions of 2026-11-16. So are the answers to the
@@ -144,8 +144,9 @@ Web (the instance is the server of the app):
 - `GET /api/v1/sync/homes/` and `GET /api/v1/homes/` do not list it, and the routes under
   `/api/v1/sync/homes/{h}/` (changes, snapshot, push, files) answer 404 for it, as for a home the
   connection never had; a pushed `is_example` is `rejected` with `forbidden`;
-- **Export all data** and the tables as CSV refuse it, and **Restore a home** never makes one (an
-  archive carries no `is_example`; the field reads false);
+- **Export all data**, the tables as CSV, the CSV of every budget page (`?export=csv`) and the
+  contact file of a contractor (`.vcf`) refuse it, and their buttons are not shown for it; **Restore
+  a home** never makes one (an archive carries no `is_example`; the field reads false);
 - the reminders, the web push, Apprise, the calendar feeds, the webhooks, the Home Assistant
   events (`events`), the QR labels and the API tokens skip it, and the consent page of the app
   lists only real homes.
@@ -185,6 +186,8 @@ otherwise, each test making an example home with every row of the file through t
 | a pushed mark is refused | `test_a_pushed_is_example_is_rejected_as_forbidden` |
 | no erased-home row, no audit entry | `test_removing_the_example_home_leaves_no_erased_home` (creates a report in the example home first, then reads `AuditEvent` after the deletion and expects none for its `home_id`) |
 | no export, no CSV | `test_export_and_csv_refuse_the_example_home` |
+| no CSV of a budget page | `test_the_csv_of_the_budget_refuses_the_example_home` (one case per page) |
+| no contact file | `test_the_contact_file_of_a_contractor_refuses_the_example_home` |
 | no calendar | `test_the_calendar_feeds_leave_the_example_home_out` |
 | no message | `test_no_reminder_push_apprise_webhook_event_or_alert_is_sent_for_it` |
 | no label, no token | `test_labels_and_api_tokens_cannot_reach_the_example_home` |
@@ -329,6 +332,10 @@ reuses the demo home's values wherever it has the same row.
 
 The file has three parts: `example` (the home and its rows), `scenarios` (titles, summaries,
 steps) and `version`, raised when the shape changes.
+
+The image of the application has no `design/` directory, so the server reads a copy of the file,
+`src/housecairn/guide/guide.json`, which `tests/test_guide_content.py` keeps byte-equal to
+`design/guide.json`: a change of the source is copied there in the same pull request.
 
 ### The example home, defined
 

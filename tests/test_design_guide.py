@@ -22,8 +22,8 @@ SCENARIOS = ["create-home", "rooms-equipment", "recurring-task", "report-problem
 PLACEHOLDER = re.compile(r"\{\{([a-z0-9-]+)\}\}")
 # Fields of the example rows that are dates worked out when the row is made, not columns.
 DERIVED = {"due_offset_days", "completed_offset_days", "issued_offset_days", "valid_days"}
-# Fields that the lot of the web side adds (ADR 0084): the test reads them as existing.
-PLANNED = {("homes.home", "is_example")}
+# Fields a lot adds later: the test reads them as existing. None now: `Home.is_example` is there.
+PLANNED: set[tuple[str, str]] = set()
 # Screens of docs/screens/ that only read: no form, nothing to write (the budget sets nothing).
 READ_ONLY_SCREENS = {
     "budget",

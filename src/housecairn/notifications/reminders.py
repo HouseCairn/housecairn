@@ -38,7 +38,8 @@ from housecairn.accounts.models import User
 from housecairn.core import dates
 from housecairn.core.language import language_of
 from housecairn.core.links import external_url
-from housecairn.homes.models import WRITE_ROLES, Membership
+from housecairn.homes.models import WRITE_ROLES, Home, Membership
+from housecairn.homes.services import real_homes
 from housecairn.instance.config import get_setting, instance_zone
 from housecairn.notifications import devices, outbound, services, webpush
 from housecairn.notifications.models import (
@@ -234,7 +235,10 @@ def dispatch(now: datetime.datetime | None = None) -> int:
         return 0
     writers: dict[Any, set[Any]] = defaultdict(set)
     for home_id, user_id in Membership.objects.filter(
-        user_id__in=channels, role__in=WRITE_ROLES
+        user_id__in=channels,
+        role__in=WRITE_ROLES,
+        # The example home of the guide has no reminder (docs/adr/0084).
+        home__in=real_homes(Home.objects.all()),
     ).values_list("home_id", "user_id"):
         writers[home_id].add(user_id)
     prefs = {p.user_id: p for p in Preference.objects.filter(user_id__in=channels)}

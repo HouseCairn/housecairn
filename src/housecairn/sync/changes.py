@@ -91,6 +91,9 @@ def record_change(
     - `updated_at`: the `updated_at` of the row before this write. A known field with no clock
       of its own reads as that instant with the server's device id; nothing is migrated.
     - `wall`: the wall clock in milliseconds (tests).
+
+    A row of the example home of the guide records nothing and gives `Recorded(None)`
+    (docs/adr/0084).
     """
     if kind not in Change.Kind.values:
         raise ValueError(f"Unknown kind of change: {kind!r}.")
@@ -109,7 +112,12 @@ def record_change(
     with transaction.atomic():
         # The lock of the home's row, held until the commit: the order of the positions is
         # the order of the commits. SQLite writes one transaction at a time.
-        Home.all_objects.select_for_update().only("pk").get(pk=home_id)
+        locked = Home.all_objects.select_for_update().only("pk", "is_example").get(pk=home_id)
+        if locked.is_example:
+            # The example home of the guide never leaves its device (docs/adr/0084): no position,
+            # no clock of a field, no tombstone, whoever calls (a write of the web, a push, a
+            # repair, a retention sweep). The one place the rule lives.
+            return Recorded(None)
         head, _created = HomeHead.objects.get_or_create(home_id=home_id)
         last = clock.parse_clock(head.clock)
         server_stamp = (

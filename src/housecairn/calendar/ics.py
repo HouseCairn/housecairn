@@ -95,7 +95,8 @@ def _covered(feed: Feed) -> list[Any]:
     (docs/adr/0079): the calendar application keeps the subscription and shows nothing.
     """
     homes: list[Any] = [feed.home] if feed.home else list(feed_homes(feed.user))
-    return [home for home in homes if home.archived_at is None]
+    # Never an archived home (docs/adr/0079), never the example home of the guide (docs/adr/0084).
+    return [home for home in homes if home.archived_at is None and not home.is_example]
 
 
 def render(feed: Feed, base_url: str, *, now: datetime.datetime | None = None) -> bytes:

@@ -9,7 +9,7 @@ import secrets
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from django.contrib.auth.models import AnonymousUser
@@ -73,10 +73,17 @@ class SsoRequiredError(Exception):
         self.provider_id = home.required_provider
 
 
-def homes_for(user: AnyUser, *, restrict_to: Iterable[UUID] | None = None) -> models.QuerySet[Home]:
+def homes_for(
+    user: AnyUser,
+    *,
+    restrict_to: Iterable[UUID] | None = None,
+    include_example: bool = False,
+) -> models.QuerySet[Home]:
     """Homes the user belongs to; optionally only those in `restrict_to`.
 
-    This is the single entry point that limits every query to the user's homes.
+    This is the single entry point that limits every query to the user's homes. The example
+    home of the interactive guide is left out unless the caller says `include_example=True`
+    (docs/adr/0084): only the web pages of the example home itself and the guide do.
     """
     if not user.is_authenticated or not user.is_active:
         return Home.objects.none()
@@ -84,7 +91,16 @@ def homes_for(user: AnyUser, *, restrict_to: Iterable[UUID] | None = None) -> mo
     homes = Home.objects.filter(id__in=member_of)
     if restrict_to is not None:
         homes = homes.filter(id__in=list(restrict_to))
-    return homes
+    return homes if include_example else real_homes(homes)
+
+
+def real_homes(homes: models.QuerySet[Home]) -> models.QuerySet[Home]:
+    """Of `homes`, those that are not the example home of the guide (docs/adr/0084).
+
+    The one filter of the rule "an example home never leaves its device": `homes_for` applies
+    it, and so does every read of the homes that does not go through `homes_for`.
+    """
+    return homes.filter(is_example=False)
 
 
 def open_homes(homes: models.QuerySet[Home], providers: frozenset[str]) -> models.QuerySet[Home]:
@@ -130,7 +146,6 @@ def _require_owner(user: AnyUser, home: Home) -> None:
         raise PermissionDenied
 
 
-@transaction.atomic
 def create_home(
     owner: User,
     *,
@@ -140,7 +155,29 @@ def create_home(
     home_id: UUID | None = None,
 ) -> Home:
     """A new home, `owner` its owner. `home_id`: the id a phone made (docs/adr/0077)."""
-    home = Home(name=name, currency=currency, hemisphere=hemisphere)
+    return _create(owner, name, currency, hemisphere, home_id, is_example=False)
+
+
+def create_example_home(owner: User, *, name: str, currency: str, hemisphere: str) -> Home:
+    """The example home of the interactive guide (docs/adr/0084), marked as such.
+
+    Only `guide.services.create_example_home` calls it: no form, no API field and no sync
+    operation sets the mark.
+    """
+    return _create(owner, name, currency, hemisphere, None, is_example=True)
+
+
+@transaction.atomic
+def _create(
+    owner: User,
+    name: str,
+    currency: str,
+    hemisphere: str,
+    home_id: UUID | None,
+    *,
+    is_example: bool,
+) -> Home:
+    home = Home(name=name, currency=currency, hemisphere=hemisphere, is_example=is_example)
     if home_id is not None:
         home.id = home_id
     home.full_clean()
@@ -301,8 +338,18 @@ def delete_home(actor: AnyUser, home: Home, *, confirmation: str) -> None:
     not know the name (a script run by mistake), changes nothing. There is no
     grace period: the specification asks for a definitive deletion, so the
     owner is told to export first (docs/administration/data.md).
+
+    The example home of the guide (docs/adr/0084) is handed to `guide.services.remove_example`,
+    which waives the typed name and nothing else: a real home keeps it.
     """
     _require_owner(actor, home)
+    if home.is_example:
+        from housecairn.guide import (
+            services as guide_services,
+        )  # imported late: guide imports homes
+
+        guide_services.remove_example(cast(User, actor), home)
+        return
     if confirmation.strip() != home.name.strip():
         raise ValidationError(_("Type the exact name of the home to delete it."))
     erase_home(home)
@@ -456,6 +503,9 @@ def invite(
     only an invitation by link is made (docs/adr/0071).
     """
     _require_owner(actor, home)
+    if home.is_example:
+        # Only its maker is in the example home of the guide (docs/adr/0084).
+        raise ValidationError(_("The example home has no other member."))
     if delivery.send is not None:
         mode.refuse(mode.nothing_sent())
     address = email.strip()

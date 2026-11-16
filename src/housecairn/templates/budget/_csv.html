@@ -1,2 +1,2 @@
-{% load i18n l10n %}{# The file of the page, for the year shown. #}
-<p><a class="button button-secondary button-small" href="?{% if kind != 'projects' %}year={{ year|unlocalize }}&amp;{% endif %}export=csv">{% translate "Download as CSV" %}</a></p>
+{% load i18n l10n %}{# The file of the page, for the year shown; none for the example home, which never leaves the instance. #}
+{% if not home.is_example %}<p><a class="button button-secondary button-small" href="?{% if kind != 'projects' %}year={{ year|unlocalize }}&amp;{% endif %}export=csv">{% translate "Download as CSV" %}</a></p>{% endif %}

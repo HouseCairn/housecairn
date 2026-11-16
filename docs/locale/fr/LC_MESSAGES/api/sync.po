@@ -57,6 +57,9 @@ msgstr "Les logements"
 msgid "`GET /api/v1/sync/homes/`"
 msgstr "`GET /api/v1/sync/homes/`"
 
+msgid "The list is the real homes of the account: the example home of the guide ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)) never appears in it, and the routes of its changes, its snapshot, its pushes and its files answer 404 for it. A push that tries to write the mark of an example is refused as forbidden: the mark is not a field of the protocol."
+msgstr "La liste est celle des vrais logements du compte : le logement d'exemple du guide ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)) n'y figure jamais, et les routes de ses changements, de son instantané, de ses envois et de ses fichiers répondent 404 pour lui. Un envoi qui tente d'écrire la marque d'un exemple est refusé comme interdit : la marque n'est pas un champ du protocole."
+
 msgid "`role`: `owner`, `member` or `read_only`, the role of the account in the home."
 msgstr "`role` : `owner`, `member` ou `read_only`, le rôle du compte dans le logement."
 

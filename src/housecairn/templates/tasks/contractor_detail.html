@@ -12,7 +12,7 @@
       {% if contractor.address %}<div><dt>{% translate "Address" %}</dt><dd class="prose">{{ contractor.address|linebreaksbr }}</dd></div>{% endif %}
       {% if contractor.note %}<div><dt>{% translate "Note" %}</dt><dd class="prose">{{ contractor.note|linebreaksbr }}</dd></div>{% endif %}
     </dl>
-    <a class="button button-secondary button-block" href="{% url 'tasks:contractor-vcard' home_id=home.id contractor_id=contractor.id %}" download>{% translate "Download the contact (.vcf)" %}</a>
+    {% if not home.is_example %}<a class="button button-secondary button-block" href="{% url 'tasks:contractor-vcard' home_id=home.id contractor_id=contractor.id %}" download>{% translate "Download the contact (.vcf)" %}</a>{% endif %}
   </section>
   <h2>{% translate "Tasks" %}</h2>
   {% if tasks %}
