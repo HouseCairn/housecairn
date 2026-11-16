@@ -43,3 +43,9 @@ html:has(.undo-region .undo-banner) {
     padding-bottom: var(--hc-space-12);
   }
 }
+
+/* The filters send their form by themselves when script runs; without it, they need their
+   button (templates/components/filters_summary.html and the lists that use it). */
+button.filters-apply {
+  display: inline-flex;
+}

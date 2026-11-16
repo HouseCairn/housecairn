@@ -5,6 +5,8 @@
   <h1>{% translate "Budget" %}</h1>
   {% include "budget/_nav.html" %}
   {% include "budget/_year.html" %}
+  <div id="results">
+  {% include "budget/_csv.html" %}
   <section class="card" aria-labelledby="envelope-title">
     <h2 id="envelope-title">{% blocktranslate with year=year|unlocalize %}Envelope {{ year }}{% endblocktranslate %}</h2>
     {% if envelope.envelope is None %}
@@ -37,8 +39,6 @@
     </details>
     {% if can_write %}<a class="button button-secondary button-small" href="{% url_with_next 'projects:envelope' home_id=home.id %}">{% translate "Set the envelope" %}</a>{% endif %}
   </section>
-
-  <p><a href="{% url 'budget:rooms' home_id=home.id %}?year={{ year|unlocalize }}">{% translate "By room" %}</a> · <a href="{% url 'budget:projects' home_id=home.id %}">{% translate "By project" %}</a> · <a href="{% url 'budget:tasks' home_id=home.id %}?year={{ year|unlocalize }}">{% translate "By task of the upkeep" %}</a></p>
 
   <h2>{% blocktranslate with year=year|unlocalize %}By nature, {{ year }}{% endblocktranslate %}</h2>
   <table class="table-stack">
@@ -77,4 +77,5 @@
     </dl>
     {% if rolling.missing %}<p class="small">{% blocktranslate count counter=rolling.missing %}{{ counter }} task was done without a cost: its estimate is counted, nothing is paid.{% plural %}{{ counter }} tasks were done without a cost: their estimates are counted, nothing is paid.{% endblocktranslate %}</p>{% endif %}
   </section>
+  </div>
 {% endblock content %}

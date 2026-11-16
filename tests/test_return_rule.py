@@ -399,9 +399,12 @@ class TestMoreAndLandmarks:
         html = signed_in.get(
             tasks("list", home_id=alice_home.id), {"status": "done"}
         ).content.decode()
-        names = re.findall(r'role="search" aria-label="([^"]+)"', html)
-        assert len(names) == 2
-        assert len(set(names)) == 2
+        # One search landmark, and the tabs that filter next to it, each with a name of its own.
+        searches = re.findall(r'role="search" aria-label="([^"]+)"', html)
+        tabs = re.findall(r'<nav class="tabs[^"]*" aria-label="([^"]+)"', html)
+        assert len(searches) == 1
+        assert len(tabs) == 2
+        assert len(set(searches + tabs)) == 3
 
 
 # ---------- Repeat is open when the task comes from an item (NAV-15) ----------

@@ -27,11 +27,11 @@ msgstr "Le matériel d'un logement, à `/h/<id du logement>/stock/`. C'est l'ong
 msgid "**Add a stock item** opens the [stock item form](stock-item-form.md). Only the name is required."
 msgstr "**Ajouter un article** ouvre le [formulaire d'article](stock-item-form.md). Seul le nom est requis."
 
-msgid "The search field looks for the text anywhere in the name, in the manufacturer reference or in the name or reference of a supplier, ignoring case: `/h/<home id>/stock/?q=<text>`."
-msgstr "Le champ de recherche cherche le texte n'importe où dans le nom, dans la référence fabricant ou dans le nom ou la référence d'un fournisseur, sans tenir compte de la casse : `/h/<id du logement>/stock/?q=<texte>`."
+msgid "The search field looks for the text anywhere in the name, in the manufacturer reference or in the name or reference of a supplier, ignoring case: `/h/<home id>/stock/?q=<text>`. It has a magnifier and no button: the list follows what you type. Without JavaScript, press Enter."
+msgstr "Le champ de recherche cherche le texte n'importe où dans le nom, dans la référence fabricant ou dans le nom ou la référence d'un fournisseur, sans tenir compte de la casse : `/h/<id du logement>/stock/?q=<texte>`. Il a une loupe et aucun bouton : la liste suit ce que vous tapez. Sans JavaScript, appuyez sur Entrée."
 
-msgid "**Low stock only** keeps the items at or below their threshold: `/h/<home id>/stock/?low=1`. An item with no threshold is never low."
-msgstr "**Stock bas seulement** ne garde que les articles au niveau de leur seuil ou en dessous : `/h/<id du logement>/stock/?low=1`. Un article sans seuil n'est jamais bas."
+msgid "Two tabs, **All** and **Low stock**, switch between every item and the items at or below their threshold: `/h/<home id>/stock/?low=1`. An item with no threshold is never low. The words searched stay when you change tab."
+msgstr "Deux onglets, **Tous** et **Stock bas**, passent de tous les articles à ceux qui sont au niveau de leur seuil ou en dessous : `/h/<id du logement>/stock/?low=1`. Un article sans seuil n'est jamais bas. Les mots cherchés restent quand vous changez d'onglet."
 
 msgid "Read-only members see the same list and none of the buttons that change it."
 msgstr "Les membres en lecture seule voient la même liste et aucun des boutons qui la modifient."

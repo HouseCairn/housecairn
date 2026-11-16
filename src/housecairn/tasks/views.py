@@ -24,6 +24,7 @@ from django.utils import translation
 from django.utils.html import escape
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
@@ -114,8 +115,17 @@ class TaskListView(HomeTasksMixin, TemplateView):
         status = "done" if self.request.GET.get("status") == "done" else "open"
         if status == "done":
             # Done is the history (docs/adr/0017): what was done or skipped, filtered.
+            history = _history(self.home, self.request)
             return super().get_context_data(
-                **self.page(status=status, **_history(self.home, self.request)), **kwargs
+                **self.page(
+                    status=status,
+                    status_choices=_status_choices(),
+                    filters_count=sum(
+                        1 for key in HISTORY_FILTERS if key != "q" and self.request.GET.get(key)
+                    ),
+                    **history,
+                ),
+                **kwargs,
             )
         day = services.today()
         show_hidden = self.request.GET.get("hidden") == "1" and status == "open"
@@ -144,6 +154,8 @@ class TaskListView(HomeTasksMixin, TemplateView):
         return super().get_context_data(
             **self.page(
                 status=status,
+                status_choices=_status_choices(),
+                filters_count=1 if room else 0,
                 page=page,
                 today=day,
                 rooms=services.rooms_for_forms(self.home),
@@ -157,6 +169,11 @@ class TaskListView(HomeTasksMixin, TemplateView):
             ),
             **kwargs,
         )
+
+
+def _status_choices() -> list[tuple[str, str]]:
+    """The tabs of All: what is to do, what was done (design/patterns.md, "Filters and search")."""
+    return [("open", _("To do")), ("done", pgettext("task filter", "Done"))]
 
 
 def _is_uuid(raw: str) -> bool:

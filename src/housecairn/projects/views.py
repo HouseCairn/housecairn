@@ -2,6 +2,7 @@
 
 from functools import cached_property
 from typing import Any
+from urllib.parse import urlencode, urlsplit
 from uuid import UUID
 
 from django.contrib import messages
@@ -187,9 +188,20 @@ class ProjectListView(HomeProjectsMixin, TemplateView):
             if rows:
                 groups.append((ProjectStatus(status).label, rows))
         year = task_services.today().year
+        # Compare is a mode of the list (design/patterns.md, platform adaptation 12): the rows
+        # become boxes to tick, each row one target; the plain list has rows that open.
+        compare = self.request.GET.get("compare") == "1" and len(projects) > 1
+        keep = [
+            (key, value) for key, value in self.request.GET.items() if key != "compare" and value
+        ]
         return super().get_context_data(
             **self.page(
                 groups=groups,
+                total=len(projects),
+                compare=compare,
+                compare_url=f"{self.request.path}?{urlencode([*keep, ('compare', '1')])}",
+                done_url=f"{self.request.path}?{urlencode(keep)}" if keep else self.request.path,
+                filters_count=sum(1 for key in ("status", "room", "priority") if chosen.get(key)),
                 filtered=any(chosen.values()),
                 chosen=chosen,
                 rooms=home_rooms(self.home),
@@ -483,6 +495,13 @@ class TaskDetachView(PostView):
         link = get_object_or_404(ProjectTask, project=project, task_id=self.kwargs["task_id"])
         services.detach_task(request.user, link)
         messages.success(request, _("Task taken out of the project."))
+        # Taken out from the page of the task, one stays on that page.
+        back = navigation.safe_next(request)
+        task_page = reverse(
+            "tasks:detail", kwargs={"home_id": project.home_id, "task_id": link.task_id}
+        )
+        if back and urlsplit(back).path == task_page:
+            return redirect(back)
         return self.stay(project)
 
 

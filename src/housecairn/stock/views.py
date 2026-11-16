@@ -11,7 +11,7 @@ from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext_lazy, pgettext
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
@@ -102,7 +102,18 @@ class ArticleListView(HomeStockMixin, TemplateView):
         ]
         everything = not query and not low
         return super().get_context_data(
-            **self.page(rows=rows, query=query, low=low, everything=everything), **kwargs
+            **self.page(
+                rows=rows,
+                query=query,
+                low=low,
+                low_key="1" if low else "",
+                low_choices=[
+                    ("", pgettext("stock filter", "All")),
+                    ("1", pgettext("stock filter", "Low stock")),
+                ],
+                everything=everything,
+            ),
+            **kwargs,
         )
 
 

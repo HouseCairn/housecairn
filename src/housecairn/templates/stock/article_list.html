@@ -1,19 +1,16 @@
 {% extends "base.html" %}
-{% load i18n stock_extras tabs navigation %}
+{% load i18n stock_extras tabs navigation live %}
 {% block head_title %}{% translate "Stock" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Stock" %}</h1>
   {% tab_bar "rooms" %}
-  <form method="get" class="search-form" role="search">
-    <label for="search-q">{% translate "Search by name, reference or supplier" %}</label>
-    <div class="search-row">
-      <input id="search-q" type="search" name="q" value="{{ query }}" maxlength="120" autocomplete="off">
-      <button type="submit" class="button-secondary">{% translate "Search" %}</button>
-    </div>
-    <p>
-      <label><input type="checkbox" name="low" value="1"{% if low %} checked{% endif %}> {% translate "Low stock only" %}</label>
-    </p>
+  {% translate "Filter the stock" as stock_label %}{% filter_tabs stock_label "low" low_key low_choices "" "q" %}
+  <form method="get" class="filter-bar" role="search" {% live_form %}>
+    {% if low %}<input type="hidden" name="low" value="1">{% endif %}
+    {% translate "Search by name, reference or supplier" as search_label %}{% include "components/search_box.html" with id="search-q" label=search_label value=query live=True %}
   </form>
+  {% include "components/results_status.html" with count=rows|length %}
+  <div id="results">
   {% if rows %}
     <ul class="card-list">
       {% for row in rows %}
@@ -34,6 +31,7 @@
   {% else %}
     <p class="empty">{% translate "No stock item matches." %}</p>
   {% endif %}
+  </div>
   {% if can_write %}
     <a class="button button-secondary button-block" href="{% url_with_next 'stock:create' home_id=home.id %}">{% translate "Add a stock item" %}</a>
   {% endif %}

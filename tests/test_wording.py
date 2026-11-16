@@ -38,8 +38,11 @@ class TestDoneFilter:
         self, signed_in: Client, alice_home: Home
     ) -> None:
         html = fr(reverse("tasks:list", kwargs={"home_id": alice_home.id}), signed_in)
-        options = re.findall(r'<option value="(open|done)"[^>]*>(.*?)</option>', html, re.S)
-        assert options == [("open", "À faire"), ("done", "Faites")]
+        # The state of the list is a segmented tab, after the tabs of the section.
+        assert re.findall(r'<a class="tab"[^>]*>(.*?)</a>', html, re.S)[-2:] == [
+            "À faire",
+            "Faites",
+        ]
 
     def test_the_context_keeps_done_on_a_button_in_the_singular(self) -> None:
         with translation.override("fr"):

@@ -189,6 +189,10 @@ class SearchResult:
     def __bool__(self) -> bool:
         return bool(self.rooms or self.items)
 
+    @property
+    def count(self) -> int:
+        return len(self.rooms) + len(self.items)
+
 
 def search(home: Home, query: str) -> SearchResult:
     """Rooms and items of the home whose name contains `query` (case-insensitive), items by

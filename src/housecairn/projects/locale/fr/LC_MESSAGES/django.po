@@ -470,6 +470,9 @@ msgstr "Supprimer"
 msgid "Part of the project"
 msgstr "Fait partie du projet"
 
+msgid "Take out"
+msgstr "Retirer"
+
 msgid "Choose the home whose projects you want to open."
 msgstr "Choisissez le logement dont vous voulez ouvrir les projets."
 
@@ -558,9 +561,6 @@ msgctxt "task"
 msgid "Done"
 msgstr "Fait"
 
-msgid "Take out"
-msgstr "Retirer"
-
 msgid "No task in this project yet."
 msgstr "Aucune tâche dans ce projet pour l'instant."
 
@@ -585,9 +585,6 @@ msgstr "Ligne"
 
 msgid "Gap"
 msgstr "Écart"
-
-msgid "Edit"
-msgstr "Modifier"
 
 msgid "Total"
 msgstr "Total"
@@ -703,9 +700,6 @@ msgstr "Fixer l'enveloppe"
 msgid "Search by title or goal"
 msgstr "Rechercher par titre ou objectif"
 
-msgid "Search"
-msgstr "Rechercher"
-
 msgid "All statuses"
 msgstr "Tous les statuts"
 
@@ -726,10 +720,6 @@ msgstr "Basse"
 
 msgid "Filter"
 msgstr "Filtrer"
-
-#, python-format
-msgid "Compare %(title)s"
-msgstr "Comparer %(title)s"
 
 #, python-format
 msgid "Planned %(planned)s"

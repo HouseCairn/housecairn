@@ -1125,10 +1125,10 @@ class TestScreens:
         home_services.create_home(alice, name="Holiday flat")
         # With two homes, the current one (the one last opened), without asking.
         assert signed_in.get(reverse("tasks"))["Location"] == url("list", alice_home)
-        # The navigation entry and the "All tasks" tab.
+        # The navigation entry, the "All tasks" tab and the "To do" tab of its filter.
         assert (
             signed_in.get(url("list", alice_home)).content.decode().count('aria-current="page"')
-            == 2
+            == 3
         )
 
     def test_the_entry_without_a_home(self, client: Client, make_user: object) -> None:

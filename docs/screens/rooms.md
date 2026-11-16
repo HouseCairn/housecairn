@@ -12,8 +12,10 @@ list [every item of the home](equipment.md) and its [stock](stock.md).
   links; **Done** goes back. The order is the one of the list, here and in the
   API.
 - The search field looks for a name among the rooms and the items of the
-  home: `/h/<home id>/search/?q=<text>`. Rooms and items are listed apart, each
-  linking to its page. The search ignores case and looks for the text anywhere
-  in the name.
+  home. It has a magnifier and no button: what you type replaces the list of rooms, in
+  place, with the rooms and the items found, listed apart, each linking to its page
+  (`/h/<home id>/rooms/?q=<text>`); empty the field to get the list back. Without
+  JavaScript, Enter opens the [search](search.md) page. The search ignores case and looks
+  for the text anywhere in the name.
 
 Read-only members see the same list and none of the buttons that change it.

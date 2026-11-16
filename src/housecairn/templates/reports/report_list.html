@@ -1,15 +1,10 @@
 {% extends "base.html" %}
-{% load i18n navigation dates %}
+{% load i18n navigation dates tabs %}
 {% block head_title %}{% translate "Reports" %}{% endblock head_title %}
 {% block content %}
   {% url 'homes:detail' home_id=home.id as parent %}{% back_link parent home.name %}
   <h1>{% if can_write %}{% translate "Reports" %}{% else %}{% translate "My reports" %}{% endif %}</h1>
-  {% if filters %}
-    <nav class="task-pills" aria-label="{% translate 'Filter the reports' %}">
-      {% for key, title in filters %}<a class="pill {% if key == shown %}pill-info{% else %}pill-ghost{% endif %}" href="?show={{ key }}"{% if key == shown %} aria-current="page"{% endif %}>{{ title }}</a>{% endfor %}
-      <a class="pill {% if shown == 'mine' %}pill-info{% else %}pill-ghost{% endif %}" href="?show=mine"{% if shown == 'mine' %} aria-current="page"{% endif %}>{% translate "Mine" %}</a>
-    </nav>
-  {% endif %}
+  {% if filters %}{% translate "Filter the reports" as filter_label %}{% filter_tabs filter_label "show" shown filters "open" %}{% endif %}
   {% if page %}
     <ul class="card-list">
       {% for report in page %}

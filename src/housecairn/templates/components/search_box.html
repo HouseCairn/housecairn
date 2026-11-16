@@ -1,0 +1,10 @@
+{% load i18n live %}{% comment %}
+  The search field of a list: the magnifier inside, no Search button (design/patterns.md,
+  "Filters and search"). With `live`, the list follows what is typed, 300 ms after the last
+  key, through the form around it (see `core/templatetags/live.py`); without script, Enter
+  sends the form. `id`, `label` (what it searches, read by screen readers), `value`.
+{% endcomment %}<div class="search-field">
+  <label class="visually-hidden" for="{{ id }}">{{ label }}</label>
+  {% include "components/icon.html" with name="search" class="search-icon" %}
+  <input id="{{ id }}" type="search" name="q" value="{{ value }}" maxlength="120" placeholder="{% translate 'Search' %}" autocomplete="off" enterkeyhint="search"{% if live %} {% live_typing %}{% endif %}>
+</div>

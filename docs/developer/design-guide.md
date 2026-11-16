@@ -598,6 +598,21 @@ is checked against all of them at once.
   a field of its own. Three formats on three screens read as three different numbers.
 - **Deleting** **must** go through a confirmation page (see
   [After a deletion](#after-a-deletion)). Only Done and its siblings rely on Undo.
+- **Filters and search** **must** be those of [`design/patterns.md`](https://github.com/HouseCairn/housecairn/blob/main/design/patterns.md)
+  ("Filters and search"). A filter of state is segmented tabs, `{% filter_tabs %}`
+  (`core/templatetags/tabs.py`), each a link, so it works without JavaScript. Several
+  criteria go in a sheet, a `details` of class `filters`, whose button says `Filters (2)`
+  (`components/filters_summary.html`). A search field is `components/search_box.html`: a
+  magnifier inside and no button. On a list, the form around them carries `{% live_form %}`,
+  the search field `{% live_typing %}` and each select `{% live_change %}`
+  (`core/templatetags/live.py`): the list, wrapped in `<div id="results">`, follows what is
+  typed (after 300 ms, one request a word) or chosen, the address follows too, and the
+  server answers a whole page of which HTMX keeps `#results`. Without JavaScript the same
+  form is sent by Enter or by its `filters-apply` button, which only `no-script.css` shows.
+- **A row has one target.** A list row is one link (`a.row`) over the whole row, or one
+  label in a selection mode; a table row has one link that takes all of it
+  (`a.row-link`). A second action in a row, such as a Take out button, goes on the page the
+  row opens.
 - **Lists**: wherever a generic list exists (type of room, category of a photo, trade
   of a contractor), the field **must** offer it, with "Other" as its last choice
   ([ADR 0045](../adr/0045-generic-lists-with-other-tabs-and-audit-of-content.md)).
@@ -842,6 +857,8 @@ holds. The review checks the same list.
   with "Other".
 - [ ] A secret is shown once, in the answer to its `POST`, with `Cache-Control: no-store`
   and a Copy button.
+- [ ] A filter of state is tabs, several criteria are a sheet "Filters (n)", a search has no
+  button and follows the typing, a row has one target.
 - [ ] Touch targets of 44 px at least, visible focus, never hidden by the bar or the
   banner; WCAG 2.2 AA.
 - [ ] Tried at 375 px and 1280 px, with no horizontal scroll of the page.

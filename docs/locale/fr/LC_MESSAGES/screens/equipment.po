@@ -30,11 +30,11 @@ msgstr "**Prochaine** est la tâche ouverte la plus proche de l'élément, une t
 msgid "The label of the warranty gives its end: *warranty until* while it runs, *warranty ended* once it is over. An item with no end of warranty has no label."
 msgstr "L'étiquette de la garantie donne sa fin : *garantie jusqu'au* tant qu'elle court, *garantie terminée le* une fois finie. Un élément sans fin de garantie n'a pas d'étiquette."
 
-msgid "The search field looks for the text in the name, the brand, the model and the serial number, ignoring case: `/h/<home id>/items/?q=<text>`."
-msgstr "Le champ de recherche cherche le texte dans le nom, la marque, le modèle et le numéro de série, sans tenir compte de la casse : `/h/<home id>/items/?q=<text>`."
+msgid "The search field looks for the text in the name, the brand, the model and the serial number, ignoring case: `/h/<home id>/items/?q=<text>`. It has a magnifier and no button: the list follows what you type. Without JavaScript, press Enter."
+msgstr "Le champ de recherche cherche le texte dans le nom, la marque, le modèle et le numéro de série, sans tenir compte de la casse : `/h/<home id>/items/?q=<text>`. Il a une loupe et aucun bouton : la liste suit ce que vous tapez. Sans JavaScript, appuyez sur Entrée."
 
-msgid "**Room** keeps the items of one room: `/h/<home id>/items/?room=<room id>`. The two filters add up; **Search** applies both."
-msgstr "**Pièce** garde les éléments d'une pièce : `/h/<home id>/items/?room=<room id>`. Les deux filtres s'additionnent ; **Rechercher** applique les deux."
+msgid "**Filters** holds **Room**, which keeps the items of one room: `/h/<home id>/items/?room=<room id>`; the button says **Filters (1)** once a room is chosen. The two filters add up, and the list follows the choice."
+msgstr "**Filtres** contient **Pièce**, qui garde les éléments d'une pièce : `/h/<home id>/items/?room=<room id>` ; le bouton dit **Filtres (1)** une fois une pièce choisie. Les deux filtres s'additionnent, et la liste suit le choix."
 
 msgid "**Add an item**, under the list, opens the [item form](item-form.md) with **Room** to choose: `/h/<home id>/items/new/`. When the list is filtered on a room, that room is already chosen: `/h/<home id>/items/new/?room=<room id>`. Once saved, the new item opens. A home with no room shows **Add a room** instead, since an item lives in a room."
 msgstr "**Ajouter un élément**, sous la liste, ouvre le [formulaire d'élément](item-form.md) avec **Pièce** à choisir : `/h/<home id>/items/new/`. Quand la liste est filtrée sur une pièce, cette pièce est déjà choisie : `/h/<home id>/items/new/?room=<room id>`. Une fois enregistré, le nouvel élément s'ouvre. Un logement sans pièce affiche **Ajouter une pièce** à la place, puisqu'un élément vit dans une pièce."

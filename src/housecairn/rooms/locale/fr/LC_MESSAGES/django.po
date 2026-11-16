@@ -367,6 +367,13 @@ msgstr "Supprimer"
 msgid "this photo"
 msgstr "cette photo"
 
+msgid "Items"
+msgstr "Éléments"
+
+#, python-format
+msgid "Nothing matches “%(query)s”."
+msgstr "Rien ne correspond à « %(query)s »."
+
 #, python-format
 msgid "ended on %(date)s"
 msgstr "terminée le %(date)s"
@@ -499,11 +506,11 @@ msgstr "Équipements"
 msgid "Search by name, brand, model or serial number"
 msgstr "Rechercher par nom, marque, modèle ou numéro de série"
 
-msgid "Search"
-msgstr "Rechercher"
-
 msgid "Every room"
 msgstr "Toutes les pièces"
+
+msgid "Search"
+msgstr "Rechercher"
 
 msgid "Next:"
 msgstr "Prochaine :"
@@ -592,9 +599,6 @@ msgstr "Toutes"
 msgid "No photo in this category."
 msgstr "Aucune photo dans cette catégorie."
 
-msgid "Items"
-msgstr "Éléments"
-
 msgid "No item in this room yet."
 msgstr "Aucun élément dans cette pièce pour l'instant."
 
@@ -632,7 +636,3 @@ msgstr "Changer l'ordre"
 
 msgid "The memory of a room keeps what you can no longer see once the work is finished: the paint, the floor and wall coverings, and what runs behind the walls. Every field is optional."
 msgstr "La mémoire d'une pièce garde ce qu'on ne voit plus une fois les travaux finis : la peinture, les revêtements de sol et de murs, et ce qui passe derrière les murs. Tous les champs sont facultatifs."
-
-#, python-format
-msgid "Nothing matches “%(query)s”."
-msgstr "Rien ne correspond à « %(query)s »."

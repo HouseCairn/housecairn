@@ -1017,3 +1017,147 @@ input.setting-locked {
 .autosave-error[hidden] {
   display: none;
 }
+
+/* ---------- search and filters (design/patterns.md, "Filters and search") ----------
+   `.filter-bar`: the search field and, next to it, the button of the sheet of filters
+   (`Filters (2)`). The sheet is a `details`: it opens without script and its panel floats under
+   the bar, over the list. `.filters-apply` is the button that sends the form when no script
+   does it: hidden here, shown by no-script.css. */
+
+.filter-bar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--hc-space-2);
+  margin-bottom: var(--hc-space-3);
+}
+
+.search-field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.search-field input[type="search"] {
+  padding-left: calc(var(--hc-space-3) + 1.75rem);
+}
+
+.search-icon {
+  position: absolute;
+  inset-block: 0;
+  left: var(--hc-space-3);
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-block: auto;
+  color: var(--hc-color-text-muted);
+  pointer-events: none;
+}
+
+.filters-summary,
+.button-details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.filters-summary::-webkit-details-marker,
+.button-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.filters-summary {
+  height: 100%;
+  min-height: var(--hc-layout-touch-target-lg);
+  white-space: nowrap;
+}
+
+.filters-panel {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(100% + var(--hc-space-1));
+  z-index: 5;
+  padding: var(--hc-space-3) var(--hc-space-4) var(--hc-space-4);
+  background: var(--hc-color-surface);
+  border: 1px solid var(--hc-color-border-strong);
+  border-radius: var(--hc-radius-lg);
+  box-shadow: var(--hc-shadow-lg);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Alone in its bar (no search field), the sheet's button takes the width of the bar. */
+.filters:only-child {
+  flex: 1;
+}
+
+.filters:only-child > .filters-summary {
+  width: 100%;
+}
+
+.filters-panel label {
+  display: block;
+  margin: var(--hc-space-2) 0 var(--hc-space-1);
+  color: var(--hc-color-text-muted);
+  font-size: var(--hc-font-size-sm);
+  font-weight: var(--hc-font-weight-bold);
+}
+
+button.filters-apply {
+  display: none;
+  margin-top: var(--hc-space-3);
+}
+
+/* A segmented tab bar that follows a section's own tabs, or the heading of a list. */
+.tabs + .tabs {
+  margin-top: calc(-1 * var(--hc-space-1));
+}
+
+/* ---------- a whole row, one target (design guide, "Rows") ----------
+   `.row-link` stretches the one link of a card or a table row over all of it. */
+
+.row-link {
+  color: inherit;
+  font-weight: var(--hc-font-weight-bold);
+  text-decoration: none;
+}
+
+.row-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.table-stack tr:has(.row-link) {
+  position: relative;
+}
+
+.table-stack tr:has(.row-link):hover {
+  background: var(--hc-color-background);
+}
+
+.row-link:focus-visible {
+  outline: none;
+}
+
+.table-stack tr:has(.row-link:focus-visible) {
+  outline: 3px solid var(--hc-color-focus);
+  outline-offset: -3px;
+}
+
+/* A row that is a label: the whole row ticks its box (Compare projects). */
+label.row {
+  cursor: pointer;
+}
+
+label.row:has(input:focus-visible) {
+  outline: 3px solid var(--hc-color-focus);
+  outline-offset: -3px;
+}
+
+/* A button that opens its form in place (Add a task to the project). */
+.button-details {
+  margin-bottom: var(--hc-space-3);
+}
+
+.button-details[open] > summary {
+  margin-bottom: var(--hc-space-2);
+}

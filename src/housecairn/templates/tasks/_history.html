@@ -1,65 +1,50 @@
-{% load i18n tasks_extras people money navigation dates %}{# The Done filter of the task list: the history of the home (docs/adr/0017). #}
-  <form method="get" class="history-filters" role="search" aria-label="{% translate "Search the history" %}">
+{% load i18n tasks_extras people money navigation dates live %}{# The Done filter of the task list: the history of the home (docs/adr/0017). #}
+  <form method="get" class="filter-bar" role="search" aria-label="{% translate "Search the history" %}" {% live_form %}>
     <input type="hidden" name="status" value="done">
-    <details class="history-filter-fields"{% if filtered %} open{% endif %}>
-      <summary>{% translate "Filters" %}</summary>
-      <div class="history-filter-grid">
-    <p>
-      <label for="filter-q">{% translate "Search" %}</label>
-      <input id="filter-q" type="search" name="q" value="{{ selection.query }}" maxlength="200">
-    </p>
-    <p>
-      <label for="history-room">{% translate "Room" %}</label>
-      <select id="history-room" name="room">
-        <option value="">{% translate "All rooms" %}</option>
-        {% for candidate in rooms %}<option value="{{ candidate.id }}"{% if selection.room == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
-      </select>
-    </p>
-    <p>
-      <label for="filter-item">{% translate "Item" %}</label>
-      <select id="filter-item" name="item">
-        <option value="">{% translate "All items" %}</option>
-        {% for candidate in items %}<option value="{{ candidate.id }}"{% if selection.item == candidate.id %} selected{% endif %}>{{ candidate.room.name }} · {{ candidate.name }}</option>{% endfor %}
-      </select>
-    </p>
-    <p>
-      <label for="filter-contractor">{% translate "Contractor" %}</label>
-      <select id="filter-contractor" name="contractor">
-        <option value="">{% translate "Everyone" %}</option>
-        {% for candidate in contractors %}<option value="{{ candidate.id }}"{% if selection.contractor == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
-      </select>
-    </p>
-    <p>
-      <label for="filter-person">{% translate "Done by" %}</label>
-      <select id="filter-person" name="person">
-        <option value="">{% translate "Everyone" %}</option>
-        {% for candidate in members %}<option value="{{ candidate.id }}"{% if selection.person == candidate.id %} selected{% endif %}>{{ candidate.label }}</option>{% endfor %}
-      </select>
-    </p>
-    <p>
-      <label for="filter-outcome">{% translate "Outcome" %}</label>
-      <select id="filter-outcome" name="outcome">
-        <option value="">{% translate "Done or skipped" %}</option>
-        <option value="done"{% if selection.status == "done" %} selected{% endif %}>{% translate "Done" context "task filter" %}</option>
-        <option value="skipped"{% if selection.status == "skipped" %} selected{% endif %}>{% translate "Skipped" %}</option>
-      </select>
-    </p>
-    <p>
-      <label for="filter-after">{% translate "From" %}</label>
-      <input id="filter-after" type="date" name="after" value="{{ selection.after|date:'Y-m-d' }}">
-    </p>
-    <p>
-      <label for="filter-before">{% translate "To" %}</label>
-      <input id="filter-before" type="date" name="before" value="{{ selection.before|date:'Y-m-d' }}">
-    </p>
+    {% translate "Search" as search_label %}{% include "components/search_box.html" with id="filter-q" label=search_label value=selection.query live=True %}
+    <details class="filters">
+      {% include "components/filters_summary.html" with count=filters_count %}
+      <div class="filters-panel">
+        <label for="history-room">{% translate "Room" %}</label>
+        <select id="history-room" name="room" {% live_change %}>
+          <option value="">{% translate "All rooms" %}</option>
+          {% for candidate in rooms %}<option value="{{ candidate.id }}"{% if selection.room == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
+        </select>
+        <label for="filter-item">{% translate "Item" %}</label>
+        <select id="filter-item" name="item" {% live_change %}>
+          <option value="">{% translate "All items" %}</option>
+          {% for candidate in items %}<option value="{{ candidate.id }}"{% if selection.item == candidate.id %} selected{% endif %}>{{ candidate.room.name }} · {{ candidate.name }}</option>{% endfor %}
+        </select>
+        <label for="filter-contractor">{% translate "Contractor" %}</label>
+        <select id="filter-contractor" name="contractor" {% live_change %}>
+          <option value="">{% translate "Everyone" %}</option>
+          {% for candidate in contractors %}<option value="{{ candidate.id }}"{% if selection.contractor == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
+        </select>
+        <label for="filter-person">{% translate "Done by" %}</label>
+        <select id="filter-person" name="person" {% live_change %}>
+          <option value="">{% translate "Everyone" %}</option>
+          {% for candidate in members %}<option value="{{ candidate.id }}"{% if selection.person == candidate.id %} selected{% endif %}>{{ candidate.label }}</option>{% endfor %}
+        </select>
+        <label for="filter-outcome">{% translate "Outcome" %}</label>
+        <select id="filter-outcome" name="outcome" {% live_change %}>
+          <option value="">{% translate "Done or skipped" %}</option>
+          <option value="done"{% if selection.status == "done" %} selected{% endif %}>{% translate "Done" context "task filter" %}</option>
+          <option value="skipped"{% if selection.status == "skipped" %} selected{% endif %}>{% translate "Skipped" %}</option>
+        </select>
+        <label for="filter-after">{% translate "From" %}</label>
+        <input id="filter-after" type="date" name="after" value="{{ selection.after|date:'Y-m-d' }}" {% live_change %}>
+        <label for="filter-before">{% translate "To" %}</label>
+        <input id="filter-before" type="date" name="before" value="{{ selection.before|date:'Y-m-d' }}" {% live_change %}>
+        <div class="button-row filters-actions">
+          <button type="submit" class="button-secondary filters-apply">{% translate "Filter" %}</button>
+          {% if filtered %}<a class="button button-secondary" href="{% url 'tasks:list' home_id=home.id %}?status=done">{% translate "Clear" %}</a>{% endif %}
+        </div>
       </div>
-    <div class="button-row">
-      <button type="submit" class="button-secondary">{% translate "Filter" %}</button>
-      {% if filtered %}<a class="button button-secondary" href="{% url 'tasks:list' home_id=home.id %}?status=done">{% translate "Clear" %}</a>{% endif %}
-    </div>
     </details>
   </form>
-  <p class="history-total" role="status">
+  {% include "components/results_status.html" with count=cost.count %}
+  <div id="results">
+  <p class="history-total">
     {% blocktranslate count counter=cost.count %}{{ counter }} entry{% plural %}{{ counter }} entries{% endblocktranslate %}
     {% if cost.with_cost %} · {% blocktranslate with total=cost.total|money:home.currency count counter=cost.with_cost %}real cost: {{ total }}, entered on {{ counter }} entry{% plural %}real cost: {{ total }}, entered on {{ counter }} entries{% endblocktranslate %}{% endif %}
   </p>
@@ -88,3 +73,4 @@
   {% else %}
     <p class="empty">{% if filtered %}{% translate "Nothing matches." %}{% else %}{% translate "Nothing done yet." %}{% endif %}</p>
   {% endif %}
+  </div>

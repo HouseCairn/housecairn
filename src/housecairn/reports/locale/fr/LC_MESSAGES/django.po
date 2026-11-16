@@ -108,6 +108,9 @@ msgctxt "reports filter"
 msgid "All"
 msgstr "Tous"
 
+msgid "Mine"
+msgstr "Les miens"
+
 msgid "This file is too large."
 msgstr "Ce fichier est trop volumineux."
 
@@ -196,9 +199,6 @@ msgstr "Annuler"
 
 msgid "Filter the reports"
 msgstr "Filtrer les signalements"
-
-msgid "Mine"
-msgstr "Les miens"
 
 msgid "Pages"
 msgstr "Pages"

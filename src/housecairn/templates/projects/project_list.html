@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n tabs projects_extras money navigation %}
+{% load i18n tabs projects_extras money navigation live %}
 {% block head_title %}{% translate "Projects" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Projects" %}</h1>
@@ -18,54 +18,68 @@
     {% endif %}
     {% if can_write %}<a class="button button-secondary button-small" href="{% url_with_next 'projects:envelope' home_id=home.id %}">{% translate "Set the envelope" %}</a>{% endif %}
   </section>
-  <form method="get" class="filter-row" role="search">
-    <label class="visually-hidden" for="filter-q">{% translate "Search by title or goal" %}</label>
-    <input id="filter-q" type="search" name="q" value="{{ chosen.q|default:'' }}" maxlength="120" placeholder="{% translate 'Search' %}" autocomplete="off">
+  <form method="get" class="filter-bar" role="search" {% live_form %}>
     {% if view %}<input type="hidden" name="view" value="{{ view }}">{% endif %}
-    {% if statuses|length > 1 %}
-    <label class="visually-hidden" for="filter-status">{% translate "Status" %}</label>
-    <select id="filter-status" name="status">
-      <option value="">{% translate "All statuses" %}</option>
-      {% for value, label in statuses %}<option value="{{ value }}"{% if chosen.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
-    </select>
-    {% endif %}
-    <label class="visually-hidden" for="filter-room">{% translate "Room" %}</label>
-    <select id="filter-room" name="room">
-      <option value="">{% translate "All rooms" %}</option>
-      {% for candidate in rooms %}<option value="{{ candidate.id }}"{% if chosen.room == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
-    </select>
-    <label class="visually-hidden" for="filter-priority">{% translate "Priority" %}</label>
-    <select id="filter-priority" name="priority">
-      <option value="">{% translate "Any priority" %}</option>
-      <option value="high"{% if chosen.priority == "high" %} selected{% endif %}>{% translate "High" %}</option>
-      <option value="normal"{% if chosen.priority == "normal" %} selected{% endif %}>{% translate "Normal" %}</option>
-      <option value="low"{% if chosen.priority == "low" %} selected{% endif %}>{% translate "Low" %}</option>
-    </select>
-    <button type="submit" class="button-secondary button-small">{% translate "Filter" %}</button>
+    {% if compare %}<input type="hidden" name="compare" value="1">{% endif %}
+    {% translate "Search by title or goal" as search_label %}{% include "components/search_box.html" with id="filter-q" label=search_label value=chosen.q|default:"" live=True %}
+    <details class="filters">
+      {% include "components/filters_summary.html" with count=filters_count %}
+      <div class="filters-panel">
+        {% if statuses|length > 1 %}
+        <label for="filter-status">{% translate "Status" %}</label>
+        <select id="filter-status" name="status" {% live_change %}>
+          <option value="">{% translate "All statuses" %}</option>
+          {% for value, label in statuses %}<option value="{{ value }}"{% if chosen.status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        {% endif %}
+        <label for="filter-room">{% translate "Room" %}</label>
+        <select id="filter-room" name="room" {% live_change %}>
+          <option value="">{% translate "All rooms" %}</option>
+          {% for candidate in rooms %}<option value="{{ candidate.id }}"{% if chosen.room == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
+        </select>
+        <label for="filter-priority">{% translate "Priority" %}</label>
+        <select id="filter-priority" name="priority" {% live_change %}>
+          <option value="">{% translate "Any priority" %}</option>
+          <option value="high"{% if chosen.priority == "high" %} selected{% endif %}>{% translate "High" %}</option>
+          <option value="normal"{% if chosen.priority == "normal" %} selected{% endif %}>{% translate "Normal" %}</option>
+          <option value="low"{% if chosen.priority == "low" %} selected{% endif %}>{% translate "Low" %}</option>
+        </select>
+        <button type="submit" class="button-secondary button-small filters-apply">{% translate "Filter" %}</button>
+      </div>
+    </details>
   </form>
+  {% include "components/results_status.html" with count=total %}
+  <div id="results">
   {% if groups %}
-    <form method="get" action="{% url 'projects:compare' home_id=home.id %}">
+    {% if compare %}<form method="get" action="{% url 'projects:compare' home_id=home.id %}">{% endif %}
       {% for label, rows in groups %}
         <h2>{{ label }}</h2>
         <ul class="card-list">
           {% for project, amounts in rows %}
-            <li class="row">
-              <label class="visually-hidden" for="compare-{{ project.id }}">{% blocktranslate with title=project.title %}Compare {{ title }}{% endblocktranslate %}</label>
-              <input id="compare-{{ project.id }}" type="checkbox" name="p" value="{{ project.id }}">
-              <a class="row-body" href="{% url_with_next 'projects:detail' home_id=home.id project_id=project.id %}">
-                <span class="row-title">{{ project.title }}</span>
-                <span class="row-text">
-                  {% if amounts.planned or amounts.committed or amounts.paid %}{% blocktranslate with planned=amounts.planned|money:home.currency %}Planned {{ planned }}{% endblocktranslate %}{% else %}{% translate "No budget yet" %}{% endif %}
-                  {% if project.priority == "high" %} · {% translate "High priority" %}{% endif %}
+            <li>
+              {% if compare %}<label class="row" for="compare-{{ project.id }}">{% else %}<a class="row" href="{% url_with_next 'projects:detail' home_id=home.id project_id=project.id %}">{% endif %}
+                <span class="row-body">
+                  <span class="row-title">{{ project.title }}</span>
+                  <span class="row-text">
+                    {% if amounts.planned or amounts.committed or amounts.paid %}{% blocktranslate with planned=amounts.planned|money:home.currency %}Planned {{ planned }}{% endblocktranslate %}{% else %}{% translate "No budget yet" %}{% endif %}
+                    {% if project.priority == "high" %} · {% translate "High priority" %}{% endif %}
+                  </span>
+                  {% budget_gap amounts home.currency %}
                 </span>
-                {% budget_gap amounts home.currency %}
-              </a>
+                {% if compare %}<input id="compare-{{ project.id }}" type="checkbox" name="p" value="{{ project.id }}"></label>{% else %}{% include "components/icon.html" with name="chevron" class="chevron" %}</a>{% endif %}
             </li>
           {% endfor %}
         </ul>
       {% endfor %}
-      <button type="submit" class="button-secondary button-block">{% translate "Compare the ticked projects" %}</button>
+    {% if compare %}
+      <div class="button-row">
+        <button type="submit">{% translate "Compare the ticked projects" %}</button>
+        <a class="button button-secondary" href="{{ done_url }}">{% translate "Cancel" %}</a>
+      </div>
     </form>
+    {% elif total > 1 %}
+      <a class="button button-secondary button-block" href="{{ compare_url }}">{% translate "Compare projects" %}</a>
+    {% endif %}
   {% elif everything %}
     <p class="empty">{% translate "No project yet. A project is a piece of work with an end, such as redoing the bathroom." %}</p>
   {% elif not filtered %}
@@ -73,6 +87,7 @@
   {% else %}
     <p class="empty">{% translate "No project matches." %}</p>
   {% endif %}
+  </div>
   {% if can_write %}
     <a class="button button-secondary button-block" href="{% url_with_next 'projects:create' home_id=home.id %}">{% translate "Add a project" %}</a>
   {% endif %}

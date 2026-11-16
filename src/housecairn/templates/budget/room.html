@@ -6,6 +6,8 @@
   <h1>{% blocktranslate with room=room.name %}Budget of {{ room }}{% endblocktranslate %}</h1>
   <p><a class="button button-secondary button-small" href="{% url_with_next 'rooms:detail' home_id=home.id room_id=room.id %}">{% translate "Open the room" %}</a></p>
   {% include "budget/_year.html" %}
+  <div id="results">
+  {% include "budget/_csv.html" %}
   <p class="small">{% blocktranslate with year=year|unlocalize %}Projects counted in {{ year }}, shared evenly between their rooms, and the upkeep of {{ year }}.{% endblocktranslate %}</p>
   {% if detail.projects or detail.tasks %}
     <table class="table-stack">
@@ -16,13 +18,13 @@
       <tbody>
         {% for line in detail.projects %}
           <tr>
-            <th scope="row"><a href="{% url_with_next 'projects:detail' home_id=home.id project_id=line.id %}">{{ line.label }}</a><br><span class="small">{% translate "Project" %}</span></th>
+            <th scope="row"><a class="row-link" href="{% url_with_next 'projects:detail' home_id=home.id project_id=line.id %}">{{ line.label }}</a><br><span class="small">{% translate "Project" %}</span></th>
             {% include "budget/_row_amounts.html" with amounts=line.amounts %}
           </tr>
         {% endfor %}
         {% for line in detail.tasks %}
           <tr>
-            <th scope="row"><a href="{% url_with_next 'tasks:detail' home_id=home.id task_id=line.id %}">{{ line.label }}</a><br><span class="small">{% translate "Upkeep" %}</span></th>
+            <th scope="row"><a class="row-link" href="{% url_with_next 'tasks:detail' home_id=home.id task_id=line.id %}">{{ line.label }}</a><br><span class="small">{% translate "Upkeep" %}</span></th>
             {% include "budget/_row_amounts.html" with amounts=line.amounts %}
           </tr>
         {% endfor %}
@@ -34,4 +36,5 @@
   {% else %}
     <p class="empty">{% translate "No budget yet for this room this year. Give a project of the room a budget line, or one of its tasks an estimate." %}</p>
   {% endif %}
+  </div>
 {% endblock content %}

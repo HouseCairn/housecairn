@@ -1,0 +1,2 @@
+{% load i18n %}{# What the search found, said to screen readers when the list changes in place. `count`. A search in place swaps what is inside (hx-select-oob), so that the live region stays. #}
+<div id="results-status" class="visually-hidden" role="status">{% blocktranslate count counter=count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktranslate %}</div>

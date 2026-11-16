@@ -1,44 +1,49 @@
 {% extends "base.html" %}
-{% load i18n tasks_extras tabs navigation %}
+{% load i18n tasks_extras tabs navigation live %}
 {% block head_title %}{% translate "Tasks" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Tasks" %}</h1>
   {% tab_bar "today" %}
-  <form method="get" class="filter-row" role="search" aria-label="{% translate "Filter the tasks" %}">
-    <label class="visually-hidden" for="filter-status">{% translate "Show" %}</label>
-    <select id="filter-status" name="status">
-      <option value="open"{% if status == "open" %} selected{% endif %}>{% translate "To do" %}</option>
-      <option value="done"{% if status == "done" %} selected{% endif %}>{% translate "Done" context "task filter" %}</option>
-    </select>
-    {% if status == "open" %}
-    <label class="visually-hidden" for="filter-room">{% translate "Room" %}</label>
-    <select id="filter-room" name="room">
-      <option value="">{% translate "All rooms" %}</option>
-      {% for candidate in rooms %}<option value="{{ candidate.id }}"{% if room and room.id == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
-    </select>
-    {% endif %}
-    <button type="submit" class="button-secondary button-small">{% translate "Filter" %}</button>
-  </form>
+  {% translate "Filter the tasks" as status_label %}{% filter_tabs status_label "status" status status_choices "open" "room" %}
   {% if status == "done" %}
     {% include "tasks/_history.html" %}
-  {% elif page %}
-    <ul class="task-list">
-      {% for occurrence in page %}
-        {% include "tasks/_occurrence_row.html" %}
-      {% endfor %}
-    </ul>
-    {% if page.paginator.num_pages > 1 %}
-      <nav class="button-row" aria-label="{% translate 'Pages' %}">
-        {% if page.has_previous %}<a class="button button-secondary button-small" href="?status={{ status }}{% if room %}&amp;room={{ room.id }}{% endif %}{% if show_hidden %}&amp;hidden=1{% endif %}&amp;page={{ page.previous_page_number }}">{% translate "Previous" %}</a>{% endif %}
-        <span class="small">{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
-        {% if page.has_next %}<a class="button button-secondary button-small" href="?status={{ status }}{% if room %}&amp;room={{ room.id }}{% endif %}{% if show_hidden %}&amp;hidden=1{% endif %}&amp;page={{ page.next_page_number }}">{% translate "Next" %}</a>{% endif %}
-      </nav>
-    {% endif %}
   {% else %}
-    <p class="empty">{% translate "Nothing to do. Add a task to start." %}</p>
-  {% endif %}
-  {% if hidden_count %}
-    <p class="small">{% blocktranslate count counter=hidden_count %}{{ counter }} task is hidden until its date gets closer.{% plural %}{{ counter }} tasks are hidden until their date gets closer.{% endblocktranslate %} <a href="{{ show_hidden_url }}">{% translate "Show them" %}</a></p>
+    <form method="get" class="filter-bar" role="search" {% live_form %}>
+      {% if show_hidden %}<input type="hidden" name="hidden" value="1">{% endif %}
+      <details class="filters">
+        {% include "components/filters_summary.html" with count=filters_count %}
+        <div class="filters-panel">
+          <label for="filter-room">{% translate "Room" %}</label>
+          <select id="filter-room" name="room" {% live_change %}>
+            <option value="">{% translate "All rooms" %}</option>
+            {% for candidate in rooms %}<option value="{{ candidate.id }}"{% if room and room.id == candidate.id %} selected{% endif %}>{{ candidate.name }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="button-secondary button-small filters-apply">{% translate "Filter" %}</button>
+        </div>
+      </details>
+    </form>
+    {% include "components/results_status.html" with count=page.paginator.count %}
+    <div id="results">
+    {% if page %}
+      <ul class="task-list">
+        {% for occurrence in page %}
+          {% include "tasks/_occurrence_row.html" %}
+        {% endfor %}
+      </ul>
+      {% if page.paginator.num_pages > 1 %}
+        <nav class="button-row" aria-label="{% translate 'Pages' %}">
+          {% if page.has_previous %}<a class="button button-secondary button-small" href="?status={{ status }}{% if room %}&amp;room={{ room.id }}{% endif %}{% if show_hidden %}&amp;hidden=1{% endif %}&amp;page={{ page.previous_page_number }}">{% translate "Previous" %}</a>{% endif %}
+          <span class="small">{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+          {% if page.has_next %}<a class="button button-secondary button-small" href="?status={{ status }}{% if room %}&amp;room={{ room.id }}{% endif %}{% if show_hidden %}&amp;hidden=1{% endif %}&amp;page={{ page.next_page_number }}">{% translate "Next" %}</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <p class="empty">{% translate "Nothing to do. Add a task to start." %}</p>
+    {% endif %}
+    {% if hidden_count %}
+      <p class="small">{% blocktranslate count counter=hidden_count %}{{ counter }} task is hidden until its date gets closer.{% plural %}{{ counter }} tasks are hidden until their date gets closer.{% endblocktranslate %} <a href="{{ show_hidden_url }}">{% translate "Show them" %}</a></p>
+    {% endif %}
+    </div>
   {% endif %}
   {% if can_write %}
     <a class="button button-block" href="{% url_with_next 'tasks:create' home_id=home.id q_room=room.id %}">{% translate "Add a task" %}</a>

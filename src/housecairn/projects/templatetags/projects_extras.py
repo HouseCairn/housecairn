@@ -19,6 +19,8 @@ def task_project(context: template.Context, task: Task, home: Any) -> dict[str, 
     """The project a task belongs to, as one line of the page of the task (docs/adr/0050)."""
     return {
         "project": services.project_of_task(task),
+        "task": task,
         "home": home,
+        "can_write": context.get("can_write", False),
         "request": context["request"],
     }

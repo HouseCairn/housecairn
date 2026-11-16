@@ -1,23 +1,25 @@
 {% extends "base.html" %}
-{% load i18n tabs navigation dates %}
+{% load i18n tabs navigation dates live %}
 {% block head_title %}{% translate "Equipment" context "tab" %}{% endblock head_title %}
 {% block content %}
   <h1>{% translate "Equipment" context "tab" %}</h1>
   {% tab_bar "rooms" %}
-  <form method="get" class="search-form" role="search">
-    <label for="items-q">{% translate "Search by name, brand, model or serial number" %}</label>
-    <div class="search-row">
-      <input id="items-q" type="search" name="q" value="{{ query }}" maxlength="120" autocomplete="off">
-      <button type="submit" class="button-secondary">{% translate "Search" %}</button>
-    </div>
-    <p>
-      <label for="items-room">{% translate "Room" %}</label>
-      <select id="items-room" name="room">
-        <option value="">{% translate "Every room" %}</option>
-        {% for each in rooms %}<option value="{{ each.id }}"{% if each == room %} selected{% endif %}>{{ each.name }}</option>{% endfor %}
-      </select>
-    </p>
+  <form method="get" class="filter-bar" role="search" {% live_form %}>
+    {% translate "Search by name, brand, model or serial number" as search_label %}{% include "components/search_box.html" with id="items-q" label=search_label value=query live=True %}
+    <details class="filters">
+      {% include "components/filters_summary.html" with count=filters_count %}
+      <div class="filters-panel">
+        <label for="items-room">{% translate "Room" %}</label>
+        <select id="items-room" name="room" {% live_change %}>
+          <option value="">{% translate "Every room" %}</option>
+          {% for each in rooms %}<option value="{{ each.id }}"{% if each == room %} selected{% endif %}>{{ each.name }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="button-secondary button-small filters-apply">{% translate "Search" %}</button>
+      </div>
+    </details>
   </form>
+  {% include "components/results_status.html" with count=rows|length %}
+  <div id="results">
   {% if rows %}
     <ul class="card-list" data-item-list>
       {% for row in rows %}
@@ -39,6 +41,7 @@
   {% else %}
     <p class="empty">{% translate "No item matches." %}</p>
   {% endif %}
+  </div>
   {% if can_write %}
     {% if rooms %}
       <a class="button button-secondary button-block" href="{% url_with_next 'rooms:item-add' home_id=home.id q_room=room.id %}">{% translate "Add an item" %}</a>

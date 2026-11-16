@@ -8,8 +8,9 @@ The page is figures only: nothing on it changes your data, so everyone who can o
 reads it, read-only members included. How the figures are worked out is in the
 [budget guide](../guides/budget.md).
 
-- **Year** picks the year of the figures; **Download as CSV** gives the same figures as a
-  file.
+- **Year** picks the year of the figures: the page follows the choice, with no button (without
+  JavaScript, a **Show** button appears). **Download as CSV** gives the same figures as a
+  file, for the year shown.
 - **The envelope of the year** is three figures and a gauge: what is set aside (the
   **envelope**, or **Planned** when no envelope is set), what is **Spent** (the more of
   committed and paid) and what is **Left**. Next to the gauge, a sentence says the share
@@ -27,5 +28,6 @@ reads it, read-only members included. How the figures are worked out is in the
 
 Every row says where the budget stands in words (**... left**, **On budget** or **Over budget
 by ...**) and shows a gauge with its percentage: colour is never the only signal.
-See [by room](budget-rooms.md), [by project](budget-projects.md) and
-[by task](budget-tasks.md).
+The other tabs of the budget are [by room](budget-rooms.md), [by project](budget-projects.md)
+and [by task](budget-tasks.md). A row of those tables opens its room, project or task, from
+anywhere on the row.

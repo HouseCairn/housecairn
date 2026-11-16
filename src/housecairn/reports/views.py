@@ -64,6 +64,7 @@ class ReportListView(HomeReportsMixin, TemplateView):
                 ("open", pgettext("reports filter", "Open")),
                 ("closed", pgettext("reports filter", "Closed")),
                 ("all", pgettext("reports filter", "All")),
+                ("mine", _("Mine")),
             ]
             if self.can_write
             else []

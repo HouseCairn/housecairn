@@ -94,6 +94,9 @@ msgstr "Nature"
 msgid "Last 12 months"
 msgstr "12 derniers mois"
 
+msgid "Download as CSV"
+msgstr "Télécharger en CSV"
+
 msgid "No budget set"
 msgstr "Aucun budget fixé"
 
@@ -153,9 +156,6 @@ msgstr[1] "%(counter)s fois faites sans coût : ajoutez-les dans les détails de
 
 msgid "Show"
 msgstr "Afficher"
-
-msgid "Download as CSV"
-msgstr "Télécharger en CSV"
 
 msgid "Homes are added by currency. Amounts in different currencies are never converted."
 msgstr "Les logements sont additionnés par devise. Les montants de devises différentes ne sont jamais convertis."
@@ -235,15 +235,6 @@ msgstr "Le dépensé est le plus élevé de l'engagé et du payé, ligne par lig
 
 msgid "Set the envelope"
 msgstr "Fixer l'enveloppe"
-
-msgid "By room"
-msgstr "Par pièce"
-
-msgid "By project"
-msgstr "Par projet"
-
-msgid "By task of the upkeep"
-msgstr "Par tâche d'entretien"
 
 #, python-format
 msgid "By nature, %(year)s"

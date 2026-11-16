@@ -5,6 +5,8 @@
   <h1>{% translate "Budget of the upkeep" %}</h1>
   {% include "budget/_nav.html" %}
   {% include "budget/_year.html" %}
+  <div id="results">
+  {% include "budget/_csv.html" %}
   <p class="small">{% blocktranslate with year=year|unlocalize %}The tasks that are in no project, with the occurrences of {{ year }}: those done, the one open, and those the repetition will still bring before the end of the year. An open task with no date counts in the current year. A task of a project counts in its project.{% endblocktranslate %}</p>
   {% if report.lines %}
     <table class="table-stack">
@@ -21,7 +23,7 @@
       <tbody>
         {% for line in report.lines %}
           <tr>
-            <th scope="row"><a href="{% url_with_next 'tasks:detail' home_id=home.id task_id=line.id %}">{{ line.label }}</a>{% if line.extra.room %}<br><span class="small">{{ line.extra.room }}</span>{% endif %}</th>
+            <th scope="row"><a class="row-link" href="{% url_with_next 'tasks:detail' home_id=home.id task_id=line.id %}">{{ line.label }}</a>{% if line.extra.room %}<br><span class="small">{{ line.extra.room }}</span>{% endif %}</th>
             <td data-label="{% translate 'Estimate each time' %}">{% if line.extra.estimate is None %}—{% else %}{{ line.extra.estimate|money:home.currency }}{% if line.extra.stock_estimate %}<br><span class="small">{% blocktranslate with amount=line.extra.stock_estimate|money:home.currency %}materials from the stock: {{ amount }}{% endblocktranslate %}</span>{% endif %}{% endif %}{% if line.extra.unpriced_materials %}<br><span class="small">{% blocktranslate count counter=line.extra.unpriced_materials %}{{ counter }} stock item without a price{% plural %}{{ counter }} stock items without a price{% endblocktranslate %}</span>{% endif %}</td>
             <td data-label="{% translate 'Cost a year' %}">{% if line.extra.annual_cost is None %}—{% else %}{{ line.extra.annual_cost|money:home.currency }}{% endif %}</td>
             {% include "budget/_row_amounts.html" with amounts=line.amounts %}
@@ -38,4 +40,5 @@
     <p class="empty">{% translate "No task has an estimate or a cost yet. Give a task a labour or material budget." %}</p>
   {% endif %}
   {% if report.note.unlisted %}<p class="small">{% blocktranslate count counter=report.note.unlisted %}{{ counter }} task without an estimate or a cost is not listed.{% plural %}{{ counter }} tasks without an estimate or a cost are not listed.{% endblocktranslate %}</p>{% endif %}
+  </div>
 {% endblock content %}
