@@ -20,6 +20,30 @@ The notes of each version are also published with it on the project's
 ```{release-fragments} upgrade
 ```
 
+## 0.5.0
+
+HouseCairn is still alpha software. This version lets the mobile app do more through the sync API: create on the server a home it made, upload and read the files of photos, attachments and project files, and know which member of a home is the connected account. It also shows the version of the application on the About screen and adds **Add an item** to the Equipment list. Read the upgrade notes before updating: one migration runs, and no setting is new.
+
+### New
+
+- **Version on the About screen.** The About screen (More, Help) shows the version of the application on its own line, for example `Version 0.5.0`, easy to select and copy when you report a problem ([About](screens/about.md)).
+
+- **Sync API: homes made on the phone.** `POST /api/v1/sync/homes/` creates on the server a home the mobile app made, with the phone's id, the account of the connection its owner, and adds it to the homes of the connection ([Sync API](api/sync.md#creating-a-home)). It needs the scope `homes.create` and the right **May create homes** given when the phone was connected. Sent again with the same fields, it gives the same home; an id held by anything else is `409` `id_taken`, which does not say what holds it.
+
+- **Sync API: who the connected account is.** Each home of `GET /api/v1/sync/homes/` now carries `member_id`, the `id` of the entry of `members` that is the account of the connection, so that the mobile app can keep the reminders that are its own. The field is added; nothing else changes.
+
+- **Sync API: files of the phone.** The mobile app uploads the file of a photo, an attachment or a file of a project with `PUT /api/v1/sync/homes/{h}/files/{file_id}`, under an id it makes, and reads any file of the home with `GET` ([Sync API](api/sync.md#files)). The server checks and writes an image again as on the web, which drops its metadata, accepts the documents the web accepts, counts the file in the quota of the home and refuses one above the largest file of the instance, which `GET /api/v1/sync/info` now gives (`file_max_bytes`). A photo or an attachment pushed before its file waits for it; a file no row refers to within 7 days is removed by the nightly purge.
+
+### Fixed
+
+- **Add an item from the Equipment list.** The Equipment list (Rooms, Equipment) now ends with **Add an item**, which was missing: the item form opens with the room to choose, or already set when the list is filtered on a room. Read-only members do not see it ([Equipment](screens/equipment.md)).
+
+### Upgrade notes
+
+- **One migration.** `sync.0004` adds the table of the files a phone uploads before a row refers to them. No setting and no dependency are new, and the export format stays version 4. Going back to 0.4.1 after the update needs the [backup](administration/backup.md) made before ([Update](administration/update.md)).
+
+- **Files of the phones, in the data folder.** A file the mobile app uploads waits under `sync/<home id>/` in `MEDIA_ROOT` (`/data/media/` in the image), which no URL serves, until a photo, an attachment or a project file refers to it. It counts in the quota of its home, goes with the home when the home is erased, and is in the backup with the other files. The nightly purge of the sync API, at 03:30, now also removes the files no row referred to within 7 days.
+
 ## 0.4.1
 
 HouseCairn is still alpha software. This version lets phones connect with the HouseCairn mobile app: in 0.4.0 the server refused, for want of a CSRF cookie, the requests with which the app exchanges its sign-in code, renews its access and disconnects, so a phone could not finish connecting. Nothing else changes: no migration runs and no setting is new.
