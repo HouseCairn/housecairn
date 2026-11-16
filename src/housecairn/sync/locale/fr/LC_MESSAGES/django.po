@@ -120,11 +120,11 @@ msgstr "file est un UUID sous sa forme textuelle canonique."
 msgid "sha256 is 64 lower-case hexadecimal digits."
 msgstr "sha256 compte 64 chiffres hexadécimaux en minuscules."
 
-msgid "sha256 is not the digest of the file uploaded under this id."
-msgstr "sha256 n'est pas l'empreinte du fichier déposé sous cet identifiant."
-
 msgid "type of a file is a media type."
 msgstr "type d’un fichier est un type de média."
+
+msgid "sha256 is not the digest of the file uploaded under this id."
+msgstr "sha256 n'est pas l'empreinte du fichier déposé sous cet identifiant."
 
 #, python-format
 msgid "%(name)s is a UUID in its canonical text form."
