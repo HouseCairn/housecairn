@@ -227,7 +227,8 @@ def filter_tabs(
     One tab per `(value, title)` of `choices`; each is a link to the same page with `?<param>=`
     set to its value (left out for the `default` one), so that the filter works without script.
     Only the parameters named in `keep` (comma separated) follow from one tab to another, such
-    as the words searched; the page number never does.
+    as the words searched; the page number never does. The bar has the id `filter-tabs`, which
+    `{% live_form %}` swaps along with the list, so that the links keep the words and the filters.
     """
     request = context["request"]
     kept = {name for name in keep.split(",") if name}
@@ -244,4 +245,4 @@ def filter_tabs(
         tabs.append(
             Tab(title, f"{request.path}?{query}" if query else request.path, value == current)
         )
-    return {"label": label, "tabs": tabs}
+    return {"label": label, "tabs": tabs, "ident": "filter-tabs"}

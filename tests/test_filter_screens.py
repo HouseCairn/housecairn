@@ -7,6 +7,7 @@ search field has no button and follows what is typed; a row has one target.
 
 import re
 from decimal import Decimal
+from html import unescape
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,7 @@ from django.urls import reverse
 from django.utils import translation
 
 from housecairn.accounts.models import User
+from housecairn.core.navigation import with_next
 from housecairn.core.templatetags.tabs import filter_tabs
 from housecairn.homes.models import Home
 from housecairn.projects import services as project_services
@@ -120,6 +122,25 @@ class TestTabs:
         )
         assert 'name="low" value="1"' not in html
         assert "Low stock only" not in html
+
+    @pytest.mark.parametrize(
+        ("name", "query"),
+        [("stock:list", {"q": "fil"}), ("tasks:list", {"room": "1"})],
+    )
+    def test_the_tabs_are_swapped_with_the_list_so_that_their_links_keep_the_search(
+        self, signed_in: Client, alice_home: Home, name: str, query: dict[str, str]
+    ) -> None:
+        html = page(signed_in, name, alice_home, **query)
+        # The tabs carry an id that the form swaps along with `#results` (`hx-select-oob`).
+        assert html.count('<nav id="filter-tabs" class="tabs') == 1
+        assert re.search(r'hx-select-oob="#filter-tabs,[^"]*"', html)
+        # The page that answers a search in place builds the tabs from that search: every link
+        # keeps the words or the room.
+        bar = re.findall(r'<nav id="filter-tabs".*?</nav>', html, re.S)[0]
+        key = next(iter(query))
+        links = re.findall(r'href="([^"]*)"', bar)
+        assert len(links) == 2
+        assert all(f"{key}=" in link for link in links)
 
 
 class TestSearchAsYouType:
@@ -274,6 +295,34 @@ class TestRowsHaveOneTarget:
         )
         # Taken out from its own page, one stays on that page (the return rule is unchanged).
         assert taken["Location"] == task_page
+
+    def test_taking_a_task_out_from_its_page_keeps_where_that_page_was_opened_from(
+        self, signed_in: Client, alice: User, alice_home: Home, living_room_project: Project
+    ) -> None:
+        task = task_services.create_task(alice, alice_home, title="Buy brushes")
+        project_services.attach_task(alice, living_room_project, task)
+        task_page = reverse("tasks:detail", kwargs={"home_id": alice_home.id, "task_id": task.id})
+        origin = reverse("tasks:list", kwargs={"home_id": alice_home.id}) + "?room=3"
+        detach = reverse(
+            "projects:task-detach",
+            kwargs={
+                "home_id": alice_home.id,
+                "project_id": living_room_project.id,
+                "task_id": task.id,
+            },
+        )
+        on_task = signed_in.get(task_page, {"next": origin}).content.decode()
+        # The form of the page posts the page as it is, with its own `next`.
+        posted = re.search(rf'action="{detach}".*?name="next" value="([^"]*)"', on_task, re.S)
+        assert posted is not None
+        value = unescape(posted.group(1))
+        assert value.startswith(f"{task_page}?next=")
+        taken = signed_in.post(detach, {"next": value})
+        assert taken["Location"] == with_next(task_page, origin)
+        # A `next` that leaves the site is not carried over.
+        project_services.attach_task(alice, living_room_project, task)
+        away = signed_in.post(detach, {"next": f"{task_page}?next=https://example.com/"})
+        assert "example.com" not in away["Location"]
 
     def test_a_budget_line_is_one_target_that_opens_its_form(
         self, signed_in: Client, alice_home: Home, living_room_project: Project

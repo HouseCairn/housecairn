@@ -1,5 +1,5 @@
 {% if tabs %}
-<nav class="tabs{% if tabs|length <= 4 %} tabs-fit{% endif %}" aria-label="{{ label }}">
+<nav{% if ident %} id="{{ ident }}"{% endif %} class="tabs{% if tabs|length <= 4 %} tabs-fit{% endif %}" aria-label="{{ label }}">
   <ul class="tabs-list">
     {% for tab in tabs %}
       <li><a class="tab" href="{{ tab.url }}"{% if tab.current %} aria-current="page"{% endif %}>{{ tab.label }}</a></li>

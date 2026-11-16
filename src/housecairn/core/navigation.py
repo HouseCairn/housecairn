@@ -91,6 +91,24 @@ def safe_next(request: HttpRequest) -> str | None:
     return target
 
 
+def nested_next(request: HttpRequest) -> str:
+    """The safe `next` carried by the `next` of the request ("" when there is none).
+
+    `safe_next` drops it on purpose; a page that is left and then reached again by an action
+    in place (the page of a task) hands it back through `with_next`.
+    """
+    if safe_next(request) is None:
+        return ""
+    inner = dict(parse_qsl(urlsplit(_raw_next(request)).query)).get("next", "")
+    if (
+        not inner.startswith("/")
+        or not is_safe_redirect(inner, request)
+        or not prefix.in_application(inner)
+    ):
+        return ""
+    return clean_next(inner)
+
+
 def back_url(request: HttpRequest, default: str) -> str:
     """Where to go back: the `next` of the request when it is safe, else `default`."""
     return safe_next(request) or default

@@ -501,7 +501,7 @@ class TaskDetachView(PostView):
             "tasks:detail", kwargs={"home_id": project.home_id, "task_id": link.task_id}
         )
         if back and urlsplit(back).path == task_page:
-            return redirect(back)
+            return redirect(navigation.with_next(task_page, navigation.nested_next(request)))
         return self.stay(project)
 
 

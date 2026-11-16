@@ -607,8 +607,10 @@ is checked against all of them at once.
   the search field `{% live_typing %}` and each select `{% live_change %}`
   (`core/templatetags/live.py`): the list, wrapped in `<div id="results">`, follows what is
   typed (after 300 ms, one request a word) or chosen, the address follows too, and the
-  server answers a whole page of which HTMX keeps `#results`. Without JavaScript the same
-  form is sent by Enter or by its `filters-apply` button, which only `no-script.css` shows.
+  server answers a whole page of which HTMX keeps `#results` and the tabs of the filter of
+  state (`#filter-tabs`), so that their links keep the words and the filters. Without
+  JavaScript the same form is sent by Enter or by its `filters-apply` button, which only
+  `no-script.css` shows.
 - **A row has one target.** A list row is one link (`a.row`) over the whole row, or one
   label in a selection mode; a table row has one link that takes all of it
   (`a.row-link`). A second action in a row, such as a Take out button, goes on the page the
