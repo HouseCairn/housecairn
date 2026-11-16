@@ -141,12 +141,33 @@ class TestHomes:
             "role": "owner",
             "archived_at": None,
             "head": HomeHead.objects.get(home=alice_home).pos,
+            "member_id": str(alice.pk),
             "members": [
                 {"id": str(alice.pk), "name": "alice", "role": "owner"},
                 {"id": str(bob.pk), "name": "Bob", "role": "read_only"},
             ],
         }
         assert "@" not in json.dumps(entry)
+
+    def test_the_member_of_the_connection_in_each_home(self, alice: User, bob: User) -> None:
+        main = home_services.create_home(alice, name="Main")
+        flat = home_services.create_home(bob, name="Flat")
+        Membership.objects.create(home=main, user=bob, role=Role.READ_ONLY)
+        Membership.objects.create(home=flat, user=alice, role=Role.MEMBER)
+        for user, other in ((alice, bob), (bob, alice)):
+            phone = connect(user, [main, flat])
+            homes = {h["id"]: h for h in get(phone.access, HOMES).json()["homes"]}
+            assert set(homes) == {str(main.pk), str(flat.pk)}
+            for entry in homes.values():
+                assert entry["member_id"] == str(user.pk) != str(other.pk)
+                mine = [m for m in entry["members"] if m["id"] == entry["member_id"]]
+                assert len(mine) == 1
+                assert mine[0]["role"] == entry["role"]
+        read_only = {h["id"]: h for h in get(connect(bob, [main]).access, HOMES).json()["homes"]}[
+            str(main.pk)
+        ]
+        assert read_only["role"] == "read_only"
+        assert read_only["member_id"] == str(bob.pk)
 
     def test_an_archived_home_is_listed_and_read(self, alice: User, alice_home: Home) -> None:
         phone = connect(alice, [alice_home])
