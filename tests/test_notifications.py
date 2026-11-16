@@ -11,6 +11,7 @@ import socket
 import ssl
 import threading
 import time
+import types
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
@@ -71,6 +72,17 @@ def sent(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, str, str]]:
     for plugin in (NotifyTelegram, NotifyGotify, NotifyDiscord):
         monkeypatch.setattr(plugin, "send", fake)
     return calls
+
+
+@pytest.fixture
+def minute_end(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stop the clock a tenth of a second before a minute change.
+
+    The test limit counts per clock minute; frozen here, the sends of a test cannot
+    straddle two minutes, whatever the time the suite runs at.
+    """
+    frozen = 1_800_000_000 // 60 * 60 + 59.9
+    monkeypatch.setattr(services, "time", types.SimpleNamespace(time=lambda: frozen))
 
 
 @pytest.fixture
@@ -1094,7 +1106,9 @@ class TestWebAndApi:
         assert answer.status_code == 422
         assert TOKEN not in answer.text
 
-    def test_tests_are_limited(self, alice: User, channel: Channel, sent: list[Any]) -> None:
+    def test_tests_are_limited(
+        self, alice: User, channel: Channel, sent: list[Any], minute_end: None
+    ) -> None:
         for _ in range(services.TESTS_PER_MINUTE):
             assert services.start_test(alice, channel).test_state == SendState.SENT
         with pytest.raises(services.ValidationError, match="Too many"):

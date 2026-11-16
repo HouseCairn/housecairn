@@ -6,6 +6,7 @@ a list, so that a test decides when, and whether, the worker gets to the task.
 
 import datetime
 import socket
+import types
 from collections.abc import Iterator
 from typing import Any
 
@@ -55,6 +56,17 @@ def delivered(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, str]]:
 
     monkeypatch.setattr(outbound, "deliver", fake)
     return calls
+
+
+@pytest.fixture
+def minute_end(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Stop the clock a tenth of a second before a minute change.
+
+    The test limit counts per clock minute; frozen here, the sends of a test cannot
+    straddle two minutes, whatever the time the suite runs at.
+    """
+    frozen = 1_800_000_000 // 60 * 60 + 59.9
+    monkeypatch.setattr(services, "time", types.SimpleNamespace(time=lambda: frozen))
 
 
 @pytest.fixture
@@ -464,7 +476,12 @@ class TestTheScreen:
         assert queued == []
 
     def test_the_limit_is_still_said(
-        self, signed_in: Client, alice: User, channel: Channel, queued: Queued
+        self,
+        signed_in: Client,
+        alice: User,
+        channel: Channel,
+        queued: Queued,
+        minute_end: None,
     ) -> None:
         for _ in range(services.TESTS_PER_MINUTE):
             services.start_test(alice, channel)
