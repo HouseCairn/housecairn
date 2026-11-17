@@ -76,6 +76,7 @@ AUDITED: dict[tuple[str, str], str] = {
     ("accounts/services.py", "delete_account"): SEES_EVERY_HOME
     + " (the memberships of the account: the example home goes with it)",
     ("sync/changes.py", "record_change"): SEES_EVERY_HOME + " (a lock, and the mark itself)",
+    ("sync/changes.py", "view_changed"): SEES_EVERY_HOME + " (a lock, and the mark itself)",
     ("sync/files.py", "receive"): SEES_EVERY_HOME + " (a row lock, nothing read out)",
     ("instance/providers.py", "_clean_slug"): SEES_EVERY_HOME + " (a provider in use by any home)",
     ("instance/providers.py", "_counts"): SEES_EVERY_HOME + " (a provider in use by any home)",

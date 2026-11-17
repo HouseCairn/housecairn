@@ -1,10 +1,11 @@
 """The change log of the homes, for the sync API of the mobile app (docs/adr/0077, 0079).
 
-Four tables, all internal: no screen, no route, no API resource. They follow the home: erasing
-a home erases its positions, its changes and its clocks; only the table of erased homes
-(`ErasedHome`) lives outside it, to say that a home was erased.
+Its tables are all internal: no screen, no route, no API resource. They follow the home: erasing
+a home erases its positions, its changes, its clocks and the views of its members; only the
+table of erased homes (`ErasedHome`) lives outside it, to say that a home was erased.
 """
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -53,6 +54,28 @@ class HomeHead(models.Model):
 
     def __str__(self) -> str:
         return f"{self.home_id} at {self.pos}"
+
+
+class MemberView(models.Model):
+    """Where the view of one member of a home last changed, as a position of its feed.
+
+    A read-only member is given their own reports only, as the site shows them (docs/adr/0086).
+    When a member starts or stops writing, or joins the home again, what their phone holds no
+    longer matches what they may read: the home's head moves on by one position with no change
+    (`changes.view_changed`), and a cursor below `since` answers 410 `cursor_expired`, so that
+    the phone starts again from the snapshot of its new view.
+    """
+
+    home = models.ForeignKey("homes.Home", on_delete=models.CASCADE, related_name="+")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    # The first position a cursor of this member's phones may be at.
+    since = models.PositiveBigIntegerField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["home", "user"], name="sync_member_view")]
+
+    def __str__(self) -> str:
+        return f"{self.user_id} in {self.home_id} since {self.since}"
 
 
 class Change(models.Model):

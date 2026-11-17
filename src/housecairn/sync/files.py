@@ -486,10 +486,19 @@ def locate(
     file_id: uuid.UUID,
     *,
     exclude: tuple[type[models.Model], Any] | None = None,
+    hidden: Callable[[str, Any], bool] | None = None,
 ) -> Located | None:
-    """The stored file of the id `file_id` in a home: held by a row, or waiting for one."""
+    """The stored file of the id `file_id` in a home: held by a row, or waiting for one.
+
+    `hidden(entity, row id)` names the rows the reader may not see (`sync.visibility`, the
+    photo of another member's report for a read-only member): their file is not found.
+    """
+    held_by_hidden = False
     for model, holder, row in _rows_naming(home_id, file_id):
         if exclude is not None and (model, row.pk) == exclude:
+            continue
+        if hidden is not None and hidden(holder.entity, row.pk):
+            held_by_hidden = True
             continue
         name = getattr(row, holder.field).name
         storage = _storage(model, holder)
@@ -504,6 +513,8 @@ def locate(
             is_image,
             str(file_id),
         )
+    if held_by_hidden:
+        return None  # nor the bytes still waiting in the sync folder under its id
     found = SyncFile.objects.filter(pk=file_id, home_id=home_id).exclude(stored="").first()
     if found is None or not sync_storage.exists(found.stored):
         return None

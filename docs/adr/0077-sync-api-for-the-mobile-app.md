@@ -31,6 +31,9 @@
   errors of an upload are `400` `malformed` (a digest missing or wrong), `403` `forbidden` (a
   read-only member), `409` `file_conflict`, `413` `too_large` or `quota_exceeded`, `415`
   `unsupported_type`; and `info` gives `file_max_bytes` in `limits`.
+  [ADR 0086](0086-a-read-only-member-syncs-their-own-reports.md) gives a read-only member their
+  own reports only, as the site shows them, in the feed, the snapshot and the files, and starts
+  a phone again from the snapshot (`410` `cursor_expired`) when the view of its member changes.
 - Date: 2026-11-14
 - Amends: [ADR 0005](0005-stable-identifiers-and-soft-deletion.md) (ids made by a client,
   deterministic ids, how long a deletion stays visible) and

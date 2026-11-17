@@ -165,13 +165,25 @@ The changes of the home after the position `after` (0 at first), in position ord
 entity type together. Each change is the operation of the protocol (`op`: type `t`, home `h`,
 row `id`, kind `k` among `put`, `delete` and `restore`, clock `c`, fields `f`, empty for a
 deletion or a restoration) and the device that wrote it. Positions are numbered 1, 2, 3...
-per home, with no gap; the app keeps the last one it applied and asks for the next page with
-it while `more` is true.
+per home and never repeat; the app keeps the last one it applied and asks for the next page
+with it while `more` is true.
 
 - `limit`: 500 by default, at most 1 000; a larger value gives 1 000.
 - `after` or `limit` that is not a whole number, or `after` beyond `head`: `400`.
 - `after` older than the oldest change kept: `410` with `"code": "cursor_expired"`. Changes
   and deleted rows are kept 400 days; the app then starts again from the snapshot.
+- `after` from before the account started or stopped writing in the home (see below): `410`
+  `cursor_expired` too.
+
+**What a read-only member reads.** As on the site, a read-only member is given the reports they
+made and no others: the changes of the other reports are left out of the pages, their rows and
+tombstones out of the snapshot, and their photos answer `404`. Every other row of the home is
+given to every member. A page then holds `limit` changes the member reads, and positions are
+skipped where a change was left out: the app keeps the position of the last change it applied,
+which stays below `head`. When an owner makes a member read-only or a member again, or when a
+person joins the home again, the head moves on by one position with no change, and a cursor
+below it answers `410` `cursor_expired`: the app starts again from the snapshot of what the
+person may now read, and drops what it held that the snapshot lacks.
 
 ## The snapshot
 
@@ -376,7 +388,8 @@ download (`Content-Disposition`), with `X-Content-Type-Options: nosniff` and a p
 nothing. The file of a photo, an attachment, a report or a label made on the web is read by the
 id its reference gives, which is the id of its row. The answer is `404` for a file no row holds
 and never uploaded, for the thumbnail of a document or of a label (the server keeps none), and
-`400` for another `size`. A read-only member reads the files.
+`400` for another `size`. A read-only member reads the files, but the photo of a report made by
+someone else answers `404`, as an id nobody holds.
 
 ## Errors
 
@@ -395,7 +408,7 @@ itself:
 | `wrong_device` | `409` | A device id other than the one the connection pushed with, or one of another connection. |
 | `insecure_transport` | `403` | Plain HTTP outside the local network. |
 | `sso_required` | `403` | The home requires a sign-in provider the connection was not made with. |
-| `cursor_expired` | `410` | `after` is older than the oldest change kept. |
+| `cursor_expired` | `410` | `after` is older than the oldest change kept, or from before the account started or stopped writing in the home. |
 | `forbidden` | `403` | A file uploaded by a read-only member. |
 | `file_conflict` | `409` | A file id that holds other bytes, or is held by anything else. |
 | `too_large` | `413` | A file above `file_max_bytes`. |

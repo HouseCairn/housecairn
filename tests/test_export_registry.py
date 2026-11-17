@@ -51,6 +51,7 @@ LEFT_OUT = {
     # The change log of the sync API (docs/adr/0077): positions, changes and field clocks of
     # the home, for the phones. Erased with the home, which is why they cascade from it.
     "sync.HomeHead": "the position of the change log of the home",
+    "sync.MemberView": "where the view of a member of the home last changed in its change log",
     "sync.Change": "the changes of the home, for the sync API",
     "sync.RowClocks": "the clock of every field of a row of the home",
     # A file a phone uploaded (docs/adr/0077, need 10): the row that refers to it takes the

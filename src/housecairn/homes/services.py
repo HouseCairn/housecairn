@@ -395,6 +395,12 @@ def change_role(actor: AnyUser, membership: Membership, role: Role | str) -> Mem
     target.role = new_role
     _check_an_owner_remains(locked)
     target.save(update_fields=["role", "updated_at"])
+    if (previous in WRITE_ROLES) != (new_role in WRITE_ROLES):
+        # A read-only member is given their own reports only (docs/adr/0086): what their phones
+        # hold no longer matches, they start again from the snapshot.
+        from housecairn.sync import changes as sync_changes
+
+        sync_changes.view_changed(home, target.user_id)
     audit.record(
         "member.role_changed",
         actor=actor,
@@ -654,6 +660,11 @@ def accept_invitation(user: User, raw: str) -> Membership:
         membership = Membership.objects.create(
             home=invitation.home, user=user, role=invitation.role
         )
+        # A phone bound to the home before the person left it holds what they saw then
+        # (docs/adr/0086): it starts again from the snapshot of their new role.
+        from housecairn.sync import changes as sync_changes
+
+        sync_changes.view_changed(invitation.home, user.pk)
     invitation.accepted_at = timezone.now()
     invitation.accepted_by = user
     invitation.save(update_fields=["accepted_at", "accepted_by", "updated_at"])
