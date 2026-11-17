@@ -24,10 +24,13 @@ from housecairn.reports import services as report_services
 from housecairn.reports.models import Report
 from housecairn.rooms import services as room_services
 from housecairn.sync import rows as changelog
+from housecairn.sync.files import pending_name
 from housecairn.sync.models import HomeHead
+from housecairn.sync.visibility import view_of
 from tests.oauth_support import Connected, connect
 from tests.rooms_support import image_bytes, upload
 from tests.test_sync_files import get as get_file
+from tests.test_sync_files import put as put_file
 from tests.test_sync_read_api import changes_url, get, lines_of, snapshot_url
 
 pytestmark = pytest.mark.django_db
@@ -203,18 +206,101 @@ def test_a_member_who_writes_reads_the_photo_of_any_report(
 # ---------- a task made from a report the reader may not see ----------
 
 
-def test_a_task_made_from_a_hidden_report_names_it_nowhere(
+def test_a_task_made_from_a_hidden_report_is_given_with_its_title_and_place_not_the_report(
     alice: User, bob: User, alice_home: Home, home_with_reports: dict[str, Any]
 ) -> None:
-    """The link is on the report (`task_id`), which the reader does not get: the task has none."""
-    alices = home_with_reports["alices"]
+    """The task keeps the title and the place copied at its making, as the site shows them.
+
+    The report (its row, id, photo) is not given, in the feed nor in the snapshot.
+    """
+    alices, room = home_with_reports["alices"], home_with_reports["room"]
+    alices.room = room
+    alices.save(update_fields=["room"])
     task = report_services.make_task(alice, alices)
+    assert (task.title, task.room_id) == (alices.title, room.pk)
     reader = connect(bob, [alice_home])
+
     answer = feed(reader, alice_home)
-    tasks = [c["op"] for c in answer.json()["changes"] if c["op"]["t"] == "tasks.task"]
+    ops = [c["op"] for c in answer.json()["changes"]]
+    tasks = [op for op in ops if op["t"] == "tasks.task"]
     assert [op["id"] for op in tasks] == [str(task.pk)]
-    assert str(alices.pk) not in answer.content.decode()
-    assert str(alices.pk) not in str(snapshot(reader, alice_home))
+    assert tasks[0]["f"]["title"] == "Leak under the sink"
+    assert tasks[0]["f"]["room_id"] == str(room.pk)
+    lines = snapshot(reader, alice_home)
+    in_snapshot = [line for line in lines if line.get("t") == "tasks.task"]
+    assert [line["id"] for line in in_snapshot] == [str(task.pk)]
+
+    assert str(alices.pk) not in report_ids_in_feed(answer)
+    assert report_ids_in(lines) == {str(home_with_reports["bobs"].pk)}
+    # Nowhere in either answer: the id of the report, nor the name of its photo.
+    for given in (answer.content.decode(), str(lines)):
+        assert str(alices.pk) not in given
+        assert alices.photo.name not in given
+    assert get_file(reader.access, alice_home.pk, alices.pk).status_code == 404
+
+
+def test_the_bytes_waiting_under_the_id_of_a_hidden_photo_are_not_given(
+    alice: User, bob: User, alice_home: Home, home_with_reports: dict[str, Any]
+) -> None:
+    """A file uploaded but not yet taken by a row, which a hidden report already names.
+
+    The row says the file is its photo: the reader is told 404 and not given the bytes that wait
+    in the sync folder under that id, which the owner is given.
+    """
+    waiting = uuid.uuid4()
+    data = image_bytes()
+    owner = connect(alice, [alice_home])
+    assert (
+        put_file(owner.access, alice_home.pk, waiting, data, content_type="image/png").status_code
+        == 201
+    )
+    Report.objects.filter(pk=home_with_reports["alices"].pk).update(
+        photo=pending_name(alice_home.pk, waiting)
+    )
+
+    assert get_file(owner.access, alice_home.pk, waiting).status_code == 200
+    reader = connect(bob, [alice_home])
+    hidden = get_file(reader.access, alice_home.pk, waiting)
+    unknown = get_file(reader.access, alice_home.pk, uuid.uuid4())
+    assert hidden.status_code == unknown.status_code == 404
+    assert hidden.json() == unknown.json()
+
+
+# ---------- the site and the sync API read one rule ----------
+
+
+def test_the_site_and_the_sync_view_give_each_member_the_same_reports(
+    alice: User, bob: User, carol: User, alice_home: Home, add_member: Any
+) -> None:
+    """`visible_reports` (site) and `view_of` (sync) agree for a reader, a member and an owner.
+
+    Each reads `visible_among`: if one stops and the rule changes, they part.
+    """
+    add_member(alice_home, bob, Role.READ_ONLY)
+    add_member(alice_home, carol, Role.MEMBER)
+    bobs = [report(bob, alice_home, "Door"), report(bob, alice_home, "Gone door")]
+    others = [
+        report(alice, alice_home, "Leak"),
+        report(alice, alice_home, "Made a task"),
+        report(carol, alice_home, "Window"),
+        report(carol, alice_home, "Gone window"),
+    ]
+    report_services.make_task(alice, others[1])
+    deleted = {bobs[1].pk, others[3].pk}
+    for row in (bobs[1], others[3]):
+        changelog.soft_delete(row)
+    everyone = {r.pk for r in [*bobs, *others]}
+
+    for user in (bob, carol, alice):
+        site = set(report_services.visible_reports(user, alice_home).values_list("pk", flat=True))
+        view = view_of(user, alice_home)
+        sync = everyone if view.is_whole else view.report_ids()
+        assert sync - deleted == site, user.email
+        # The phone is given the tombstone of the deleted reports it may see, and no other.
+        assert sync & deleted == (deleted if view.is_whole else {bobs[1].pk})
+        assert report_ids_in(snapshot(connect(user, [alice_home]), alice_home)) == {
+            str(pk) for pk in sync
+        }
 
 
 # ---------- a change of role ----------

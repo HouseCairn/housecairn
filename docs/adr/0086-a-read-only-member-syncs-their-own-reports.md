@@ -37,11 +37,13 @@ Nothing else of the home is narrowed: every member gets every other row.
 - the **file** of its photo, and its thumbnail, answer `404`, the same answer as an id nobody
   holds, through every home of the connection.
 
-**A task made from a hidden report names it nowhere.** The link between the two is on the report
-(`task_id`); a task has no field that points at a report. The reader gets the task, as the site
-shows it to them, and not the report, so nothing of it (title, place, photo, text) reaches the
-phone. The mobile app finds the reports of a task by the `task_id` of the reports it holds: it
-finds none and shows none, without an error.
+**A task made from a hidden report keeps its title and place.** The link between the two is on
+the report (`task_id`); a task has no field that points at a report. The report (its row, photo,
+text and id) is not given. The task is another row: it keeps the title and the place that
+`report_services.make_task` copied into it when it was made, and it is given to the reader as the
+site shows it to them, so the phone learns no more than the site does. The mobile app finds the
+reports of a task by the `task_id` of the reports it holds: it finds none and shows none, without
+an error.
 
 **A view that changes starts the phone again.** A member who stops writing has received the
 reports of the others; one who starts writing has not. When the view of a member changes (an
@@ -73,7 +75,8 @@ of the hidden reports leave gaps between the positions a reader gets, and the `h
 and of the list of homes moves past the last change they got. A reader can thus tell that
 something they do not see changed, and when, not what nor which row. Avoiding it would need a
 numbering per member, which the cursor shared with the push and the list of homes does not have.
-This record accepts it: no title, place, photo or id of a hidden report leaves the server.
+This record accepts it: no row, photo, text or id of a hidden report leaves the server. The title
+and the place of one still reach the reader through the task made from it, as on the site.
 
 ## Consequences
 
