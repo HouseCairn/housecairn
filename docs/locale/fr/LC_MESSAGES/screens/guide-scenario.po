@@ -1,0 +1,58 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Guide scenario"
+msgstr "Scénario du guide"
+
+msgid "One scenario of the [guide](guide.md), at `/guide/<scenario>/` (for example `/guide/rooms-equipment/`): its title, what it is for, then its steps, three to six. Its link at the top leads back to the guide; at the bottom, the previous and the next scenario."
+msgstr "Un scénario du [guide](guide.md), à `/guide/<scénario>/` (par exemple `/guide/rooms-equipment/`) : son titre, ce à quoi il sert, puis ses étapes, de trois à six. Son lien en haut ramène au guide ; en bas, le scénario précédent et le suivant."
+
+msgid "A step"
+msgstr "Une étape"
+
+msgid "A step has a title, one sentence and the buttons that lead to its screen, in the example home:"
+msgstr "Une étape a un titre, une phrase et les boutons qui mènent à son écran, dans le logement d'exemple :"
+
+msgid "**Fill in for me** opens the form of the step with the values of the example already in it (the name and the type of the room, the brand and the model of the machine, the amount of a quote). Nothing is saved yet: you press the button of the form yourself, and the form checks what it holds as if you had typed it."
+msgstr "**Remplir pour moi** ouvre le formulaire de l'étape avec les valeurs de l'exemple déjà dedans (le nom et le type de la pièce, la marque et le modèle de la machine, le montant d'un devis). Rien n'est encore enregistré : vous appuyez vous-même sur le bouton du formulaire, et le formulaire vérifie ce qu'il contient comme si vous l'aviez saisi."
+
+msgid "**Open** opens the same form empty, or the screen of a step that has no form (the page of the home, Today, a report)."
+msgstr "**Ouvrir** ouvre le même formulaire vide, ou l'écran d'une étape qui n'a pas de formulaire (la page du logement, Aujourd'hui, un signalement)."
+
+msgid "When the row a step names is already in the example home (the coffee machine, for its brand and model), the step opens the form of that row instead of a form that adds one. A budget line or a quote waits for its project: until the project exists, the step has no button."
+msgstr "Quand la ligne que nomme une étape est déjà dans le logement d'exemple (la machine à café, pour sa marque et son modèle), l'étape ouvre le formulaire de cette ligne au lieu d'un formulaire qui en ajoute une. Une ligne de budget ou un devis attend son projet : tant que le projet n'existe pas, l'étape n'a pas de bouton."
+
+msgid "Once saved, a form opened from a step comes back to this page, as a form opened from any other page goes back to it ([design guide](../developer/design-guide.md), \"After a form\"). The step is then ticked, with **Done**, as soon as the data of the example home says it is done: a room added ticks **Add a room**, whoever added it and from whichever screen. A step once ticked stays ticked, even if you delete the room afterwards."
+msgstr "Une fois enregistré, un formulaire ouvert depuis une étape revient à cette page, comme un formulaire ouvert depuis n'importe quelle autre page y revient ([guide de conception](../developer/design-guide.md), « Après un formulaire »). L'étape est alors cochée, avec **Faite**, dès que les données du logement d'exemple disent qu'elle est faite : une pièce ajoutée coche **Ajouter une pièce**, quelle que soit la personne qui l'a ajoutée et depuis n'importe quel écran. Une étape cochée le reste, même si vous supprimez la pièce ensuite."
+
+msgid "Four steps leave no trace in the data (look at the settings, find your way around, undo a mistake, open the report): each has **Mark as done**, which ticks it."
+msgstr "Quatre étapes ne laissent pas de trace dans les données (regarder les réglages, s'y retrouver, annuler une erreur, ouvrir le signalement) : chacune a **Marquer comme faite**, qui la coche."
+
+msgid "The first step of the first scenario opens [Add a home](new-home.md) filled in with the example home; with no example home, the steps of the other scenarios have no button yet."
+msgstr "La première étape du premier scénario ouvre [Ajouter un logement](new-home.md) rempli avec le logement d'exemple ; sans logement d'exemple, les étapes des autres scénarios n'ont pas encore de bouton."
+
+msgid "Only the forms of the example home, and Add a home when the guide opens it, are filled in from their address. On a real home the address is ignored: a link cannot put a value in front of you there, nor in an edit form that saves as you type."
+msgstr "Seuls les formulaires du logement d'exemple, et Ajouter un logement quand le guide l'ouvre, sont remplis depuis leur adresse. Sur un vrai logement, l'adresse est ignorée : un lien ne peut y mettre aucune valeur sous vos yeux, ni dans un formulaire de modification qui s'enregistre au fil de la saisie."
+
+msgid "Add what the earlier scenarios make"
+msgstr "Ajouter ce que créent les scénarios précédents"
+
+msgid "A scenario after the first one shows **Add what the earlier scenarios make** while an earlier step that ticks by itself is not ticked, or while there is no example home. The button makes the example home if needed, then adds to it what the earlier scenarios make and it lacks (for the third scenario: the kitchen, the bathroom and the coffee machine), in your language, so that you can start where you want. It never adds anything of the scenario you are on or of a later one, so it ticks nothing ahead."
+msgstr "Un scénario après le premier affiche **Ajouter ce que créent les scénarios précédents** tant qu'une étape précédente qui se coche d'elle-même n'est pas cochée, ou tant qu'il n'y a pas de logement d'exemple. Le bouton crée le logement d'exemple si besoin, puis y ajoute ce que créent les scénarios précédents et qui lui manque (pour le troisième scénario : la cuisine, la salle de bain et la machine à café), dans votre langue, pour que vous commenciez où vous voulez. Il n'ajoute jamais rien du scénario en cours ni d'un scénario suivant, et ne coche donc rien d'avance."

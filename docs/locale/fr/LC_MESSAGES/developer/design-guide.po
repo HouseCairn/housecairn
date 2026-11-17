@@ -483,6 +483,9 @@ msgstr "Après une suppression"
 msgid "A deletion **must** go through a confirmation page: a link to the page, then a post from it, whose Cancel link goes back to the object. This includes photos, files and the revocation of a label. A tap by mistake must not lose a document."
 msgstr "Une suppression **doit** passer par une page de confirmation : un lien vers la page, puis un envoi depuis celle-ci, dont le lien Annuler ramène à l'objet. Cela vaut pour les photos, les fichiers et la révocation d'une étiquette. Un toucher par erreur ne doit pas faire perdre un document."
 
+msgid "One exception, decided by [ADR 0084](../adr/0084-interactive-guide-and-example-home.md): **Delete the example home** of the guide asks on the same page, in place of its button, with **Delete** and **Cancel** (the page again with `?delete-example=1`, so no script is needed). The example home holds fictional values only, and the guide offers to make it again."
+msgstr "Une exception, décidée par l'[ADR 0084](../adr/0084-interactive-guide-and-example-home.md) : **Supprimer le logement d'exemple** du guide demande confirmation sur la même page, à la place de son bouton, avec **Supprimer** et **Annuler** (la même page avec `?delete-example=1`, sans script nécessaire). Le logement d'exemple ne contient que des valeurs fictives, et le guide propose de le recréer."
+
 msgid "After the deletion, the person **must** land on the parent of the deleted object, never on `next` if it points to that object or one of its children. That page no longer exists."
 msgstr "Après la suppression, la personne **doit** arriver sur le parent de l'objet supprimé, jamais sur `next` s'il désigne cet objet ou l'un de ses enfants. Cette page n'existe plus."
 
@@ -1103,4 +1106,3 @@ msgstr "L'audit a comparé l'interface à Material 3, aux recommandations d'Appl
 
 #~ msgid "An address sent away (an invitation email, a QR label, a calendar feed) is `homes.scoping.site_url(request)` followed by `reverse(…)`: the scheme and the host come from `HOUSECAIRN_SITE_URL` when it is set, else from the request, and the path, prefix included, from `reverse`."
 #~ msgstr "Une adresse envoyée au-dehors (un e-mail d'invitation, une étiquette QR, un flux de calendrier) est `homes.scoping.site_url(request)` suivi de `reverse(…)` : le schéma et l'hôte viennent de `HOUSECAIRN_SITE_URL` quand il est défini, sinon de la requête, et le chemin, préfixe compris, de `reverse`."
-

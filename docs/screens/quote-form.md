@@ -20,3 +20,11 @@ or changes one (`/h/<home id>/projects/quotes/<quote id>/edit/`).
 
 The link at the top and **Cancel** lead back to the screen the form was opened from,
 usually the project, and so does the form once sent.
+
+## Opened from the guide
+
+A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its
+address by **Fill in for me** with the values of the example (the contractor, the amount, the dates, the status and the budget line of a quote). The form shows them and
+saves nothing until you press its button; each value is checked by its field first, and one the
+field refuses (a choice that does not exist, a line of another project, a text too long) is left out, as if you had
+not typed it. Saved, the form comes back to the guide.

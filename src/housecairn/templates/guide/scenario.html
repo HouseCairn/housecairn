@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n navigation %}
+{% block head_title %}{{ title }}{% endblock head_title %}
+{% block content %}
+  {% url 'guide:index' as parent %}{% back_link parent %}
+  <h1>{{ number }}. {{ title }}</h1>
+  <p class="lead">{{ summary }}</p>
+  {% if catch_up %}
+    <div class="card guide-catch-up">
+      <p>{% if home %}{% translate "The earlier scenarios are not all done. The guide can add what they make to the example home, so that you can start here." %}{% else %}{% translate "There is no example home yet. The guide can make it, with what the earlier scenarios add, so that you can start here." %}{% endif %}</p>
+      <form method="post" action="{% url 'guide:fill' scenario=scenario_id %}">
+        {% csrf_token %}
+        <button type="submit" class="button button-secondary">{% translate "Add what the earlier scenarios make" %}</button>
+      </form>
+    </div>
+  {% endif %}
+  <ol class="guide-steps">
+    {% for step in steps %}
+      <li class="card guide-step{% if step.ticked %} guide-step-done{% endif %}" id="step-{{ step.id }}">
+        <h2 class="guide-step-title">
+          {% if step.ticked %}<span class="pill pill-success">{% translate "Done" context "guide step" %}</span>{% endif %}
+          {{ number }}.{{ step.number }} {{ step.title }}{% if step.optional %} <span class="pill pill-ghost">{% translate "Optional" %}</span>{% endif %}
+        </h2>
+        <p>{{ step.explain }}</p>
+        {% if step.open or step.fill %}
+          <div class="button-row">
+            {% if step.fill %}<a class="button button-small" href="{{ step.fill }}">{% translate "Fill in for me" %}</a>{% endif %}
+            {% if step.open %}<a class="button {% if step.fill %}button-secondary {% endif %}button-small" href="{{ step.open }}">{% translate "Open" context "guide step" %}</a>{% endif %}
+          </div>
+        {% elif not home and not step.ticked %}
+          <p class="small">{% translate "Add the example home first, in the first scenario." %}</p>
+        {% endif %}
+        {% if step.manual and home and not step.ticked %}
+          <form method="post" action="{% url 'guide:tick' %}">
+            {% csrf_token %}
+            <input type="hidden" name="step" value="{{ step.id }}">
+            <input type="hidden" name="next" value="{% url 'guide:scenario' scenario=scenario_id %}">
+            <button type="submit" class="button button-secondary button-small">{% translate "Mark as done" %}</button>
+          </form>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+  <nav class="button-row guide-pager" aria-label="{% translate 'Scenarios' %}">
+    {% if previous %}<a class="button button-secondary" href="{{ previous.url }}">‹ {{ previous.title }}</a>{% endif %}
+    {% if following %}<a class="button" href="{{ following.url }}">{{ following.title }} ›</a>{% else %}<a class="button" href="{% url 'guide:index' %}">{% translate "Back to the guide" %}</a>{% endif %}
+  </nav>
+{% endblock content %}

@@ -144,6 +144,12 @@ msgstr "Enregistré au fil de la saisie"
 msgid "When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script."
 msgstr "Quand vous modifiez une fiche qui existe, chaque champ est enregistré dès que vous le changez, ou après une courte pause de saisie, et **Enregistré** s'affiche sous le bouton (un lecteur d'écran l'annonce). Une erreur s'affiche sous son champ, et ce que vous avez saisi reste. Un intervenant, une pièce, un élément ou un article ajouté sur place, et un fichier, attendent **Enregistrer** ; de même que toute modification sans script."
 
+msgid "Opened from the guide"
+msgstr "Ouvert depuis le guide"
+
+msgid "A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its address by **Fill in for me** with the values of the example (the title, the room and the item of the descaling, then its repetition every 3 months after the last time). The form shows them and saves nothing until you press its button; each value is checked by its field first, and one the field refuses (a choice that does not exist, a text too long) is left out, as if you had not typed it. Saved, the form comes back to the guide."
+msgstr "Une étape du [guide](guide-scenario.md) ouvre ce formulaire dans le logement d'exemple, rempli depuis son adresse par **Remplir pour moi** avec les valeurs de l'exemple (le titre, la pièce et l'élément du détartrage, puis sa répétition tous les 3 mois après la dernière fois). Le formulaire les affiche et n'enregistre rien tant que vous n'appuyez pas sur son bouton ; chaque valeur est d'abord vérifiée par son champ, et une valeur que le champ refuse (un choix qui n'existe pas, un texte trop long) est laissée de côté, comme si vous ne l'aviez pas saisie. Une fois enregistré, le formulaire revient au guide."
+
 #~ msgid "Repeat"
 #~ msgstr "Répétition"
 
@@ -152,4 +158,3 @@ msgstr "Quand vous modifiez une fiche qui existe, chaque champ est enregistré d
 
 #~ msgid "The field has no list to scroll through: start typing and the contractors of the home are suggested (with their trade); without script, type the name. A name that is already in the home, whatever its case, picks that contractor; a new name creates one, which you complete on its [sheet](contractor.md)."
 #~ msgstr "Le champ n'a pas de liste à faire défiler : commencez à saisir et les intervenants du logement sont suggérés (avec leur métier) ; sans script, saisissez le nom. Un nom que le logement connaît déjà, quelle que soit la casse, choisit cet intervenant ; un nouveau nom en crée un, que vous complétez sur sa [fiche](contractor.md)."
-

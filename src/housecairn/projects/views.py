@@ -20,6 +20,7 @@ from django.views.generic import FormView, TemplateView
 
 from housecairn.core import navigation
 from housecairn.core.templatetags.tabs import PROJECT_VIEWS
+from housecairn.guide.prefill import PrefillMixin
 from housecairn.homes import current
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
@@ -234,7 +235,8 @@ class CompareView(HomeProjectsMixin, TemplateView):
         return super().get_context_data(**self.page(rows=rows), **kwargs)
 
 
-class EnvelopeView(HomeProjectsMixin, FormView[forms.EnvelopeForm]):
+class EnvelopeView(PrefillMixin, HomeProjectsMixin, FormView[forms.EnvelopeForm]):
+    prefill_fields = ("year", "amount")
     require_write = True
     template_name = "projects/envelope_form.html"
     form_class = forms.EnvelopeForm
@@ -289,7 +291,9 @@ class ProjectFormMixin(HomeProjectsMixin, FormView[forms.ProjectForm]):
         return data
 
 
-class ProjectCreateView(ProjectFormMixin):
+class ProjectCreateView(PrefillMixin, ProjectFormMixin):
+    prefill_fields = ("title", "goal", "status", "rooms")
+
     def form_valid(self, form: forms.ProjectForm) -> HttpResponse:
         data = self.values(form)
         budget = data.pop("budget", None)
@@ -315,7 +319,9 @@ class ProjectCreateView(ProjectFormMixin):
         )
 
 
-class ProjectEditView(ProjectFormMixin):
+class ProjectEditView(PrefillMixin, ProjectFormMixin):
+    prefill_fields = ("title", "goal", "status", "rooms")
+
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["instance"] = self.get_project()
@@ -514,7 +520,9 @@ class LineFormMixin(HomeProjectsMixin, FormView[forms.LineForm]):
     form_class = forms.LineForm
 
 
-class LineCreateView(LineFormMixin):
+class LineCreateView(PrefillMixin, LineFormMixin):
+    prefill_fields = ("label", "nature", "planned", "paid")
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return super().get_context_data(**self.page(project=self.get_project()), **kwargs)
 
@@ -529,7 +537,9 @@ class LineCreateView(LineFormMixin):
         return self.back(project)
 
 
-class LineEditView(LineFormMixin):
+class LineEditView(PrefillMixin, LineFormMixin):
+    prefill_fields = ("label", "nature", "planned", "paid")
+
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["instance"] = self.get_line()
@@ -638,7 +648,16 @@ class QuoteFormMixin(HomeProjectsMixin, FormView[forms.QuoteForm]):
         return self.back(project)
 
 
-class QuoteCreateView(QuoteFormMixin):
+class QuoteCreateView(PrefillMixin, QuoteFormMixin):
+    prefill_fields = (
+        "contractor_name",
+        "budget_line",
+        "status",
+        "amount",
+        "issued_on",
+        "valid_until",
+    )
+
     def project_of_page(self) -> Project:
         return self.get_project()
 
@@ -646,7 +665,16 @@ class QuoteCreateView(QuoteFormMixin):
         return self.run(form, None)
 
 
-class QuoteEditView(QuoteFormMixin):
+class QuoteEditView(PrefillMixin, QuoteFormMixin):
+    prefill_fields = (
+        "contractor_name",
+        "budget_line",
+        "status",
+        "amount",
+        "issued_on",
+        "valid_until",
+    )
+
     def project_of_page(self) -> Project:
         return self.get_quote().project
 

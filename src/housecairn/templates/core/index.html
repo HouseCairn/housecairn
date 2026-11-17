@@ -13,4 +13,11 @@
       <a class="button" href="{% url 'account_login' %}">{% translate "Sign in" %}</a>
     {% endif %}
   </section>
+  {% if user.is_authenticated %}
+    <section class="card" aria-labelledby="guide-card-title">
+      <h2 id="guide-card-title">{% translate "Guide" %}</h2>
+      <p>{% translate "New to HouseCairn? Try it on an example home, in five short scenarios, then delete it in one press." %}</p>
+      <a class="button button-secondary" href="{% url 'guide:index' %}">{% translate "Open the guide" %}</a>
+    </section>
+  {% endif %}
 {% endblock content %}

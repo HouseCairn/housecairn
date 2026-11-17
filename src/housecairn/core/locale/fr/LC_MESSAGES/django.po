@@ -154,6 +154,12 @@ msgstr "Aide"
 msgid "A guide to every screen"
 msgstr "Le guide de chaque écran"
 
+msgid "Guide"
+msgstr "Guide"
+
+msgid "Five scenarios to try on an example home"
+msgstr "Cinq scénarios à essayer sur un logement d'exemple"
+
 msgid "API documentation"
 msgstr "Documentation de l'API"
 
@@ -539,6 +545,12 @@ msgstr "Bientôt"
 
 msgid "Add a home"
 msgstr "Ajouter un logement"
+
+msgid "New to HouseCairn? Try it on an example home, in five short scenarios, then delete it in one press."
+msgstr "Vous découvrez HouseCairn ? Essayez-le sur un logement d'exemple, en cinq courts scénarios, puis supprimez-le d'un geste."
+
+msgid "Open the guide"
+msgstr "Ouvrir le guide"
 
 msgid "Sign out"
 msgstr "Se déconnecter"

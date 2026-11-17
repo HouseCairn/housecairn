@@ -27,7 +27,10 @@ budget and, in words, where the budget stands: **... left**, **Over budget by ..
   It sets it against the planned budget of the projects that are neither finished nor
   abandoned, shows what is paid so far and what is left, and says **over the envelope**
   when the plans exceed it. **Set the envelope** (owners and members) asks for a year and
-  an amount in the currency of the home, at `/h/<home id>/projects/envelope/`.
+  an amount in the currency of the home, at `/h/<home id>/projects/envelope/`. The last
+  step of the [guide](guide-scenario.md) opens it in the example home with **Fill in for me**,
+  filled in with the current year and 6,000; the form checks both before it shows them, and
+  saves nothing until you press its button.
 
 The [budget](budget.md) sets the envelope against the projects and the upkeep of the year
 together.

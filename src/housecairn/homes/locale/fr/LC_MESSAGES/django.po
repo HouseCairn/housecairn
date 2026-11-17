@@ -464,6 +464,12 @@ msgstr "Logement ajouté"
 msgid "Home added."
 msgstr "Logement ajouté."
 
+msgid "Example home added"
+msgstr "Logement d'exemple ajouté"
+
+msgid "Example home added."
+msgstr "Logement d'exemple ajouté."
+
 msgid "Home saved."
 msgstr "Logement enregistré."
 
@@ -667,6 +673,10 @@ msgstr "L'archive est en préparation. Rechargez cette page dans un moment."
 msgid "Archived"
 msgstr "Archivé"
 
+msgctxt "home"
+msgid "Example"
+msgstr "Exemple"
+
 msgid "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. You can still open it and change it."
 msgstr "Ce logement est archivé. Il est masqué d'Aujourd'hui et du sélecteur de logement, n'envoie aucun rappel et ses flux de calendrier sont vides. Vous pouvez toujours l'ouvrir et le modifier."
 
@@ -723,6 +733,9 @@ msgstr "Modifier le logement"
 
 msgid "Add a home"
 msgstr "Ajouter un logement"
+
+msgid "This is the example home of the guide: its values are fictional, and you delete it in one press when you are done."
+msgstr "C'est le logement d'exemple du guide : ses valeurs sont fictives, et vous le supprimez d'un geste quand vous avez fini."
 
 msgid "Each home has its own rooms, tasks, budget and currency. You will be its owner, and can invite the rest of the household."
 msgstr "Chaque logement a ses pièces, ses tâches, son budget et sa devise. Vous en serez propriétaire, et pourrez inviter le reste du foyer."

@@ -25,6 +25,8 @@ from housecairn.accounts.names import person_name
 from housecairn.accounts.services import email_is_configured
 from housecairn.audit import services as audit_services
 from housecairn.core import navigation
+from housecairn.guide.links import GUIDE_FLAG
+from housecairn.guide.prefill import PrefillMixin
 from housecairn.homes import csv_export, csv_import, exports, forms, jobs, restore, services, sso
 from housecairn.homes.models import ExportStatus, Home, Invitation, Membership
 from housecairn.homes.scoping import (
@@ -76,20 +78,48 @@ class HomeListView(WebHomeScopedMixin, ListView[Home]):
         # Archived homes are listed apart, below the others (docs/adr/0079).
         context["rows"] = [row for row in rows if not row["home"].is_archived]
         context["archived_rows"] = [row for row in rows if row["home"].is_archived]
+        # The example home of the guide is no home of the list of homes (docs/adr/0084): it
+        # is shown after them, marked, from the one place that reads it.
+        from housecairn.guide import services as guide_services
+
+        context["example"] = guide_services.example_home_of(self.request.user)
         return context
 
 
-class HomeCreateView(LoginRequiredMixin, FormView[forms.NewHomeForm]):
+class HomeCreateView(PrefillMixin, LoginRequiredMixin, FormView[forms.NewHomeForm]):
+    """A new home. Opened from the guide (`?guide=1`), the form makes the example home.
+
+    The guide fills it in with the example (`guide.links.new_home`) and leaves "What the home
+    has" unticked, as it always opens, so that no template task ticks a step of scenario 3
+    ahead unless the person ticks one (docs/adr/0084). The form
+    carries the flag in a hidden field; the guide's service sets the mark, and refuses a second
+    example home.
+    """
+
     template_name = "homes/home_form.html"
     form_class = forms.NewHomeForm
+    prefill_fields = ("name", "currency", "hemisphere")
+
+    def from_guide(self) -> bool:
+        data = self.request.POST if self.request.method == "POST" else self.request.GET
+        return bool(data.get(GUIDE_FLAG) == "1")
+
+    def prefills(self) -> bool:
+        # No home yet: the form is filled in from the query only when the guide opened it.
+        return self.from_guide()
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        return super().get_context_data(from_guide=self.from_guide(), **kwargs)
 
     def form_valid(self, form: forms.NewHomeForm) -> HttpResponse:
         from housecairn.tasks import task_templates
 
+        if self.from_guide():
+            return self.example_made(form)
         # The home and the tasks of the equipment checked, together or not at all.
         with transaction.atomic():
             home = services.create_home(
-                self.request.user,  # type: ignore[arg-type]
+                self.request.user,
                 name=form.cleaned_data["name"],
                 currency=form.cleaned_data["currency"],
                 hemisphere=form.cleaned_data["hemisphere"],
@@ -104,6 +134,34 @@ class HomeCreateView(LoginRequiredMixin, FormView[forms.NewHomeForm]):
                 "homes:list",
                 added=_("Home added"),
                 saved=_("Home added."),
+            )
+        )
+
+    def example_made(self, form: forms.NewHomeForm) -> HttpResponse:
+        from housecairn.guide import services as guide_services
+        from housecairn.tasks import task_templates
+
+        try:
+            with transaction.atomic():
+                home = guide_services.create_example_home(
+                    self.request.user,
+                    name=form.cleaned_data["name"],
+                    currency=form.cleaned_data["currency"],
+                    hemisphere=form.cleaned_data["hemisphere"],
+                )
+                task_templates.add_equipment(
+                    self.request.user, home, form.cleaned_data.get("equipment") or []
+                )
+        except ValidationError as exc:
+            form.add_error(None, exc)
+            return self.form_invalid(form)
+        return redirect(
+            navigation.after_create(
+                self.request,
+                reverse("homes:detail", kwargs={"home_id": home.id}),
+                "homes:list",
+                added=_("Example home added"),
+                saved=_("Example home added."),
             )
         )
 

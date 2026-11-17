@@ -39,3 +39,8 @@ msgstr "**Envoyer le signalement** affiche le signalement et vous remercie. Une 
 msgid "Opened with **Report a problem** from a room, an item or a stock item, the form comes back to that page once sent, with **Problem reported · Open** to open the report. Opened from the reports, it opens the new report."
 msgstr "Ouvert par **Signaler un problème** depuis une pièce, un élément ou un article, le formulaire revient à cette page une fois envoyé, avec **Problème signalé · Ouvrir** pour ouvrir le signalement. Ouvert depuis les signalements, il ouvre le nouveau signalement."
 
+msgid "Opened from the guide"
+msgstr "Ouvert depuis le guide"
+
+msgid "A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its address by **Fill in for me** with the values of the example (what is wrong and the room). The form shows them and saves nothing until you press its button; each value is checked by its field first, and one the field refuses (a choice that does not exist, a text too long) is left out, as if you had not typed it. Saved, the form comes back to the guide."
+msgstr "Une étape du [guide](guide-scenario.md) ouvre ce formulaire dans le logement d'exemple, rempli depuis son adresse par **Remplir pour moi** avec les valeurs de l'exemple (ce qui ne va pas et la pièce). Le formulaire les affiche et n'enregistre rien tant que vous n'appuyez pas sur son bouton ; chaque valeur est d'abord vérifiée par son champ, et une valeur que le champ refuse (un choix qui n'existe pas, un texte trop long) est laissée de côté, comme si vous ne l'aviez pas saisie. Une fois enregistré, le formulaire revient au guide."

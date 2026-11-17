@@ -29,3 +29,76 @@ msgstr "coches d'étapes"
 
 msgid "You already have an example home. Delete it to make another."
 msgstr "Vous avez déjà un logement d'exemple. Supprimez-le pour en créer un autre."
+
+msgid "The earlier scenarios are done in the example home."
+msgstr "Les scénarios précédents sont faits dans le logement d'exemple."
+
+msgid "The example home was deleted."
+msgstr "Le logement d'exemple a été supprimé."
+
+msgid "Example home"
+msgstr "Logement d'exemple"
+
+msgid "Fictional values, to try HouseCairn for real. It stays on this instance."
+msgstr "Des valeurs fictives, pour essayer HouseCairn pour de vrai. Il reste sur cette instance."
+
+msgid "Back to the guide"
+msgstr "Retour au guide"
+
+msgid "Delete the example home?"
+msgstr "Supprimer le logement d'exemple ?"
+
+msgid "Everything in it goes, for good. Your other homes do not change."
+msgstr "Tout ce qu'il contient disparaît, définitivement. Vos autres logements ne changent pas."
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Delete the example home"
+msgstr "Supprimer le logement d'exemple"
+
+msgid "Five short scenarios, done for real on an example home with fictional values. You delete the example home in one press when you are done."
+msgstr "Cinq courts scénarios, faits pour de vrai sur un logement d'exemple aux valeurs fictives. Vous supprimez le logement d'exemple d'un geste quand vous avez fini."
+
+msgctxt "guide scenario"
+msgid "Done"
+msgstr "Fait"
+
+#, python-format
+msgid "%(done)s of %(total)s"
+msgstr "%(done)s sur %(total)s"
+
+msgid "The earlier scenarios are not all done. The guide can add what they make to the example home, so that you can start here."
+msgstr "Les scénarios précédents ne sont pas tous faits. Le guide peut ajouter ce qu'ils créent au logement d'exemple, pour que vous commenciez ici."
+
+msgid "There is no example home yet. The guide can make it, with what the earlier scenarios add, so that you can start here."
+msgstr "Il n'y a pas encore de logement d'exemple. Le guide peut le créer, avec ce qu'ajoutent les scénarios précédents, pour que vous commenciez ici."
+
+msgid "Add what the earlier scenarios make"
+msgstr "Ajouter ce que créent les scénarios précédents"
+
+msgctxt "guide step"
+msgid "Done"
+msgstr "Faite"
+
+msgid "Optional"
+msgstr "Facultative"
+
+msgid "Fill in for me"
+msgstr "Remplir pour moi"
+
+msgctxt "guide step"
+msgid "Open"
+msgstr "Ouvrir"
+
+msgid "Add the example home first, in the first scenario."
+msgstr "Ajoutez d'abord le logement d'exemple, dans le premier scénario."
+
+msgid "Mark as done"
+msgstr "Marquer comme faite"
+
+msgid "Scenarios"
+msgstr "Scénarios"

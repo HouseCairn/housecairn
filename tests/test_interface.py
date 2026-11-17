@@ -34,6 +34,7 @@ STYLE_LAYERS = (
     "calendar.css",
     "labels.css",
     "reports.css",
+    "guide.css",
     "forms.css",
     "chip-select.css",
     "utilities.css",

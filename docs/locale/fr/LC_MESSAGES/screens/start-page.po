@@ -33,8 +33,8 @@ msgstr "**Connecté avec un logement** : elle ouvre l'[Aujourd'hui](today.md) de
 msgid "**Signed in with several homes**: the [Today](today.md) of the [current home](my-home.md#the-current-home), or [Today in several homes](my-home.md) when you chose **All homes** (and before you chose a home)."
 msgstr "**Connecté avec plusieurs logements** : l'[Aujourd'hui](today.md) du [logement courant](my-home.md#the-current-home), ou [Aujourd'hui avec plusieurs logements](my-home.md) quand vous avez choisi **Tous les logements** (et avant que vous ayez choisi un logement)."
 
-msgid "**Signed in with no home to open**: the welcome page, with **Add a home** and **My homes**."
-msgstr "**Connecté sans logement à ouvrir** : la page de bienvenue, avec **Ajouter un logement** et **Mes logements**."
+msgid "**Signed in with no home to open**: the welcome page, with **Add a home** and **My homes**, and a card **Guide** whose **Open the guide** leads to the [guide](guide.md), to try the application on an example home. The example home does not count as a home to open here: with it alone, the welcome page stays."
+msgstr "**Connecté, sans logement à ouvrir** : la page d'accueil, avec **Ajouter un logement** et **Mes logements**, et une carte **Guide** dont **Ouvrir le guide** mène au [guide](guide.md), pour essayer l'application sur un logement d'exemple. Le logement d'exemple ne compte pas ici comme un logement à ouvrir : avec lui seul, la page d'accueil reste."
 
 #~ msgid "The start page, on a computer."
 #~ msgstr "La page d'accueil, sur ordinateur."
@@ -45,3 +45,5 @@ msgstr "**Connecté sans logement à ouvrir** : la page de bienvenue, avec **Ajo
 #~ msgid "**Signed in with several homes**: [Today in several homes](my-home.md)."
 #~ msgstr "**Connecté avec plusieurs logements** : [Aujourd'hui avec plusieurs logements](my-home.md)."
 
+#~ msgid "**Signed in with no home to open**: the welcome page, with **Add a home** and **My homes**."
+#~ msgstr "**Connecté sans logement à ouvrir** : la page de bienvenue, avec **Ajouter un logement** et **Mes logements**."

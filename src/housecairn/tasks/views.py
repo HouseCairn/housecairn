@@ -35,6 +35,7 @@ from housecairn.core.form_errors import banner_messages
 from housecairn.core.language import instance_default
 from housecairn.core.prefix import in_application, resolve_url
 from housecairn.core.redirects import has_safe_shape
+from housecairn.guide.prefill import PrefillMixin
 from housecairn.homes import current
 from housecairn.homes.models import Home
 from housecairn.homes.scoping import open_homes_for_request
@@ -318,7 +319,19 @@ class TaskFormMixin(HomeTasksMixin, FormView[Any]):
             )
 
 
-class TaskCreateView(TaskFormMixin):
+class TaskCreateView(PrefillMixin, TaskFormMixin):
+    prefill_fields = (
+        "title",
+        "procedure",
+        "repeats",
+        "repeat_from",
+        "repeat_interval",
+        "repeat_unit",
+        "due_on",
+        "duration_value",
+        "duration_unit",
+    )
+
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = {}
         item = self._pick(Item, "item")
@@ -432,7 +445,18 @@ class TaskDetailView(HomeTasksMixin, TemplateView):
         )
 
 
-class TaskEditView(AutosaveMixin, TaskFormMixin):
+class TaskEditView(PrefillMixin, AutosaveMixin, TaskFormMixin):
+    prefill_fields = (
+        "title",
+        "procedure",
+        "repeats",
+        "repeat_from",
+        "repeat_interval",
+        "repeat_unit",
+        "due_on",
+        "duration_value",
+        "duration_unit",
+    )
     with_files = False
 
     def autosave_forms(self, form: forms.TaskForm) -> list[Any]:

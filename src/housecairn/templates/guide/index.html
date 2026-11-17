@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n navigation %}
+{% block head_title %}{% translate "Guide" %}{% endblock head_title %}
+{% block content %}
+  {% url 'more' as parent %}{% back_link parent %}
+  <h1>{% translate "Guide" %}</h1>
+  <p class="lead">{% translate "Five short scenarios, done for real on an example home with fictional values. You delete the example home in one press when you are done." %}</p>
+  <ol class="list guide-scenarios">
+    {% for scenario in scenarios %}
+      <li>
+        <a class="row" href="{{ scenario.url }}">
+          <span class="row-body">
+            <span class="row-title">{{ scenario.number }}. {{ scenario.title }}</span>
+            <span class="row-text">{{ scenario.summary }}</span>
+          </span>
+          {% if scenario.finished %}<span class="pill pill-success">{% translate "Done" context "guide scenario" %}</span>{% else %}<span class="pill pill-ghost">{% blocktranslate with done=scenario.done total=scenario.total %}{{ done }} of {{ total }}{% endblocktranslate %}</span>{% endif %}
+          {% include "components/icon.html" with name="chevron" class="chevron" %}
+        </a>
+      </li>
+    {% endfor %}
+  </ol>
+  {% if home %}
+    <section class="card" aria-labelledby="example-home-title">
+      <h2 id="example-home-title">{% translate "Example home" %}</h2>
+      <p><a href="{% url 'homes:detail' home_id=home.id %}">{{ home.name }}</a></p>
+      {% include "guide/_delete_example.html" with delete=delete %}
+    </section>
+  {% endif %}
+{% endblock content %}

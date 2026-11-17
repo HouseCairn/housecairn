@@ -168,6 +168,8 @@ LABELS: dict[str, Any] = {
     "labels:detail": _("QR label"),
     "index": _("Today"),
     "more": _("More"),
+    "guide:index": _("Guide"),
+    "guide:scenario": _("Guide"),
 }
 
 
@@ -309,6 +311,7 @@ PARENTS: dict[str, Callable[[dict[str, Any]], tuple[str, dict[str, Any]] | None]
     "labels:list": lambda kw: ("homes:detail", _home(kw)),
     "homes:household": lambda kw: ("homes:detail", _home(kw)),
     "budget:room": lambda kw: ("budget:rooms", _home(kw)),
+    "guide:scenario": lambda kw: ("guide:index", {}),
     "api-tokens:new": lambda kw: ("api-tokens:list", {}),
     "api-tokens:revoke": lambda kw: ("api-tokens:list", {}),
 }

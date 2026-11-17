@@ -36,6 +36,11 @@ msgstr "**Prévu** est ce que vous comptez dépenser ; **Payé** est ce qui a é
 msgid "**Delete the budget line** asks for confirmation. The quotes accepted on it go back to *received*: they commit nothing any more."
 msgstr "**Supprimer la ligne de budget** demande confirmation. Les devis acceptés sur elle repassent à *reçu* : ils n'engagent plus rien."
 
+msgid "Opened from the guide"
+msgstr "Ouvert depuis le guide"
+
+msgid "A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its address by **Fill in for me** with the values of the example (the label, the nature and the planned and paid amounts of a line). The form shows them and saves nothing until you press its button; each value is checked by its field first, and one the field refuses (a choice that does not exist, a text too long) is left out, as if you had not typed it. Saved, the form comes back to the guide."
+msgstr "Une étape du [guide](guide-scenario.md) ouvre ce formulaire dans le logement d'exemple, rempli depuis son adresse par **Remplir pour moi** avec les valeurs de l'exemple (le libellé, la nature et les montants prévu et payé d'une ligne). Le formulaire les affiche et n'enregistre rien tant que vous n'appuyez pas sur son bouton ; chaque valeur est d'abord vérifiée par son champ, et une valeur que le champ refuse (un choix qui n'existe pas, un texte trop long) est laissée de côté, comme si vous ne l'aviez pas saisie. Une fois enregistré, le formulaire revient au guide."
+
 #~ msgid "**Planned** is what you plan to spend; **Paid** is what has been paid so far. Both are amounts in the currency of the home, from 0 to 9,999,999,999.99, with at most two decimals. The committed amount is not typed: it is the sum of the quotes accepted on the line."
 #~ msgstr "**Prévu** est ce que vous prévoyez de dépenser ; **Payé** est ce qui a été payé jusqu'ici. Ce sont deux montants dans la devise du logement, de 0 à 9 999 999 999,99, avec deux décimales au plus. Le montant engagé ne se saisit pas : c'est la somme des devis acceptés sur la ligne."
-

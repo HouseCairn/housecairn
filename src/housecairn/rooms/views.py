@@ -20,6 +20,7 @@ from django.views.generic import FormView, TemplateView
 from housecairn.barcodes import photos as barcode_photos
 from housecairn.core import navigation
 from housecairn.core.autosave import AutosaveMixin
+from housecairn.guide.prefill import PrefillMixin
 from housecairn.homes import current
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
@@ -122,7 +123,8 @@ class RoomFormMixin(HomeRoomsMixin, FormView[Any]):
         return super().get_context_data(**self.page(), **kwargs)
 
 
-class RoomCreateView(RoomFormMixin):
+class RoomCreateView(PrefillMixin, RoomFormMixin):
+    prefill_fields = ("name", "kind")
     template_name = "rooms/room_form.html"
     form_class = forms.RoomForm
 
@@ -168,7 +170,8 @@ class RoomDetailView(HomeRoomsMixin, TemplateView):
         )
 
 
-class RoomEditView(AutosaveMixin, RoomFormMixin):
+class RoomEditView(PrefillMixin, AutosaveMixin, RoomFormMixin):
+    prefill_fields = ("name", "kind")
     template_name = "rooms/room_form.html"
     form_class: Any = forms.RoomForm
 
@@ -280,7 +283,8 @@ class ItemFormMixin(RoomFormMixin):
             )
 
 
-class ItemCreateView(ItemFormMixin):
+class ItemCreateView(PrefillMixin, ItemFormMixin):
+    prefill_fields = ("room", "name", "kind", "brand", "model")
     # Route name of the list a creation opens the new item from (the guide's rule on `next`).
     section_list = "rooms:list"
 
@@ -374,7 +378,9 @@ class ItemDetailView(HomeRoomsMixin, TemplateView):
         )
 
 
-class ItemEditView(AutosaveMixin, ItemFormMixin):
+class ItemEditView(PrefillMixin, AutosaveMixin, ItemFormMixin):
+    prefill_fields = ("room", "name", "kind", "brand", "model")
+
     def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
         kwargs["instance"] = self.get_item()

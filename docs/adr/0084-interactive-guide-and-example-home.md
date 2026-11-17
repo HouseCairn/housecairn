@@ -82,9 +82,10 @@ signed-in person; it needs no setting and sends nothing anywhere.
   calendar feed, no QR label, no notification channel and no reminder for it (it behaves, for
   these, as an archived home does, [0079](0079-lots-of-the-server-mode-of-the-mobile-app.md)).
 - **Recognisable on every screen.** A banner "Example home" with the link **Delete the example
-  home** on every page of the home, the word "Example" next to its name in the home selector and
-  in **My homes**, and on the page of the home. The wording is for the card of the screens; the terms are
-  added to the glossary by the first web lot (`guide` and `example-home`).
+  home** on every page of the home, and the word "Example" next to its name in **My homes** and
+  on the page of the home. The home selector does not list it (it lists the homes a section may
+  open on). The wording is for the card of the screens; the terms are added to the glossary by
+  the first web lot (`guide` and `example-home`).
 - **Deleted in one gesture: one press and one confirmation on the same page.** One button,
   **Delete the example home**, on the guide page and in the banner. Pressing it shows a
   confirmation on the same page (in the web, in place of the button, with **Delete** and
@@ -402,6 +403,31 @@ unticked), `today.md` (the card of an empty Today), `room-form.md`, `item-form.m
 the guide), `budget-line-form.md`, `quote-form.md` (the pre-fill from the guide); in the app,
 `spec.md` (Homes: the example is never synced) and `plan.md`. Release notes: one fragment **new**
 with W2 and one with A3. This record changes nothing a person sees, so it has no fragment.
+
+**How W2 settled what this record left to it** (the web screens):
+
+- *The query of a filled-in form* names the fields of the form (`?name=Kitchen&kind=kitchen`).
+  A view lists the fields it takes (`guide.prefill.PrefillMixin`), and each value goes through
+  the `clean` of its field before it is shown: a value the field refuses is left out. The post
+  is checked as any other, and the rights of the form are those of its view. Only the forms of
+  the example home are filled in (and Add a home when it carries `?guide=1`): on a real home the
+  query is ignored, so that no link puts a made-up value in an edit form that saves as it is
+  changed ([0082](0082-sheets-saved-field-by-field.md)).
+- *A step on a row already there* (the brand of the machine, the repetition of the task, the
+  payment of a line) opens the form of that row, found as `fill_example` finds it; otherwise the
+  form that adds it. A line or a quote has no link before its project exists.
+- *The new home of step 1* is the ordinary form with `?guide=1`, kept in a hidden field: its
+  post calls `guide.services.create_example_home`, which sets the mark and refuses a second one.
+- *The confirmation in place* of **Delete the example home** is the same page with
+  `?delete-example=1`, so that it needs no script; the post goes to `/guide/delete/<home id>/`,
+  which answers 404 for any home but the example home owned by the person. The design guide
+  records it as the one exception to its confirmation page.
+- *A step ticked by hand* has **Mark as done**, and is never unticked, as a state's tick.
+- *My homes* shows the example home after the real ones, marked **Example**; the home selector
+  does not, since it lists the homes a section may open on.
+- *The terms* a text cites are written from the catalog message the glossary names for the
+  web (`guide/terms.py`, kept equal to the glossary by its test), since the image has no
+  `design/` directory.
 
 ## Consequences
 

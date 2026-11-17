@@ -19,9 +19,10 @@ from housecairn.accounts.models import User
 from housecairn.audit import models as audit_models
 from housecairn.core.language import language_of
 from housecairn.guide import content, states
+from housecairn.guide.models import StepTick
 from housecairn.homes import files
 from housecairn.homes import services as home_services
-from housecairn.homes.models import Hemisphere, Home
+from housecairn.homes.models import Hemisphere, Home, Membership, Role
 from housecairn.projects import services as project_services
 from housecairn.projects.models import AnnualEnvelope, BudgetLine, Project, Quote
 from housecairn.reports import services as report_services
@@ -33,8 +34,17 @@ from housecairn.tasks.models import Contractor, Occurrence, Status, Task
 
 
 def example_home_of(user: User) -> Home | None:
-    """The example home of the account, if it has one: there is at most one."""
-    return home_services.homes_for(user, include_example=True).filter(is_example=True).first()
+    """The example home of the account, if it has one: there is at most one.
+
+    Only its owner has it: a member that some other path put there would see no banner, no
+    guide, no tick and no filling (defence in depth: nothing adds a member to an example home).
+    """
+    owned = Membership.objects.filter(user=user, role=Role.OWNER).values("home_id")
+    return (
+        home_services.homes_for(user, include_example=True)
+        .filter(is_example=True, id__in=owned)
+        .first()
+    )
 
 
 def _language(actor: User, language: str | None) -> str:
@@ -86,6 +96,23 @@ def remove_example(actor: User, home: Home) -> None:
     Home.all_objects.filter(pk=home_id).delete()
     audit_models.AuditEvent.objects.filter(home_id=home_id).delete()
     transaction.on_commit(lambda: files.erase_home_files(home_id))
+
+
+def tick_by_hand(actor: User, home: Home, step_id: str) -> bool:
+    """Tick a step that has no state of its own (`manual`), on the example home of `actor`.
+
+    Only the steps of the file marked `manual` are ticked this way: the others tick by their
+    state. Returns whether a tick was made (False when it was there already).
+    """
+    if not home.is_example:
+        raise ValueError("Only the example home has ticks.")
+    if not home_services.can_write(actor, home):
+        raise PermissionDenied
+    manual = {step["id"] for step in content.steps() if step.get("manual")}
+    if step_id not in manual:
+        raise ValueError(f"{step_id!r} is not a step ticked by hand.")
+    _tick, made = StepTick.objects.get_or_create(home=home, step_id=step_id)
+    return made
 
 
 # ---------- catching up ----------

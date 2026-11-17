@@ -20,6 +20,11 @@
     </section>
   {% empty %}
     <p class="empty">{% translate "Nothing to do for now." %}</p>
+    <section class="card" aria-labelledby="guide-card-title">
+      <h2 id="guide-card-title">{% translate "Guide" %}</h2>
+      <p>{% translate "Not sure where to start? Try HouseCairn on an example home, in five short scenarios." %}</p>
+      <a class="button button-secondary" href="{% url 'guide:index' %}">{% translate "Open the guide" %}</a>
+    </section>
   {% endfor %}
   {% if can_write %}
     <a class="button button-block" href="{% url_with_next 'tasks:create' home_id=home.id %}">{% translate "Add a task" %}</a>

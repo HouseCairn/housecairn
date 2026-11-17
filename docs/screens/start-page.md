@@ -11,4 +11,6 @@ The root address of the instance, `/`. What it shows depends on who opens it:
   [current home](my-home.md#the-current-home), or [Today in several homes](my-home.md)
   when you chose **All homes** (and before you chose a home).
 - **Signed in with no home to open**: the welcome page, with **Add a home** and **My
-  homes**.
+  homes**, and a card **Guide** whose **Open the guide** leads to the [guide](guide.md), to try
+  the application on an example home. The example home does not count as a home to open
+  here: with it alone, the welcome page stays.

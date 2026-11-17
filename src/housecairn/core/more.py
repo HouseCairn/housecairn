@@ -171,6 +171,13 @@ def groups(user: Any, home_id: Any = None, reports_waiting: int = 0) -> list[Gro
                     icon="help",
                 ),
                 Entry(
+                    _("Guide"),
+                    reverse("guide:index"),
+                    _("Five scenarios to try on an example home"),
+                    ("guide:*",),
+                    icon="book",
+                ),
+                Entry(
                     _("API documentation"),
                     reverse("api-docs"),
                     _("OpenAPI schema and test interface"),

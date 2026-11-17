@@ -70,5 +70,7 @@ budget-projects
 budget-tasks
 more
 security-and-sign-in
+guide
+guide-scenario
 about
 ```

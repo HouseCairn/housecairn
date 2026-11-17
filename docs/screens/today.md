@@ -46,3 +46,9 @@ opens the [task](task.md).
 - Each section shows at most 200 rows; the task list holds the rest.
 
 Read-only members see the same page and none of the **Done** buttons.
+
+## Nothing to do yet
+
+When Today has nothing to show, a card **Guide** under **Nothing to do for now.** offers
+**Open the guide**: the [guide](guide.md) walks through the application on an example home.
+The card goes as soon as Today shows a task.

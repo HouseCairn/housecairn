@@ -8,11 +8,16 @@
   {% else %}
   {% url 'homes:list' as parent %}{% back_link parent %}
   <h1>{% translate "Add a home" %}</h1>
+  {% if from_guide %}
+  <p class="small">{% translate "This is the example home of the guide: its values are fictional, and you delete it in one press when you are done." %}</p>
+  {% else %}
   <p class="small">{% translate "Each home has its own rooms, tasks, budget and currency. You will be its owner, and can invite the rest of the household." %}</p>
+  {% endif %}
   {% endif %}
   <form method="post" class="card">
     {% csrf_token %}
     {% next_field %}
+    {% if from_guide %}<input type="hidden" name="guide" value="1">{% endif %}
     {% include "components/form_errors.html" with form=form only %}
     {{ form.as_p }}
     <div class="form-submit"><button type="submit" class="button-block">{% if editing %}{% translate "Save" %}{% else %}{% translate "Create the home" %}{% endif %}</button></div>

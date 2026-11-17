@@ -38,6 +38,8 @@ urlpatterns = [
     path("more/", core_views.MoreView.as_view(), name="more"),
     path("more/security/", core_views.SecurityView.as_view(), name="more-security"),
     path("about/", core_views.AboutView.as_view(), name="about"),
+    # The interactive guide, on an example home (docs/adr/0084).
+    path("guide/", include("housecairn.guide.urls")),
     path("h/", include("housecairn.homes.urls")),
     # Rooms, items and photos of a home (docs/adr/0029); /rooms/ is the navigation entry.
     path("h/<uuid:home_id>/", include("housecairn.rooms.urls")),
