@@ -1,0 +1,14 @@
+{% load i18n %}{# Delete the example home: one press shows the confirmation on the same page, in place of the button, with Delete and Cancel; no name to type, no export (docs/adr/0084). The confirmation is the same page with ?delete-example=1, so it works without script. #}
+{% if delete.confirming %}
+  <div class="inline-confirm" id="delete-example" role="group" aria-labelledby="delete-example-question">
+    <p id="delete-example-question"><strong>{% translate "Delete the example home?" %}</strong> {% translate "Everything in it goes, for good. Your other homes do not change." %}</p>
+    <form method="post" action="{{ delete.delete_url }}" class="button-row">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ delete.next }}">
+      <button type="submit" class="button button-danger" autofocus>{% translate "Delete" %}</button>
+      <a class="button button-secondary" href="{{ delete.cancel_url }}">{% translate "Cancel" %}</a>
+    </form>
+  </div>
+{% else %}
+  <a class="button button-secondary button-small" href="{{ delete.confirm_url }}#delete-example">{% translate "Delete the example home" %}</a>
+{% endif %}

@@ -1,0 +1,39 @@
+/* The interactive guide and the example home (docs/adr/0084): the steps of a scenario, the
+   banner of the example home and the confirmation that takes the place of its button. */
+
+.example-banner {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.example-banner p,
+.inline-confirm p {
+  margin: 0;
+}
+
+.inline-confirm {
+  display: grid;
+  gap: var(--hc-space-2);
+}
+
+.guide-steps {
+  margin: 0 0 var(--hc-space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.guide-step-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hc-space-2);
+  margin-top: 0;
+}
+
+.guide-step-done {
+  border-color: var(--hc-color-success);
+}
+
+.guide-pager {
+  justify-content: space-between;
+}

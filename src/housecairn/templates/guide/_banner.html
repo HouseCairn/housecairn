@@ -1,0 +1,7 @@
+{% load i18n %}{# On every page of the example home (docs/adr/0084): it says what the home is, leads back to the guide, and deletes it. #}
+{% if delete %}
+  <div class="alert alert-info example-banner" role="note">
+    <p><strong>{% translate "Example home" %}</strong> · {% translate "Fictional values, to try HouseCairn for real. It stays on this instance." %} <a href="{% url 'guide:index' %}">{% translate "Back to the guide" %}</a></p>
+    {% include "guide/_delete_example.html" with delete=delete %}
+  </div>
+{% endif %}

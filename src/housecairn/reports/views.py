@@ -16,6 +16,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from housecairn.core import navigation
+from housecairn.guide.prefill import PrefillMixin
 from housecairn.reports import forms, services
 from housecairn.reports.files import photo_response
 from housecairn.reports.models import CLOSED_STATUSES, Report, ReportStatus
@@ -75,7 +76,8 @@ class ReportListView(HomeReportsMixin, TemplateView):
         )
 
 
-class ReportCreateView(HomeReportsMixin, FormView[Any]):
+class ReportCreateView(PrefillMixin, HomeReportsMixin, FormView[Any]):
+    prefill_fields = ("title",)
     template_name = "reports/report_form.html"
     form_class = forms.ReportForm
 

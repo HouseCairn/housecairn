@@ -4,7 +4,7 @@
 {% block content %}
   {% url 'more' as parent %}{% back_link parent %}
   <h1>{% translate "My homes" %}</h1>
-  {% if rows %}
+  {% if rows or example %}
     <ul class="card-list">
       {% for row in rows %}
         <li>
@@ -18,6 +18,19 @@
           </a>
         </li>
       {% endfor %}
+      {% if example %}
+        {# The example home of the guide comes after the real homes, with its mark (docs/adr/0084). #}
+        <li>
+          <a class="row" href="{% url_with_next 'homes:detail' home_id=example.id %}">
+            <span class="row-body">
+              <span class="row-title">{{ example.name }}</span>
+              <span class="row-text">{{ example.currency }}</span>
+            </span>
+            <span class="pill pill-info">{% translate "Example" context "home" %}</span>
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
+          </a>
+        </li>
+      {% endif %}
     </ul>
   {% elif not archived_rows %}
     <p class="empty">{% translate "You are not a member of any home yet." %}</p>

@@ -173,6 +173,11 @@ HELP_PAGES: dict[str, str] = {
     # The consent page the mobile app opens in the browser (docs/adr/0078).
     "oauth2_provider:authorize": "screens/api-tokens/",
     "about": "screens/about/",
+    "guide:index": "screens/guide/",
+    "guide:delete": "screens/guide/",
+    "guide:scenario": "screens/guide-scenario/",
+    "guide:fill": "screens/guide-scenario/",
+    "guide:tick": "screens/guide-scenario/",
 }
 # Other routes of django-allauth (sign-up, password, email addresses,
 # two-factor authentication, single sign-on): the account pages.

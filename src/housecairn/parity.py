@@ -237,6 +237,13 @@ EXEMPT: dict[str, str] = {
     "oauth2_provider:authorize": "the OAuth consent page of the mobile app, in the browser",
     "oauth2_provider:token": "the OAuth token endpoint the mobile app calls",
     "oauth2_provider:revoke-token": "the OAuth revocation endpoint the mobile app calls",
+    # docs/adr/0084: the guide is a teaching aid on the example home, which the API never
+    # sees; each step leads to a screen that has its API counterpart.
+    "guide:index": "the interactive guide, a teaching aid, not data of a home",
+    "guide:scenario": "a scenario of the interactive guide, a teaching aid, not data of a home",
+    "guide:fill": "adds the rows of the guide to the example home, which the API never sees",
+    "guide:tick": "a tick of the guide on the example home, which the API never sees",
+    "guide:delete": "deletes the example home of the guide, which the API never sees",
 }
 
 # Third-party route trees: sign-in, administration. Their functions are either
