@@ -27,6 +27,9 @@ msgstr "La liste des logements dont vous êtes membre, sur `/h/`. Chaque nom ouv
 msgid "A home that an owner [archived](home.md) is listed apart, under **Archived**, below the others: it is hidden from Today and from the home selector, and sends no reminder. Open it to change it or to bring it back."
 msgstr "Un logement qu'un propriétaire a [archivé](home.md) est listé à part, sous **Archivé**, sous les autres : il est masqué d'Aujourd'hui et du sélecteur de logement, et n'envoie aucun rappel. Ouvrez-le pour le modifier ou le remettre en service."
 
+msgid "The example home of the [guide](guide.md), if you have one, comes after your other homes, marked **Example**. It is the only list of homes that shows it: the home selector, All homes of Today and the lists of the connected apps leave it out."
+msgstr "Le logement d'exemple du [guide](guide.md), si vous en avez un, vient après vos autres logements, marqué **Exemple**. C'est la seule liste de logements qui le montre : le sélecteur de logement, Tous les logements d'Aujourd'hui et les listes des applications connectées le laissent de côté."
+
 msgid "The page **Restore a home** asks for the archive and how to restore it. **Restore** brings the home back with its identifiers, and is refused while that home is on the instance. **Restore as a copy** makes a new home next to it, with new identifiers and its own copy of every file, under the name given in **Name of the copy** (left empty: the name of the home followed by \"(copy)\"). The page says that the members and invitations of the archive are not copied: you are the only member of the copy. With script, **Name of the copy** shows only when the copy is chosen; without it, it always shows and a restore ignores it. Back on **My homes**, a message names the home made."
 msgstr "La page **Restaurer un logement** demande l'archive et la façon de la restaurer. **Restaurer** fait revenir le logement avec ses identifiants, et est refusé tant que ce logement est sur l'instance. **Restaurer comme copie** crée un nouveau logement à côté, avec de nouveaux identifiants et sa propre copie de chaque fichier, sous le nom donné dans **Nom de la copie** (laissé vide : le nom du logement suivi de « (copie) »). La page indique que les membres et les invitations de l'archive ne sont pas copiés : vous êtes le seul membre de la copie. Avec le script, **Nom de la copie** n'apparaît que si la copie est choisie ; sans, il apparaît toujours et une restauration l'ignore. De retour sur **Mes logements**, un message nomme le logement créé."
 
@@ -38,4 +41,3 @@ msgstr "La liste est l'entrée **Mes logements** de [Plus](more.md), et son lien
 
 #~ msgid "The list of homes, on a computer."
 #~ msgstr "La liste des logements, sur ordinateur."
-

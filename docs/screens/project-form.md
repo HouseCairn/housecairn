@@ -18,3 +18,11 @@ Adds a project (`/h/<home id>/projects/new/`) or changes one
 **Delete the project** asks for confirmation. It removes the project, its budget lines, its
 quotes and its photos from the screens and the API; its tasks stay, taken out of the
 project.
+
+## Opened from the guide
+
+A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its
+address by **Fill in for me** with the values of the example (the title, the goal, the status and the room of the project). The form shows them and
+saves nothing until you press its button; each value is checked by its field first, and one the
+field refuses (a choice that does not exist, a room of another home, a text too long) is left out, as if you had
+not typed it. Saved, the form comes back to the guide.

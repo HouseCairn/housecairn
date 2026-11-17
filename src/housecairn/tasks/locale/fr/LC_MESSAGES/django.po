@@ -1290,3 +1290,12 @@ msgstr "Ajouter les tâches"
 
 msgid "Nothing to do for now."
 msgstr "Rien à faire pour l'instant."
+
+msgid "Guide"
+msgstr "Guide"
+
+msgid "Not sure where to start? Try HouseCairn on an example home, in five short scenarios."
+msgstr "Vous ne savez pas par où commencer ? Essayez HouseCairn sur un logement d'exemple, en cinq courts scénarios."
+
+msgid "Open the guide"
+msgstr "Ouvrir le guide"

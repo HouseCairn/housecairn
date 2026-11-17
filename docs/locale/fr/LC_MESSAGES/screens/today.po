@@ -57,6 +57,12 @@ msgstr "Chaque section montre 200 lignes au plus ; la liste des tâches contient
 msgid "Read-only members see the same page and none of the **Done** buttons."
 msgstr "Les membres en lecture seule voient la même page et aucun des boutons **Fait**."
 
+msgid "Nothing to do yet"
+msgstr "Rien à faire pour le moment"
+
+msgid "When Today has nothing to show, a card **Guide** under **Nothing to do for now.** offers **Open the guide**: the [guide](guide.md) walks through the application on an example home. The card goes as soon as Today shows a task."
+msgstr "Quand Aujourd'hui n'a rien à montrer, une carte **Guide** sous **Rien à faire pour l'instant.** propose **Ouvrir le guide** : le [guide](guide.md) fait parcourir l'application sur un logement d'exemple. La carte disparaît dès qu'Aujourd'hui montre une tâche."
+
 #~ msgid "**Display** opens the display preferences and comes back here."
 #~ msgstr "**Affichage** ouvre les préférences d'affichage et revient ici."
 
@@ -65,4 +71,3 @@ msgstr "Les membres en lecture seule voient la même page et aucun des boutons *
 
 #~ msgid "The **tabs** above the list, shared by the [task list](tasks.md), the [history](history.md) and the [display preferences](display-preferences.md), switch between **Today**, **All tasks**, **History** and **Display preferences**. The current tab is marked; on a phone the tabs scroll sideways when they do not all fit."
 #~ msgstr "Les **onglets** au-dessus de la liste, communs à la [liste des tâches](tasks.md), à l'[historique](history.md) et aux [préférences d'affichage](display-preferences.md), passent d'**Aujourd'hui** à **Toutes les tâches**, **Historique** et **Préférences d'affichage**. L'onglet courant est marqué ; sur téléphone, les onglets défilent latéralement quand ils ne tiennent pas tous."
-

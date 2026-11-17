@@ -403,6 +403,28 @@ the guide), `budget-line-form.md`, `quote-form.md` (the pre-fill from the guide)
 `spec.md` (Homes: the example is never synced) and `plan.md`. Release notes: one fragment **new**
 with W2 and one with A3. This record changes nothing a person sees, so it has no fragment.
 
+**How W2 settled what this record left to it** (the web screens):
+
+- *The query of a filled-in form* names the fields of the form (`?name=Kitchen&kind=kitchen`).
+  A view lists the fields it takes (`guide.prefill.PrefillMixin`), and each value goes through
+  the `clean` of its field before it is shown: a value the field refuses is left out. The post
+  is checked as any other, and the rights of the form are those of its view.
+- *A step on a row already there* (the brand of the machine, the repetition of the task, the
+  payment of a line) opens the form of that row, found as `fill_example` finds it; otherwise the
+  form that adds it. A line or a quote has no link before its project exists.
+- *The new home of step 1* is the ordinary form with `?guide=1`, kept in a hidden field: its
+  post calls `guide.services.create_example_home`, which sets the mark and refuses a second one.
+- *The confirmation in place* of **Delete the example home** is the same page with
+  `?delete-example=1`, so that it needs no script; the post goes to `/guide/delete/<home id>/`,
+  which answers 404 for any home but the example home owned by the person. The design guide
+  records it as the one exception to its confirmation page.
+- *A step ticked by hand* has **Mark as done**, and is never unticked, as a state's tick.
+- *My homes* shows the example home after the real ones, marked **Example**; the home selector
+  does not, since it lists the homes a section may open on.
+- *The terms* a text cites are written from the catalog message the glossary names for the
+  web (`guide/terms.py`, kept equal to the glossary by its test), since the image has no
+  `design/` directory.
+
 ## Consequences
 
 - The guide adds no table to a real home: one column on `Home`, and one small table of ticks

@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.utils import translation
 
 from housecairn.accounts.models import User
-from housecairn.guide import links, prefill, services, states, terms
+from housecairn.guide import content, links, prefill, services, states, terms
 from housecairn.guide.models import StepTick
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Membership, Role
@@ -90,7 +90,9 @@ def test_a_scenario_counts_its_ticks(alice_client: Client, example: Home) -> Non
 
 
 def test_an_unknown_scenario_answers_404(alice_client: Client) -> None:
-    assert alice_client.get(reverse("guide:scenario", kwargs={"scenario": "nope"})).status_code == 404
+    assert (
+        alice_client.get(reverse("guide:scenario", kwargs={"scenario": "nope"})).status_code == 404
+    )
 
 
 def test_step_one_opens_the_new_home_form_filled_in_from_the_guide(alice_client: Client) -> None:
@@ -122,6 +124,43 @@ def test_a_step_links_to_its_form_with_next_back_to_the_scenario(
     assert query == {"name": ["Kitchen"], "kind": ["kitchen"], "next": [SCENARIO_2]}
 
 
+def test_open_leads_to_the_same_form_empty(alice_client: Client, example: Home) -> None:
+    html = alice_client.get(SCENARIO_2).content.decode().replace("&amp;", "&")
+    create = reverse("rooms:create", kwargs={"home_id": example.pk})
+    assert f'href="{create}?next={SCENARIO_2.replace("/", "%2F")}"' in html
+
+
+def test_a_step_without_a_form_opens_its_screen(example: Home) -> None:
+    step = next(s for s in content.steps() if s["id"] == "create-home.3")
+    found = links.for_step(step, example, "en", SCENARIO_2)
+    assert found.fill is None
+    assert found.open is not None
+    assert found.open.startswith(reverse("tasks:today", kwargs={"home_id": example.pk}) + "?")
+
+
+def test_a_finished_scenario_says_done(alice: User, alice_client: Client, example: Home) -> None:
+    for step_id in ("create-home.2", "create-home.3"):
+        services.tick_by_hand(alice, example, step_id)
+    html = alice_client.get(reverse("guide:index")).content.decode()
+    first = html.split("1. Create a home")[1].split("</li>")[0]
+    assert "pill-success" in first
+    assert "of 3" not in first
+
+
+def test_a_scenario_leads_to_the_previous_and_the_next(alice_client: Client) -> None:
+    html = alice_client.get(SCENARIO_2).content.decode()
+    assert f'href="{reverse("guide:scenario", kwargs={"scenario": "create-home"})}"' in html
+    assert f'href="{reverse("guide:scenario", kwargs={"scenario": "recurring-task"})}"' in html
+
+
+def test_nothing_to_catch_up_once_the_earlier_steps_are_ticked(
+    alice: User, alice_client: Client, example: Home
+) -> None:
+    services.fill_example(alice, example, up_to=3, language="en")
+    html = alice_client.get(reverse("guide:scenario", kwargs={"scenario": "recurring-task"}))
+    assert b"Add what the earlier scenarios make" not in html.content
+
+
 def test_a_step_on_a_row_already_there_opens_the_form_of_that_row(
     alice: User, alice_client: Client, example: Home
 ) -> None:
@@ -129,15 +168,16 @@ def test_a_step_on_a_row_already_there_opens_the_form_of_that_row(
     machine = Item.objects.get(home=example, name="Espresso machine")
     machine.brand = ""
     machine.save()
-    step = next(s for s in services.content.steps() if s["id"] == "rooms-equipment.4")
+    step = next(s for s in content.steps() if s["id"] == "rooms-equipment.4")
     found = links.for_step(step, example, "en", SCENARIO_2)
     edit = reverse("rooms:item-edit", kwargs={"home_id": example.pk, "item_id": machine.pk})
-    assert found.fill is not None and found.fill.startswith(edit + "?")
+    assert found.fill is not None
+    assert found.fill.startswith(edit + "?")
     assert _query(found.fill) == {"brand": ["Brewmark"], "model": ["BM-200"], "next": [SCENARIO_2]}
 
 
 def test_a_line_waits_for_its_project(example: Home) -> None:
-    step = next(s for s in services.content.steps() if s["id"] == "project-budget.2")
+    step = next(s for s in content.steps() if s["id"] == "project-budget.2")
     assert links.for_step(step, example, "en", SCENARIO_2) == links.Links(open=None, fill=None)
 
 
@@ -200,7 +240,8 @@ def test_a_form_shows_the_values_of_its_query(alice_client: Client, example: Hom
 def test_a_value_its_field_refuses_is_left_out(example: Home, query: str) -> None:
     form = ItemForm(rooms=Room.objects.filter(home=example), home=example, brands=[])
     assert prefill.apply(form, QueryDict(query), ("name", "kind", "room")) == []
-    assert form.initial.get("name") is None and form.initial.get("kind") is None
+    assert form.initial.get("name") is None
+    assert form.initial.get("kind") is None
 
 
 def test_a_value_its_field_accepts_is_shown(example: Home) -> None:
@@ -256,7 +297,8 @@ def test_a_form_saved_from_the_guide_comes_back_to_the_scenario(
     assert response.status_code == 302
     assert response["Location"] == SCENARIO_2
     page = alice_client.get(SCENARIO_2).content.decode()
-    assert "rooms-equipment.1" in page and states.ticked(example) >= {"rooms-equipment.1"}
+    assert "rooms-equipment.1" in page
+    assert states.ticked(example) >= {"rooms-equipment.1"}
 
 
 @pytest.mark.parametrize(
@@ -295,7 +337,7 @@ def test_the_task_form_takes_the_repetition_of_the_guide(
 ) -> None:
     services.fill_example(alice, example, up_to=3, language="en")
     task = task_services.create_task(alice, example, title="Descaling")
-    step = next(s for s in services.content.steps() if s["id"] == "recurring-task.2")
+    step = next(s for s in content.steps() if s["id"] == "recurring-task.2")
     found = links.for_step(step, example, "en", SCENARIO_2)
     assert found.fill is not None
     assert reverse("tasks:edit", kwargs={"home_id": example.pk, "task_id": task.pk}) in found.fill
@@ -379,7 +421,9 @@ def test_delete_shows_one_confirmation_on_the_same_page(
     assert f'href="{page}"' in html  # Cancel: the same page, without the confirmation
 
 
-def test_the_example_home_is_deleted_in_one_post(alice: User, alice_client: Client, example: Home) -> None:
+def test_the_example_home_is_deleted_in_one_post(
+    alice: User, alice_client: Client, example: Home
+) -> None:
     response = alice_client.post(_delete_url(example), {"next": SCENARIO_2})
     assert response.status_code == 302
     assert response["Location"] == SCENARIO_2
@@ -453,6 +497,7 @@ def test_the_page_of_the_example_home_offers_no_typed_deletion(
 ) -> None:
     html = alice_client.get(reverse("homes:detail", kwargs={"home_id": example.pk})).content
     assert reverse("homes:delete", kwargs={"home_id": example.pk}).encode() not in html
+    assert reverse("homes:archive", kwargs={"home_id": example.pk}).encode() not in html
     assert b"Delete the example home" in html
 
 
@@ -510,7 +555,7 @@ def test_the_guide_shows_only_the_example_home_of_the_person(
 
 def test_the_terms_cited_by_the_guide_are_those_of_the_glossary() -> None:
     glossary = {term["id"]: term for term in json.loads(GLOSSARY.read_text())["terms"]}
-    cited = set(terms.CITED.findall(json.dumps(services.content.document()["scenarios"])))
+    cited = set(terms.CITED.findall(json.dumps(content.document()["scenarios"])))
     assert cited == set(terms.TERMS)
     for term_id, (context, message) in terms.TERMS.items():
         web = glossary[term_id]["web"][0]
@@ -528,5 +573,5 @@ def test_a_cited_term_is_written_in_the_language_of_the_reader(language: str) ->
 
 def test_the_example_rows_made_by_the_guide_tick_every_step_with_a_state(alice: User) -> None:
     home = make_example(alice)
-    with_state = {s["id"] for s in services.content.steps() if "done_when" in s}
+    with_state = {s["id"] for s in content.steps() if "done_when" in s}
     assert with_state <= set(states.tick(home)) | states.ticked(home)

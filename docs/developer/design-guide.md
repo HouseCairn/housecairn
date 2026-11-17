@@ -379,6 +379,10 @@ to it. The page of the room leads to its budget by its block "Budget of the room
 - A deletion **must** go through a confirmation page: a link to the page, then a post
   from it, whose Cancel link goes back to the object. This includes photos, files and
   the revocation of a label. A tap by mistake must not lose a document.
+- One exception, decided by [ADR 0084](../adr/0084-interactive-guide-and-example-home.md):
+  **Delete the example home** of the guide asks on the same page, in place of its button, with
+  **Delete** and **Cancel** (the page again with `?delete-example=1`, so no script is needed).
+  The example home holds fictional values only, and the guide offers to make it again.
 - After the deletion, the person **must** land on the parent of the deleted object,
   never on `next` if it points to that object or one of its children. That page no
   longer exists.

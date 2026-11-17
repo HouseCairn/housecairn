@@ -48,6 +48,11 @@ msgstr "**Supprimer le devis** demande confirmation et libère ce qu'il engageai
 msgid "The link at the top and **Cancel** lead back to the screen the form was opened from, usually the project, and so does the form once sent."
 msgstr "Le lien du haut et **Annuler** ramènent à l'écran d'où le formulaire a été ouvert, en général le projet, tout comme le formulaire une fois envoyé."
 
+msgid "Opened from the guide"
+msgstr "Ouvert depuis le guide"
+
+msgid "A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its address by **Fill in for me** with the values of the example (the contractor, the amount, the dates, the status and the budget line of a quote). The form shows them and saves nothing until you press its button; each value is checked by its field first, and one the field refuses (a choice that does not exist, a line of another project, a text too long) is left out, as if you had not typed it. Saved, the form comes back to the guide."
+msgstr "Une étape du [guide](guide-scenario.md) ouvre ce formulaire dans le logement d'exemple, rempli depuis son adresse par **Remplir pour moi** avec les valeurs de l'exemple (l'artisan, le montant, les dates, le statut et la ligne de budget d'un devis). Le formulaire les affiche et n'enregistre rien tant que vous n'appuyez pas sur son bouton ; chaque valeur est d'abord vérifiée par son champ, et une valeur que le champ refuse (un choix qui n'existe pas, une ligne d'un autre projet, un texte trop long) est laissée de côté, comme si vous ne l'aviez pas saisie. Une fois enregistré, le formulaire revient au guide."
+
 #~ msgid "**Amount** is in the currency of the home, from 0 to 9,999,999,999.99."
 #~ msgstr "**Montant** est dans la devise du logement, de 0 à 9 999 999 999,99."
-

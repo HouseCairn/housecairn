@@ -39,8 +39,8 @@ msgstr "**Comparer les projets** (affiché quand la liste compte au moins deux p
 msgid "**Add a project** opens the [project form](project-form.md)."
 msgstr "**Ajouter un projet** ouvre le [formulaire de projet](project-form.md)."
 
-msgid "**The budget envelope** at the top is what the household wants to spend on work this year. It sets it against the planned budget of the projects that are neither finished nor abandoned, shows what is paid so far and what is left, and says **over the envelope** when the plans exceed it. **Set the envelope** (owners and members) asks for a year and an amount in the currency of the home, at `/h/<home id>/projects/envelope/`."
-msgstr "**L'enveloppe budgétaire**, en haut, est ce que le foyer veut dépenser en travaux cette année. Elle la compare au budget prévu des projets qui ne sont ni terminés ni abandonnés, montre ce qui est payé jusqu'ici et ce qui reste, et dit **au-delà de l'enveloppe** quand les prévisions la dépassent. **Fixer l'enveloppe** (propriétaires et membres) demande une année et un montant dans la devise du logement, à `/h/<id du logement>/projects/envelope/`."
+msgid "**The budget envelope** at the top is what the household wants to spend on work this year. It sets it against the planned budget of the projects that are neither finished nor abandoned, shows what is paid so far and what is left, and says **over the envelope** when the plans exceed it. **Set the envelope** (owners and members) asks for a year and an amount in the currency of the home, at `/h/<home id>/projects/envelope/`. The last step of the [guide](guide-scenario.md) opens it in the example home with **Fill in for me**, filled in with the current year and 6,000; the form checks both before it shows them, and saves nothing until you press its button."
+msgstr "**L'enveloppe budgétaire**, en haut, est ce que le foyer veut dépenser en travaux cette année. Elle la compare au budget prévu des projets qui ne sont ni terminés ni abandonnés, montre ce qui est payé jusqu'ici et ce qui reste, et dit **au-delà de l'enveloppe** quand les prévisions la dépassent. **Fixer l'enveloppe** (propriétaires et membres) demande une année et un montant dans la devise du logement, à `/h/<id du logement>/projects/envelope/`. La dernière étape du [guide](guide-scenario.md) l'ouvre dans le logement d'exemple avec **Remplir pour moi**, rempli avec l'année en cours et 6 000 ; le formulaire vérifie les deux avant de les afficher, et n'enregistre rien tant que vous n'appuyez pas sur son bouton."
 
 msgid "The [budget](budget.md) sets the envelope against the projects and the upkeep of the year together."
 msgstr "Le [budget](budget.md) compare l'enveloppe aux projets et à l'entretien de l'année ensemble."
@@ -53,4 +53,3 @@ msgstr "Les membres en lecture seule voient la même liste et aucun des boutons 
 
 #~ msgid "**Compare the ticked projects** opens the [comparison](project-compare.md) of the projects whose box is ticked."
 #~ msgstr "**Comparer les projets cochés** ouvre la [comparaison](project-compare.md) des projets dont la case est cochée."
-

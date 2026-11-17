@@ -18,3 +18,11 @@ screen the form was opened from.
 ## Saved as you go
 
 When you edit a record that exists, each field is saved as soon as you change it, or after a short pause in typing, and **Saved** shows under the button (a screen reader announces it). An error shows under its field, and what you typed stays. A contractor, room, item or stock item added in place, and a file, wait for **Save**; so does every change without script.
+
+## Opened from the guide
+
+A step of the [guide](guide-scenario.md) opens this form in the example home, filled in from its
+address by **Fill in for me** with the values of the example (the name and the type of the room). The form shows them and
+saves nothing until you press its button; each value is checked by its field first, and one the
+field refuses (a choice that does not exist, a text too long) is left out, as if you had
+not typed it. Saved, the form comes back to the guide.

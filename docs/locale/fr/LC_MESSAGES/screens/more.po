@@ -33,8 +33,8 @@ msgstr "**Moi** : votre [profil](profile.md) (le nom que les autres voient), vos
 msgid "**Instance**, for an administrator only: [instance administration](instance.md)."
 msgstr "**Instance**, pour un administrateur seulement : l'[administration de l'instance](instance.md)."
 
-msgid "**Help**: this documentation, the documentation of the API, **iOS app (TestFlight beta)** (opens the page to join the beta in a new tab; see [Install on a phone](../getting-started/phone.md)) and the [About](about.md) page."
-msgstr "**Aide** : cette documentation, la documentation de l'API, **Application iOS (bêta TestFlight)** (ouvre la page pour rejoindre la bêta dans un nouvel onglet ; voir [Installer sur un téléphone](../getting-started/phone.md)) et la page [À propos](about.md)."
+msgid "**Help**: this documentation, the interactive [Guide](guide.md) (five scenarios on an example home), the documentation of the API, **iOS app (TestFlight beta)** (opens the page to join the beta in a new tab; see [Install on a phone](../getting-started/phone.md)) and the [About](about.md) page."
+msgstr "**Aide** : cette documentation, le [Guide](guide.md) interactif (cinq scénarios sur un logement d'exemple), la documentation de l'API, **Application iOS (bêta TestFlight)** (ouvre la page pour rejoindre la bêta dans un nouvel onglet ; voir [Installer sur un téléphone](../getting-started/phone.md)) et la page [À propos](about.md)."
 
 msgid "**Sign out** comes last. The actions that cannot be taken back, deleting your account or a home, are not on More: they are at the bottom of their own page."
 msgstr "**Se déconnecter** vient en dernier. Les actions sans retour, supprimer votre compte ou un logement, ne sont pas dans Plus : elles sont en bas de leur propre page."
@@ -50,4 +50,3 @@ msgstr "**Se déconnecter** vient en dernier. Les actions sans retour, supprimer
 
 #~ msgid "**Help**: this documentation, the documentation of the API and the [About](about.md) page."
 #~ msgstr "**Aide** : cette documentation, la documentation de l'API et la page [À propos](about.md)."
-

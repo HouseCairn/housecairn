@@ -1,0 +1,40 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "Guide"
+msgstr "Guide"
+
+msgid "The interactive guide, at `/guide/`, opened from **Guide** in the Help group of [More](more.md), from the [welcome page](start-page.md) and from an empty [Today](today.md). It lists five scenarios, each a short walk done for real on an **example home** with fictional values ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)); the [Guide](../getting-started/guide.md) page of this documentation prints the same text."
+msgstr "Le guide interactif, à `/guide/`, ouvert depuis **Guide** dans le groupe Aide de [Plus](more.md), depuis la [page d'accueil](start-page.md) et depuis un [Aujourd'hui](today.md) vide. Il liste cinq scénarios, chacun un court parcours fait pour de vrai sur un **logement d'exemple** aux valeurs fictives ([ADR 0084](../adr/0084-interactive-guide-and-example-home.md)) ; la page [Guide](../getting-started/guide.md) de cette documentation imprime le même texte."
+
+msgid "Each scenario opens its [steps](guide-scenario.md) and says how far it is: **1 of 3**, then **Done** once every step is ticked (an optional step does not count). The ticks are read from the example home, so a person with no example home sees every scenario at **0**. The guide is the same for every role and every account; it shows only your own example home."
+msgstr "Chaque scénario ouvre ses [étapes](guide-scenario.md) et dit où il en est : **1 sur 3**, puis **Fait** une fois chaque étape cochée (une étape facultative ne compte pas). Les coches se lisent dans le logement d'exemple : une personne sans logement d'exemple voit chaque scénario à **0**. Le guide est le même pour chaque rôle et chaque compte ; il ne montre que votre propre logement d'exemple."
+
+msgid "Once the example home exists, a card under the scenarios names it, with a link to its [page](home.md), and the button **Delete the example home**."
+msgstr "Une fois le logement d'exemple créé, une carte sous les scénarios le nomme, avec un lien vers sa [page](home.md), et le bouton **Supprimer le logement d'exemple**."
+
+msgid "Delete the example home"
+msgstr "Supprimer le logement d'exemple"
+
+msgid "**Delete the example home** is on this page and in the banner of every page of the example home. Pressing it shows, in place of the button, the question **Delete the example home?** with **Delete** and **Cancel**: there is no page of its own, no name to type and no offer to export, since the example home never leaves the instance. Without script, the question is the same page with `?delete-example=1` in its address."
+msgstr "**Supprimer le logement d'exemple** est sur cette page et dans le bandeau de chaque page du logement d'exemple. Un appui affiche, à la place du bouton, la question **Supprimer le logement d'exemple ?** avec **Supprimer** et **Annuler** : pas de page à elle, pas de nom à saisir ni de proposition d'export, puisque le logement d'exemple ne quitte jamais l'instance. Sans script, la question est la même page avec `?delete-example=1` dans son adresse."
+
+msgid "**Delete** erases the home, everything in it (its rooms, tasks, reports, projects, files) and its ticks, and lands on the guide, or back on the guide page it was pressed from; **Cancel** closes the question. You can then make a new example home from the first scenario. Only your own example home goes this way: the address of a real home, or of the example home of another account, answers **Page not found**, as for a home that does not exist."
+msgstr "**Supprimer** efface le logement, tout ce qu'il contient (ses pièces, tâches, signalements, projets, fichiers) et ses coches, puis mène au guide, ou ramène à la page du guide d'où il a été pressé ; **Annuler** ferme la question. Vous pouvez ensuite créer un nouveau logement d'exemple depuis le premier scénario. Seul votre propre logement d'exemple part de cette façon : l'adresse d'un vrai logement, ou du logement d'exemple d'un autre compte, répond **Page introuvable**, comme pour un logement qui n'existe pas."

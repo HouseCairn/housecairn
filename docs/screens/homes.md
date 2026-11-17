@@ -11,6 +11,10 @@ A home that an owner [archived](home.md) is listed apart, under **Archived**, be
 others: it is hidden from Today and from the home selector, and sends no reminder. Open it
 to change it or to bring it back.
 
+The example home of the [guide](guide.md), if you have one, comes after your other homes,
+marked **Example**. It is the only list of homes that shows it: the home selector, All homes of
+Today and the lists of the connected apps leave it out.
+
 The page **Restore a home** asks for the archive and how to restore it. **Restore**
 brings the home back with its identifiers, and is refused while that home is on the
 instance. **Restore as a copy** makes a new home next to it, with new identifiers and

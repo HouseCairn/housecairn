@@ -82,7 +82,7 @@ class HomeListView(WebHomeScopedMixin, ListView[Home]):
         # is shown after them, marked, from the one place that reads it.
         from housecairn.guide import services as guide_services
 
-        context["example"] = guide_services.example_home_of(self.request.user)  # type: ignore[arg-type]
+        context["example"] = guide_services.example_home_of(self.request.user)
         return context
 
 
@@ -102,7 +102,7 @@ class HomeCreateView(PrefillMixin, LoginRequiredMixin, FormView[forms.NewHomeFor
 
     def from_guide(self) -> bool:
         data = self.request.POST if self.request.method == "POST" else self.request.GET
-        return data.get(GUIDE_FLAG) == "1"
+        return bool(data.get(GUIDE_FLAG) == "1")
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return super().get_context_data(from_guide=self.from_guide(), **kwargs)
@@ -115,7 +115,7 @@ class HomeCreateView(PrefillMixin, LoginRequiredMixin, FormView[forms.NewHomeFor
         # The home and the tasks of the equipment checked, together or not at all.
         with transaction.atomic():
             home = services.create_home(
-                self.request.user,  # type: ignore[arg-type]
+                self.request.user,
                 name=form.cleaned_data["name"],
                 currency=form.cleaned_data["currency"],
                 hemisphere=form.cleaned_data["hemisphere"],
@@ -140,7 +140,7 @@ class HomeCreateView(PrefillMixin, LoginRequiredMixin, FormView[forms.NewHomeFor
         try:
             with transaction.atomic():
                 home = guide_services.create_example_home(
-                    self.request.user,  # type: ignore[arg-type]
+                    self.request.user,
                     name=form.cleaned_data["name"],
                     currency=form.cleaned_data["currency"],
                     hemisphere=form.cleaned_data["hemisphere"],

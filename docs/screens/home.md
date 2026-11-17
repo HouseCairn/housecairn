@@ -12,6 +12,11 @@ An example home, the one that the guide makes ([ADR 0084](../adr/0084-interactiv
 opens like another home but never leaves the instance: it has no **Export all data**, no QR labels,
 no invitations and no calendar feed, it is not in the list of your homes of the connected apps, and
 nobody but you sees it ([Export and deletion](../administration/data.md#the-example-home)).
+Its name carries the mark **Example**, and every page of the example home starts with a banner
+**Example home**, with **Back to the guide** and **Delete the example home**: one press shows the
+question in place of the button, with **Delete** and **Cancel**, on the same page, with no name
+to type and no export ([Delete the example home](guide.md#delete-the-example-home)). The bottom
+of its page has no **Archive this home** nor **Delete this home**.
 
 ## Name, currency and hemisphere
 
