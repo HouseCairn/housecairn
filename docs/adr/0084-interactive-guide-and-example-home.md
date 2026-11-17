@@ -82,9 +82,10 @@ signed-in person; it needs no setting and sends nothing anywhere.
   calendar feed, no QR label, no notification channel and no reminder for it (it behaves, for
   these, as an archived home does, [0079](0079-lots-of-the-server-mode-of-the-mobile-app.md)).
 - **Recognisable on every screen.** A banner "Example home" with the link **Delete the example
-  home** on every page of the home, the word "Example" next to its name in the home selector and
-  in **My homes**, and on the page of the home. The wording is for the card of the screens; the terms are
-  added to the glossary by the first web lot (`guide` and `example-home`).
+  home** on every page of the home, and the word "Example" next to its name in **My homes** and
+  on the page of the home. The home selector does not list it (it lists the homes a section may
+  open on). The wording is for the card of the screens; the terms are added to the glossary by
+  the first web lot (`guide` and `example-home`).
 - **Deleted in one gesture: one press and one confirmation on the same page.** One button,
   **Delete the example home**, on the guide page and in the banner. Pressing it shows a
   confirmation on the same page (in the web, in place of the button, with **Delete** and
