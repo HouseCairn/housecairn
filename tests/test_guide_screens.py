@@ -8,7 +8,7 @@ home; and Delete the example home deletes that home only, after one confirmation
 import json
 import re
 from pathlib import Path
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 import pytest
 from django.http import QueryDict
@@ -499,6 +499,54 @@ def test_the_page_of_the_example_home_offers_no_typed_deletion(
     assert reverse("homes:delete", kwargs={"home_id": example.pk}).encode() not in html
     assert reverse("homes:archive", kwargs={"home_id": example.pk}).encode() not in html
     assert b"Delete the example home" in html
+
+
+# ---------- a hostile `next` leads nowhere outside the site ----------
+
+HOSTILE_NEXT = [
+    "https://evil.example/x",
+    "//evil.example/x",
+    "/\\evil.example/x",
+    "javascript:alert(1)",
+]
+
+
+@pytest.mark.parametrize("hostile", HOSTILE_NEXT)
+def test_deleting_the_example_ignores_a_hostile_next(
+    alice_client: Client, example: Home, hostile: str
+) -> None:
+    response = alice_client.post(_delete_url(example), {"next": hostile})
+    assert response.status_code == 302
+    assert response["Location"] == reverse("guide:index")
+    assert not Home.all_objects.filter(pk=example.pk).exists()
+
+
+@pytest.mark.parametrize("hostile", HOSTILE_NEXT)
+def test_ticking_by_hand_ignores_a_hostile_next(
+    alice_client: Client, example: Home, hostile: str
+) -> None:
+    response = alice_client.post(reverse("guide:tick"), {"step": "create-home.2", "next": hostile})
+    assert response.status_code == 302
+    assert response["Location"] == reverse("guide:scenario", kwargs={"scenario": "create-home"})
+    assert StepTick.objects.filter(home=example, step_id="create-home.2").exists()
+
+
+@pytest.mark.parametrize("hostile", HOSTILE_NEXT)
+@pytest.mark.parametrize("where", ["query", "body"])
+def test_a_form_opened_from_a_step_ignores_a_hostile_next(
+    alice_client: Client, example: Home, hostile: str, where: str
+) -> None:
+    url = reverse("rooms:create", kwargs={"home_id": example.pk})
+    data = {"name": "Kitchen", "kind": "kitchen"}
+    if where == "query":
+        response = alice_client.post(f"{url}?{urlencode({'next': hostile})}", data)
+    else:
+        response = alice_client.post(url, {**data, "next": hostile})
+    room = Room.objects.get(home=example, name="Kitchen")
+    assert response.status_code == 302
+    assert response["Location"] == reverse(
+        "rooms:detail", kwargs={"home_id": example.pk, "room_id": room.pk}
+    )
 
 
 # ---------- the forms carry the token of the site ----------
