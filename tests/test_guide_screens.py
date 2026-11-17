@@ -501,6 +501,71 @@ def test_the_page_of_the_example_home_offers_no_typed_deletion(
     assert b"Delete the example home" in html
 
 
+# ---------- the forms carry the token of the site ----------
+
+
+@pytest.fixture
+def strict_client(alice: User) -> Client:
+    """A client that checks the CSRF token as a browser's post is checked."""
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(alice)
+    return client
+
+
+def _token_of_form(html: str, action: str) -> str | None:
+    """The CSRF token inside the form that posts to `action`, not one of another form."""
+    form = re.search(rf'<form[^>]*action="{re.escape(action)}"[^>]*>(.*?)</form>', html, re.S)
+    assert form is not None, f"no form posts to {action}"
+    token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', form[1])
+    return token[1] if token else None
+
+
+def test_the_deletion_of_the_example_needs_the_token_the_page_carries(
+    strict_client: Client, example: Home
+) -> None:
+    page = reverse("rooms:list", kwargs={"home_id": example.pk})
+    html = strict_client.get(f"{page}?delete-example=1").content.decode()
+    token = _token_of_form(html, _delete_url(example))
+    assert token is not None  # the form of the confirmation itself carries one
+    refused = strict_client.post(_delete_url(example), {"next": page})
+    assert refused.status_code == 403
+    assert Home.all_objects.filter(pk=example.pk).exists()
+    done = strict_client.post(_delete_url(example), {"csrfmiddlewaretoken": token})
+    assert done.status_code == 302
+    assert done["Location"] == reverse("guide:index")
+    assert not Home.all_objects.filter(pk=example.pk).exists()
+
+
+def test_mark_as_done_needs_the_token_the_page_carries(
+    strict_client: Client, example: Home
+) -> None:
+    page = reverse("guide:scenario", kwargs={"scenario": "create-home"})
+    html = strict_client.get(page).content.decode()
+    token = _token_of_form(html, reverse("guide:tick"))
+    assert token is not None
+    data = {"step": "create-home.2", "next": page}
+    assert strict_client.post(reverse("guide:tick"), data).status_code == 403
+    assert not StepTick.objects.filter(home=example, step_id="create-home.2").exists()
+    done = strict_client.post(reverse("guide:tick"), {**data, "csrfmiddlewaretoken": token})
+    assert done.status_code == 302
+    assert done["Location"] == page
+    assert StepTick.objects.filter(home=example, step_id="create-home.2").exists()
+
+
+def test_adding_what_the_earlier_scenarios_make_needs_the_token_the_page_carries(
+    alice: User, strict_client: Client
+) -> None:
+    fill = reverse("guide:fill", kwargs={"scenario": "rooms-equipment"})
+    token = _token_of_form(strict_client.get(SCENARIO_2).content.decode(), fill)
+    assert token is not None
+    assert strict_client.post(fill).status_code == 403
+    assert services.example_home_of(alice) is None  # nothing was made
+    done = strict_client.post(fill, {"csrfmiddlewaretoken": token})
+    assert done.status_code == 302
+    assert done["Location"] == SCENARIO_2
+    assert services.example_home_of(alice) is not None
+
+
 # ---------- the entries ----------
 
 
