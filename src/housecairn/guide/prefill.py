@@ -1,14 +1,15 @@
 """Forms opened from the guide, filled in from their address (docs/adr/0084).
 
-A step of the guide that names a row of the example (`suggest`) opens its form with the values
-of that row in the query: `?name=Kitchen&kind=kitchen`. The form only shows them; the person
-still presses the button that saves it, and the post is checked as any other.
+A step of the guide that names a row of the example (`suggest`) opens its form, on the example
+home, with the values of that row in the query: `?name=Kitchen&kind=kitchen`. The form only
+shows them; the person still presses the button that saves it, and the post is checked as
+any other.
 
 What the query says is input, never trusted: each value goes through the `clean` of its field
 before it is shown, and a value the field refuses (a choice that does not exist, a room of
 another home, a text too long, a date that is not one) is left out, as if the query did not
-carry it. Only the fields a view names are read, and a page that is not a form ignores the
-query altogether.
+carry it. Only the fields a view names are read, and a page that is not a form, or a form of a
+real home, ignores the query altogether.
 """
 
 from typing import Any
@@ -54,15 +55,32 @@ def apply(form: forms.BaseForm, query: QueryDict, names: tuple[str, ...]) -> lis
 class PrefillMixin:
     """For a form view: on a GET, `prefill_fields` are filled in from the query.
 
-    The guide's links carry the values (`guide.links`); any other link may too, and the
-    values are checked by the fields of the form before they are shown.
+    Only the forms of the example home are (and the creation of a home opened from the guide,
+    which says so itself): on a real home the query is ignored, so that a link can never put a
+    value of its making in front of the person, nor into an edit form that saves as it is
+    changed (docs/adr/0082). The guide's links carry the values (`guide.links`), and the values
+    are checked by the fields of the form before they are shown.
     """
 
     prefill_fields: tuple[str, ...] = ()
     request: Any
+    kwargs: dict[str, Any]
+
+    def prefills(self) -> bool:
+        """Whether this page is a form of the example home of the person."""
+        from housecairn.homes import services as home_services
+
+        home_id = self.kwargs.get("home_id")
+        if home_id is None:
+            return False
+        return (
+            home_services.homes_for(self.request.user, include_example=True)
+            .filter(pk=home_id, is_example=True)
+            .exists()
+        )
 
     def get_form(self, form_class: Any = None) -> Any:
         form = super().get_form(form_class)  # type: ignore[misc]
-        if self.request.method == "GET" and self.prefill_fields:
+        if self.request.method == "GET" and self.prefill_fields and self.prefills():
             apply(form, self.request.GET, self.prefill_fields)
         return form

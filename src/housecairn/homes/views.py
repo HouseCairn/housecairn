@@ -104,6 +104,10 @@ class HomeCreateView(PrefillMixin, LoginRequiredMixin, FormView[forms.NewHomeFor
         data = self.request.POST if self.request.method == "POST" else self.request.GET
         return bool(data.get(GUIDE_FLAG) == "1")
 
+    def prefills(self) -> bool:
+        # No home yet: the form is filled in from the query only when the guide opened it.
+        return self.from_guide()
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         return super().get_context_data(from_guide=self.from_guide(), **kwargs)
 

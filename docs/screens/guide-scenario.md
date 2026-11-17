@@ -31,6 +31,10 @@ mistake, open the report): each has **Mark as done**, which ticks it.
 The first step of the first scenario opens [Add a home](new-home.md) filled in with the example
 home; with no example home, the steps of the other scenarios have no button yet.
 
+Only the forms of the example home, and Add a home when the guide opens it, are filled in from
+their address. On a real home the address is ignored: a link cannot put a value in front of you
+there, nor in an edit form that saves as you type.
+
 ## Add what the earlier scenarios make
 
 A scenario after the first one shows **Add what the earlier scenarios make** while an earlier

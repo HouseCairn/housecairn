@@ -347,6 +347,51 @@ def test_the_task_form_takes_the_repetition_of_the_guide(
     assert re.search(r'name="repeat_interval"[^>]*value="3"', html)
 
 
+@pytest.mark.parametrize(
+    "route",
+    ["rooms:create", "rooms:item-add", "tasks:create", "reports:create", "projects:create"],
+)
+def test_the_query_fills_in_no_form_of_a_real_home(
+    alice_client: Client, alice_home: Home, route: str
+) -> None:
+    url = reverse(route, kwargs={"home_id": alice_home.pk})
+    query = "name=Planted&title=Planted&kind=kitchen"
+    html = alice_client.get(f"{url}?{query}").content.decode()
+    assert 'value="Planted"' not in html
+    assert '<option value="kitchen" selected>' not in html
+
+
+def test_the_query_changes_no_edit_form_of_a_real_room(
+    alice: User, alice_client: Client, alice_home: Home
+) -> None:
+    room = room_services.create_room(alice, alice_home, name="Study", kind="office")
+    item = room_services.create_item(alice, room, name="Desk", kind="equipment")
+    edit_room = reverse("rooms:edit", kwargs={"home_id": alice_home.pk, "room_id": room.pk})
+    edit_item = reverse("rooms:item-edit", kwargs={"home_id": alice_home.pk, "item_id": item.pk})
+    html = alice_client.get(f"{edit_room}?name=Planted").content.decode()
+    assert 'value="Study"' in html
+    assert 'value="Planted"' not in html
+    html = alice_client.get(f"{edit_item}?name=Planted&brand=Planted").content.decode()
+    assert 'value="Desk"' in html
+    assert 'value="Planted"' not in html
+
+
+def test_the_query_fills_in_the_edit_form_of_the_example_home(
+    alice: User, alice_client: Client, example: Home
+) -> None:
+    room = room_services.create_room(alice, example, name="Study", kind="office")
+    edit = reverse("rooms:edit", kwargs={"home_id": example.pk, "room_id": room.pk})
+    assert 'value="Planted"' in alice_client.get(f"{edit}?name=Planted").content.decode()
+
+
+def test_a_new_home_is_filled_in_from_the_query_only_when_the_guide_opens_it(
+    alice_client: Client,
+) -> None:
+    url = reverse("homes:create")
+    assert 'value="Planted"' not in alice_client.get(f"{url}?name=Planted").content.decode()
+    assert 'value="Planted"' in alice_client.get(f"{url}?name=Planted&guide=1").content.decode()
+
+
 # ---------- catching up and ticking by hand ----------
 
 

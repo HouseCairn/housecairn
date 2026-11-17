@@ -48,6 +48,9 @@ msgstr "Quatre étapes ne laissent pas de trace dans les données (regarder les 
 msgid "The first step of the first scenario opens [Add a home](new-home.md) filled in with the example home; with no example home, the steps of the other scenarios have no button yet."
 msgstr "La première étape du premier scénario ouvre [Ajouter un logement](new-home.md) rempli avec le logement d'exemple ; sans logement d'exemple, les étapes des autres scénarios n'ont pas encore de bouton."
 
+msgid "Only the forms of the example home, and Add a home when the guide opens it, are filled in from their address. On a real home the address is ignored: a link cannot put a value in front of you there, nor in an edit form that saves as you type."
+msgstr "Seuls les formulaires du logement d'exemple, et Ajouter un logement quand le guide l'ouvre, sont remplis depuis leur adresse. Sur un vrai logement, l'adresse est ignorée : un lien ne peut y mettre aucune valeur sous vos yeux, ni dans un formulaire de modification qui s'enregistre au fil de la saisie."
+
 msgid "Add what the earlier scenarios make"
 msgstr "Ajouter ce que créent les scénarios précédents"
 

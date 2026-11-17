@@ -408,7 +408,10 @@ with W2 and one with A3. This record changes nothing a person sees, so it has no
 - *The query of a filled-in form* names the fields of the form (`?name=Kitchen&kind=kitchen`).
   A view lists the fields it takes (`guide.prefill.PrefillMixin`), and each value goes through
   the `clean` of its field before it is shown: a value the field refuses is left out. The post
-  is checked as any other, and the rights of the form are those of its view.
+  is checked as any other, and the rights of the form are those of its view. Only the forms of
+  the example home are filled in (and Add a home when it carries `?guide=1`): on a real home the
+  query is ignored, so that no link puts a made-up value in an edit form that saves as it is
+  changed ([0082](0082-sheets-saved-field-by-field.md)).
 - *A step on a row already there* (the brand of the machine, the repetition of the task, the
   payment of a line) opens the form of that row, found as `fill_example` finds it; otherwise the
   form that adds it. A line or a quote has no link before its project exists.
