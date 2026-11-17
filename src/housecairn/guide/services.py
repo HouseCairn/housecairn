@@ -22,7 +22,7 @@ from housecairn.guide import content, states
 from housecairn.guide.models import StepTick
 from housecairn.homes import files
 from housecairn.homes import services as home_services
-from housecairn.homes.models import Hemisphere, Home
+from housecairn.homes.models import Hemisphere, Home, Membership, Role
 from housecairn.projects import services as project_services
 from housecairn.projects.models import AnnualEnvelope, BudgetLine, Project, Quote
 from housecairn.reports import services as report_services
@@ -34,8 +34,17 @@ from housecairn.tasks.models import Contractor, Occurrence, Status, Task
 
 
 def example_home_of(user: User) -> Home | None:
-    """The example home of the account, if it has one: there is at most one."""
-    return home_services.homes_for(user, include_example=True).filter(is_example=True).first()
+    """The example home of the account, if it has one: there is at most one.
+
+    Only its owner has it: a member that some other path put there would see no banner, no
+    guide, no tick and no filling (defence in depth: nothing adds a member to an example home).
+    """
+    owned = Membership.objects.filter(user=user, role=Role.OWNER).values("home_id")
+    return (
+        home_services.homes_for(user, include_example=True)
+        .filter(is_example=True, id__in=owned)
+        .first()
+    )
 
 
 def _language(actor: User, language: str | None) -> str:

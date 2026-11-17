@@ -641,7 +641,8 @@ def accept_invitation(user: User, raw: str) -> Membership:
         raise Invitation.DoesNotExist
     # Lock the row: of two simultaneous acceptances, only one uses it.
     invitation = Invitation.objects.select_for_update().get(pk=invitation.pk)
-    if not invitation.is_pending:
+    if not invitation.is_pending or invitation.home.is_example:
+        # An example home has no other member (docs/adr/0084): such a link is a dead one.
         raise Invitation.DoesNotExist
     if not same_address(user.email, invitation.email):
         raise PermissionDenied(_("This invitation is for another email address."))

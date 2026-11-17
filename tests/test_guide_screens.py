@@ -7,6 +7,7 @@ home; and Delete the example home deletes that home only, after one confirmation
 
 import json
 import re
+from datetime import timedelta
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit
 
@@ -14,13 +15,13 @@ import pytest
 from django.http import QueryDict
 from django.test import Client
 from django.urls import reverse
-from django.utils import translation
+from django.utils import timezone, translation
 
 from housecairn.accounts.models import User
 from housecairn.guide import content, links, prefill, services, states, terms
 from housecairn.guide.models import StepTick
 from housecairn.homes import services as home_services
-from housecairn.homes.models import Home, Membership, Role
+from housecairn.homes.models import Home, Invitation, Membership, Role
 from housecairn.projects.models import BudgetLine, Project
 from housecairn.rooms import services as room_services
 from housecairn.rooms.forms import ItemForm
@@ -499,6 +500,51 @@ def test_the_page_of_the_example_home_offers_no_typed_deletion(
     assert reverse("homes:delete", kwargs={"home_id": example.pk}).encode() not in html
     assert reverse("homes:archive", kwargs={"home_id": example.pk}).encode() not in html
     assert b"Delete the example home" in html
+
+
+# ---------- defence in depth: only its owner has the example home ----------
+
+
+@pytest.mark.parametrize("role", [Role.MEMBER, Role.READ_ONLY])
+def test_a_member_forced_into_the_example_home_has_no_guide_on_it(
+    client_of: object, make_user: object, example: Home, role: Role
+) -> None:
+    # Nothing adds a member to an example home; one forced in the database gets none of it.
+    member = make_user()  # type: ignore[operator]
+    Membership.objects.create(home=example, user=member, role=role)
+    assert services.example_home_of(member) is None
+    client = client_of(member)  # type: ignore[operator]
+    page = client.get(reverse("homes:detail", kwargs={"home_id": example.pk}))
+    assert b"example-banner" not in page.content
+    guide = client.get(reverse("guide:index")).content.decode()
+    assert "Delete the example home" not in guide
+    assert "0 of 3" in guide
+    assert client.post(reverse("guide:tick"), {"step": "create-home.2"}).status_code == 404
+    assert not StepTick.objects.filter(home=example, step_id="create-home.2").exists()
+    client.post(reverse("guide:fill", kwargs={"scenario": "rooms-equipment"}))
+    assert not Room.objects.filter(home=example).exists()  # nothing was added to the owner's
+
+
+def test_an_invitation_to_an_example_home_opens_nothing(
+    alice: User, example: Home, make_user: object
+) -> None:
+    # `invite` refuses an example home; a row forced in the database is still a dead link.
+    raw, digest = home_services._new_secret()
+    Invitation.objects.create(
+        home=example,
+        email="new@example.com",
+        role=Role.MEMBER,
+        invited_by=alice,
+        digest=digest,
+        expires_at=timezone.now() + timedelta(days=1),
+        sent_at=timezone.now(),
+        delivered_by_email=True,
+    )
+    guest = make_user("new@example.com")  # type: ignore[operator]
+    assert home_services.find_invitation(raw) is not None  # a live link, but for an example
+    with pytest.raises(Invitation.DoesNotExist):
+        home_services.accept_invitation(guest, raw)
+    assert not Membership.objects.filter(home=example, user=guest).exists()
 
 
 # ---------- a hostile `next` leads nowhere outside the site ----------
