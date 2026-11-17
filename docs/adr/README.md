@@ -83,3 +83,4 @@ later record supersedes it.
 | [0082](0082-sheets-saved-field-by-field.md) | The sheets of records are saved field by field, through their own form | 2026-11-15 |
 | [0083](0083-barcode-lookup.md) | Barcode lookup: Open Products Facts then Open Food Facts, behind a list of providers | 2026-11-15 |
 | [0084](0084-interactive-guide-and-example-home.md) | An interactive guide on an example home, one text for the web and the app | 2026-11-16 |
+| [0085](0085-photos-of-reports-and-labels-of-articles-as-sync-files.md) | The photo of a report and the label of an article as files of the sync API | 2026-11-17 |

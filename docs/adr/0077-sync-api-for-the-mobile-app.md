@@ -25,7 +25,9 @@
   the right `may_create_homes`. The `hemisphere` may be left out, `north`, as on the web.
   Lot M6 builds the files ([need 10](#how-the-eleven-needs-are-met)) and makes them precise:
   the rows that take a file are a photo, an attachment and a file of a project (the label of an
-  article and the photo of a report keep their reference in `extra`, a lot of their own); the
+  article and the photo of a report kept their reference in `extra` until
+  [ADR 0085](0085-photos-of-reports-and-labels-of-articles-as-sync-files.md) made them files of
+  the sync API too); the
   errors of an upload are `400` `malformed` (a digest missing or wrong), `403` `forbidden` (a
   read-only member), `409` `file_conflict`, `413` `too_large` or `quota_exceeded`, `415`
   `unsupported_type`; and `info` gives `file_max_bytes` in `limits`.
@@ -288,8 +290,9 @@ the server mode.
     **As built (lot M6).** The rows that take a file are `rooms.photo` (field `image`, an image
     only), `tasks.attachment` and `projects.projectfile` (field `file`, an image or a document
     of the allow-list of the attachments, [ADR 0034](0034-task-attachments.md)); the label of
-    an article and the photo of a report keep their reference in `extra`, until a lot of their
-    own. An upload waits under `MEDIA_ROOT/sync/<home>/` and counts in the quota of the home;
+    an article and the photo of a report kept their reference in `extra`, until
+    [ADR 0085](0085-photos-of-reports-and-labels-of-articles-as-sync-files.md) gave them the
+    same rules (fields `label` and `photo`, images only, `null` for no photo). An upload waits under `MEDIA_ROOT/sync/<home>/` and counts in the quota of the home;
     the row that refers to it takes it, moved into the folder of its app under the phone's id
     (`<home>/<file id><extension>`), so the id of the file of a row is read from the name of
     its stored file and a file made on the web keeps the id of its row. A row whose file has

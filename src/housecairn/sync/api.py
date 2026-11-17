@@ -852,7 +852,8 @@ class SyncFileView(SyncAPIView):
         },
         description=(
             "A file of the home by its id: one a phone uploaded, or the file of a photo, an "
-            "attachment or a file of a project made on the web, named by the id of its row."
+            "attachment, a file of a project, the photo of a report or the label of an article "
+            "made on the web, named by the id of its row."
         ),
     )
     def get(

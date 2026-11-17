@@ -12,9 +12,10 @@ change is recorded first, which decides the fields that win, then only those are
 Once the operations are applied, `sync.repairs` runs the repair rules across rows and the
 effects the web runs once per new state (lot M5b), in the same transaction. Not here: the
 creation of a home (M5c). The file field of a row that holds a file (`sync.files.HOLDERS`: a
-photo, an attachment, a file of a project) takes a file reference, which gives the row the file
-the phone uploaded under that id, or waits for it (lot M6). The file fields of the other types
-(the label of an article, the photo of a report) are still kept in `extra`.
+photo, an attachment, a file of a project, the photo of a report, the label of an article)
+takes a file reference, which gives the row the file the phone uploaded under that id, or waits
+for it (lot M6, docs/adr/0085). The photo of a report and the label of an article are optional:
+`null` there is a row without a file, or a file removed.
 """
 
 import datetime
@@ -470,6 +471,10 @@ def _apply_row(
     for name, value in fields.items():
         field = columns.writable.get(name)
         if holder is not None and name == holder.field:
+            if value is None and holder.optional:
+                # No photo, or the photo removed (a report, an article: docs/adr/0085).
+                values[name] = logged[name] = None
+                continue
             try:
                 values[name] = sync_files.parse_reference(value)
                 sync_files.check_digest(home.pk, values[name])
@@ -488,8 +493,10 @@ def _apply_row(
         )
     if stored is None:
         missing = [name for name in _required(model, columns) if values.get(name) is None]
-        if holder is not None and holder.field not in values:
-            missing.append(holder.field)  # a photo or an attachment is made with its file
+        if holder is not None and not holder.optional and holder.field not in values:
+            # A photo or an attachment is made with its file; a report or an article may have
+            # none (docs/adr/0085), as on the web.
+            missing.append(holder.field)
         if missing:
             raise MalformedError(
                 op.index, _("A new row needs %(fields)s.") % {"fields": ", ".join(sorted(missing))}
@@ -542,15 +549,23 @@ def _file_columns(
 
     def settle_files(row: Any, won: dict[str, Any], kind: str) -> dict[str, Any]:
         held = {} if settle is None else dict(settle(row, won, kind))
-        reference = won.get(holder.field)
-        if kind != changes.PUT or not isinstance(reference, sync_files.Reference):
+        if kind != changes.PUT or holder.field not in won:
             return held
-        columns, take = sync_files.columns_for(model, home.pk, reference)
+        reference = won[holder.field]
+        take = None
+        if reference is None:  # an optional file removed: the row keeps no file
+            columns = sync_files.empty_columns(holder)
+        elif isinstance(reference, sync_files.Reference):
+            columns, take = sync_files.columns_for(model, home.pk, reference)
+        else:  # pragma: no cover - the push reads a reference or null only
+            return held
         if stored is not None:
             before = getattr(stored, holder.field).name or ""
-            if sync_files.file_id_of(before, stored.pk) != str(reference.file):
+            if reference is None or sync_files.file_id_of(before, stored.pk) != str(reference.file):
                 storage: Any = model._meta.get_field(holder.field).storage  # type: ignore[union-attr]
-                sync_files.replaced(model, storage, [before, stored.thumbnail.name or ""])
+                sync_files.replaced(
+                    model, storage, [before, sync_files.thumbnail_of(stored, holder)]
+                )
         if take is not None:
             taking.append(take)
         return {**held, **columns}

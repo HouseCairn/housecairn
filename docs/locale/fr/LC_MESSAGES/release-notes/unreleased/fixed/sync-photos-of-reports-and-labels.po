@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Photos of reports and label photos in the mobile app.** With a Housecairn server, the [sync API](../../../api/sync.md#files) now serves and takes the photo of a report and the label photo of a stock article, as it does the photos of rooms and items: a photo added on the site reaches the phone, and one taken on the phone reaches the site, re-encoded without its metadata. A report or an article may still have no photo, and a phone can remove or replace it."
+msgstr "**Photos des signalements et photos d'étiquette dans l'application mobile.** Avec un serveur Housecairn, l'[API de synchronisation](../../../api/sync.md#files) sert et reçoit désormais la photo d'un signalement et la photo d'étiquette d'un article du stock, comme elle le fait des photos des pièces et des équipements : une photo ajoutée sur le site arrive sur le téléphone, et une photo prise sur le téléphone arrive sur le site, réencodée sans ses métadonnées. Un signalement ou un article peut toujours n'avoir aucune photo, et un téléphone peut la retirer ou la remplacer."
+

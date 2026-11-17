@@ -241,9 +241,8 @@ by any later operation. A `delete` or a `restore` writes the field `deleted_at`;
 brings back a deleted row, only a `restore` with a later clock does. A `delete` may come before
 the `put` of its row, from another phone: the server keeps it, the row then comes deleted, and
 the snapshot gives the deletion of a row the server does not have yet. A field the server has no column for (written by a newer app) is kept and given back to
-the other phones; so is, for now, the file reference of the label of an article and of the
-photo of a report. A photo, an attachment and a file of a project take the file their
-reference names ([Files](#files)). The server writes who acted, whatever the operation says: `completed_by_id` and
+the other phones. A photo, an attachment, a file of a project, the photo of a report and the
+label of an article take the file their reference names ([Files](#files)). The server writes who acted, whatever the operation says: `completed_by_id` and
 `closed_by_id` are the account of the phone, and so is `reporter_id` of a new report, which no
 later operation changes. `assignee_id` may name any member of the home.
 
@@ -316,8 +315,9 @@ A push to a home that was erased answers `410` with `"code": "home_gone"`, and a
 ## Files
 
 A photo of a room or an item (`rooms.photo`, field `image`), an attachment of a task
-(`tasks.attachment`, field `file`) and a file of a project (`projects.projectfile`, field
-`file`) hold a **file reference**:
+(`tasks.attachment`, field `file`), a file of a project (`projects.projectfile`, field
+`file`), the photo of a report (`reports.report`, field `photo`) and the photo of the label of
+an article (`stock.article`, field `label`) hold a **file reference**:
 
 ```json
 {"file": "3c1d9e2a-7b4f-4c8d-9e1a-2b3c4d5e6f70", "sha256": "9f86d081...", "size": 48213,
@@ -332,6 +332,11 @@ a value that is not one, the push is `400` `malformed`. So it is when the `sha25
 is not the digest of the file the home already holds under that `file`: the phone and the server
 never disagree silently about the bytes of a file. The answer carries the `index` of the
 operation. A reference to a file the server does not have yet is not compared: it waits.
+
+A report and an article may have no photo, as on the web ([ADR 0085](../adr/0085-photos-of-reports-and-labels-of-articles-as-sync-files.md)):
+their field is `null`, or left out when the row is made. A later `null` removes the photo, as a
+reference to another file replaces it; the server then removes the file it kept once the push
+is written. The photo of a room has no `null`: a photo is removed by deleting its row.
 
 The phone uploads the file **before** the push that refers to it:
 
@@ -356,7 +361,8 @@ location of the photo included), and gets a thumbnail; a document is kept as it 
 server keeps its own copy and the phone keeps its own, so the bytes the server sends back are
 not those of the upload. The file counts in the quota of the home from its upload.
 
-When a row refers to a file the server has, the row takes it; a photo takes an image only.
+When a row refers to a file the server has, the row takes it; a photo (of a room, of a report,
+of a label) takes an image only.
 When the server does not have it yet (the upload failed, or another phone holds it), the push
 is applied all the same and the row waits: the web shows no picture and a download is `404`,
 until the upload comes and the row takes the file. A file that no row refers to within 7 days
@@ -367,9 +373,10 @@ again first, with the same id and bytes.
 image (made by the server for its own pages; the app makes its thumbnails itself). The answer
 is the file the server keeps, with the type it found: an image inline, anything else as a
 download (`Content-Disposition`), with `X-Content-Type-Options: nosniff` and a policy that runs
-nothing. The file of a photo or an attachment made on the web is read by the id its reference
-gives. The answer is `404` for a file no row holds and never uploaded, or for the thumbnail of
-a document, and `400` for another `size`. A read-only member reads the files.
+nothing. The file of a photo, an attachment, a report or a label made on the web is read by the
+id its reference gives, which is the id of its row. The answer is `404` for a file no row holds
+and never uploaded, for the thumbnail of a document or of a label (the server keeps none), and
+`400` for another `size`. A read-only member reads the files.
 
 ## Errors
 

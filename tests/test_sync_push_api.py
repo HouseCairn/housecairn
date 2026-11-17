@@ -881,10 +881,10 @@ class TestMerge:
         assert clock.clock_of_instant(article.created_at) >> 16 == clock.parse_clock(made) >> 16
         assert Change.objects.get(row_id=article_id).fields["created_at"] == made
 
-    def test_a_file_reference_is_kept_until_the_files_lot(
+    def test_the_file_reference_of_a_label_waits_for_its_file(
         self, phone: Connected, alice_home: Home
     ) -> None:
-        """M6 maps file references; until then a phone's reference is a field kept in `extra`."""
+        """The label of an article takes its reference as a photo does (docs/adr/0085)."""
         from housecairn.stock.models import Article
 
         article_id = uuid.uuid4()
@@ -903,14 +903,23 @@ class TestMerge:
             )
         )
         assert result["status"] == "applied"
-        assert not Article.objects.get(pk=article_id).label  # no stored file, no path written
+        # No stored file yet: the column names the file to come, and nothing is on disk.
+        article = Article.objects.get(pk=article_id)
+        assert article.label.name == f"{alice_home.pk}/{reference['file']}"
         change = Change.objects.get(row_id=article_id)
         feed = reading.changes_after(alice_home.pk, change.pos - 1, 1)
         assert feed.changes[0]["op"]["f"]["label"] == reference
         line = next(
             line for line in reading.snapshot_lines(alice_home) if line.get("id") == str(article_id)
         )
-        assert line["f"]["label"][0] == reference
+        # The snapshot reads the column: the same file, of the type sent; no size is kept.
+        assert line["f"]["label"][0] == {
+            "file": reference["file"],
+            "size": None,
+            "type": "image/jpeg",
+            "width": None,
+            "height": None,
+        }
 
     def test_completed_by_is_the_account_of_the_phone(
         self,

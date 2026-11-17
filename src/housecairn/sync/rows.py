@@ -75,8 +75,9 @@ class Spec:
     # Bookkeeping columns a model sends all the same (`created_at` of the stock and reports).
     send: frozenset[str] = frozenset()
     # File fields sent by the name of the stored file, empty as null (the label of an article,
-    # the photo of a report); the reading maps them to a reference. The photos, attachments and
-    # files of a project send theirs as a `virtual` field (`sync.files`, lot M6).
+    # the photo of a report); the reading maps them to a reference (`sync.files`,
+    # docs/adr/0085). The photos, attachments and files of a project send theirs as a
+    # `virtual` field (`sync.files`, lot M6).
     file_names: frozenset[str] = frozenset()
 
 
