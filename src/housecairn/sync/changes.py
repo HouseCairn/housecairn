@@ -2,8 +2,10 @@
 
 `record_change` is called in the transaction that writes the row. It locks the row of the home,
 decides field by field which writes win (last writer wins by clock, then device), and adds one
-entry to the change feed with the next position of the home. Positions have no gap and no
-repeat: the position is taken under the lock and committed, or rolled back, with the write.
+entry to the change feed with the next position of the home. Positions have no repeat: the
+position is taken under the lock and committed, or rolled back, with the write. They have no gap
+either, but one: `view_changed` takes a position with no change when the view of a member of the
+home changes (docs/adr/0086).
 """
 
 import datetime
@@ -19,7 +21,7 @@ from django.utils import timezone
 
 from housecairn.homes.models import Home
 from housecairn.sync import clock
-from housecairn.sync.models import Change, HomeHead, RowClocks, ServerDevice
+from housecairn.sync.models import Change, HomeHead, MemberView, RowClocks, ServerDevice
 
 PUT = Change.Kind.PUT.value
 DELETE = Change.Kind.DELETE.value
@@ -188,6 +190,30 @@ def record_change(
             fields={} if kind != PUT else won,
         )
         return Recorded(change, lost)
+
+
+def view_changed(home: Home | uuid.UUID, user_id: uuid.UUID) -> int | None:
+    """What a member may read of a home changed: their phones start again from the snapshot.
+
+    Called in the transaction that changes it: a member who starts or stops writing (a
+    read-only member is given their own reports only, docs/adr/0086), or who joins the home
+    again. The head moves on by one position, with no change, and the member's view starts
+    there (`MemberView.since`): a phone whose cursor is below it, any cursor it got before the
+    change, is answered 410 `cursor_expired`, and the snapshot it reads then covers `since` at
+    least. The position, None for the example home of the guide, which never leaves its device.
+    """
+    home_id = home.pk if isinstance(home, Home) else home
+    with transaction.atomic():
+        locked = Home.all_objects.select_for_update().only("pk", "is_example").get(pk=home_id)
+        if locked.is_example:
+            return None
+        head, _created = HomeHead.objects.get_or_create(home_id=home_id)
+        head.pos += 1
+        head.save(update_fields=["pos"])
+        MemberView.objects.update_or_create(
+            home_id=home_id, user_id=user_id, defaults={"since": head.pos}
+        )
+        return head.pos
 
 
 def _stored_stamp(

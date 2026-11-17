@@ -15,7 +15,7 @@ themselves (`sync.files`, lot M6).
 
 import datetime
 import uuid
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import Any
 
@@ -27,7 +27,7 @@ from housecairn.accounts.names import person_name
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Membership
 from housecairn.sync import changes as sync_changes
-from housecairn.sync import clock, retention
+from housecairn.sync import clock, retention, visibility
 from housecairn.sync import files as sync_files
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, ErasedHome, ErasedHomeConnection, HomeHead, RowClocks
@@ -248,11 +248,20 @@ def operation_of(change: Change, row: models.Model | None = None) -> dict[str, A
     }
 
 
-def changes_after(home_id: uuid.UUID, after: int, limit: int) -> Page:
+def changes_after(
+    home_id: uuid.UUID,
+    after: int,
+    limit: int,
+    view: Callable[[], visibility.View] | None = None,
+) -> Page:
     """The changes of a home after the position `after`, at most `limit`, in position order.
 
     `after` and `limit` are checked by the caller to be integers, `after` at least 0 and
     `limit` between 1 and `MAX_LIMIT`; this checks them against the log of the home.
+
+    `view` reads what the member may see (`sync.visibility`), after the head: the changes of a
+    report they may not see are left out, and a cursor from before their view changed has
+    expired. None: every change (the tests of the log).
     """
     if after < 0 or not 1 <= limit <= MAX_LIMIT:
         raise ValueError("A cursor is at least 0 and a page holds 1 to MAX_LIMIT changes.")
@@ -261,11 +270,14 @@ def changes_after(home_id: uuid.UUID, after: int, limit: int) -> Page:
         raise CursorOutOfRangeError
     if after < head.floor:
         raise CursorExpiredError
+    seen = view() if view is not None else visibility.View(None)
+    if after < seen.since:
+        raise CursorExpiredError  # the phone holds what the member saw before (ADR 0086)
     # Up to the head read above: a change committed since then is in the next page.
     found = list(
-        Change.objects.filter(home_id=home_id, pos__gt=after, pos__lte=head.pos).order_by("pos")[
-            : limit + 1
-        ]
+        seen.changes(
+            Change.objects.filter(home_id=home_id, pos__gt=after, pos__lte=head.pos)
+        ).order_by("pos")[: limit + 1]
     )
     page, more = found[:limit], len(found) > limit
     files = _rows_with_files(page)
@@ -303,7 +315,9 @@ def _rows_with_files(page: list[Change]) -> dict[tuple[str, uuid.UUID], models.M
 # ---------- the snapshot ----------
 
 
-def snapshot_lines(home: Home) -> Iterator[dict[str, Any]]:
+def snapshot_lines(
+    home: Home, view: Callable[[], visibility.View] | None = None
+) -> Iterator[dict[str, Any]]:
     """The state of a home, one row per line, then its members, then `{"covers": pos}`.
 
     A line is `{"t", "h", "id", "f": {field: [value, clock, device]}}` (protocol section 2.4),
@@ -312,13 +326,17 @@ def snapshot_lines(home: Home) -> Iterator[dict[str, Any]]:
     the rows. A write committed meanwhile is then either after `covers`, and the feed gives it
     again (applying it twice changes nothing), or not seen at all; a value is never older than
     the clock given with it.
+
+    `view` reads what the member may see, after the head (`sync.visibility`): a report they
+    may not see has no line, its tombstone neither. None: every row.
     """
     lines: list[dict[str, Any]] = []
     with transaction.atomic():
         covers = head_of(home.pk).pos
+        shown = view() if view is not None else visibility.View(None)
         device = clock.device_to_b64(sync_changes.server_device())
         for entity in ENTITIES:
-            lines.extend(_entity_lines(home, entity, device))
+            lines.extend(_entity_lines(home, entity, device, shown))
         members = members_of(home)
     yield from lines
     yield {"members": members}
@@ -335,8 +353,15 @@ def _stamp(entry: list[str] | None, fallback: tuple[str, str]) -> tuple[str, str
     return (entry[0], entry[1]) if entry is not None else fallback
 
 
-def _entity_lines(home: Home, entity: str, server_device: str) -> list[dict[str, Any]]:
-    clocks = _clocks_of(home.pk, entity)
+def _entity_lines(
+    home: Home, entity: str, server_device: str, view: visibility.View
+) -> list[dict[str, Any]]:
+    # A row the member may not see has no line, its tombstone neither (docs/adr/0086).
+    clocks = {
+        row_id: rc
+        for row_id, rc in _clocks_of(home.pk, entity).items()
+        if not view.hides(entity, row_id)
+    }
     if is_link(entity):
         return _link_lines(home, entity, clocks, server_device)
     model = model_of(entity)
@@ -349,6 +374,8 @@ def _entity_lines(home: Home, entity: str, server_device: str) -> list[dict[str,
     lines = []
     seen = set()
     for row in queryset.order_by("pk").iterator():
+        if view.hides(entity, row.pk):
+            continue
         seen.add(row.pk)
         rc = clocks.get(row.pk)
         deleted_at = getattr(row, "deleted_at", None)

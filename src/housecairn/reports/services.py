@@ -82,14 +82,29 @@ def reports_of(home: Home) -> models.QuerySet[Report]:
     return Report.objects.filter(home=home).select_related(*_RELATED)
 
 
-def visible_reports(actor: AnyUser, home: Home) -> models.QuerySet[Report]:
-    """Every report for a member who writes; only their own for anyone else."""
-    reports = reports_of(home)
-    if home_services.can_write(actor, home):
+def sees_every_report(actor: AnyUser, home: Home) -> bool:
+    """Whether `actor` sees every report of `home`: a member who writes does, nobody else."""
+    return home_services.can_write(actor, home)
+
+
+def visible_among(
+    actor: AnyUser, home: Home, reports: models.QuerySet[Report]
+) -> models.QuerySet[Report]:
+    """The reports of `home` among `reports` that `actor` may see: the one rule of the reports.
+
+    Every report for a member who writes; only their own for anyone else. The site reads it by
+    `visible_reports`; the sync API (docs/adr/0086) by the rows it keeps, deleted ones included.
+    """
+    if sees_every_report(actor, home):
         return reports
     if not actor.is_authenticated:
         return reports.none()
     return reports.filter(reporter=actor)
+
+
+def visible_reports(actor: AnyUser, home: Home) -> models.QuerySet[Report]:
+    """Every report for a member who writes; only their own for anyone else."""
+    return visible_among(actor, home, reports_of(home))
 
 
 def reports_of_task(home: Home, actor: AnyUser) -> Any:

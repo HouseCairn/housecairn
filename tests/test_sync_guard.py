@@ -65,6 +65,7 @@ NOT_SYNCED = {
     "notifications.Delivery": "that a reminder was sent",
     "sync.Change": "the log itself",
     "sync.HomeHead": "the log itself",
+    "sync.MemberView": "the log itself: where the view of a member last changed",
     "sync.RowClocks": "the log itself",
     "sync.SyncFile": "the bytes of a file a phone uploaded; the row that refers to it syncs",
 }

@@ -413,11 +413,15 @@ def test_a_read_only_member_reads_the_file_and_sends_none(
     field: str,
     folder: str,
 ) -> None:
-    """As for the photo of a room: reading is a member's right, writing is not."""
+    """As for the photo of a room: reading is a member's right, writing is not.
+
+    The photo of a report made by another member is not theirs to read (docs/adr/0086).
+    """
     row = web_row(entity, alice, alice_home)
     add_member(alice_home, bob, Role.READ_ONLY)
     reader = connect(bob, [alice_home])
-    assert get(reader.access, alice_home.pk, row.pk).status_code == 200
+    expected = 404 if entity == REPORT else 200
+    assert get(reader.access, alice_home.pk, row.pk).status_code == expected
     answer = put(reader.access, alice_home.pk, uuid.uuid4(), image_bytes())
     assert (answer.status_code, answer.json()["code"]) == (403, "forbidden")
 

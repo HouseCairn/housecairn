@@ -41,7 +41,7 @@ from housecairn.homes.forms import HomeForm
 from housecairn.homes.models import Hemisphere, Home
 from housecairn.homes.scoping import allow, homes_for_request, open_homes_for_request
 from housecairn.sync import changes as sync_changes
-from housecairn.sync import clock, creating, files, limits, pushing, reading
+from housecairn.sync import clock, creating, files, limits, pushing, reading, visibility
 from housecairn.sync.models import Push
 
 READ_RATE_ACTION = limits.READ_ACTION
@@ -391,8 +391,11 @@ class SyncChangesView(SyncAPIView):
         limit = min(_integer(request, "limit", reading.DEFAULT_LIMIT), reading.MAX_LIMIT)
         if limit < 1:
             raise exceptions.ParseError(_("limit is 1 or more."))
+        user = cast(User, request.user)
         try:
-            page = reading.changes_after(home.pk, after, limit)
+            page = reading.changes_after(
+                home.pk, after, limit, view=lambda: visibility.view_of(user, home)
+            )
         except reading.CursorExpiredError:
             raise cursor_expired() from None
         except reading.CursorOutOfRangeError:
@@ -430,9 +433,10 @@ class SyncSnapshotView(SyncAPIView):
         _limited(request)
         _snapshot_limited(request)
         home = readable_home(request, home_id)
+        user = cast(User, request.user)
         body = "".join(
             json.dumps(line, ensure_ascii=False, separators=(",", ":")) + "\n"
-            for line in reading.snapshot_lines(home)
+            for line in reading.snapshot_lines(home, view=lambda: visibility.view_of(user, home))
         )
         return HttpResponse(body.encode(), content_type=f"{SNAPSHOT_TYPE}; charset=utf-8")
 
@@ -864,7 +868,9 @@ class SyncFileView(SyncAPIView):
         size = request.query_params.get("size")
         if size not in (None, THUMBNAIL):
             raise exceptions.ParseError(_("size is thumbnail, or left out."))
-        located = files.locate(home.pk, file_id)
+        # The photo of a report the member may not see answers as an id nobody holds.
+        view = visibility.view_of(cast(User, request.user), home)
+        located = files.locate(home.pk, file_id, hidden=view.hides)
         if located is None or (size == THUMBNAIL and not located.thumbnail):
             raise exceptions.NotFound
         return _file_response(located, thumbnail=size == THUMBNAIL)
