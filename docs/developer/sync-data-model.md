@@ -11,14 +11,16 @@ which give the homes of a connection, the changes after a position and the snaps
 
 Every write of a row of a home is a **change**: the row (its entity type and its id), the
 fields written with their new values, the clock and the device that wrote them. Changes of
-one home are numbered by a **position** (`pos`), 1, 2, 3... with no gap and no repeat, and a
-phone reads the feed from the last position it has seen.
+one home are numbered by a **position** (`pos`), 1, 2, 3... with no repeat, and a phone reads
+the feed from the last position it has seen. A position has no change only when the view of a
+member changed (`changes.view_changed`, below).
 
 | Table | Holds |
 | --- | --- |
 | `sync_homehead` | One row per home: the last position, the last clock, and the `floor`, the highest position the purge removed. |
 | `sync_change` | The feed: position, entity type (`rooms.room`), row id, kind (`put`, `delete`, `restore`), clock, device, fields written. |
 | `sync_rowclocks` | One row per row of a home: the clock and device of each field, the fields the server has no column for (`extra`), and when the row was deleted. |
+| `sync_memberview` | Per member of a home, the position where what they may read last changed (`since`): a cursor below it has expired. |
 | `sync_erasedhome` | The homes that were erased, with the connected apps that were bound to them. Outside the home. |
 | `sync_serverdevice` | The device id of the server: one row. |
 
@@ -139,6 +141,18 @@ A field with no column goes to `extra`, a JSON value per row with, for each fiel
 clock and device. It merges by the same rule and is given back by the feed, so a second phone
 gets the field a newer phone wrote. When a later version gains the column, its migration
 moves the value out of `extra`.
+
+## What each member reads
+
+A read-only member is given the reports they made and no others, by the rule of the site
+(`reports.services.visible_among`, read by `sync.visibility`): the feed leaves the changes of the
+other reports out in its query, the snapshot their rows and tombstones, and `GET` of a file the
+photo of one (`404`). The view is read after the head, in the same transaction for the snapshot.
+
+When an owner makes a member read-only or a member again, or when a person joins the home again
+by an invitation, `changes.view_changed` moves the head on by one position with no change and
+writes that position to `sync_memberview`. A cursor below it is answered `410`
+`cursor_expired`, and the phone starts again from the snapshot of its new view (ADR 0086).
 
 ## Erased homes
 

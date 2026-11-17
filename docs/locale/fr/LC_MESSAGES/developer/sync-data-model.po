@@ -27,8 +27,8 @@ msgstr "L'application mobile peut garder ses logements sur un serveur HouseCairn
 msgid "What is recorded"
 msgstr "Ce qui est enregistré"
 
-msgid "Every write of a row of a home is a **change**: the row (its entity type and its id), the fields written with their new values, the clock and the device that wrote them. Changes of one home are numbered by a **position** (`pos`), 1, 2, 3... with no gap and no repeat, and a phone reads the feed from the last position it has seen."
-msgstr "Toute écriture d'une ligne d'un logement est un **changement** : la ligne (son type d'entité et son identifiant), les champs écrits avec leurs nouvelles valeurs, l'horloge et l'appareil qui les ont écrits. Les changements d'un logement sont numérotés par une **position** (`pos`), 1, 2, 3... sans trou ni doublon, et un téléphone lit le flux à partir de la dernière position qu'il a vue."
+msgid "Every write of a row of a home is a **change**: the row (its entity type and its id), the fields written with their new values, the clock and the device that wrote them. Changes of one home are numbered by a **position** (`pos`), 1, 2, 3... with no repeat, and a phone reads the feed from the last position it has seen. A position has no change only when the view of a member changed (`changes.view_changed`, below)."
+msgstr "Toute écriture d'une ligne d'un logement est un **changement** : la ligne (son type d'entité et son identifiant), les champs écrits avec leurs nouvelles valeurs, l'horloge et l'appareil qui les ont écrits. Les changements d'un logement sont numérotés par une **position** (`pos`), 1, 2, 3... sans doublon, et un téléphone lit le flux à partir de la dernière position qu'il a vue. Une position n'a pas de changement seulement quand la vue d'un membre a changé (`changes.view_changed`, plus bas)."
 
 msgid "Table"
 msgstr "Table"
@@ -53,6 +53,12 @@ msgstr "`sync_rowclocks`"
 
 msgid "One row per row of a home: the clock and device of each field, the fields the server has no column for (`extra`), and when the row was deleted."
 msgstr "Une ligne par ligne d'un logement : l'horloge et l'appareil de chaque champ, les champs pour lesquels le serveur n'a pas de colonne (`extra`) et le moment où la ligne a été supprimée."
+
+msgid "`sync_memberview`"
+msgstr "`sync_memberview`"
+
+msgid "Per member of a home, the position where what they may read last changed (`since`): a cursor below it has expired."
+msgstr "Par membre d'un logement, la position où ce qu'il peut lire a changé pour la dernière fois (`since`) : un curseur en dessous a expiré."
 
 msgid "`sync_erasedhome`"
 msgstr "`sync_erasedhome`"
@@ -173,6 +179,15 @@ msgstr "Les champs que le serveur ne connaît pas"
 
 msgid "A field with no column goes to `extra`, a JSON value per row with, for each field, its value, clock and device. It merges by the same rule and is given back by the feed, so a second phone gets the field a newer phone wrote. When a later version gains the column, its migration moves the value out of `extra`."
 msgstr "Un champ sans colonne va dans `extra`, une valeur JSON par ligne qui garde, pour chaque champ, sa valeur, son horloge et son appareil. Il fusionne par la même règle et est rendu par le flux, de sorte qu'un second téléphone reçoit le champ qu'un téléphone plus récent a écrit. Quand une version ultérieure gagne la colonne, sa migration sort la valeur de `extra`."
+
+msgid "What each member reads"
+msgstr "Ce que lit chaque membre"
+
+msgid "A read-only member is given the reports they made and no others, by the rule of the site (`reports.services.visible_among`, read by `sync.visibility`): the feed leaves the changes of the other reports out in its query, the snapshot their rows and tombstones, and `GET` of a file the photo of one (`404`). The view is read after the head, in the same transaction for the snapshot."
+msgstr "Un membre en lecture seule reçoit les signalements qu'il a faits et aucun autre, par la règle du site (`reports.services.visible_among`, lue par `sync.visibility`) : le flux écarte dans sa requête les changements des autres signalements, l'instantané leurs lignes et leurs pierres tombales, et le `GET` d'un fichier la photo de l'un d'eux (`404`). La vue est lue après la tête, dans la même transaction pour l'instantané."
+
+msgid "When an owner makes a member read-only or a member again, or when a person joins the home again by an invitation, `changes.view_changed` moves the head on by one position with no change and writes that position to `sync_memberview`. A cursor below it is answered `410` `cursor_expired`, and the phone starts again from the snapshot of its new view (ADR 0086)."
+msgstr "Quand un propriétaire fait passer un membre en lecture seule ou de nouveau en membre, ou quand une personne rejoint de nouveau le logement par une invitation, `changes.view_changed` avance la tête d'une position sans changement et écrit cette position dans `sync_memberview`. Un curseur en dessous reçoit `410` `cursor_expired`, et le téléphone repart de l'instantané de sa nouvelle vue (ADR 0086)."
 
 msgid "Erased homes"
 msgstr "Logements effacés"

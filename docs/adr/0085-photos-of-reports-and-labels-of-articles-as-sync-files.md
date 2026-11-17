@@ -65,7 +65,9 @@ field does. Nothing else moves: such a reference names no file the server has.
 
 **Who reads.** As for the photo of a room: a home of the connection only, `404` otherwise, an
 upload refused to a read-only member (`403`) who still reads the files, a row deleted read
-while it can be restored and `404` once gone for good, nothing of the example home.
+while it can be restored and `404` once gone for good, nothing of the example home. Since
+[ADR 0086](0086-a-read-only-member-syncs-their-own-reports.md), the photo of a report made by
+another member answers `404` to a read-only member.
 
 ## Consequences
 
