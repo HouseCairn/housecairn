@@ -75,7 +75,7 @@ def test_the_beta_is_a_help_entry_with_its_icon_and_the_other_entries_stay_in_th
     entries = [e for g in more.groups(alice) if g.key == more.HELP for e in g.entries]
     beta = [e for e in entries if e.url == about_links.TESTFLIGHT_URL]
     assert [e.icon for e in beta] == ["phone-download"]
-    assert [e.external for e in entries] == [False, False, True, False]
+    assert [e.external for e in entries] == [False, False, False, True, False]
 
 
 @pytest.mark.django_db
