@@ -145,6 +145,12 @@ def record_change(
                 value = clock.format_clock(made)
             is_known = known is None or name in known or name == DELETED_AT
             stored = _stored_stamp(row, name, is_known, server_stamp)
+            if is_known and name in row.extra:
+                # A field kept in `extra` before the server took it (the photo of a report and
+                # the label of an article, docs/adr/0085): the later of the two stamps.
+                kept = _stored_stamp(row, name, False, None)
+                if stored is None or (kept is not None and clock.wins(kept, stored)):
+                    stored = kept
             if stored is not None and not clock.wins(new, stored):
                 lost[name] = (clock.format_clock(stored[0]), clock.device_to_b64(stored[1]))
                 continue
@@ -152,6 +158,7 @@ def record_change(
             encoded = clock.device_to_b64(device)
             if is_known:
                 row.clocks[name] = [clock.format_clock(made), encoded]
+                row.extra.pop(name, None)  # the column holds it now
             else:
                 row.extra[name] = [value, clock.format_clock(made), encoded]
 

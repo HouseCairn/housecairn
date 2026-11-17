@@ -28,6 +28,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Membership
 from housecairn.sync import changes as sync_changes
 from housecairn.sync import clock, retention
+from housecairn.sync import files as sync_files
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, ErasedHome, ErasedHomeConnection, HomeHead, RowClocks
 
@@ -107,27 +108,23 @@ def is_link(entity: str) -> bool:
 
 
 def file_reference(
-    model: type[models.Model], name: str, row: models.Model | None, row_id: Any
+    model: type[models.Model], name: str, row: models.Model | None, row_id: Any, stored: str
 ) -> Any:
     """A file the change log keeps by the name of its stored file, as a reference.
 
-    The reference is named by the id of the row, as a photo made on the web is
-    (`rooms.syncing`); the name of the stored file never leaves the server. Its type and size
-    are those the row keeps for its file now, when it keeps them.
+    The photo of a report and the label of an article (docs/adr/0085). The reference is named
+    by the file id the stored name holds: the id of the row for a file made on the web, as a
+    photo of a room is (`rooms.syncing`), the phone's id for a file a phone sent, with the
+    digest of what it sent. The name of the stored file never leaves the server. Its type and
+    size are those the row keeps for its file now, when it keeps them.
     """
-
-    def column(suffix: str) -> Any:
-        if row is None:
-            return None
-        return getattr(row, f"{name}_{suffix}", None) or None
-
-    return {
-        "file": str(row_id),
-        "size": column("size_bytes"),
-        "type": column("content_type"),
-        "width": None,
-        "height": None,
-    }
+    holder = sync_files.holder_of(model)
+    if holder is None or holder.field != name:  # pragma: no cover - every file field holds
+        raise ValueError(f"{model._meta.label}.{name} holds no file.")
+    reference = sync_files.stored_reference(row, holder, stored, row_id)
+    for key in ("size", "type"):
+        reference[key] = reference[key] or None  # a column of a row without a file: none
+    return reference
 
 
 def public_fields(
@@ -140,8 +137,8 @@ def public_fields(
     file_names = sync_rows.spec_of(model).file_names
     return {
         name: (
-            file_reference(model, name, row, row_id)
-            # A stored file name; a reference a phone pushed is kept as it came (`extra`).
+            file_reference(model, name, row, row_id, value)
+            # A stored file name; a reference a phone pushed is given as it came.
             if name in file_names and isinstance(value, str)
             else value
         )

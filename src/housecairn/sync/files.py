@@ -20,6 +20,9 @@ with a **file reference** `{"file": uuid, "sha256": hex, "size", "type", "width"
   thumbnail) without a change of the feed: the reference of the row, which is what the feed
   carries, does not change.
 - A file no row ever referred to is removed by the nightly purge after 7 days (`purge`).
+- The photo of a report and the label of an article are optional (docs/adr/0085): `null`
+  removes the file of the row, as a new reference replaces it. Each keeps the columns its model
+  had for the file (`photo_content_type`, `label_content_type`).
 """
 
 import contextlib
@@ -61,6 +64,14 @@ class Holder:
     images_only: bool
     # Whether the model keeps `is_image` (an attachment, a project file).
     has_is_image: bool
+    # The columns of the model for what the server keeps of the file: its type, its size and
+    # its thumbnail (None: the model keeps none), and whether it keeps `width` and `height`.
+    content_type: str = "content_type"
+    size: str | None = "size_bytes"
+    thumbnail: str | None = "thumbnail"
+    dimensions: bool = True
+    # Whether a row may hold no file: `null` in an operation removes it (docs/adr/0085).
+    optional: bool = False
 
 
 HOLDERS: dict[str, Holder] = {
@@ -68,6 +79,27 @@ HOLDERS: dict[str, Holder] = {
     "tasks.attachment": Holder("tasks.attachment", "file", images_only=False, has_is_image=True),
     "projects.projectfile": Holder(
         "projects.projectfile", "file", images_only=False, has_is_image=True
+    ),
+    "reports.report": Holder(
+        "reports.report",
+        "photo",
+        images_only=True,
+        has_is_image=False,
+        content_type="photo_content_type",
+        size="photo_size_bytes",
+        dimensions=False,
+        optional=True,
+    ),
+    "stock.article": Holder(
+        "stock.article",
+        "label",
+        images_only=True,
+        has_is_image=False,
+        content_type="label_content_type",
+        size=None,
+        thumbnail=None,
+        dimensions=False,
+        optional=True,
     ),
 }
 
@@ -85,6 +117,51 @@ def holder_of(model: type[models.Model]) -> Holder | None:
 def _storage(model: type[models.Model], holder: Holder) -> Storage:
     field: Any = model._meta.get_field(holder.field)
     return field.storage  # type: ignore[no-any-return]
+
+
+def thumbnail_of(row: Any, holder: Holder) -> str:
+    """The name of the stored thumbnail of a row, "" when it has none or its model keeps none."""
+    if holder.thumbnail is None:
+        return ""
+    return getattr(row, holder.thumbnail).name or ""
+
+
+def _names(holder: Holder, name: str, thumbnail: str) -> dict[str, Any]:
+    """The columns of the names of a stored file and of its thumbnail."""
+    columns: dict[str, Any] = {holder.field: name}
+    if holder.thumbnail is not None:
+        columns[holder.thumbnail] = thumbnail
+    return columns
+
+
+def _file_columns(
+    holder: Holder,
+    name: str,
+    *,
+    thumbnail: str,
+    content_type: str,
+    size: int,
+    width: int | None,
+    height: int | None,
+    is_image: bool,
+) -> dict[str, Any]:
+    """The columns a row of `holder` keeps for a file, under the names of its model."""
+    columns = {**_names(holder, name, thumbnail), holder.content_type: content_type}
+    if holder.size is not None:
+        columns[holder.size] = size
+    if holder.dimensions:
+        columns["width"] = width if width is not None or not holder.images_only else 0
+        columns["height"] = height if height is not None or not holder.images_only else 0
+    if holder.has_is_image:
+        columns["is_image"] = is_image
+    return columns
+
+
+def empty_columns(holder: Holder) -> dict[str, Any]:
+    """The columns of a row that holds no file: `null` for a holder whose file is optional."""
+    return _file_columns(
+        holder, "", thumbnail="", content_type="", size=0, width=0, height=0, is_image=False
+    )
 
 
 # ---------- the reference of an operation ----------
@@ -184,13 +261,29 @@ def reference_of(instance: Any, holder: Holder) -> dict[str, Any]:
     dimensions are those of the file the server keeps (or of the reference, while it waits).
     """
     name = getattr(instance, holder.field).name or ""
-    file_id = file_id_of(name, instance.pk)
+    return stored_reference(instance, holder, name, instance.pk)
+
+
+def stored_reference(row: Any, holder: Holder, name: str, row_id: Any) -> dict[str, Any]:
+    """The reference of the stored file `name` of the row `row_id` (`row` None: it is gone).
+
+    The file id is read from the name; the size, type and dimensions are those the row keeps
+    now, None for what its model does not keep (the size of a label, the dimensions of the
+    photo of a report).
+    """
+
+    def column(column_name: str | None) -> Any:
+        if row is None or column_name is None:
+            return None
+        return getattr(row, column_name, None)
+
+    file_id = file_id_of(name, row_id)
     reference: dict[str, Any] = {
         "file": file_id,
-        "size": instance.size_bytes,
-        "type": instance.content_type,
-        "width": instance.width,
-        "height": instance.height,
+        "size": column(holder.size),
+        "type": column(holder.content_type),
+        "width": column("width") if holder.dimensions else None,
+        "height": column("height") if holder.dimensions else None,
     }
     digest = SyncFile.objects.filter(pk=file_id).values_list("sha256", flat=True).first()
     if digest is not None:
@@ -217,18 +310,18 @@ def columns_for(
     if found is not None and (found.is_image or not holder.images_only):
         columns = _stored_columns(holder, found, home_id)
         return columns, lambda row: _take(row, holder, found)
-    columns = {
-        holder.field: pending_name(home_id, reference.file),
-        "thumbnail": "",
-        "content_type": reference.type[: model._meta.get_field("content_type").max_length],  # type: ignore[union-attr]
-        "size_bytes": reference.size,
-        "width": reference.width if reference.width is not None or not holder.images_only else 0,
-        "height": (
-            reference.height if reference.height is not None or not holder.images_only else 0
-        ),
-    }
-    if holder.has_is_image:
-        columns["is_image"] = reference.type.startswith("image/")
+    type_field: Any = model._meta.get_field(holder.content_type)
+    longest: int = type_field.max_length
+    columns = _file_columns(
+        holder,
+        pending_name(home_id, reference.file),
+        thumbnail="",
+        content_type=reference.type[:longest],
+        size=reference.size,
+        width=reference.width,
+        height=reference.height,
+        is_image=reference.type.startswith("image/"),
+    )
     return columns, None
 
 
@@ -238,17 +331,16 @@ def _extension(found: SyncFile) -> str:
 
 def _stored_columns(holder: Holder, found: SyncFile, home_id: uuid.UUID) -> dict[str, Any]:
     extension = _extension(found) or _held_extension(found)
-    columns: dict[str, Any] = {
-        holder.field: f"{home_id}/{found.pk}{extension}",
-        "thumbnail": f"{home_id}/{found.pk}{THUMBNAIL_SUFFIX}" if found.is_image else "",
-        "content_type": found.content_type,
-        "size_bytes": found.size_bytes,
-        "width": found.width if found.width is not None or not holder.images_only else 0,
-        "height": found.height if found.height is not None or not holder.images_only else 0,
-    }
-    if holder.has_is_image:
-        columns["is_image"] = found.is_image
-    return columns
+    return _file_columns(
+        holder,
+        f"{home_id}/{found.pk}{extension}",
+        thumbnail=f"{home_id}/{found.pk}{THUMBNAIL_SUFFIX}" if found.is_image else "",
+        content_type=found.content_type,
+        size=found.size_bytes,
+        width=found.width,
+        height=found.height,
+        is_image=found.is_image,
+    )
 
 
 def _held_extension(found: SyncFile) -> str:
@@ -277,9 +369,7 @@ def _take(row: Any, holder: Holder, found: SyncFile) -> None:
         return
     if shared:
         name, thumbnail = _own_names(row, holder, name)
-        type(row)._base_manager.filter(pk=row.pk).update(
-            **{holder.field: name, "thumbnail": thumbnail}
-        )
+        type(row)._base_manager.filter(pk=row.pk).update(**_names(holder, name, thumbnail))
         row.refresh_from_db()
     source = locate(found.home_id, found.pk, exclude=(model, row.pk))
     if source is None:  # the bytes are gone (removed by hand): the row keeps the reference
@@ -307,23 +397,21 @@ def _own_names(row: Any, holder: Holder, name: str) -> tuple[str, str]:
     """The names of a copy of a file for `row`: the file id, then a part of the row's id."""
     path = PurePosixPath(name)
     stem = f"{path.parent}/{path.name[:36]}-{str(row.pk)[:8]}"
-    thumbnail = f"{stem}{THUMBNAIL_SUFFIX}" if row.thumbnail.name else ""
+    thumbnail = f"{stem}{THUMBNAIL_SUFFIX}" if thumbnail_of(row, holder) else ""
     return f"{stem}{path.suffix}", thumbnail
 
 
 def _copy(source: "Located", target: Storage, name: str, row: Any, holder: Holder) -> None:
     with source.storage.open(source.name, "rb") as handle:
         saved = target.save(name, handle)
-    thumbnail = row.thumbnail.name
+    thumbnail = thumbnail_of(row, holder)
     if source.thumbnail and thumbnail:
         with source.storage.open(source.thumbnail, "rb") as handle:
             saved_thumb = target.save(thumbnail, handle)
     else:
         saved_thumb = thumbnail
     if saved != name or saved_thumb != thumbnail:  # the storage chose another name
-        type(row)._base_manager.filter(pk=row.pk).update(
-            **{holder.field: saved, "thumbnail": saved_thumb}
-        )
+        type(row)._base_manager.filter(pk=row.pk).update(**_names(holder, saved, saved_thumb))
 
 
 def _mark_referenced(found: SyncFile) -> None:
@@ -355,7 +443,13 @@ def replaced(model: type[models.Model], storage: Storage, names: Iterable[str]) 
             model._base_manager.filter(**{f"{holder.field}__in": kept}).values_list(
                 holder.field, flat=True
             )
-        ) | set(model._base_manager.filter(thumbnail__in=kept).values_list("thumbnail", flat=True))
+        )
+        if holder.thumbnail is not None:
+            held |= set(
+                model._base_manager.filter(**{f"{holder.thumbnail}__in": kept}).values_list(
+                    holder.thumbnail, flat=True
+                )
+            )
         _delete(storage, [name for name in kept if name not in held])
 
     transaction.on_commit(remove)
@@ -405,8 +499,8 @@ def locate(
         return Located(
             storage,
             name,
-            row.thumbnail.name or "",
-            row.content_type,
+            thumbnail_of(row, holder),
+            getattr(row, holder.content_type),
             is_image,
             str(file_id),
         )
