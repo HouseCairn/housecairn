@@ -20,6 +20,45 @@ The notes of each version are also published with it on the project's
 ```{release-fragments} upgrade
 ```
 
+## 0.5.1
+
+HouseCairn is still alpha software. This version adds an interactive guide on an example home that never leaves the instance, filters in tabs and search as you type on the lists, a shortcut to the iOS app beta and finishing touches on the screens. It also fixes the return to the mobile app after its sign-in, and gives the mobile app the photos of reports and of labels and, for a read-only member, only their own reports. Read the upgrade notes before updating: three migrations run, and no setting is new.
+
+### New
+
+- **Finishing touches of the screens.** Each entry of [More](screens/more.md) has its icon. The page of [task templates](screens/task-templates.md) is lists of rows under a heading per equipment, each row one box to tick, and it can be opened from a [room](screens/room.md), with that room already chosen. An [item](screens/item.md) with no photo shows a dashed frame under **Photos**, and the actions of a room and of an item are one row of buttons as wide as their text. The budget lines of a [project](screens/project.md) name the planned amount with the same word as the other budget screens (in French, *Prévu* everywhere instead of *Prévue* on this one). On the pages shown signed out, such as the sign-in page, each language is a button: tapping it applies it, and the **Change** button is gone.
+
+- **Filters in tabs, search as you type, one target a row.** A filter of state is now a tab, with the current one marked: **Open**, **Closed**, **All** and **Mine** on the [reports](screens/reports.md), **To do** and **Done** on the [tasks](screens/tasks.md), **All** and **Low stock** on the [stock](screens/stock.md). The other criteria are folded under **Filters (2)**, a sheet that says how many apply, on the [projects](screens/projects.md), the tasks to do, the [history](screens/history.md) and the [equipment](screens/equipment.md). The search fields have a magnifier and no button: the list follows what you type, after a short pause, and the address keeps the words. The [rooms](screens/rooms.md) search shows its results in place. The year of the [budget](screens/budget.md) follows its choice, without **Show**, and the repeated **By room**, **By project** and **By task of the upkeep** links are gone from its summary. A row is one link over its whole width: the tasks of a [project](screens/project.md) no longer carry a **Take out** button (it is on the page of the task), a budget line opens its form from its name, and the rows of the budget tables open their room, project or task from anywhere. **Compare projects** turns the rows into boxes to tick. The two forms for a project's tasks are two buttons. Without JavaScript, everything still works: Enter sends a search, and a **Filter**, **Search** or **Show** button appears where a choice needs one.
+
+- **Guide in the documentation.** [Guide](getting-started/guide.md), under Getting started, walks through five scenarios on a fictional example home: create a home, add rooms and equipment, plan a recurring task, report a problem, follow a project and its budget. Each step links to the reference page of its screen.
+
+- **Interactive guide.** **More › Help › Guide** (also on the welcome page and on an empty
+  Today) walks through five scenarios on an example home with fictional values: create a home,
+  add rooms and equipment, plan a recurring task, report a problem, follow a project and its
+  budget. Each step opens the real screen, where **Fill in for me** fills in a form with the
+  example's values, and ticks itself once done, except a few that you tick with
+  **Mark as done**. The example home carries a banner on each of its pages, never
+  leaves the instance, and goes with **Delete the example home** and one confirmation
+  ([Guide](screens/guide.md)).
+
+- **Shortcut to the iOS app beta.** **More** (under **Help**) and [About](screens/about.md) have an **iOS app (TestFlight beta)** entry that opens the page to join the beta, in a new tab (iPhone, TestFlight required). It is also mentioned in [Install on a phone](getting-started/phone.md). Nothing is loaded from that site until you follow the link. See [More](screens/more.md).
+
+### Fixed
+
+- **Gauges drawn the same everywhere.** Every gauge of the [budget](screens/budget.md) screens, from the overview to the budgets by room, of a room, by project and of the upkeep, is now one bar of 8 px, in the colour of the application on its muted background, and in the warning colour once the spending goes beyond 100 %. The percentage stays in text, on the same line as the bar, instead of wrapping under it.
+
+- **Mobile app sign-in.** After Connect or Cancel on the consent page, the browser now returns to the mobile app. The page's Content Security Policy (`form-action`) blocked the redirect to the app, so the browser stayed on the site, while Connect had already connected the phone and sent its security email. Only the consent page allows the app's scheme; the other pages keep their policy.
+
+- **Photos of reports and label photos in the mobile app.** With a Housecairn server, the [sync API](api/sync.md#files) now serves and takes the photo of a report and the label photo of a stock article, as it does the photos of rooms and items: a photo added on the site reaches the phone, and one taken on the phone reaches the site, re-encoded without its metadata. A report or an article may still have no photo, and a phone can remove or replace it.
+
+- **A read-only member's phone shows their own reports only.** With a Housecairn server, the [sync API](api/sync.md#the-changes) gave the phone of a read-only member every report of the home, with its photo, when the site shows them only the reports they made. It now gives them the same reports as the site. When an owner makes a member read-only, or a member again, their phone starts again from the server's data at its next sync, with the reports their new role shows; a phone that held the reports of others before this version drops them at its next sync too.
+
+### Upgrade notes
+
+- **Three migrations.** `homes.0008` adds the mark of an example home, `guide.0001` adds the table of the steps of the guide that are done, and `sync.0005` adds what each read-only member's phone may see: in each home that has a read-only member, it moves the sync position on by one, so that at their next sync the phones of these members start again from the server's data, with their own reports only. No setting and no dependency are new, and the export format stays version 4. Going back to 0.5.0 after the update needs the [backup](administration/backup.md) made before: 0.5.0 does not know the example home and would treat it as an ordinary home, and would again give a read-only member's phone every report ([Update](administration/update.md)).
+
+- **Backups leave the example home out.** `backup_instance` removes the example homes, with their files, from the copy it archives, and says how many it left out; `restore_instance` erases a home that arrives marked as an example. With PostgreSQL, when the database holds an example home, the backup cleans a scratch database made from the dump: the database role then needs the right to create a database, or the backup stops and says so (delete the example home, or allow `CREATEDB`). See [Data and backups](administration/backup.md).
+
 ## 0.5.0
 
 HouseCairn is still alpha software. This version lets the mobile app do more through the sync API: create on the server a home it made, upload and read the files of photos, attachments and project files, and know which member of a home is the connected account. It also shows the version of the application on the About screen and adds **Add an item** to the Equipment list. Read the upgrade notes before updating: one migration runs, and no setting is new.
