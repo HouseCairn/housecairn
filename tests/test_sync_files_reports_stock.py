@@ -326,21 +326,29 @@ def test_null_removes_the_file(
 def test_a_value_kept_in_extra_before_gives_way_to_the_column(
     phone: Connected, alice_home: Home
 ) -> None:
-    """A reference a phone pushed before this change was kept in `extra`; a later write wins."""
+    """A reference a phone pushed before this change was kept in `extra`, with its clock.
+
+    A write of the column older than that clock loses to it; a later one wins, and the value
+    leaves `extra`, so that the snapshot gives the column and no longer the old value.
+    """
     row_id = uuid.uuid4()
-    assert results(pushed(phone, alice_home, row_op(alice_home, REPORT, row_id, None)))
+    made = row_op(alice_home, REPORT, row_id, None)
+    del made["f"]["photo"]
+    assert results(pushed(phone, alice_home, made))[0]["status"] == "applied"
     clocks = RowClocks.objects.get(row_id=row_id)
-    old_clock = stamp(-60_000)
-    clocks.extra["photo"] = [
-        '{"size": 1, "type": "image/jpeg"}',
-        old_clock,
-        clocks.clocks["title"][1],
-    ]
+    old = '{"size": 1, "type": "image/jpeg"}'
+    clocks.extra["photo"] = [old, stamp(60_000), clocks.clocks["title"][1]]
     clocks.save()
+    older = row_op(alice_home, REPORT, row_id, None, c=stamp(30_000))
+    del older["f"]["title"]
+    assert results(pushed(phone, alice_home, older, number=2))[0]["status"] == "ignored"
+    clocks.refresh_from_db()
+    assert clocks.extra["photo"][0] == old
     data, file_id = image_bytes(), uuid.uuid4()
     put(phone.access, alice_home.pk, file_id, data)
-    later = row_op(alice_home, REPORT, row_id, reference(file_id, data), c=stamp(1000))
-    assert results(pushed(phone, alice_home, later, number=2))[0]["status"] == "applied"
+    later = row_op(alice_home, REPORT, row_id, reference(file_id, data), c=stamp(120_000))
+    del later["f"]["title"]
+    assert results(pushed(phone, alice_home, later, number=3))[0]["status"] == "applied"
     clocks.refresh_from_db()
     assert "photo" not in clocks.extra
     line = next(
@@ -348,21 +356,6 @@ def test_a_value_kept_in_extra_before_gives_way_to_the_column(
     )
     assert line["f"]["photo"][0]["file"] == str(file_id)
     assert line["f"]["photo"][0]["sha256"] == sha(data)
-
-
-def test_a_write_older_than_the_value_kept_in_extra_loses(
-    phone: Connected, alice_home: Home
-) -> None:
-    row_id = uuid.uuid4()
-    pushed(phone, alice_home, row_op(alice_home, REPORT, row_id, None))
-    clocks = RowClocks.objects.get(row_id=row_id)
-    clocks.extra["photo"] = ["kept", stamp(120_000), clocks.clocks["title"][1]]
-    clocks.save()
-    older = row_op(alice_home, REPORT, row_id, None, c=stamp(60_000))
-    del older["f"]["title"]
-    assert results(pushed(phone, alice_home, older, number=2))[0]["status"] == "ignored"
-    clocks.refresh_from_db()
-    assert clocks.extra["photo"][0] == "kept"
 
 
 # ---------- who reads and writes ----------
