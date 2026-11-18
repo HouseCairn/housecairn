@@ -252,7 +252,10 @@ try() { # title, command...
 try "docker exec: a shell" docker exec hc-trial-debug sh -c 'id'
 try "docker exec: Python, the entry point's manage subcommand" \
   docker exec hc-trial-debug python -m housecairn.entrypoint manage check
-try "docker cp out of the container" docker cp hc-trial-debug:/app/.venv/pyvenv.cfg -
+# `docker cp … -` writes a tar stream: unpacked to standard output, so that the
+# file's content is printed rather than its tar header.
+try "docker cp out of the container" \
+  bash -c 'set -o pipefail; docker cp hc-trial-debug:/app/.venv/pyvenv.cfg - | tar -xOf -'
 try "Attached busybox: same PID and network namespaces, same user, no capability, read-only" \
   docker run --rm --pid=container:hc-trial-debug --network=container:hc-trial-debug \
   --user 10001:10001 --cap-drop ALL --security-opt no-new-privileges --read-only "$BUSYBOX" \
