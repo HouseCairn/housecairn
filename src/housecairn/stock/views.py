@@ -240,7 +240,7 @@ class ArticleDetailView(HomeStockMixin, TemplateView):
 
 
 class ItemStockMixin(HomeStockMixin):
-    """A page of the stock that starts from an item of the home (docs/adr/0087)."""
+    """A page of the stock that starts from an item of the home (docs/adr/0088)."""
 
     require_write = True
 

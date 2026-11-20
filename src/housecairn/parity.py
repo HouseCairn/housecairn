@@ -118,7 +118,7 @@ PARITY: dict[str, tuple[str, ...]] = {
     "stock:label": ("api-v1:home-article-label",),
     "stock:movement-add": ("api-v1:home-movement-list",),
     # The stock of an item, edited from the item: the `compatible_items` of an article
-    # (docs/adr/0087).
+    # (docs/adr/0088).
     "stock:item-link": ("api-v1:home-article-detail",),
     "stock:item-create": ("api-v1:home-article-list",),
     "stock:item-unlink": ("api-v1:home-article-detail",),

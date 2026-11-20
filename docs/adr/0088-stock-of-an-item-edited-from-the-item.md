@@ -1,4 +1,4 @@
-# 0087. The stock of an item is edited from the item as well as from the stock item
+# 0088. The stock of an item is edited from the item as well as from the stock item
 
 - Status: accepted
 - Date: 2026-11-20

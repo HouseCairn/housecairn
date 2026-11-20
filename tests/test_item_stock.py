@@ -1,10 +1,11 @@
-"""The stock on the page of an item: link, create in place, take out (docs/adr/0087).
+"""The stock on the page of an item: link, create in place, take out (docs/adr/0088).
 
 The link is the `compatible_items` of the article, edited from the other side. Nothing is stored
 differently: the tests also check that the sync and the audit see the same change as with the
 form of the article.
 """
 
+import re
 from decimal import Decimal
 
 import pytest
@@ -172,7 +173,7 @@ class TestLinking:
             services.link_articles(alice, owner_item, [foreign_article])
         assert linked(foreign_article) == set()
 
-    def test_an_item_of_another_home_is_a_404(
+    def test_a_home_that_is_not_the_one_of_the_item_is_a_404(
         self, client: Client, bob: User, alice_home: Home, owner_item: Item, article: Article
     ) -> None:
         client.force_login(bob)
@@ -184,6 +185,30 @@ class TestLinking:
         ):
             address = stock_url(name, alice_home, owner_item, **extra)
             assert getattr(client, method)(address).status_code == 404, address
+
+    def test_an_item_of_another_home_is_a_404_through_the_own_home(
+        self,
+        client: Client,
+        bob: User,
+        bob_home: Home,
+        owner_item: Item,
+        article: Article,
+        foreign_article: Article,
+    ) -> None:
+        # Bob is a member of his own home and asks for the item of Alice through it: the home
+        # is fine, the item is not in it.
+        client.force_login(bob)
+        link = stock_url("item-link", bob_home, owner_item)
+        create = stock_url("item-create", bob_home, owner_item)
+        unlink = stock_url("item-unlink", bob_home, owner_item, article_id=foreign_article.id)
+        assert client.get(link).status_code == 404
+        assert client.post(link, {"articles": [foreign_article.id]}).status_code == 404
+        assert client.get(create).status_code == 404
+        assert client.post(create, {"name": "Gasket"}).status_code == 404
+        assert client.post(unlink).status_code == 404
+        assert linked(foreign_article) == set()
+        assert linked(article) == {owner_item}
+        assert not Article.objects.filter(name="Gasket").exists()
 
     def test_the_link_is_a_sync_change_like_the_one_of_the_form(
         self, alice: User, alice_home: Home, owner_item: Item, filter_article: Article
@@ -398,3 +423,49 @@ class TestFrench:
             stock_url("item-link", alice_home, owner_item), HTTP_ACCEPT_LANGUAGE="fr"
         ).text
         assert "Lier un article" in link
+
+
+class TestRequestSafety:
+    def test_taking_out_needs_the_csrf_token(
+        self, alice: User, alice_home: Home, owner_item: Item, article: Article
+    ) -> None:
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(alice)
+        address = stock_url("item-unlink", alice_home, owner_item, article_id=article.id)
+        assert client.post(address).status_code == 403
+        assert linked(article) == {owner_item}
+
+    def test_the_form_to_take_out_carries_the_token(
+        self, alice: User, alice_home: Home, owner_item: Item, article: Article
+    ) -> None:
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(alice)
+        page = client.get(item_page(alice_home, owner_item)).content.decode()
+        form = page.split("row-actions")[1].split("</form>")[0]
+        assert "csrfmiddlewaretoken" in form
+        match = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', form)
+        assert match
+        address = stock_url("item-unlink", alice_home, owner_item, article_id=article.id)
+        response = client.post(address, {"csrfmiddlewaretoken": match.group(1)})
+        assert response.status_code == 302
+        assert linked(article) == set()
+
+    def test_a_hostile_next_does_not_leave_the_site_when_taking_out(
+        self, signed_in: Client, alice_home: Home, owner_item: Item, article: Article
+    ) -> None:
+        address = stock_url("item-unlink", alice_home, owner_item, article_id=article.id)
+        response = signed_in.post(address, {"next": "https://evil.example/"})
+        assert response.status_code == 302
+        assert response["Location"] == item_page(alice_home, owner_item) + "#stock"
+        assert linked(article) == set()
+
+    def test_a_hostile_next_does_not_leave_the_site_when_linking(
+        self, signed_in: Client, alice_home: Home, owner_item: Item, filter_article: Article
+    ) -> None:
+        address = stock_url("item-link", alice_home, owner_item)
+        response = signed_in.post(
+            address, {"articles": [filter_article.id], "next": "//evil.example/"}
+        )
+        assert response.status_code == 302
+        assert response["Location"] == item_page(alice_home, owner_item)
+        assert linked(filter_article) == {owner_item}
