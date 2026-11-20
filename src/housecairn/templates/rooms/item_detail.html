@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n tasks_extras navigation dates %}
+{% load i18n tasks_extras navigation dates stock_extras money %}
 {% block head_title %}{{ item.name }}{% endblock head_title %}
 {% block content %}
   {% url 'rooms:detail' home_id=home.id room_id=item.room_id as parent %}{% back_link parent item.room.name %}
@@ -59,6 +59,38 @@
   {% endif %}
   {% if can_write %}
     <a class="button button-secondary button-block" href="{% url 'rooms:item-photo-add' home_id=home.id item_id=item.id %}">{% translate "Add a photo" %}</a>
+  {% endif %}
+
+  {% item_articles item as stock_rows %}
+  <h2 id="stock">{% translate "Materials" context "equipment section" %}</h2>
+  {% if stock_rows %}
+    <ul class="card-list">
+      {% for article in stock_rows %}
+        <li>
+          <a class="row" href="{% url_with_next 'stock:detail' home_id=home.id article_id=article.id %}">
+            <span class="row-body">
+              <span class="row-title">{{ article.name }}</span>
+              <span class="row-text">{{ article|amount:article.quantity }}{% if article.unit_price is not None %} · {{ article.unit_price|money:home.currency }}{% endif %}</span>
+            </span>
+            {% include "components/icon.html" with name="chevron" class="chevron" %}
+          </a>
+          {% if can_write %}
+            <form method="post" class="row-actions" action="{% url_with_next 'stock:item-unlink' home_id=home.id item_id=item.id article_id=article.id %}">
+              {% csrf_token %}
+              <button type="submit" class="button-secondary button-small">{% translate "Remove" %}<span class="visually-hidden"> {{ article.name }}</span></button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">{% translate "No stock item linked to this yet." %}</p>
+  {% endif %}
+  {% if can_write %}
+    <div class="button-row">
+      <a class="button button-secondary" href="{% url_with_next 'stock:item-link' home_id=home.id item_id=item.id %}">{% translate "Link a stock item" %}</a>
+      <a class="button button-secondary" href="{% url_with_next 'stock:item-create' home_id=home.id item_id=item.id %}">{% translate "New stock item" %}</a>
+    </div>
   {% endif %}
 
   {% open_occurrences_for item as task_rows %}

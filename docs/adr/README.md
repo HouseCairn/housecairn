@@ -85,3 +85,4 @@ later record supersedes it.
 | [0084](0084-interactive-guide-and-example-home.md) | An interactive guide on an example home, one text for the web and the app | 2026-11-16 |
 | [0085](0085-photos-of-reports-and-labels-of-articles-as-sync-files.md) | The photo of a report and the label of an article as files of the sync API | 2026-11-17 |
 | [0086](0086-a-read-only-member-syncs-their-own-reports.md) | A read-only member syncs their own reports only | 2026-11-17 |
+| [0088](0088-stock-of-an-item-edited-from-the-item.md) | The stock of an item is edited from the item as well as from the stock item | 2026-11-20 |

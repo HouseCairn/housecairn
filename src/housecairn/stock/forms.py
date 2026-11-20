@@ -78,6 +78,31 @@ class ArticleForm(LabelAboveMixin, forms.ModelForm[Article]):
             del self.fields["clear_label"]
 
 
+class ArticleChoiceField(forms.ModelMultipleChoiceField[Article]):
+    """The articles of the home, by name."""
+
+    widget = ChipSelectMultiple
+
+    def label_from_instance(self, obj: Any) -> str:
+        return str(obj.name)
+
+
+class LinkArticlesForm(LabelAboveMixin, forms.Form):
+    """Pick the articles of the stock that fit an item (the page of the item)."""
+
+    articles = ArticleChoiceField(
+        label=_("Stock items"),
+        queryset=Article.objects.none(),
+        help_text=_("The stock items of this home that this equipment uses."),
+    )
+
+    def __init__(self, *args: Any, articles: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        field = self.fields["articles"]
+        assert isinstance(field, forms.ModelMultipleChoiceField)  # noqa: S101 - narrows the type
+        field.queryset = articles
+
+
 class SupplierForm(LabelAboveMixin, forms.ModelForm[Supplier]):
     class Meta:
         model = Supplier

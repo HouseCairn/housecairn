@@ -24,6 +24,11 @@ links are shown on the page of the stock item, and the page of a room lists the 
 items that concern it (listed on the room, compatible with one of its items, or its
 paint left over).
 
+You can also start from the equipment: its page has a **Materials** section that lists the stock
+items it uses, links others (**Link a stock item**), adds a new one already linked (**New stock
+item**) and takes a link away (**Remove**, which keeps the stock item). It is the same link,
+edited from either side.
+
 ## Scan a barcode
 
 The **barcode (EAN)** field takes the 8 to 14 digits printed under the bars. Type them, or

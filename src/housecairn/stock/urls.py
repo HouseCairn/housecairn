@@ -9,6 +9,21 @@ app_name = "stock"
 urlpatterns = [
     path("stock/", views.ArticleListView.as_view(), name="list"),
     path("stock/new/", views.ArticleCreateView.as_view(), name="create"),
+    path(
+        "stock/for-item/<uuid:item_id>/link/",
+        views.ItemArticleLinkView.as_view(),
+        name="item-link",
+    ),
+    path(
+        "stock/for-item/<uuid:item_id>/new/",
+        views.ItemArticleCreateView.as_view(),
+        name="item-create",
+    ),
+    path(
+        "stock/for-item/<uuid:item_id>/unlink/<uuid:article_id>/",
+        views.ItemArticleUnlinkView.as_view(),
+        name="item-unlink",
+    ),
     path("stock/<uuid:article_id>/", views.ArticleDetailView.as_view(), name="detail"),
     path("stock/<uuid:article_id>/edit/", views.ArticleEditView.as_view(), name="edit"),
     path("stock/<uuid:article_id>/delete/", views.ArticleDeleteView.as_view(), name="delete"),

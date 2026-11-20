@@ -375,6 +375,51 @@ def update_article(
     return article
 
 
+def articles_of_item(item: Item) -> models.QuerySet[Article]:
+    """The articles of the stock that fit an item, each with its `quantity`."""
+    return articles_of(item.home).filter(compatible_items=item)
+
+
+def articles_to_link(item: Item) -> models.QuerySet[Article]:
+    """The articles of the home of the item that do not fit it yet."""
+    return articles_of(item.home).exclude(compatible_items=item)
+
+
+def _check_same_home(item: Item, articles: Iterable[Article]) -> list[Article]:
+    chosen = list(articles)
+    if any(article.home_id != item.home_id for article in chosen):
+        raise ValidationError({"articles": _("This stock item is not in this home.")})
+    return chosen
+
+
+@transaction.atomic
+def link_articles(actor: AnyUser, item: Item, articles: Iterable[Article]) -> list[Article]:
+    """Make the item one of the compatible items of each article (the link, seen from the item).
+
+    The link is the one of `compatible_items`, written by `update_article`: the same checks,
+    the same record for the sync and the audit. An article already linked stays as it is.
+    """
+    _require_write(actor, item.home)
+    chosen = _check_same_home(item, articles)
+    for article in chosen:
+        current = list(article.compatible_items.all())
+        if any(other.pk == item.pk for other in current):
+            continue
+        update_article(actor, article, compatible_items=[*current, item])
+    return chosen
+
+
+@transaction.atomic
+def unlink_article(actor: AnyUser, item: Item, article: Article) -> None:
+    """Take the item out of the compatible items of the article; the article is kept."""
+    _require_write(actor, item.home)
+    _check_same_home(item, [article])
+    current = list(article.compatible_items.all())
+    kept = [other for other in current if other.pk != item.pk]
+    if len(kept) != len(current):
+        update_article(actor, article, compatible_items=kept)
+
+
 @transaction.atomic
 def delete_article(actor: AnyUser, article: Article) -> None:
     """Soft-delete the article with its suppliers and movements."""

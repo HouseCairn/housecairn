@@ -24,6 +24,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.homes.scoping import WebHomeScopedMixin
 from housecairn.rooms import conf
+from housecairn.rooms.models import Item
 from housecairn.rooms.services import items_of, rooms_of
 from housecairn.stock import forms, services
 from housecairn.stock.files import label_response
@@ -233,6 +234,83 @@ class ArticleDetailView(HomeStockMixin, TemplateView):
             ),
             **kwargs,
         )
+
+
+# ---------- the stock of an item, from the page of the item ----------
+
+
+class ItemStockMixin(HomeStockMixin):
+    """A page of the stock that starts from an item of the home (docs/adr/0088)."""
+
+    require_write = True
+
+    def get_item(self) -> Item:
+        item: Item = get_object_or_404(items_of(self.home), id=self.kwargs["item_id"])
+        return item
+
+    def item_url(self) -> str:
+        return reverse(
+            "rooms:item-detail", kwargs={"home_id": self.home.id, "item_id": self.kwargs["item_id"]}
+        )
+
+
+class ItemArticleLinkView(ItemStockMixin, FormView[Any]):
+    """Link articles of the stock to an item: the same link as `compatible_items`."""
+
+    template_name = "stock/item_link_form.html"
+    form_class = forms.LinkArticlesForm
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        kwargs = super().get_form_kwargs()
+        kwargs["articles"] = services.articles_to_link(self.get_item())
+        return kwargs
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        item = self.get_item()
+        return super().get_context_data(
+            **self.page(item=item, nothing_to_link=not services.articles_to_link(item).exists()),
+            **kwargs,
+        )
+
+    def form_valid(self, form: forms.LinkArticlesForm) -> HttpResponse:
+        item = self.get_item()
+        try:
+            services.link_articles(self.request.user, item, form.cleaned_data["articles"])
+        except ValidationError as exc:
+            form.add_error("articles", exc)
+            return self.form_invalid(form)
+        messages.success(self.request, _("Stock items linked."))
+        return redirect(navigation.back_url(self.request, self.item_url()))
+
+
+class ItemArticleCreateView(ItemStockMixin, ArticleCreateView):
+    """The form of a new article, with the item already chosen as compatible."""
+
+    def get_initial(self) -> dict[str, Any]:
+        return {**super().get_initial(), "compatible_items": [self.get_item().pk]}
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        return super().get_context_data(item=self.get_item(), **kwargs)
+
+    def form_valid(self, form: forms.ArticleForm) -> HttpResponse:
+        # Whatever the form posted, the new article fits the item it was started from.
+        item = self.get_item()
+        chosen = [other for other in form.cleaned_data["compatible_items"] if other.pk != item.pk]
+        form.cleaned_data["compatible_items"] = [item, *chosen]
+        return super().form_valid(form)
+
+
+class ItemArticleUnlinkView(ItemStockMixin, View):
+    """Take an article out of the stock of an item; the article stays in the stock."""
+
+    http_method_names = ["post"]
+
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        item = self.get_item()
+        article = get_object_or_404(services.articles_of(self.home), id=self.kwargs["article_id"])
+        services.unlink_article(request.user, item, article)
+        messages.success(request, _("Stock item taken out of this equipment."))
+        return redirect(navigation.stay(request, self.item_url()) + "#stock")
 
 
 class ConfirmDeleteView(HomeStockMixin, TemplateView):

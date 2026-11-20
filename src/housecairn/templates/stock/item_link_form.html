@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n navigation static %}
+{% block head_title %}{% translate "Link a stock item" %}{% endblock head_title %}
+{% block extra_head %}<script src="{% static 'js/chip-select.js' %}" defer></script>{% endblock extra_head %}
+{% block content %}
+  {% url 'rooms:item-detail' home_id=home.id item_id=item.id as parent %}{% back_link parent item.name %}
+  <h1>{% translate "Link a stock item" %}</h1>
+  {% if nothing_to_link %}
+    <p class="empty">{% translate "Every stock item of this home is already linked, or there is none yet." %}</p>
+    <a class="button button-secondary button-block" href="{% url_with_next 'stock:item-create' home_id=home.id item_id=item.id %}">{% translate "New stock item" %}</a>
+  {% else %}
+    <form method="post" class="card">
+      {% csrf_token %}
+      {% next_field %}
+      {% include "components/form_errors.html" with form=form only %}
+      {{ form.as_p }}
+      <div class="form-submit"><button type="submit" class="button-block">{% translate "Link" %}</button></div>
+    </form>
+  {% endif %}
+{% endblock content %}

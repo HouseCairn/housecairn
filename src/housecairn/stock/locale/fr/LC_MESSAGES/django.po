@@ -33,6 +33,12 @@ msgstr "Photo de l'étiquette"
 msgid "Remove the photo of the label"
 msgstr "Supprimer la photo de l'étiquette"
 
+msgid "Stock items"
+msgstr "Articles"
+
+msgid "The stock items of this home that this equipment uses."
+msgstr "Les articles du stock de ce logement que cet équipement utilise."
+
 msgid "Quantity"
 msgstr "Quantité"
 
@@ -213,6 +219,9 @@ msgstr "Cet élément n'est pas dans ce logement."
 msgid "This room is not in this home."
 msgstr "Cette pièce n'est pas dans ce logement."
 
+msgid "This stock item is not in this home."
+msgstr "Cet article n'est pas dans ce logement."
+
 msgid "The difference with the stock is too large to be recorded."
 msgstr "L'écart avec le stock est trop grand pour être enregistré."
 
@@ -245,6 +254,12 @@ msgstr "Article ajouté."
 
 msgid "Stock item saved."
 msgstr "Article enregistré."
+
+msgid "Stock items linked."
+msgstr "Articles liés."
+
+msgid "Stock item taken out of this equipment."
+msgstr "Article retiré de cet équipement."
 
 msgid "The stock item, its suppliers and its movements disappear from the screens."
 msgstr "L'article, ses fournisseurs et ses mouvements disparaissent des écrans."
@@ -354,6 +369,10 @@ msgid "Add a stock item"
 msgstr "Ajouter un article"
 
 #, python-format
+msgid "It will be linked to %(name)s."
+msgstr "Il sera lié à %(name)s."
+
+#, python-format
 msgid "Label photo: JPEG, PNG or WebP, up to %(size)s. Location data and other information stored in the file are removed."
 msgstr "Photo de l'étiquette : JPEG, PNG ou WebP, jusqu'à %(size)s. La position et les autres informations stockées dans le fichier sont supprimées."
 
@@ -399,6 +418,18 @@ msgstr "Supprimer %(name)s ?"
 
 msgid "Cancel"
 msgstr "Annuler"
+
+msgid "Link a stock item"
+msgstr "Lier un article"
+
+msgid "Every stock item of this home is already linked, or there is none yet."
+msgstr "Tous les articles de ce logement sont déjà liés, ou il n'y en a pas encore."
+
+msgid "New stock item"
+msgstr "Nouvel article"
+
+msgid "Link"
+msgstr "Lier"
 
 #, python-format
 msgid "The price is in %(currency)s, the currency of the home. The link is only stored: HouseCairn never opens it."
