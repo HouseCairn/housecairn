@@ -95,3 +95,8 @@ button:disabled {
 .card > .button-row {
   margin-top: var(--hc-space-4);
 }
+
+/* The action under a row of a list: Remove under a stock item of an item. */
+.row-actions {
+  padding: 0 var(--hc-space-4) var(--hc-space-3);
+}

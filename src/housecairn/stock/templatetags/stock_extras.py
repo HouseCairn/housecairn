@@ -6,7 +6,7 @@ from typing import Any
 from django import template
 from django.template.defaultfilters import floatformat
 
-from housecairn.rooms.models import Room
+from housecairn.rooms.models import Item, Room
 from housecairn.stock import services
 from housecairn.stock.models import Article
 
@@ -42,3 +42,9 @@ def paint_article_of(room: Room) -> Article | None:
     if room.paint_article_id is None:
         return None
     return services.articles_of(room.home).filter(pk=room.paint_article_id).first()
+
+
+@register.simple_tag
+def item_articles(item: Item) -> list[Article]:
+    """The articles of the stock that fit the item, each with its quantity."""
+    return list(services.articles_of_item(item))

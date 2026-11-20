@@ -6,6 +6,10 @@
   {% if article %}
     {% url 'stock:detail' home_id=home.id article_id=article.id as parent %}{% back_link parent article.name %}
     <h1>{% translate "Edit the stock item" %}</h1>
+  {% elif item %}
+    {% url 'rooms:item-detail' home_id=home.id item_id=item.id as parent %}{% back_link parent item.name %}
+    <h1>{% translate "Add a stock item" %}</h1>
+    <p class="small">{% blocktranslate with name=item.name %}It will be linked to {{ name }}.{% endblocktranslate %}</p>
   {% else %}
     {% url 'stock:list' home_id=home.id as parent %}{% back_link parent %}
     <h1>{% translate "Add a stock item" %}</h1>

@@ -33,8 +33,8 @@ msgstr "**Enregistrer un mouvement** prend une quantité, une date (aujourd'hui 
 msgid "**Rooms** lists the rooms where the item is used, and **Needed by tasks** the tasks that list it in their materials. A movement written by a task names that task."
 msgstr "**Pièces** liste les pièces où l'article sert, et **Demandé par des tâches** les tâches qui le listent dans leurs fournitures. Un mouvement écrit par une tâche nomme cette tâche."
 
-msgid "**Compatible items** lists the equipment or surfaces of the home this fits; each one opens its [item page](item.md)."
-msgstr "**Éléments compatibles** liste les équipements ou surfaces du logement auxquels il convient ; chacun ouvre sa [page d'élément](item.md)."
+msgid "**Compatible items** lists the equipment or surfaces of the home this fits; each one opens its [item page](item.md). The link can also be made and removed from the item page, in its **Materials** section."
+msgstr "**Éléments compatibles** liste les équipements ou surfaces du logement auxquels il convient ; chacun ouvre sa [page d'élément](item.md). Le lien peut aussi être fait et retiré depuis la page de l'élément, dans sa section **Matériel**."
 
 msgid "**Suppliers** lists where to buy it: name, supplier reference, purchase link and the last price paid, in the currency of the home. **Add a supplier** and **Edit the supplier** open the [supplier form](supplier-form.md). The purchase link is a plain link: HouseCairn never opens it and shows no preview."
 msgstr "**Fournisseurs** liste où l'acheter : nom, référence fournisseur, lien d'achat et dernier prix payé, dans la devise du logement. **Ajouter un fournisseur** et **Modifier le fournisseur** ouvrent le [formulaire de fournisseur](supplier-form.md). Le lien d'achat est un simple lien : HouseCairn ne l'ouvre jamais et n'affiche aucun aperçu."

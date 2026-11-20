@@ -99,8 +99,17 @@ def read(html: str) -> _Page:
 
 Case = tuple[str, Callable[[dict[str, Any]], str], dict[str, Any]]
 
+
 # Every screen that shows a form in the page, with an invalid post. A form sent with an
 # error comes back as the page itself (200, or 422), never as a redirect.
+def _link_page(c: dict[str, Any]) -> str:
+    """The page that links stock items to an item: it has a form once one is left to link."""
+    from housecairn.stock import services as stock_services
+
+    stock_services.create_article(c["alice"], c["home"], name="Not linked yet")
+    return reverse("stock:item-link", args=[c["home"].id, c["item"].id])
+
+
 CASES: list[Case] = [
     ("room-create", lambda c: reverse("rooms:create", args=[c["home"].id]), {"kind": "other"}),
     (
@@ -212,6 +221,11 @@ CASES: list[Case] = [
     ),
     ("envelope", lambda c: reverse("projects:envelope", args=[c["home"].id]), {"amount": "x"}),
     ("article-create", lambda c: reverse("stock:create", args=[c["home"].id]), {"name": ""}),
+    (
+        "item-link",
+        lambda c: _link_page(c),
+        {},
+    ),
     (
         "supplier-create",
         lambda c: reverse("stock:supplier-create", args=[c["home"].id, c["article"].id]),
@@ -534,6 +548,7 @@ TEMPLATE_CASES: dict[str, list[str]] = {
     "rooms/room_form.html": ["room-create", "room-edit"],
     "rooms/room_memory_form.html": ["room-memory"],
     "stock/article_form.html": ["article-create"],
+    "stock/item_link_form.html": ["item-link"],
     "stock/supplier_form.html": ["supplier-create"],
     "tasks/attachment_form.html": ["task-attachment"],
     "tasks/completion_form.html": ["task-completion"],

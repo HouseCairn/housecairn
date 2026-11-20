@@ -13,7 +13,8 @@ One item of the [stock](stock.md), at `/h/<home id>/stock/<item id>/`.
 - **Rooms** lists the rooms where the item is used, and **Needed by tasks** the tasks that
   list it in their materials. A movement written by a task names that task.
 - **Compatible items** lists the equipment or surfaces of the home this fits; each
-  one opens its [item page](item.md).
+  one opens its [item page](item.md). The link can also be made and removed from the item
+  page, in its **Materials** section.
 - **Suppliers** lists where to buy it: name, supplier reference, purchase link and
   the last price paid, in the currency of the home. **Add a supplier** and **Edit
   the supplier** open the [supplier form](supplier-form.md). The purchase link is a

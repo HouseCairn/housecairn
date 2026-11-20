@@ -456,6 +456,22 @@ msgstr "Aucune photo pour l'instant."
 msgid "Add a photo"
 msgstr "Ajouter une photo"
 
+msgctxt "equipment section"
+msgid "Materials"
+msgstr "Matériel"
+
+msgid "Remove"
+msgstr "Retirer"
+
+msgid "No stock item linked to this yet."
+msgstr "Aucun article lié pour l'instant."
+
+msgid "Link a stock item"
+msgstr "Lier un article"
+
+msgid "New stock item"
+msgstr "Nouvel article"
+
 msgid "Tasks"
 msgstr "Tâches"
 

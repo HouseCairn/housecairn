@@ -27,6 +27,21 @@ msgstr "Un équipement ou une surface (un mur, un sol), sur `/h/<home id>/items/
 msgid "The page shows what you noted: brand and model, serial number, purchase and installation dates, the manufacturer's warranty (a label with its end tells whether it is still running, then its duration, its start and who gives it), the maintenance contract (its provider is a link to the [sheet](contractor.md) of the contractor, then the number and the link of the contract), notes, then the links and the photos of the item; an item with no photo shows a dashed frame, *No photo yet.*, and **Add a photo** under it. Only what is filled in is shown. The actions are one row of buttons, each as wide as its text, going on to a second line when it must: **Edit the item**, which opens the [item form](item-form.md), the QR label and **Report a problem**."
 msgstr "La page montre ce que vous avez noté : marque et modèle, numéro de série, dates d'achat et de pose, la garantie constructeur (une étiquette avec sa fin indique si elle court encore, puis sa durée, son départ et qui la donne), le contrat d'entretien (son prestataire est un lien vers la [fiche](contractor.md) de l'intervenant, puis le numéro et le lien du contrat), les notes, puis les liens et les photos de l'élément ; un élément sans photo montre un cadre en pointillés, *Aucune photo pour l'instant.*, avec **Ajouter une photo** dessous. Seul ce qui est renseigné s'affiche. Les actions forment une rangée de boutons, chacun de la largeur de son texte, qui passe à une deuxième ligne quand il le faut : **Modifier l'élément**, qui ouvre le [formulaire de l'élément](item-form.md), l'étiquette QR et **Signaler un problème**."
 
+msgid "**Materials** lists the stock items that fit the item: the name, the quantity in stock with its unit and the unit price when there is one; each opens the [stock item](stock-item.md). It is the same link as the **Compatible items** of the stock item, seen from the equipment. Members and owners have three actions there:"
+msgstr "**Matériel** liste les articles du stock qui conviennent à l'élément : le nom, la quantité en stock avec son unité et le prix unitaire quand il y en a un ; chacun ouvre l'[article](stock-item.md). C'est le même lien que les **Éléments compatibles** de l'article, vu depuis l'équipement. Les membres et les propriétaires y ont trois actions :"
+
+msgid "**Link a stock item** opens a page with the search field of the home's stock items that are not linked yet (without JavaScript, the list itself); pick one or several, then **Link**."
+msgstr "**Lier un article** ouvre une page avec le champ de recherche des articles du logement pas encore liés (sans JavaScript, la liste elle-même) ; choisissez-en un ou plusieurs, puis **Lier**."
+
+msgid "**New stock item** opens the [form of a stock item](stock-item-form.md) with this item already chosen as compatible; once saved, you come back to the item."
+msgstr "**Nouvel article** ouvre le [formulaire d'un article](stock-item-form.md) avec cet élément déjà choisi comme compatible ; une fois enregistré, vous revenez à l'élément."
+
+msgid "**Remove**, under a stock item, takes the link away. The stock item, its quantity and its movements stay in the stock."
+msgstr "**Retirer**, sous un article, enlève le lien. L'article, sa quantité et ses mouvements restent dans le stock."
+
+msgid "Read-only members see the section and none of the buttons."
+msgstr "Les membres en lecture seule voient la section et aucun des boutons."
+
 msgid "The maintenance log and the cost of ownership of an item arrive with the tasks: there is no tab for them yet."
 msgstr "Le journal d'entretien et le coût de possession d'un élément arrivent avec les tâches : il n'y a pas encore d'onglet pour eux."
 
