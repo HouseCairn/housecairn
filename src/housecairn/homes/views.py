@@ -264,6 +264,9 @@ class HomeAuditView(WebHomeScopedMixin, DetailView[Home]):
 class HomeExportView(WebHomeScopedMixin, View):
     """Download everything of the home as one archive. Owners only."""
 
+    # Still open in an archived home (docs/adr/0089): exporting reads the home.
+    archived_home_writes = True
+
     http_method_names = ["post"]
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
@@ -299,6 +302,9 @@ class HomeExportJobView(WebHomeScopedMixin, View):
 
 class HomeExportDownloadView(WebHomeScopedMixin, View):
     """Hand the archive of a job: a POST, so that no preview or prefetch uses a download."""
+
+    # Still open in an archived home (docs/adr/0089): a download changes nothing.
+    archived_home_writes = True
 
     http_method_names = ["post"]
 
@@ -472,6 +478,9 @@ class HomeRestoreView(LoginRequiredMixin, FormView[forms.RestoreForm]):
 class HomeDeleteView(WebHomeScopedMixin, FormView[forms.DeleteHomeForm]):
     """Delete the home for good, after typing its name. Owners only."""
 
+    # Still open in an archived home (docs/adr/0089): deleting it for good.
+    archived_home_writes = True
+
     template_name = "homes/delete.html"
     form_class = forms.DeleteHomeForm
 
@@ -616,6 +625,9 @@ class InvitationResendView(HomeActionView):
 
 
 class InvitationRevokeView(HomeActionView):
+    # Still open in an archived home (docs/adr/0089): taking access away.
+    archived_home_writes = True
+
     def act(self, home: Home) -> HttpResponse | None:
         services.revoke_invitation(self.request.user, self.invitation(home))
         messages.success(self.request, _("Invitation revoked."))
@@ -680,6 +692,9 @@ class ConfirmedActionView(HomeActionView):
 
 
 class MemberRemoveView(ConfirmedActionView):
+    # Still open in an archived home (docs/adr/0089): taking access away or leaving.
+    archived_home_writes = True
+
     def _is_me(self) -> bool:
         return Membership.objects.filter(
             id=self.kwargs["member_id"], user=self.request.user
@@ -720,6 +735,9 @@ class MemberRemoveView(ConfirmedActionView):
 class ArchiveView(ConfirmedActionView):
     """Archive the home, after a confirmation. Owners only (docs/adr/0079)."""
 
+    # Still open in an archived home (docs/adr/0089): archiving it again changes nothing.
+    archived_home_writes = True
+
     def confirmation(self, home: Home) -> dict[str, Any]:
         if not services.is_owner(self.request.user, home):
             raise PermissionDenied
@@ -727,8 +745,9 @@ class ArchiveView(ConfirmedActionView):
             "title": _("Archive this home?"),
             "text": _(
                 "%(home)s will be listed apart, hidden from Today and from the home selector, "
-                "send no reminder, and its calendar feeds will be empty. Nothing is deleted: "
-                "you can open it, change it and bring it back whenever you want."
+                "send no reminder, and its calendar feeds will be empty. It becomes read only: "
+                "nothing is deleted, you can open it and export it, and bring it back to "
+                "change it."
             )
             % {"home": home.name},
             "action": reverse("homes:archive", args=[home.id]),
@@ -748,6 +767,9 @@ class ArchiveView(ConfirmedActionView):
 
 class UnarchiveView(ConfirmedActionView):
     """Bring an archived home back, after a confirmation. Owners only (docs/adr/0079)."""
+
+    # Still open in an archived home (docs/adr/0089): the way back.
+    archived_home_writes = True
 
     def confirmation(self, home: Home) -> dict[str, Any]:
         if not services.is_owner(self.request.user, home):
@@ -775,6 +797,9 @@ class UnarchiveView(ConfirmedActionView):
 
 
 class LeaveView(ConfirmedActionView):
+    # Still open in an archived home (docs/adr/0089): leaving it.
+    archived_home_writes = True
+
     def locked_ok(self) -> bool:
         return True
 
@@ -798,6 +823,9 @@ class LeaveView(ConfirmedActionView):
 
 class UnlockView(HomeActionView):
     """Stop requiring a sign-in provider the instance no longer offers."""
+
+    # Still open in an archived home (docs/adr/0089): the way out of a provider gone.
+    archived_home_writes = True
 
     def locked_ok(self) -> bool:
         return True

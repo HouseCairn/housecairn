@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n navigation %}
+{% block head_title %}{{ home.name }}{% endblock head_title %}
+{% block content %}
+  {% url 'homes:detail' home_id=home.id as parent %}{% back_link parent home.name %}
+  <section class="card hero">
+    <h1>{% translate "Archived home: read only" %}</h1>
+    <p class="lead">{% blocktranslate with home=home.name %}{{ home }} is archived: it can be read and exported, but not changed.{% endblocktranslate %}</p>
+    {% if is_owner %}
+      <a class="button" href="{% url_with_next 'homes:unarchive' home_id=home.id %}">{% translate "Bring this home back" %}</a>
+    {% else %}
+      <p class="small">{% translate "An owner can bring it back." %}</p>
+    {% endif %}
+  </section>
+{% endblock content %}

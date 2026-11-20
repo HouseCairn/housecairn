@@ -32,6 +32,7 @@ from django.db import IntegrityError, models, transaction
 from django.utils.translation import gettext as _
 
 from housecairn.accounts.models import User
+from housecairn.homes import services as home_services
 from housecairn.homes.models import Home, Membership, Role
 from housecairn.sync import changes, clock, reading, repairs
 from housecairn.sync import files as sync_files
@@ -60,9 +61,15 @@ INVALID_REFERENCE = "invalid_reference"
 WRONG_HOME = "wrong_home"
 ID_TAKEN = "id_taken"
 CLOCK_AHEAD = "clock_ahead"
+# An operation on an archived home, which is read only (docs/adr/0089): refused whatever the
+# role, but the one that brings it back. An app that does not know the code keeps the operation
+# aside, as for any code it does not know.
+HOME_ARCHIVED = home_services.HOME_ARCHIVED
 
 KINDS = (changes.PUT, changes.DELETE, changes.RESTORE)
 ARCHIVED_AT = "archived_at"
+HOME_ENTITY = "homes.home"
+WRITERS = (Role.OWNER, Role.MEMBER)
 # The fields the server writes itself, whatever the operation says: who did it is the account
 # of the phone. `ACTED_BY` when the operation sets it (done, closed); `MADE_BY` when the row is
 # made, and never changed afterwards (the author of a report).
@@ -361,9 +368,13 @@ def apply(home: Home, pusher: Pusher, raw_ops: Sequence[Any]) -> dict[str, Any]:
         session = repairs.Session(home, pusher.user)
         session.begin(op.row_id for op in ops if op.entity == repairs.OCCURRENCE)
         results = []
+        archived = home.archived_at is not None
         for op in ops:
             try:
                 with transaction.atomic():
+                    if archived and pusher.role in WRITERS and not _brings_back(op):
+                        # Read only (docs/adr/0089); a read-only member keeps `forbidden`.
+                        raise _RejectedError(HOME_ARCHIVED)
                     result = _apply_one(home, pusher, op, holders, session)
             except _RejectedError as rejected:
                 result = {"i": op.index, "status": REJECTED, "code": rejected.code}
@@ -372,6 +383,11 @@ def apply(home: Home, pusher: Pusher, raw_ops: Sequence[Any]) -> dict[str, Any]:
                     op.index, _("This operation breaks a rule of the data.")
                 ) from None
             results.append(result)
+            if op.entity == HOME_ENTITY and result["status"] == APPLIED:
+                # The operation may have archived the home, or brought it back: the next
+                # operations follow (`_brings_back`).
+                home.refresh_from_db(fields=["archived_at"])
+                archived = home.archived_at is not None
         if ops:
             try:
                 with transaction.atomic():
@@ -383,6 +399,17 @@ def apply(home: Home, pusher: Pusher, raw_ops: Sequence[Any]) -> dict[str, Any]:
                 ) from None
         head = HomeHead.objects.filter(home_id=home.pk).values_list("pos", flat=True).first()
     return {"head": head or 0, "results": results}
+
+
+def _brings_back(op: Operation) -> bool:
+    """Whether `op` is the one change an archived home takes from a phone: bringing it back.
+
+    A `put` of the home itself that sets `archived_at` and nothing else: clearing it brings the
+    home back, setting it again changes nothing (docs/adr/0089). The app makes each change an
+    operation of its own, so bringing a home back is one. Only an owner may: `_apply_row`
+    rejects the others with `forbidden`, as for archiving.
+    """
+    return op.entity == HOME_ENTITY and op.kind == changes.PUT and set(op.fields) == {ARCHIVED_AT}
 
 
 def _apply_one(

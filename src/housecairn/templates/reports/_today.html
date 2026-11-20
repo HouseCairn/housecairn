@@ -1,2 +1,2 @@
 {% load i18n navigation %}{% if waiting %}<p class="undo-banner" role="status"><span>{% blocktranslate count counter=waiting %}{{ counter }} problem reported{% plural %}{{ counter }} problems reported{% endblocktranslate %}</span><a class="button button-secondary button-small" href="{% url_with_next 'reports:list' home_id=home.id %}">{% translate "See the reports" %}</a></p>{% endif %}
-<p><a class="button button-secondary button-small" href="{% url_with_next 'reports:create' home_id=home.id %}">{% translate "Report a problem" %}</a></p>
+{% if not home.is_archived %}<p><a class="button button-secondary button-small" href="{% url_with_next 'reports:create' home_id=home.id %}">{% translate "Report a problem" %}</a></p>{% endif %}

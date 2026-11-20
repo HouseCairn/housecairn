@@ -33,16 +33,21 @@ may write.
 ## Archive a home
 
 Owners see **Archive this home** above **Delete this home**. A page asks for a confirmation
-first. An archived home is not deleted and not locked: it is **listed apart** on
+first. An archived home is not deleted: it is **listed apart** on
 [My homes](homes.md), under **Archived**; it leaves [Today](today.md), the
 [calendar](../guides/calendar.md) and the home selector; it **sends no reminder** and no
 alert of a new report; and its [calendar feeds](../guides/calendar.md) keep their address
 but hold no event, and it gets no new feed. Opening it from the list shows its page, marked
-**Archived**, and every page of the home still opens and can be changed as before: marking a
-repeating task done still makes its next occurrence, as in any home, and that occurrence
-sends no reminder until the home is brought back.
+**Archived**, and every page of the home still opens, **read only**: each starts with the banner
+**Archived home: read only**, and the buttons that change something are gone, for every member,
+owners included. Nobody adds, edits, completes or reports anything in it, from the screens, the
+API, Home Assistant or the mobile app, until an owner brings it back. What stays possible:
+**Export all data**, **Delete this home**, leaving the home, and, on
+[Household and roles](household.md), removing a member and revoking an invitation (inviting and
+changing roles wait until the home is back).
 
-On an archived home, owners see **Bring this home back** instead: after a confirmation the
+On an archived home, owners see **Bring this home back** instead, on its page and in the banner
+of each of its pages: after a confirmation the
 home is listed again and its reminders resume. Only owners archive or bring back a home,
 as only they delete it. Both actions are recorded in the [audit log](audit.md). After
 either, you go back to where you came from.

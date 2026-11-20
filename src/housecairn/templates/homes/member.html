@@ -13,6 +13,7 @@
     </dl>
   </section>
   {% if is_owner %}
+    {% if not home.is_archived %}{# Roles wait until the home is back (docs/adr/0089); removing someone does not. #}
     <h2>{% translate "Role" %}</h2>
     <form method="post" action="{% url 'homes:member-role' home_id=home.id member_id=membership.id %}" class="card">
       {% csrf_token %}
@@ -22,9 +23,10 @@
       <button type="submit" class="button-secondary button-block">{% translate "Change the role" %}</button>
       <p class="small">{% translate "A home always keeps at least one owner." %}</p>
     </form>
+    {% endif %}
     {% if not is_me %}
       <div class="button-row">
-        {% if membership.role != "owner" %}
+        {% if membership.role != "owner" and not home.is_archived %}
           <form method="post" action="{% url 'homes:transfer' home_id=home.id member_id=membership.id %}">
             {% csrf_token %}
             {% next_field %}

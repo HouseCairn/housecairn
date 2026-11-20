@@ -169,6 +169,11 @@ class HomeViewSet(
     lookup_field = "id"
     lookup_url_kwarg = "home_id"
     http_method_names = ["get", "post", "patch", "head", "options"]
+    # What an archived home still takes (docs/adr/0089); `partial_update` and `import_tables`
+    # are refused with 403 `home_archived`.
+    archived_home_writes = frozenset(
+        {"archive", "unarchive", "export", "export_download", "delete_home", "leave", "unlock"}
+    )
 
     def get_queryset(self) -> models.QuerySet[Home]:
         return homes_for_request(self.request).order_by("name")
@@ -514,6 +519,8 @@ class MemberViewSet(
     lookup_field = "id"
     lookup_url_kwarg = "member_id"
     http_method_names = ["get", "patch", "delete", "post", "head", "options"]
+    # Removing a member, or leaving, stays open in an archived home (docs/adr/0089).
+    archived_home_writes = frozenset({"destroy"})
 
     def get_permissions(self) -> list[Any]:
         return [*super().get_permissions(), NoTokenForHousehold()]
@@ -594,6 +601,8 @@ class InvitationViewSet(
     lookup_field = "id"
     lookup_url_kwarg = "invitation_id"
     http_method_names = ["get", "post", "delete", "head", "options"]
+    # Revoking an invitation stays open in an archived home (docs/adr/0089).
+    archived_home_writes = frozenset({"destroy"})
 
     def get_permissions(self) -> list[Any]:
         return [*super().get_permissions(), NoTokenForHousehold()]

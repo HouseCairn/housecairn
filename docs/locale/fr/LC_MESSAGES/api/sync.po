@@ -30,8 +30,8 @@ msgstr "Accès"
 msgid "Every route but `info` takes only the access token of a [connected app](../screens/api-tokens.md#connected-apps) (`Authorization: Bearer hca_...`), with the scope `sync`, given when a person connects the app in the browser ([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). An API token or a session gets `403` with `\"code\": \"sync_needs_connection\"`. The routes answer over HTTPS, and over plain HTTP only between local addresses (`403` with `\"code\": \"insecure_transport\"` otherwise). Every answer carries the header `HC-Sync: 1`."
 msgstr "Toutes les routes sauf `info` n'acceptent que le jeton d'accès d'une [application connectée](../screens/api-tokens.md#connected-apps) (`Authorization: Bearer hca_...`), avec la portée `sync`, donné quand une personne connecte l'application dans le navigateur ([ADR 0078](../adr/0078-oauth-2-with-pkce-for-the-mobile-app.md)). Un jeton d'API ou une session reçoit `403` avec `\"code\": \"sync_needs_connection\"`. Les routes répondent en HTTPS, et en HTTP en clair seulement entre adresses locales (`403` avec `\"code\": \"insecure_transport\"` sinon). Chaque réponse porte l'en-tête `HC-Sync: 1`."
 
-msgid "A connection reads the homes chosen when it was made, as long as its account is a member of them, with the account's role. A home it was not given, a home its account left, and a home that does not exist all answer `404`, never `403`. A home that requires a sign-in provider is read only by a connection made after signing in through it (`403` with `\"code\": \"sso_required\"` otherwise), as for an API token. An archived home is listed and read like the others."
-msgstr "Une connexion lit les logements choisis quand elle a été créée, tant que son compte en est membre, avec le rôle du compte. Un logement qui ne lui a pas été donné, un logement que son compte a quitté et un logement qui n'existe pas répondent tous `404`, jamais `403`. Un logement qui exige un fournisseur de connexion n'est lu que par une connexion créée après s'être connecté par lui (`403` avec `\"code\": \"sso_required\"` sinon), comme pour un jeton d'API. Un logement archivé est listé et lu comme les autres."
+msgid "A connection reads the homes chosen when it was made, as long as its account is a member of them, with the account's role. A home it was not given, a home its account left, and a home that does not exist all answer `404`, never `403`. A home that requires a sign-in provider is read only by a connection made after signing in through it (`403` with `\"code\": \"sso_required\"` otherwise), as for an API token. An archived home is listed and read like the others; it takes no change but the one that brings it back ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md))."
+msgstr "Une connexion lit les logements choisis quand elle a été créée, tant que son compte en est membre, avec le rôle du compte. Un logement qui ne lui a pas été donné, un logement que son compte a quitté et un logement qui n'existe pas répondent tous `404`, jamais `403`. Un logement qui exige un fournisseur de connexion n'est lu que par une connexion créée après s'être connecté par lui (`403` avec `\"code\": \"sso_required\"` sinon), comme pour un jeton d'API. Un logement archivé est listé et lu comme les autres ; il n'accepte aucune modification, sauf celle qui le remet en service ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md))."
 
 msgid "Reads are limited to 600 a minute per connection, pushes to 60 a minute per connection, and snapshots to 6 a minute per connection (a snapshot also counts as a read), each counted apart; beyond that the answer is `429`. An upload of a file counts as a push, a download as a read. `GET /api/v1/sync/info`, with the access token of a connection, gives these limits in `limits`: `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push`, `push_bytes` and `file_max_bytes`, the largest file the instance accepts (its setting of the largest file)."
 msgstr "Les lectures sont limitées à 600 par minute et par connexion, les envois à 60 par minute et par connexion, et les instantanés à 6 par minute et par connexion (un instantané compte aussi comme une lecture), chacun compté à part ; au-delà, la réponse est `429`. Le dépôt d'un fichier compte comme un envoi, son téléchargement comme une lecture. `GET /api/v1/sync/info`, avec le jeton d'accès d'une connexion, donne ces limites dans `limits` : `reads_per_minute`, `snapshots_per_minute`, `pushes_per_minute`, `ops_per_push`, `push_bytes` et `file_max_bytes`, le fichier le plus gros que l'instance accepte (son réglage du fichier le plus gros)."
@@ -271,6 +271,12 @@ msgstr "`clock_ahead`"
 msgid "The clock of the operation is more than 24 hours ahead of the server's: the date of the phone is wrong. The other operations of the push apply."
 msgstr "L'horloge de l'opération a plus de 24 heures d'avance sur celle du serveur : la date du téléphone est fausse. Les autres opérations de l'envoi s'appliquent."
 
+msgid "`home_archived`"
+msgstr "`home_archived`"
+
+msgid "The home is archived, so read only ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md)), for an owner or a member; a read-only member keeps `forbidden`. Only a `put` of the home that sets `archived_at` alone is taken (owners only): it brings the home back, and the operations after it in the push apply. The operations after one that archives the home are rejected. An app that does not know the code keeps the operation aside, as for any refusal."
+msgstr "Le logement est archivé, donc en lecture seule ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md)), pour un propriétaire ou un membre ; un membre en lecture seule garde `forbidden`. Seul un `put` du logement qui pose `archived_at` et rien d'autre est accepté (propriétaires seulement) : il remet le logement en service, et les opérations qui le suivent dans l'envoi s'appliquent. Les opérations qui suivent une opération qui archive le logement sont rejetées. Une application qui ne connaît pas ce code met l'opération de côté, comme pour tout refus."
+
 msgid "A push to a home that was erased answers `410` with `\"code\": \"home_gone\"`, and applies nothing."
 msgstr "Un envoi vers un logement effacé répond `410` avec `\"code\": \"home_gone\"`, et n'applique rien."
 
@@ -314,6 +320,12 @@ msgstr "`400` `malformed`"
 
 msgid "`HC-Sha256` missing, not 64 lower-case hexadecimal digits, or not the digest of the body; or an empty body."
 msgstr "`HC-Sha256` absent, autre chose que 64 chiffres hexadécimaux en minuscules, ou pas l'empreinte du corps ; ou un corps vide."
+
+msgid "`403` `home_archived`"
+msgstr "`403` `home_archived`"
+
+msgid "The home is archived, so read only ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md))."
+msgstr "Le logement est archivé, donc en lecture seule ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md))."
 
 msgid "`403` `forbidden`"
 msgstr "`403` `forbidden`"

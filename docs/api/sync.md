@@ -22,7 +22,8 @@ them, with the account's role. A home it was not given, a home its account left,
 that does not exist all answer `404`, never `403`. A home that requires a sign-in provider is
 read only by a connection made after signing in through it (`403` with
 `"code": "sso_required"` otherwise), as for an API token. An archived home is listed and read
-like the others.
+like the others; it takes no change but the one that brings it back
+([ADR 0089](../adr/0089-an-archived-home-is-read-only.md)).
 
 Reads are limited to 600 a minute per connection, pushes to 60 a minute per connection, and
 snapshots to 6 a minute per connection (a snapshot also counts as a read), each counted apart;
@@ -321,6 +322,7 @@ The codes of a rejected operation:
 | `wrong_home` | The operation names another home than the one of the route. |
 | `id_taken` | The id is held by a row of another home or of another type. The answer does not say where. |
 | `clock_ahead` | The clock of the operation is more than 24 hours ahead of the server's: the date of the phone is wrong. The other operations of the push apply. |
+| `home_archived` | The home is archived, so read only ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md)), for an owner or a member; a read-only member keeps `forbidden`. Only a `put` of the home that sets `archived_at` alone is taken (owners only): it brings the home back, and the operations after it in the push apply. The operations after one that archives the home are rejected. An app that does not know the code keeps the operation aside, as for any refusal. |
 
 A push to a home that was erased answers `410` with `"code": "home_gone"`, and applies nothing.
 
@@ -361,6 +363,7 @@ The phone uploads the file **before** the push that refers to it:
 | `201` | The file is kept: `{"file": "...", "sha256": "..."}`. |
 | `200` | The same bytes were uploaded before under this id: nothing changes. |
 | `400` `malformed` | `HC-Sha256` missing, not 64 lower-case hexadecimal digits, or not the digest of the body; or an empty body. |
+| `403` `home_archived` | The home is archived, so read only ([ADR 0089](../adr/0089-an-archived-home-is-read-only.md)). |
 | `403` `forbidden` | The account is a read-only member of the home. |
 | `409` `file_conflict` | The id holds other bytes, or is held by anything else on the server (a file of another home, a file of the web). The answer does not say which. |
 | `413` `too_large` | The file is larger than `file_max_bytes`. A length announced above it is refused before the body is read. |

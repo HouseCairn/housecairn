@@ -403,6 +403,9 @@ msgstr "Le nom de la copie est trop long (%(max)s caractères au plus)."
 msgid "This archive conflicts with data already on this instance; nothing was restored."
 msgstr "Cette archive entre en conflit avec des données déjà présentes sur cette instance ; rien n'a été restauré."
 
+msgid "This home is archived, so it is read only. An owner can bring it back."
+msgstr "Ce logement est archivé : il est en lecture seule. Un propriétaire peut le remettre en service."
+
 #, python-format
 msgid "This home requires signing in through %(provider)s."
 msgstr "Ce logement exige une connexion par %(provider)s."
@@ -552,8 +555,8 @@ msgid "Archive this home?"
 msgstr "Archiver ce logement ?"
 
 #, python-format
-msgid "%(home)s will be listed apart, hidden from Today and from the home selector, send no reminder, and its calendar feeds will be empty. Nothing is deleted: you can open it, change it and bring it back whenever you want."
-msgstr "%(home)s sera listé à part, masqué d'Aujourd'hui et du sélecteur de logement, n'enverra aucun rappel et ses flux de calendrier seront vides. Rien n'est supprimé : vous pouvez l'ouvrir, le modifier et le remettre en service quand vous voulez."
+msgid "%(home)s will be listed apart, hidden from Today and from the home selector, send no reminder, and its calendar feeds will be empty. It becomes read only: nothing is deleted, you can open it and export it, and bring it back to change it."
+msgstr "%(home)s sera listé à part, masqué d'Aujourd'hui et du sélecteur de logement, n'enverra aucun rappel et ses flux de calendrier seront vides. Il passe en lecture seule : rien n'est supprimé, vous pouvez l'ouvrir et l'exporter, et le remettre en service pour le modifier."
 
 msgid "Archive"
 msgstr "Archiver"
@@ -591,6 +594,18 @@ msgstr "Bienvenue dans %(home)s."
 msgid "You joined %(home)s."
 msgstr "Vous avez rejoint %(home)s."
 
+msgid "Archived home: read only"
+msgstr "Logement archivé : lecture seule"
+
+msgid "Bring it back to change it."
+msgstr "Remettez-le en service pour le modifier."
+
+msgid "An owner can bring it back."
+msgstr "Un propriétaire peut le remettre en service."
+
+msgid "Bring this home back"
+msgstr "Remettre ce logement en service"
+
 msgid "owner · everything, the household included"
 msgstr "propriétaire · tout, foyer compris"
 
@@ -599,6 +614,10 @@ msgstr "membre · tâches, projets, réalisation"
 
 msgid "read only · sees the home, changes nothing"
 msgstr "lecture seule · voit le logement, ne modifie rien"
+
+#, python-format
+msgid "%(home)s is archived: it can be read and exported, but not changed."
+msgstr "%(home)s est archivé : il peut être consulté et exporté, mais pas modifié."
 
 msgid "Home audit log"
 msgstr "Journal d'audit du logement"
@@ -677,8 +696,8 @@ msgctxt "home"
 msgid "Example"
 msgstr "Exemple"
 
-msgid "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. You can still open it and change it."
-msgstr "Ce logement est archivé. Il est masqué d'Aujourd'hui et du sélecteur de logement, n'envoie aucun rappel et ses flux de calendrier sont vides. Vous pouvez toujours l'ouvrir et le modifier."
+msgid "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. It is read only until an owner brings it back."
+msgstr "Ce logement est archivé. Il est masqué d'Aujourd'hui et du sélecteur de logement, n'envoie aucun rappel et ses flux de calendrier sont vides. Il est en lecture seule jusqu'à ce qu'un propriétaire le remette en service."
 
 msgid "Your role"
 msgstr "Votre rôle"
@@ -721,9 +740,6 @@ msgstr "Importer des tableaux"
 
 msgid "Rooms, items, tasks, stock and contractors, from CSV files"
 msgstr "Pièces, éléments, tâches, stock et intervenants, depuis des fichiers CSV"
-
-msgid "Bring this home back"
-msgstr "Remettre ce logement en service"
 
 msgid "Archive this home"
 msgstr "Archiver ce logement"

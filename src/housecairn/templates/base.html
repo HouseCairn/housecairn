@@ -42,7 +42,7 @@
     <main id="main" class="content {% block main_class %}{% endblock main_class %}" tabindex="-1">
       {% include "shell/offline_banner.html" %}
       {% include "demo/banner.html" %}
-      {% if user.is_authenticated %}{% load guide_extras %}{% example_banner %}{% endif %}
+      {% if user.is_authenticated %}{% load guide_extras %}{% example_banner %}{% load homes_extras %}{% archived_banner %}{% endif %}
       {% if messages %}
         <ul class="messages" role="status">
           {% for message in messages %}<li class="message message-{{ message.tags }}">{{ message }}</li>{% endfor %}

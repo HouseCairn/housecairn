@@ -39,7 +39,12 @@ from housecairn.homes import services as home_services
 from housecairn.homes import sso
 from housecairn.homes.forms import HomeForm
 from housecairn.homes.models import Hemisphere, Home
-from housecairn.homes.scoping import allow, homes_for_request, open_homes_for_request
+from housecairn.homes.scoping import (
+    allow,
+    archived_message,
+    homes_for_request,
+    open_homes_for_request,
+)
 from housecairn.sync import changes as sync_changes
 from housecairn.sync import clock, creating, files, limits, pushing, reading, visibility
 from housecairn.sync.models import Push
@@ -555,7 +560,9 @@ _RESULT = inline_serializer(
             required=False,
             help_text=(
                 "With `rejected`: forbidden, unknown_type, invalid_reference, wrong_home, "
-                "id_taken or clock_ahead (a clock more than 24 hours ahead of the server's)."
+                "id_taken, clock_ahead (a clock more than 24 hours ahead of the server's) or "
+                "home_archived (the home is archived, so read only; only bringing it back is "
+                "taken)."
             ),
         ),
         "lost": serializers.DictField(
@@ -767,7 +774,10 @@ class SyncFileView(SyncAPIView):
                 description="`malformed`: `HC-Sha256` missing, or not the digest of the body."
             ),
             403: OpenApiResponse(
-                description="`forbidden` for a read-only member, or as for every route."
+                description=(
+                    "`home_archived` when the home is archived, `forbidden` for a read-only "
+                    "member, or as for every route."
+                )
             ),
             404: OpenApiResponse(description="Not a home of this connection."),
             409: OpenApiResponse(
@@ -800,6 +810,13 @@ class SyncFileView(SyncAPIView):
     ) -> Response:
         _push_limited(request)
         home = readable_home(request, home_id)
+        if home.archived_at is not None and home_services.writes_by_role(
+            cast(User, request.user), home
+        ):
+            # Read only (docs/adr/0089): the code of the results of a push to it.
+            raise CodedError(
+                status.HTTP_403_FORBIDDEN, archived_message(), home_services.HOME_ARCHIVED
+            )
         if not home_services.can_write(cast(User, request.user), home):
             raise CodedError(
                 status.HTTP_403_FORBIDDEN, _("A read-only member sends no file."), "forbidden"

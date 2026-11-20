@@ -3,7 +3,7 @@
 {% block head_title %}{% translate "Reports" %}{% endblock head_title %}
 {% block content %}
   {% url 'homes:detail' home_id=home.id as parent %}{% back_link parent home.name %}
-  <h1>{% if can_write %}{% translate "Reports" %}{% else %}{% translate "My reports" %}{% endif %}</h1>
+  <h1>{% if sees_all %}{% translate "Reports" %}{% else %}{% translate "My reports" %}{% endif %}</h1>
   {% if filters %}{% translate "Filter the reports" as filter_label %}{% filter_tabs filter_label "show" shown filters "open" %}{% endif %}
   {% if page %}
     <ul class="card-list">
@@ -12,7 +12,7 @@
           <a class="row" href="{% url_with_next 'reports:detail' home_id=home.id report_id=report.id %}">
             <span class="row-body">
               <span class="row-title">{{ report.title }}</span>
-              <span class="row-text">{% if report.place %}{{ report.place }} · {% endif %}{{ report.get_status_display }} · {{ report.created_at|day }}{% if can_write %} · {{ report.reporter_label }}{% endif %}</span>
+              <span class="row-text">{% if report.place %}{{ report.place }} · {% endif %}{{ report.get_status_display }} · {{ report.created_at|day }}{% if sees_all %} · {{ report.reporter_label }}{% endif %}</span>
             </span>
             {% include "components/icon.html" with name="chevron" class="chevron" %}
           </a>
@@ -26,7 +26,7 @@
       </nav>
     {% endif %}
   {% else %}
-    <p class="empty">{% if shown == "mine" or not can_write %}{% translate "You have not reported anything." %}{% else %}{% translate "Nothing to deal with." %}{% endif %}</p>
+    <p class="empty">{% if shown == "mine" or not sees_all %}{% translate "You have not reported anything." %}{% else %}{% translate "Nothing to deal with." %}{% endif %}</p>
   {% endif %}
-  <a class="button button-block" href="{% url_with_next 'reports:create' home_id=home.id %}">{% translate "Report a problem" %}</a>
+  {% if not home.is_archived %}<a class="button button-block" href="{% url_with_next 'reports:create' home_id=home.id %}">{% translate "Report a problem" %}</a>{% endif %}
 {% endblock content %}
