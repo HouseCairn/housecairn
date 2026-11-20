@@ -10,6 +10,7 @@ from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseBase
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.translation import gettext as _
 from django.utils.translation import pgettext
 from django.views import View
@@ -17,6 +18,7 @@ from django.views.generic import FormView, TemplateView
 
 from housecairn.core import navigation
 from housecairn.guide.prefill import PrefillMixin
+from housecairn.homes import services as home_services
 from housecairn.reports import forms, services
 from housecairn.reports.files import photo_response
 from housecairn.reports.models import CLOSED_STATUSES, Report, ReportStatus
@@ -30,6 +32,14 @@ SHOWN = ("open", "closed", "all", "mine")
 
 
 class HomeReportsMixin(HomeRoomsMixin):
+    @cached_property
+    def sees_all(self) -> bool:
+        """Every report, or only one's own: by the role, archived or not (docs/adr/0089)."""
+        return services.sees_every_report(self.request.user, self.home)
+
+    def page(self, **extra: Any) -> dict[str, Any]:
+        return super().page(sees_all=self.sees_all, **extra)
+
     def get_report(self) -> Report:
         report: Report = get_object_or_404(
             services.visible_reports(self.request.user, self.home),
@@ -44,7 +54,7 @@ class ReportListView(HomeReportsMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         shown = self.request.GET.get("show", "")
         if shown not in SHOWN:
-            shown = "open" if self.can_write else "mine"
+            shown = "open" if self.sees_all else "mine"
         rows = services.visible_reports(self.request.user, self.home)
         if shown == "open":
             rows = rows.filter(status=ReportStatus.OPEN)
@@ -67,7 +77,7 @@ class ReportListView(HomeReportsMixin, TemplateView):
                 ("all", pgettext("reports filter", "All")),
                 ("mine", _("Mine")),
             ]
-            if self.can_write
+            if self.sees_all
             else []
         )
         return super().get_context_data(
@@ -80,6 +90,11 @@ class ReportCreateView(PrefillMixin, HomeReportsMixin, FormView[Any]):
     prefill_fields = ("title",)
     template_name = "reports/report_form.html"
     form_class = forms.ReportForm
+
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        # The form of a report is not offered in an archived home (docs/adr/0089).
+        home_services.check_not_archived(self.home)
+        return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         # Refuse an oversized body before reading any of it.

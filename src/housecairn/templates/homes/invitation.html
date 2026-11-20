@@ -4,7 +4,9 @@
 {% block content %}
   <h1>{% blocktranslate with home=home.name %}Join {{ home }}{% endblocktranslate %}</h1>
   <p class="lead">{% blocktranslate with role=invitation.get_role_display email=invitation.email %}You are invited as {{ role }}, with the address {{ email }}.{% endblocktranslate %}</p>
-  {% if user.is_authenticated %}
+  {% if archived %}
+    <div class="alert alert-info" role="status">{% translate "This home is archived; the invitation will work again once it is brought back." %}</div>
+  {% elif user.is_authenticated %}
     {% if same_address and needs_verification %}
       <div class="alert alert-warning" role="status">
         {% if email_configured %}

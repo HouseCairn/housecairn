@@ -27,6 +27,7 @@
         <p class="code mono">{{ shared_link }}</p>
       </section>
     {% endif %}
+    {% if not home.is_archived %}{# Who may open an archived home waits until it is back (docs/adr/0089); taking access away does not. #}
     <h2>{% translate "Invite someone" %}</h2>
     <form method="post" action="{% url 'homes:invite' home_id=home.id %}" class="card">
       {% csrf_token %}
@@ -36,6 +37,7 @@
       <button type="submit" class="button-block">{% translate "Invite" %}</button>
       <p class="small">{% if email_configured %}{% translate "The invitation is sent by email, with a link that works once." %}{% else %}{% translate "This instance does not send email: you will get a link to pass on, which works once." %}{% endif %} {% blocktranslate count days=invitation_days %}It expires after {{ days }} day.{% plural %}It expires after {{ days }} days.{% endblocktranslate %}</p>
     </form>
+    {% endif %}
     {% if invitations %}
       <h2>{% translate "Pending invitations" %}</h2>
       {% for invitation in invitations %}
@@ -43,11 +45,13 @@
           <p class="row-title">{{ invitation.email }}</p>
           <p class="row-text">{{ invitation.get_role_display }} · {% blocktranslate with date=invitation.expires_at|day %}until {{ date }}{% endblocktranslate %}</p>
           <div class="button-row">
+            {% if not home.is_archived %}
             <form method="post" action="{% url 'homes:invitation-resend' home_id=home.id invitation_id=invitation.id %}">
               {% csrf_token %}
               {% next_field %}
               <button type="submit" class="button-secondary button-small">{% translate "Send again" %}</button>
             </form>
+            {% endif %}
             <form method="post" action="{% url 'homes:invitation-revoke' home_id=home.id invitation_id=invitation.id %}">
               {% csrf_token %}
               {% next_field %}
@@ -57,7 +61,7 @@
         </section>
       {% endfor %}
     {% endif %}
-    {% if providers %}
+    {% if providers and not home.is_archived %}
       <h2>{% translate "Sign-in" %}</h2>
       <form method="post" action="{% url 'homes:required-provider' home_id=home.id %}" class="card">
         {% csrf_token %}

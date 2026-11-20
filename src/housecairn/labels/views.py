@@ -118,6 +118,10 @@ class LabelDetailView(LabelsMixin, TemplateView):
 class LabelPrintView(LabelsMixin, View):
     """The PDF of the labels ticked on the list, or of the one label of its page."""
 
+    # Printing the labels that exist reads the home: still open in an archived one, which makes
+    # no new label (`can_write`, docs/adr/0089).
+    archived_home_writes = True
+
     def post(self, request: HttpRequest, **kwargs: Any) -> HttpResponseBase:
         try:
             selection = parse_selection(request.POST.getlist("target"))

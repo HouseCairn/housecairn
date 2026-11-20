@@ -84,6 +84,9 @@ class LabelViewSet(
     lookup_field = "id"
     lookup_url_kwarg = "label_id"
     http_method_names = ["get", "post", "delete", "head", "options"]
+    # Printing the labels that exist reads the home: still open in an archived one
+    # (docs/adr/0089).
+    archived_home_writes = frozenset({"print_labels"})
 
     def get_queryset(self) -> models.QuerySet[Label]:
         labels = services.labels_of(self.get_home())

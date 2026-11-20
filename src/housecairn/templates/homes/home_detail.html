@@ -6,7 +6,7 @@
   <h1>{{ home.name }}{% if home.is_archived %} <span class="pill">{% translate "Archived" %}</span>{% endif %}{% if home.is_example %} <span class="pill pill-info">{% translate "Example" context "home" %}</span>{% endif %}</h1>
   {% tab_bar "home" %}
   {% if home.is_archived %}
-    <div class="alert alert-info" role="status">{% translate "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. You can still open it and change it." %}</div>
+    <div class="alert alert-info" role="status">{% translate "This home is archived. It is hidden from Today and from the home selector, sends no reminder and its calendar feeds are empty. It is read only until an owner brings it back." %}</div>
   {% endif %}
   <section class="card">
     <dl class="facts">

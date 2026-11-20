@@ -1,4 +1,4 @@
-"""Archiving a home: listed apart, silent, still openable (docs/adr/0079, lot M1).
+"""Archiving a home: listed apart, silent, still openable, read only (docs/adr/0079, 0089).
 
 Each rule has a test that fails without it: owners only, hidden from Today and the selector,
 no reminder, an empty calendar feed that stays valid, `GET /api/v1/homes/` that keeps
@@ -183,9 +183,10 @@ class TestScreens:
         assert "Main house" in html
         assert "You are not a member of any home yet." not in html
 
-    def test_an_archived_home_stays_readable_and_editable_by_its_address(
+    def test_an_archived_home_stays_readable_and_is_read_only_by_its_address(
         self, signed_in: Client, alice: User, alice_home: Home
     ) -> None:
+        """Read only since docs/adr/0089: its pages open, a change is refused with a 403."""
         home_services.archive_home(alice, alice_home)
         kwargs = {"home_id": alice_home.id}
         assert signed_in.get(reverse("tasks:today", kwargs=kwargs)).status_code == 200
@@ -194,10 +195,10 @@ class TestScreens:
             reverse("homes:edit", kwargs=kwargs),
             {"name": "Renamed", "currency": "EUR", "hemisphere": "north"},
         )
-        assert response.status_code == 302
+        assert response.status_code == 403
         alice_home.refresh_from_db()
-        assert alice_home.name == "Renamed"
-        assert alice_home.archived_at is not None  # editing does not bring it back
+        assert alice_home.name == "Main house"
+        assert alice_home.archived_at is not None
 
 
 class TestHiddenFromTheLists:
@@ -435,10 +436,10 @@ class TestNoNewFeed:
 
 
 class TestRecurringTask:
-    def test_finishing_a_recurring_task_of_an_archived_home_makes_the_next(
+    def test_a_recurring_task_of_an_archived_home_is_not_finished(
         self, alice: User, alice_home: Home
     ) -> None:
-        """Wanted (docs/adr/0079): the home stays editable, so its tasks work as before."""
+        """Read only since docs/adr/0089: closing an occurrence is refused, nothing is made."""
         task = task_services.create_task(
             alice,
             alice_home,
@@ -449,10 +450,9 @@ class TestRecurringTask:
             repeat_interval=1,
         )
         home_services.archive_home(alice, alice_home)
-        closing = task_services.complete(alice, task.occurrences.get())
-        assert closing.next is not None
-        assert closing.next.task == task
-        assert task.occurrences.count() == 2
+        with pytest.raises(PermissionDenied):
+            task_services.complete(alice, task.occurrences.get())
+        assert task.occurrences.count() == 1
 
 
 class TestApi:

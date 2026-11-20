@@ -21,6 +21,10 @@ and the role you are invited with.
   administrator, or ask to be invited again once the instance sends email. A
   link that came by email proves the address by itself.
 
+An invitation to a home that was archived since waits: the page says that it will
+work again once the home is brought back, and offers neither to join nor to create an
+account. The link stays valid until then, within its expiry.
+
 The link works once. A link that was used, revoked, replaced by a newer one or
 has expired opens a page saying it no longer works, without any detail: ask the
 person who invited you to send it again. Only the account with the invited

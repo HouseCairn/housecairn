@@ -2,7 +2,7 @@
 {% load i18n reports_extras navigation dates %}
 {% block head_title %}{{ report.title }}{% endblock head_title %}
 {% block content %}
-  {% url 'reports:list' home_id=home.id as parent %}{% if can_write %}{% translate "Reports" as list_label %}{% else %}{% translate "My reports" as list_label %}{% endif %}{% back_link parent list_label %}
+  {% url 'reports:list' home_id=home.id as parent %}{% if sees_all %}{% translate "Reports" as list_label %}{% else %}{% translate "My reports" as list_label %}{% endif %}{% back_link parent list_label %}
   <section class="card">
     <div class="task-pills">
       <span class="pill {% if report.is_open %}pill-warning{% elif report.status == 'task' %}pill-info{% else %}pill-ghost{% endif %}">{{ report.get_status_display }}</span>

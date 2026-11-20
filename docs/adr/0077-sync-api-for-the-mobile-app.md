@@ -346,7 +346,8 @@ The device that won is a device id in `b64`, here the server's `server_device`.
 a repeat), `repaired` (written, then changed by a repair rule: the changes follow in the feed),
 or `rejected` with a `code` (`forbidden` for a read-only member, or for `archived_at` set by a
 member who is not an owner; `unknown_type`, `invalid_reference`, `wrong_home`, `id_taken`,
-`clock_ahead` for a clock more than 24 hours ahead of the server's),
+`clock_ahead` for a clock more than 24 hours ahead of the server's, `home_archived` for an
+operation on an archived home but the one that brings it back, [ADR 0089](0089-an-archived-home-is-read-only.md)),
 which the phone shows on the row without blocking the rest. Every status but `rejected` tells
 the phone that the server has seen the row ([next section](#starting-again-after-410)).
 

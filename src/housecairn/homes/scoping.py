@@ -13,6 +13,7 @@ from django.template.response import TemplateResponse
 from django.utils import translation
 from django.utils.translation import gettext as _
 from rest_framework import exceptions, status
+from rest_framework.permissions import SAFE_METHODS
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
@@ -61,6 +62,10 @@ def active_homes_for_request(request: HttpRequest | Request) -> models.QuerySet[
     return services.active_homes(open_homes_for_request(request))
 
 
+# The attribute of a request that holds the home its view opened from the address.
+OPENED_HOME = "_housecairn_opened_home"
+
+
 class HomeScopedMixin:
     """For web and API views alike: `get_homes()`, and `get_home()` from the URL.
 
@@ -75,6 +80,12 @@ class HomeScopedMixin:
     # Whether the home of the address may be the example home of the guide (docs/adr/0084):
     # the web pages of a home say yes, the API never does.
     include_example = False
+    # What a request that changes something (any method but GET, HEAD and OPTIONS) may do in an
+    # archived home (docs/adr/0089): nothing, unless the view names itself an exception here,
+    # `True` for the whole view, or the names of its actions for an API view set. The
+    # exceptions are bringing the home back, exporting it, deleting it, leaving it and taking
+    # access away; each service still checks its own rule.
+    archived_home_writes: bool | frozenset[str] = False
 
     def get_homes(self) -> models.QuerySet[Home]:
         return open_homes_for_request(self.request)
@@ -91,7 +102,38 @@ class HomeScopedMixin:
         )
         if not allow_locked:
             services.check_open(home, sso.signed_in_providers(self.request))
+            # The banner of an archived home (`homes_extras.archived_banner`) reads it here.
+            setattr(self.request, OPENED_HOME, home)
+        if self.request.method not in SAFE_METHODS and not self._writes_archived_home():
+            services.check_not_archived(home)
         return home
+
+    def _writes_archived_home(self) -> bool:
+        allowed = self.archived_home_writes
+        if isinstance(allowed, bool):
+            return allowed
+        return getattr(self, "action", None) in allowed
+
+    def refuse_change_to_archived_home(self) -> None:
+        """Before the view reads anything of a change: refuse it if the home is archived.
+
+        Called first by every view of a home that changes something (the web in `dispatch`,
+        the API in `check_permissions`), so that a body the view would refuse for another
+        reason, or a row it would not find, still gets the refusal of an archived home: no
+        route of a home writes in an archived one unless it is an exception (docs/adr/0089).
+        """
+        if (
+            self.request.method in SAFE_METHODS
+            or self.home_url_kwarg not in self.kwargs
+            or self._writes_archived_home()
+        ):
+            return
+        self.get_home()
+
+    def check_permissions(self, request: Request) -> None:
+        """DRF: the permissions of the view, then the rule of an archived home."""
+        super().check_permissions(request)  # type: ignore[misc]
+        self.refuse_change_to_archived_home()
 
 
 class WebHomeScopedMixin(LoginRequiredMixin, HomeScopedMixin):
@@ -114,10 +156,29 @@ class WebHomeScopedMixin(LoginRequiredMixin, HomeScopedMixin):
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponseBase:
         try:
+            if request.user.is_authenticated:
+                self.refuse_change_to_archived_home()
             response: HttpResponseBase = super().dispatch(request, *args, **kwargs)
             return response
         except services.SsoRequiredError as exc:
             return sso_required_response(request, exc)
+        except services.HomeArchivedError as exc:
+            return home_archived_response(request, exc.home)
+
+
+def home_archived_response(request: HttpRequest, home: Home) -> HttpResponse:
+    """403: the home is archived, so read only; an owner is offered to bring it back."""
+    response = TemplateResponse(
+        request,
+        "homes/archived_refused.html",
+        {
+            "home": home,
+            "is_owner": services.is_owner(request.user, home),
+            "archived_refused": True,
+        },
+        status=403,
+    )
+    return response.render()
 
 
 def sso_required_response(request: HttpRequest, exc: services.SsoRequiredError) -> HttpResponse:
@@ -141,6 +202,10 @@ class SsoRequiredApiError(exceptions.PermissionDenied):
     default_code = "sso_required"
 
 
+def archived_message() -> str:
+    return _("This home is archived, so it is read only. An owner can bring it back.")
+
+
 def api_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     """DRF exception handler: `SsoRequiredError` becomes a 403 naming the provider."""
     from housecairn.demo import mode
@@ -153,6 +218,13 @@ def api_exception_handler(exc: Exception, context: dict[str, Any]) -> Response |
         # The refusals of the sync API's boundary and transport rule (docs/adr/0078), and its
         # coded errors (`cursor_expired`, `home_gone`, docs/adr/0077).
         return Response({"detail": exc.detail, "code": code}, status=exc.status_code)
+    if isinstance(exc, services.HomeArchivedError):
+        # An archived home is read only (docs/adr/0089), for every role: the same code as the
+        # results of a push to it.
+        return Response(
+            {"detail": archived_message(), "code": services.HOME_ARCHIVED},
+            status=status.HTTP_403_FORBIDDEN,
+        )
     if isinstance(exc, services.SsoRequiredError):
         return Response(
             {

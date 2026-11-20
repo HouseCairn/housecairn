@@ -182,7 +182,9 @@ def entries(
             assignee_id=task.assignee_id,
             person=person_name(task.assignee),
             priority=task.priority,
-            can_write=roles.get(occurrence.home_id) in WRITE_ROLES,
+            # An archived home is read only (docs/adr/0089).
+            can_write=roles.get(occurrence.home_id) in WRITE_ROLES
+            and occurrence.home.archived_at is None,
             updated_at=occurrence.updated_at,
             first_due=None if projected else occurrence.postponed_from,
         )

@@ -1,0 +1,7 @@
+{% load i18n navigation %}{# On every page of an archived home (docs/adr/0089): it is read only; an owner brings it back from here. #}
+{% if home %}
+  <div class="alert alert-info archived-banner" role="note">
+    <p><strong>{% translate "Archived home: read only" %}</strong> · {% if is_owner %}{% translate "Bring it back to change it." %}{% else %}{% translate "An owner can bring it back." %}{% endif %}</p>
+    {% if is_owner %}<a class="button button-secondary button-small" href="{% url_with_next 'homes:unarchive' home_id=home.id %}">{% translate "Bring this home back" %}</a>{% endif %}
+  </div>
+{% endif %}

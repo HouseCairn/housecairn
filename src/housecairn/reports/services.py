@@ -83,8 +83,12 @@ def reports_of(home: Home) -> models.QuerySet[Report]:
 
 
 def sees_every_report(actor: AnyUser, home: Home) -> bool:
-    """Whether `actor` sees every report of `home`: a member who writes does, nobody else."""
-    return home_services.can_write(actor, home)
+    """Whether `actor` sees every report of `home`: a member whose role writes does, nobody else.
+
+    By the role, archived or not (`writes_by_role`): archiving a home changes what may be
+    written in it, not what its members see (docs/adr/0089).
+    """
+    return home_services.writes_by_role(actor, home)
 
 
 def visible_among(
@@ -250,6 +254,7 @@ def create_report(
 ) -> Report:
     """Report a problem. The place is optional, and at most one of room, item, stock item."""
     _require_member(actor, home)
+    home_services.check_not_archived(home)  # read only for every role (docs/adr/0089)
     assert isinstance(actor, User)  # noqa: S101 - a member is a signed-in user
     if sum(place is not None for place in (room, item, article)) > 1:
         raise ValidationError({"place": _("Choose one place.")})

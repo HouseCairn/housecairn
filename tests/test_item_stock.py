@@ -376,7 +376,7 @@ class TestWhoMayWrite:
         assert client.post(address).status_code == 302
         assert linked(article) == set()
 
-    def test_an_archived_home_is_written_like_everywhere_else(
+    def test_an_archived_home_is_read_only_here_too(
         self,
         signed_in: Client,
         alice_home: Home,
@@ -384,15 +384,15 @@ class TestWhoMayWrite:
         article: Article,
         filter_article: Article,
     ) -> None:
-        # An archived home stays readable and editable (docs/adr/0079): the same here as on the
-        # form of the article.
+        # An archived home is read only (docs/adr/0089): the same here as on the form of the
+        # article.
         Home.objects.filter(pk=alice_home.pk).update(archived_at=timezone.now())
         edit = reverse("stock:edit", kwargs={"home_id": alice_home.id, "article_id": article.id})
-        assert signed_in.get(edit).status_code == 200
+        assert signed_in.get(edit).status_code == 403
         link = stock_url("item-link", alice_home, owner_item)
-        assert signed_in.get(link).status_code == 200
-        assert signed_in.post(link, {"articles": [filter_article.id]}).status_code == 302
-        assert linked(filter_article) == {owner_item}
+        assert signed_in.get(link).status_code == 403
+        assert signed_in.post(link, {"articles": [filter_article.id]}).status_code == 403
+        assert linked(filter_article) == set()
 
     def test_the_demonstration_mode_does_not_change_the_stock_rules(
         self,

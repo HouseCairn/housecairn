@@ -111,8 +111,8 @@ def open_homes(homes: models.QuerySet[Home], providers: frozenset[str]) -> model
 def active_homes(homes: models.QuerySet[Home]) -> models.QuerySet[Home]:
     """Of `homes`, those not archived: what the lists, Today and the reminders cover (ADR 0079).
 
-    Reading, changing or exporting a home opened by its address does not go through here:
-    an archived home stays readable and editable.
+    Reading or exporting a home opened by its address does not go through here: an archived
+    home stays readable, and read only (`can_write`, docs/adr/0089).
     """
     return homes.filter(archived_at__isnull=True)
 
@@ -133,8 +133,41 @@ def role_of(user: AnyUser, home: Home) -> Role | None:
     return Role(membership.role) if membership else None
 
 
-def can_write(user: AnyUser, home: Home) -> bool:
+# The code of a change refused because its home is archived (docs/adr/0089): in the answers of
+# the API, and in the results of a push of the sync API.
+HOME_ARCHIVED = "home_archived"
+
+
+class HomeArchivedError(PermissionDenied):
+    """A change to an archived home, which is read only (docs/adr/0089)."""
+
+    def __init__(self, home: Home) -> None:
+        super().__init__("home archived")
+        self.home = home
+
+
+def check_not_archived(home: Home) -> None:
+    """Refuse a change to an archived home, whatever the role (docs/adr/0089)."""
+    if home.archived_at is not None:
+        raise HomeArchivedError(home)
+
+
+def writes_by_role(user: AnyUser, home: Home) -> bool:
+    """Whether the role of `user` in `home` is one that writes, archived or not.
+
+    What decides what a person sees (every report, docs/adr/0086), never whether they may
+    change something now: that is `can_write`.
+    """
     return role_of(user, home) in WRITE_ROLES
+
+
+def can_write(user: AnyUser, home: Home) -> bool:
+    """Whether `user` may change the content of `home` now.
+
+    A role that writes, in a home that is not archived: an archived home is read only for
+    everyone, its owners included, until an owner brings it back (docs/adr/0089).
+    """
+    return home.archived_at is None and writes_by_role(user, home)
 
 
 def is_owner(user: AnyUser, home: Home) -> bool:
@@ -223,6 +256,7 @@ def set_required_provider(
     against the session that sets the rule, nor name a provider nobody can use.
     """
     _require_owner(actor, home)
+    check_not_archived(home)  # who may open it waits until it is back (docs/adr/0089)
     if provider_id:
         if provider_id not in set(declared):
             raise ValidationError(_("This sign-in provider is not offered by this instance."))
@@ -276,8 +310,8 @@ def lift_all_unavailable_requirements(*, declared: Iterable[str]) -> int:
 def archive_home(actor: AnyUser, home: Home) -> Home:
     """An owner archives the home: listed apart, no reminder, an empty calendar feed.
 
-    Nothing is deleted and nothing becomes read only (docs/adr/0079). Archiving a home that
-    is archived already changes nothing and records nothing.
+    Nothing is deleted; the home is read only until an owner brings it back (docs/adr/0079,
+    0089). Archiving a home that is archived already changes nothing and records nothing.
     """
     _require_owner(actor, home)
     if home.archived_at is None:
@@ -387,6 +421,7 @@ def change_role(actor: AnyUser, membership: Membership, role: Role | str) -> Mem
     new_role = Role(role)
     home = membership.home
     _require_owner(actor, home)
+    check_not_archived(home)  # who may open it waits until it is back (docs/adr/0089)
     locked = _lock_memberships(home)
     target = next((m for m in locked if m.pk == membership.pk), None)
     if target is None:
@@ -443,6 +478,7 @@ def leave_home(actor: User, home: Home) -> None:
 def transfer_ownership(actor: User, home: Home, to: Membership) -> Membership:
     """The acting owner makes another member owner and becomes a member."""
     _require_owner(actor, home)
+    check_not_archived(home)  # who may open it waits until it is back (docs/adr/0089)
     locked = _lock_memberships(home)
     target = next((m for m in locked if m.pk == to.pk), None)
     mine = next((m for m in locked if m.user_id == actor.pk), None)
@@ -509,6 +545,7 @@ def invite(
     only an invitation by link is made (docs/adr/0071).
     """
     _require_owner(actor, home)
+    check_not_archived(home)  # who may open it waits until it is back (docs/adr/0089)
     if home.is_example:
         # Only its maker is in the example home of the guide (docs/adr/0084).
         raise ValidationError(_("The example home has no other member."))
@@ -570,6 +607,7 @@ def resend_invitation(
 ) -> tuple[Invitation, str | None]:
     """A new link and a new expiry; the previous link stops working."""
     _require_owner(actor, invitation.home)
+    check_not_archived(invitation.home)  # who may open it waits until it is back (docs/adr/0089)
     if delivery.send is not None:
         mode.refuse(mode.nothing_sent())
     if invitation.accepted_at is not None or invitation.revoked_at is not None:
@@ -644,6 +682,9 @@ def accept_invitation(user: User, raw: str) -> Membership:
     if not invitation.is_pending or invitation.home.is_example:
         # An example home has no other member (docs/adr/0084): such a link is a dead one.
         raise Invitation.DoesNotExist
+    # What gives access waits until the home is back (docs/adr/0089): the invitation is kept,
+    # unused, and works again once an owner brings the home back.
+    check_not_archived(invitation.home)
     if not same_address(user.email, invitation.email):
         raise PermissionDenied(_("This invitation is for another email address."))
     if invitation.delivered_by_email:
