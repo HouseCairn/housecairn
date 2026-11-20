@@ -895,6 +895,9 @@ class InvitationView(View):
         return {
             "invitation": self.invitation,
             "home": self.invitation.home,
+            # What gives access waits until the home is back (docs/adr/0089): the page says
+            # so, and the invitation is kept for then.
+            "archived": self.invitation.home.archived_at is not None,
             "same_address": same_address,
             # A link handed over by hand proves nothing: the account verifies the
             # address first (docs/adr/0020).
@@ -908,9 +911,9 @@ class InvitationView(View):
             **extra,
         }
 
-    def render(self, **extra: Any) -> HttpResponse:
+    def render(self, status: int = 200, **extra: Any) -> HttpResponse:
         return TemplateResponse(
-            self.request, "homes/invitation.html", self.context(**extra)
+            self.request, "homes/invitation.html", self.context(**extra), status=status
         ).render()
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
@@ -925,6 +928,9 @@ class InvitationView(View):
         return forms.InvitationSignupForm(data, email=self.invitation.email)
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        if self.invitation.home.archived_at is not None:
+            # Neither an account nor a member until the home is back (docs/adr/0089).
+            return self.render(status=403, form=None)
         if request.user.is_authenticated:
             return self.accept(request.user)
         if not self.may_create_account():

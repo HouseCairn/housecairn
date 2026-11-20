@@ -4,12 +4,16 @@ Every route of a home that changes something (any method but GET, HEAD and OPTIO
 from the URL resolver, pages, HTMX and API alike, with the ids of real rows of the home: each
 answers 403 and writes nothing, unless it is one of the exceptions of the record (bringing the
 home back, exporting it, deleting it, leaving it, taking access away). A new route is refused
-until it is declared an exception, never let through. The pages of an archived home offer no
-change but those, the sync API refuses each operation of a push with `home_archived` but the one
-that brings the home back, and a report or an event sent to it is refused without a 500.
+until it is declared an exception, never let through. Accepting an invitation, whose routes name
+no home, waits until the home is back and keeps the invitation. The pages of an archived home
+offer no change but those, the sync API refuses each operation of a push with `home_archived`
+but the one that brings the home back, and a report or an event sent to it is refused without a
+500.
 """
 
+import datetime
 import hashlib
+import html
 import json
 import re
 import uuid
@@ -32,6 +36,7 @@ from housecairn.accounts.models import User
 from housecairn.apitokens import services as token_services
 from housecairn.apitokens.models import Scope
 from housecairn.audit.models import AuditEvent
+from housecairn.calendar import services as calendar_services
 from housecairn.events.models import Event
 from housecairn.homes import services as home_services
 from housecairn.homes.management.commands.load_demo_data import load
@@ -87,6 +92,10 @@ EXCEPTIONS = frozenset(
         "api-v1:home-label-print post",
     }
 )
+
+# The routes that give access to a home by the secret of an invitation: they name no home in their
+# address, so the routes of a home leave them out; `TestInvitations` covers them (docs/adr/0089).
+JOINS = frozenset({"invitation post", "api-v1:invitation-accept post"})
 
 
 @pytest.fixture(autouse=True)
@@ -301,6 +310,17 @@ class TestEveryRoute:
         assert any(not route.startswith("api/") for _name, route, _method in REFUSED)
         assert len(REFUSED) > 100
 
+    def test_the_routes_that_join_a_home_are_covered(self) -> None:
+        """Accepting an invitation names no home in its address: `TestInvitations` covers it."""
+        found = {
+            f"{name} {method}"
+            for route, name, callback in _walk(get_resolver().url_patterns)
+            if "home_id" not in route
+            and (name == "invitation" or name.startswith("api-v1:invitation"))
+            for method in _methods(callback, UNSAFE)
+        }
+        assert found == JOINS
+
     @pytest.mark.parametrize("entry", REFUSED, ids=_id)
     def test_a_change_is_refused_and_writes_nothing(
         self, alice: User, ids: dict[str, str], entry: tuple[str, str, str]
@@ -361,6 +381,95 @@ class TestTheWayBack:
         assert answer.status_code == 403
         alice_home.refresh_from_db()
         assert alice_home.archived_at is not None
+
+
+# ---------- invitations sent before the home was archived ----------
+
+WAITS = "This home is archived; the invitation will work again once it is brought back."
+WAITS_FR = "Ce logement est archivé ; l'invitation reprendra quand il sera remis en service."
+
+
+@pytest.fixture
+def pending(alice: User, alice_home: Home) -> str:
+    """The secret of an invitation that went by email, then the home was archived."""
+    sent: list[str] = []
+    home_services.invite(
+        alice,
+        alice_home,
+        email="carol@example.com",
+        role=Role.MEMBER,
+        delivery=home_services.Delivery(send=lambda _invitation, raw: sent.append(raw)),
+    )
+    home_services.archive_home(alice, alice_home)
+    return sent[0]
+
+
+def accept(way: str, user: User, raw: str) -> Any:
+    """Accept the invitation of `raw` as `user`, from the page of its link or from the API."""
+    if way == "web":
+        web = Client()
+        web.force_login(user)
+        return web.post(f"/invitations/{raw}/")
+    api = APIClient()
+    api.force_authenticate(user)
+    return api.post("/api/v1/invitations/accept/", {"token": raw}, format="json")
+
+
+class TestInvitations:
+    """What gives access waits until the home is back (docs/adr/0089): the routes of `JOINS`."""
+
+    def test_the_service_refuses_and_keeps_the_invitation(
+        self, make_user: Callable[..., User], alice_home: Home, pending: str
+    ) -> None:
+        carol = make_user("carol@example.com")
+        with pytest.raises(home_services.HomeArchivedError):
+            home_services.accept_invitation(carol, pending)
+        assert home_services.find_invitation(pending) is not None
+        assert home_services.role_of(carol, alice_home) is None
+
+    @pytest.mark.parametrize("way", ["web", "api"])
+    def test_accepting_is_refused_then_works_once_the_home_is_back(
+        self, make_user: Callable[..., User], alice: User, alice_home: Home, pending: str, way: str
+    ) -> None:
+        carol = make_user("carol@example.com")
+        answer = accept(way, carol, pending)
+        assert answer.status_code == 403, answer.content[:300]
+        if way == "api":
+            assert answer.json()["code"] == home_services.HOME_ARCHIVED
+        else:
+            assert WAITS in html.unescape(answer.content.decode())
+        assert home_services.role_of(carol, alice_home) is None
+        # Kept, unused: the same link works once an owner brings the home back.
+        assert home_services.find_invitation(pending) is not None
+        home_services.unarchive_home(alice, alice_home)
+        answer = accept(way, carol, pending)
+        assert answer.status_code in (200, 302), answer.content[:300]
+        assert home_services.role_of(carol, alice_home) == Role.MEMBER
+        assert home_services.find_invitation(pending) is None
+
+    def test_the_page_says_it_waits_and_offers_nothing(
+        self, make_user: Callable[..., User], pending: str
+    ) -> None:
+        client = Client()
+        client.force_login(make_user("carol@example.com"))
+        page = html.unescape(client.get(f"/invitations/{pending}/").content.decode())
+        assert WAITS in page
+        assert "Join the home" not in page
+        french = client.get(f"/invitations/{pending}/", HTTP_ACCEPT_LANGUAGE="fr")
+        assert WAITS_FR in html.unescape(french.content.decode())
+
+    def test_no_account_is_made_from_the_link(self, alice_home: Home, pending: str) -> None:
+        client = Client()
+        page = html.unescape(client.get(f"/invitations/{pending}/").content.decode())
+        assert WAITS in page
+        assert "Create the account and join" not in page
+        password = "a-long-and-unusual-passphrase"
+        answer = client.post(
+            f"/invitations/{pending}/", {"password1": password, "password2": password}
+        )
+        assert answer.status_code == 403
+        assert not User.objects.filter(email="carol@example.com").exists()
+        assert home_services.find_invitation(pending) is not None
 
 
 # ---------- the pages ----------
@@ -459,6 +568,19 @@ class TestThePages:
         home = Home.objects.get(pk=ids["home_id"])
         assert report_services.sees_every_report(bob, home)
         assert report_services.visible_reports(bob, home).count() == 1
+
+
+class TestTheCalendar:
+    def test_no_entry_of_an_archived_home_may_be_written(self, alice: User, home: Home) -> None:
+        """`entries` says it itself, whatever homes its caller passes (its callers drop them)."""
+        today = task_services.today()
+        span = (today - datetime.timedelta(days=60), today + datetime.timedelta(days=300))
+        assert any(e.can_write for e in calendar_services.entries(alice, [home], *span).entries)
+        home_services.archive_home(alice, home)
+        home.refresh_from_db()
+        after = calendar_services.entries(alice, [home], *span).entries
+        assert after
+        assert not any(e.can_write for e in after)
 
 
 # ---------- reports and events: Home Assistant ----------
@@ -610,6 +732,28 @@ class TestSync:
         assert results[0]["status"] == "applied"
         assert results[1] == {"i": 1, "status": "rejected", "code": "home_archived"}
         assert not Room.objects.filter(pk=room_id).exists()
+
+    def test_bringing_it_back_with_another_change_is_refused(
+        self, phone: Connected, alice: User, alice_home: Home
+    ) -> None:
+        """Only a `put` that sets `archived_at` alone brings it back, not one that renames too."""
+        home_services.archive_home(alice, alice_home)
+        answer = push(
+            phone.access,
+            alice_home.pk,
+            [
+                op(
+                    alice_home.pk,
+                    "homes.home",
+                    alice_home.pk,
+                    {"archived_at": None, "name": "Renamed"},
+                )
+            ],
+        )
+        assert answer.json()["results"] == [{"i": 0, "status": "rejected", "code": "home_archived"}]
+        found = Home.objects.get(pk=alice_home.pk)
+        assert found.name == "Main house"
+        assert found.archived_at is not None
 
     def test_a_member_who_is_not_an_owner_does_not_bring_it_back(
         self, alice: User, alice_home: Home, bob: User

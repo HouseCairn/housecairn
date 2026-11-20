@@ -893,6 +893,9 @@ msgstr "Rejoindre %(home)s"
 msgid "You are invited as %(role)s, with the address %(email)s."
 msgstr "Vous êtes invité avec le rôle %(role)s, à l'adresse %(email)s."
 
+msgid "This home is archived; the invitation will work again once it is brought back."
+msgstr "Ce logement est archivé ; l'invitation reprendra quand il sera remis en service."
+
 #, python-format
 msgid "This link was handed over, not sent by email, so it does not prove that %(email)s is yours. Verify this address in your account first, then open the link again."
 msgstr "Ce lien vous a été remis, et non envoyé par e-mail : il ne prouve donc pas que l'adresse %(email)s est la vôtre. Vérifiez d'abord cette adresse dans votre compte, puis rouvrez le lien."

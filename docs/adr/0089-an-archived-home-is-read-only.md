@@ -51,8 +51,11 @@ do with a home they no longer use:
 
 What gives access waits until the home is back: inviting, sending an invitation again, changing a
 role, handing over ownership, requiring a sign-in provider. The services refuse them too
-(`check_not_archived`). The preferences of a person (display, notifications, calendar feeds,
-API tokens) belong to the person, not to the home, and are not touched.
+(`check_not_archived`). So does accepting an invitation sent before the home was archived, from
+its page or from the API (`403` `home_archived`): its page says that it will work again once the
+home is back, creates no account, and the invitation is kept, unused, until then. The
+preferences of a person (display, notifications, calendar feeds, API tokens) belong to the
+person, not to the home, and are not touched.
 
 **The sync API.** A push to an archived home is answered as before, one result per operation:
 each operation of a member whose role writes is `rejected` with the new code `home_archived`,

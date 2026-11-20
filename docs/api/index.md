@@ -58,7 +58,9 @@ web interface: every request only sees the homes of its user
   changes something answers `403` with `"code": "home_archived"`, a report or an event of
   Home Assistant included, but `unarchive/`, `archive/`, `export/` and its download,
   `delete/`, `leave/`, `unlock/`, removing a member, revoking an invitation and printing the
-  labels that exist.
+  labels that exist. `POST /api/v1/invitations/accept/` answers the same `403` for an
+  invitation to an archived home, and keeps the invitation: it works again once the home is
+  back.
 - **Rooms, items and photos** of a home: `/api/v1/homes/<home id>/rooms/`,
   `.../items/`, `.../photos/` and `.../search/?q=`, with the same rules as the
   screens ([ADR 0029](../adr/0029-rooms-items-and-room-memory.md),
