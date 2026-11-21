@@ -120,18 +120,71 @@ class TestReporting:
             services.create_report(bob, alice_home, title="x")
         assert Report.objects.count() == 3
 
-    def test_a_person_has_a_limited_number_of_reports_waiting(
+    def test_a_reader_has_a_limited_number_of_open_reports(
         self, alice: User, alice_home: Home, reader: User, member: User
     ) -> None:
         for i in range(MAX_OPEN_PER_REPORTER):
             services.create_report(reader, alice_home, title=f"n{i}")
         with pytest.raises(ValidationError):
             services.create_report(reader, alice_home, title="one more")
+        assert Report.objects.filter(reporter=reader).count() == MAX_OPEN_PER_REPORTER
         services.create_report(member, alice_home, title="another person is not limited")
         report = Report.objects.filter(reporter=reader).first()
         assert report is not None
         services.close_report(alice, report, resolution="resolved")
         services.create_report(reader, alice_home, title="room again")
+
+    def test_the_owner_and_a_member_who_writes_are_not_limited(
+        self, alice: User, alice_home: Home, member: User
+    ) -> None:
+        for person in (alice, member):
+            for i in range(MAX_OPEN_PER_REPORTER + 3):
+                services.create_report(person, alice_home, title=f"n{i}")
+            assert Report.objects.filter(reporter=person).count() == MAX_OPEN_PER_REPORTER + 3
+
+    def test_a_report_made_into_a_task_frees_a_place(
+        self, alice: User, alice_home: Home, reader: User
+    ) -> None:
+        for i in range(MAX_OPEN_PER_REPORTER):
+            services.create_report(reader, alice_home, title=f"n{i}")
+        with pytest.raises(ValidationError):
+            services.create_report(reader, alice_home, title="full")
+        first = Report.objects.filter(reporter=reader).order_by("created_at").first()
+        assert first is not None
+        services.make_task(alice, first)
+        assert Report.objects.filter(reporter=reader, status=ReportStatus.TASK).count() == 1
+        services.create_report(reader, alice_home, title="one place freed")
+        with pytest.raises(ValidationError):
+            services.create_report(reader, alice_home, title="full again")
+
+    def test_a_closed_report_frees_a_place_whatever_the_closing(
+        self, alice: User, alice_home: Home, reader: User
+    ) -> None:
+        for i in range(MAX_OPEN_PER_REPORTER):
+            services.create_report(reader, alice_home, title=f"n{i}")
+        mine = list(Report.objects.filter(reporter=reader)[:2])
+        services.close_report(alice, mine[0], resolution="resolved")
+        services.close_report(alice, mine[1], resolution="no_action")
+        services.create_report(reader, alice_home, title="a")
+        services.create_report(reader, alice_home, title="b")
+        with pytest.raises(ValidationError):
+            services.create_report(reader, alice_home, title="c")
+
+    def test_the_form_refuses_a_reader_past_the_limit_and_lets_the_owner_through(
+        self, client: Any, alice: User, alice_home: Home, reader: User
+    ) -> None:
+        for i in range(MAX_OPEN_PER_REPORTER):
+            services.create_report(reader, alice_home, title=f"n{i}")
+            services.create_report(alice, alice_home, title=f"n{i}")
+        client.force_login(reader)
+        refused = client.post(url("create", alice_home), {"title": "one more"})
+        assert refused.status_code == 200
+        assert "open reports" in refused.content.decode()
+        assert Report.objects.filter(reporter=reader).count() == MAX_OPEN_PER_REPORTER
+        client.force_login(alice)
+        allowed = client.post(url("create", alice_home), {"title": "one more"})
+        assert allowed.status_code == 302
+        assert Report.objects.filter(reporter=alice).count() == MAX_OPEN_PER_REPORTER + 1
 
     def test_creation_is_recorded_with_the_title_only(self, alice_home: Home, reader: User) -> None:
         services.create_report(reader, alice_home, title="Mould in the corner", room=None)

@@ -262,14 +262,15 @@ def create_report(
         if found is not None and found.home_id != home.id:
             raise ValidationError({"place": _("Nothing with this identifier in this home.")})
     title = _clean_title(title)
+    # Only a member who writes nothing else is limited, and only by the reports still open:
+    # the owner and the members who write may report as much as they need.
     if (
-        Report.objects.filter(
-            home=home, reporter=actor, status__in=(ReportStatus.OPEN, ReportStatus.TASK)
-        ).count()
+        not home_services.writes_by_role(actor, home)
+        and Report.objects.filter(home=home, reporter=actor, status=ReportStatus.OPEN).count()
         >= MAX_OPEN_PER_REPORTER
     ):
         raise ValidationError(
-            _("You already have %(max)d reports waiting: they must be dealt with first.")
+            _("You already have %(max)d open reports: they must be dealt with first.")
             % {"max": MAX_OPEN_PER_REPORTER}
         )
     with transaction.atomic():

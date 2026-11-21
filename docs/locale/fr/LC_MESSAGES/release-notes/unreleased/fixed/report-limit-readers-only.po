@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Report limit.** The limit of 20 reports now applies to read-only members only (a tenant, a tradesman), and only the reports still open count: the owner and the members who may write can report as much as they need, and a report made into a task, resolved or closed frees a place."
+msgstr "**Limite de signalements.** La limite de 20 signalements ne vaut plus que pour les membres en lecture seule (un locataire, un artisan), et seuls les signalements encore ouverts comptent : le propriétaire et les membres qui peuvent écrire signalent autant qu'il le faut, et un signalement transformé en tâche, résolu ou classé libère une place."

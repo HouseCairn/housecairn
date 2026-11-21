@@ -81,8 +81,8 @@ msgid "Nothing with this identifier in this home."
 msgstr "Rien avec cet identifiant dans ce logement."
 
 #, python-format
-msgid "You already have %(max)d reports waiting: they must be dealt with first."
-msgstr "Vous avez déjà %(max)d signalements en attente : il faut d'abord les traiter."
+msgid "You already have %(max)d open reports: they must be dealt with first."
+msgstr "Vous avez déjà %(max)d signalements ouverts : il faut d'abord les traiter."
 
 msgid "Only an open report can be made into a task."
 msgstr "Seul un signalement ouvert peut être transformé en tâche."

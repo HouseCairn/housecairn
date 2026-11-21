@@ -11,8 +11,9 @@ one included; it is the only thing a read-only member writes. It is one tap from
   The file is checked by its content, not by its name; the location and every other
   piece of information hidden in it are removed; it counts in the storage of the home.
 
-**Send the report** shows the report and thanks you. A person may have 20 reports waiting
-at the same time; close or wait for some before sending more. The members who may write
+**Send the report** shows the report and thanks you. A read-only member may have 20 open
+reports at the same time; wait for some to be dealt with before sending more. The owner and
+the members who may write have no limit, and a report made into a task no longer counts. The members who may write
 and have a notification channel are told (see the [guide](../guides/qr-labels.md)).
 
 Opened with **Report a problem** from a room, an item or a stock item, the form comes back
