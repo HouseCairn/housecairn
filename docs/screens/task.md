@@ -53,11 +53,22 @@ under the name, which keeps its full width. The choice of the stock item in the 
 starts on a dash.
 
 **History** lists the occurrences done or skipped, the most recent first, with the
-real cost and the note. **Details** on a row opens a form to fill in or correct what
-is known of that time: the date it was done (not in the future), the real cost,
-a note and, for each stock item the closing took, the quantity really used (the stock
-follows). Changing the date does not move the occurrence created after it.
+real cost (*of which stock used* when the closing took stock of value) and the note. The real
+cost is the stock the closing took, each item at its unit price on the day it was taken, plus
+the amount typed for the rest; a price changed later does not change it
+([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). **Details** on a row opens a
+form to fill in or correct what is known of that time: the date it was done (not in the
+future), the cost, a note and, for each stock item the closing took, the quantity really used
+(the stock follows, and so does its value). When the closing took stock, the form shows
+**Stock used: 151.00**, for example, and the cost field is **Other costs (labour, purchases
+outside the stock)**: what is typed there is added to the stock, which is not typed again. A
+stock item taken without a unit price counts for nothing, and the form says how many.
+Changing the date does not move the occurrence created after it.
 Once the next occurrence has been changed (postponed, noted, given a photo or done),
-**Undo** is refused for the one before it, because it would lose that work.
+**Undo** is refused for the one before it, because it would lose that work. An undo puts the
+stock back, and its value leaves the real cost.
+
+The **Cost** block puts what is **Planned** apart from what is **Real**: **Paid so far** is
+the real cost of every time done, and **Of which stock used** its part from the stock.
 
 Read-only members see everything and none of the buttons.

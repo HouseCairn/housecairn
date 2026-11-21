@@ -169,6 +169,12 @@ msgstr "Coût réel"
 msgid "Note"
 msgstr "Note"
 
+msgid "Other costs (labour, purchases outside the stock)"
+msgstr "Autres coûts (main-d'œuvre, achats hors stock)"
+
+msgid "Added to the stock used, shown above: do not type the stock again."
+msgstr "S'ajoute au stock utilisé, affiché plus haut : ne saisissez pas le stock une seconde fois."
+
 #, python-format
 msgid "Used: %(name)s"
 msgstr "Utilisé : %(name)s"
@@ -567,6 +573,9 @@ msgstr "quantité utilisée"
 
 msgid "quantity taken from the stock"
 msgstr "quantité prise dans le stock"
+
+msgid "unit price when taken"
+msgstr "prix unitaire à la sortie"
 
 msgid "stock draw"
 msgstr "prélèvement de stock"
@@ -1217,6 +1226,10 @@ msgstr "Aucun fichier pour l'instant."
 
 msgid "History"
 msgstr "Historique"
+
+#, python-format
+msgid "of which stock used %(amount)s"
+msgstr "dont stock utilisé %(amount)s"
 
 msgid "Add a task"
 msgstr "Ajouter une tâche"

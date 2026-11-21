@@ -1,9 +1,9 @@
-"""What of an attachment the sync API sends (docs/adr/0077, 0079)."""
+"""What of an attachment and a stock draw the sync API sends (docs/adr/0077, 0079, 0090)."""
 
 from typing import Any
 
 from housecairn.sync import files, rows
-from housecairn.tasks.models import Attachment
+from housecairn.tasks.models import Attachment, MaterialDraw
 
 
 def attachment_file(attachment: Attachment) -> dict[str, Any]:
@@ -24,3 +24,6 @@ def register() -> None:
             virtual=attachment_file,
         ),
     )
+    # The unit price a draw was taken at is the server's (docs/adr/0090): a phone that pushes
+    # it is refused (`forbidden`), and the server sets it when the draw is made or comes back.
+    rows.register(MaterialDraw, rows.Spec(skip=frozenset({"unit_price"})))

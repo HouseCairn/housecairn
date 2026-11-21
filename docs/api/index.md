@@ -123,7 +123,11 @@ web interface: every request only sees the homes of its user
   read or change (a token reads, the person signed in changes). `language` is a language the instance ships (`en`, `fr`) or empty to
   follow the browser; the web screens apply it from the next page. History is the occurrence list with `status=closed&ordering=recent` and the
   filters `contractor`, `completed_by`, `q`, `closed_after` and `closed_before`;
-  `GET .../occurrences/cost/` gives the real cost entered on the same selection.
+  `GET .../occurrences/cost/` gives the real cost of the same selection. The real cost of an
+  occurrence is `real_cost`, read only: `stock_cost`, the stock it took at the unit prices of
+  when it was taken (each line of `stock` gives its `unit_price` and `value`), plus
+  `actual_cost`, the amount typed, which `PATCH` still sets alone
+  ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)).
 - **QR labels and reports** ([ADR 0047](../adr/0047-qr-labels.md)):
   `/api/v1/homes/<home id>/labels/` and `.../reports/`. `POST .../labels/` with `kind`
   (`room`, `item` or `article`) and `target` returns the active label of the object (201

@@ -11,9 +11,12 @@ years costs a third of its estimate a year, every 6 months twice. A task that do
 repeat on the calendar has none. For the year picked, **Planned** counts the occurrences done
 in it, the one open and the times the repetition will still bring before 31 December (a
 year that is over counts only what happened; an open task with no date counts in the current
-year); **Paid** is the cost typed on those done. A task done with no cost
-typed is counted in the plan with nothing paid, and flagged **done without a cost**, so the
-gap does not look better than it is. **Paid in all** is every cost, any year. Tasks without
+year); **Paid** is the real cost of those done: the stock each took, at its unit prices of
+the day it was taken, plus the cost typed for the rest
+([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). A task done with no cost typed
+and no stock of value taken is counted in the plan with nothing paid, and flagged **done
+without a cost**, so the gap does not look better than it is. **Paid in all** is every cost,
+any year; the file adds **Of which stock used**. Tasks without
 an estimate or a cost are not listed; the page counts them. A row opens the task, whose page
 has a **Cost** block, and the page of what was done (**Details**) shows the estimate next to
 the field for the real cost.

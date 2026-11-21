@@ -57,7 +57,7 @@
               <span class="row-title">{{ occurrence.task.title }}</span>
               <span class="row-text">{{ occurrence|where_and_who }}</span>
               <span class="pill {% if occurrence.status == 'done' %}pill-success{% else %}pill-ghost{% endif %}">{{ occurrence.get_status_display }} · {{ occurrence.closed_on|day }}</span>
-              {% if occurrence.actual_cost is not None %}<span class="row-text">{{ occurrence.actual_cost|money:home.currency }}</span>{% endif %}
+              {% if occurrence.cost.total is not None %}<span class="row-text">{{ occurrence.cost.total|money:home.currency }}</span>{% endif %}
             </span>
           </a>
         </li>

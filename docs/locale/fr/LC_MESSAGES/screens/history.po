@@ -21,8 +21,8 @@ msgstr ""
 msgid "History"
 msgstr "Historique"
 
-msgid "What was done or skipped in a home: the **Done** filter of the [task list](tasks.md) (**All**, then **Done**), at `/h/<home id>/tasks/?status=done`, the most recent first. The former address, `/h/<home id>/history/`, leads there with its filters. Each row shows the task, where it is, the contractor and who closed it, the outcome with its date, and the real cost when one was entered. A row opens the [task](task.md)."
-msgstr "Ce qui a été fait ou ignoré dans un logement : le filtre **Fait** de la [liste des tâches](tasks.md) (**Toutes**, puis **Fait**), sur `/h/<home id>/tasks/?status=done`, le plus récent d'abord. L'ancienne adresse, `/h/<home id>/history/`, y mène avec ses filtres. Chaque ligne montre la tâche, où elle se trouve, l'intervenant et qui l'a fermée, le résultat avec sa date, et le coût réel quand il a été saisi. Une ligne ouvre la [tâche](task.md)."
+msgid "What was done or skipped in a home: the **Done** filter of the [task list](tasks.md) (**All**, then **Done**), at `/h/<home id>/tasks/?status=done`, the most recent first. The former address, `/h/<home id>/history/`, leads there with its filters. Each row shows the task, where it is, the contractor and who closed it, the outcome with its date, and the real cost when there is one: the stock the closing took, at its unit prices of that day, plus the cost typed ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). A row opens the [task](task.md)."
+msgstr "Ce qui a été fait ou ignoré dans un logement : le filtre **Fait** de la [liste des tâches](tasks.md) (**Toutes**, puis **Fait**), sur `/h/<home id>/tasks/?status=done`, le plus récent d'abord. L'ancienne adresse, `/h/<home id>/history/`, y mène avec ses filtres. Chaque ligne montre la tâche, où elle se trouve, l'intervenant et qui l'a fermée, le résultat avec sa date, et le coût réel quand il y en a un : le stock pris par la clôture, aux prix unitaires de ce jour-là, plus le coût saisi ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). Une ligne ouvre la [tâche](task.md)."
 
 msgid "People are named by their [display name](profile.md), never by their address."
 msgstr "Les personnes sont nommées par leur [nom d'affichage](profile.md), jamais par leur adresse."
@@ -42,8 +42,8 @@ msgstr "**Résultat** : faite ou ignorée (`?outcome=`)."
 msgid "**From** and **To**: the dates it was closed. A skipped occurrence has no completion date, so the day it was skipped is used."
 msgstr "**Du** et **Au** : les dates de clôture. Une occurrence ignorée n'a pas de date de réalisation : le jour où elle a été ignorée est utilisé."
 
-msgid "Above the list, a line gives the number of entries and the **real cost** entered on them. An entry with no cost counts for nothing, not for zero: the sum is that of the costs that were entered. The list shows 30 rows at a time, and the filters stay when you change page."
-msgstr "Au-dessus de la liste, une ligne donne le nombre d'entrées et le **coût réel** saisi sur elles. Une entrée sans coût compte pour rien, pas pour zéro : la somme est celle des coûts qui ont été saisis. La liste montre 30 lignes à la fois, et les filtres restent quand vous changez de page."
+msgid "Above the list, a line gives the number of entries and their **real cost**. An entry with no cost typed and no stock of value taken counts for nothing, not for zero: the sum is that of the entries that have a cost. The list shows 30 rows at a time, and the filters stay when you change page."
+msgstr "Au-dessus de la liste, une ligne donne le nombre d'entrées et leur **coût réel**. Une entrée sans coût saisi ni stock de valeur pris compte pour rien, pas pour zéro : la somme est celle des entrées qui ont un coût. La liste montre 30 lignes à la fois, et les filtres restent quand vous changez de page."
 
 msgid "Exporting the history (CSV, PDF file) comes with a later version."
 msgstr "L'export de l'historique (CSV, dossier PDF) viendra dans une version ultérieure."

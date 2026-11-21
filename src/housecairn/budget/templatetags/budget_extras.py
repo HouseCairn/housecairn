@@ -7,7 +7,8 @@ from housecairn.budget import services
 from housecairn.projects.models import ZERO
 from housecairn.projects.services import Amounts
 from housecairn.rooms.models import Room
-from housecairn.tasks.models import Occurrence, Task
+from housecairn.tasks import costs
+from housecairn.tasks.models import Occurrence, Status, Task
 
 register = template.Library()
 
@@ -33,12 +34,20 @@ def task_cost(task: Task, home: Any) -> dict[str, Any]:
     if row is None:  # a task of a project: its money is in the budget lines of the project
         return {"row": None}
     total = row.figures(services.anytime)
-    return {"row": row, "home": home, "paid": total.paid, "missing": total.missing}
+    return {
+        "row": row,
+        "home": home,
+        "paid": total.paid,
+        "stock_used": total.stock,
+        "unpriced_draws": costs.unpriced_draws_of(task.pk),
+        "missing": total.missing,
+    }
 
 
 @register.inclusion_tag("budget/_occurrence_cost.html")
 def occurrence_cost(occurrence: Occurrence, home: Any) -> dict[str, Any]:
-    """On the page of what was done: the estimate, next to the field of the real cost."""
+    """On the page of what was done: the estimate, and the stock used, next to the field of
+    the real cost (docs/adr/0090), so that the stock is not typed again."""
     task = occurrence.task
     plan = services.stock_plan_of(task)
     parts = [task.labour_budget, task.material_budget]
@@ -47,7 +56,12 @@ def occurrence_cost(occurrence: Occurrence, home: Any) -> dict[str, Any]:
         if all(part is None for part in parts) and plan.priced == 0
         else services.material_of(task.material_budget, plan) + (task.labour_budget or ZERO)
     )
-    return {"estimate": estimate, "home": home}
+    drew = occurrence.status == Status.DONE and occurrence.draws.exists()
+    return {
+        "estimate": estimate,
+        "home": home,
+        "stock": costs.stock_used_by(occurrence) if drew else None,
+    }
 
 
 @register.inclusion_tag("budget/_room_budget.html", takes_context=True)

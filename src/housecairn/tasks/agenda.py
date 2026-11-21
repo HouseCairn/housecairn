@@ -23,7 +23,7 @@ from housecairn.accounts.names import person_name
 from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.rooms.models import Item
-from housecairn.tasks import recurrence, services
+from housecairn.tasks import costs, recurrence, services
 from housecairn.tasks.models import (
     CLOSED_STATUSES,
     DisplayPreference,
@@ -298,7 +298,11 @@ def history(home: Home, selection: HistoryFilter) -> models.QuerySet[Occurrence]
 
 @dataclass(frozen=True)
 class Cost:
-    """The real cost of a selection, over the occurrences where one was entered."""
+    """The real cost of a selection, over the occurrences that have one (docs/adr/0090).
+
+    The real cost of each is the stock it used plus the amount typed (`tasks.costs`);
+    `with_cost` counts those where either says something. Added in `Decimal`, not by SQL.
+    """
 
     total: Decimal
     with_cost: int
@@ -306,10 +310,9 @@ class Cost:
 
 
 def cost_of(rows: models.QuerySet[Occurrence]) -> Cost:
-    found = rows.order_by().aggregate(
-        total=models.Sum("actual_cost"),
-        with_cost=models.Count("actual_cost"),
-        count=models.Count("id"),
-    )
-    total = Decimal(found["total"] or 0).quantize(Decimal("0.01"))
-    return Cost(total, found["with_cost"], found["count"])
+    found = list(rows.order_by().values_list("id", "actual_cost"))
+    used = costs.stock_used(rows.order_by().values("id"))
+    real = [costs.real_cost(typed, used.get(pk, costs.NOTHING).amount) for pk, typed in found]
+    known = [cost for cost in real if cost is not None]
+    total = sum(known, Decimal(0)).quantize(costs.CENT)
+    return Cost(total, len(known), len(found))

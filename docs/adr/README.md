@@ -87,3 +87,4 @@ later record supersedes it.
 | [0086](0086-a-read-only-member-syncs-their-own-reports.md) | A read-only member syncs their own reports only | 2026-11-17 |
 | [0088](0088-stock-of-an-item-edited-from-the-item.md) | The stock of an item is edited from the item as well as from the stock item | 2026-11-20 |
 | [0089](0089-an-archived-home-is-read-only.md) | An archived home is read only, on the web as in the mobile app | 2026-11-20 |
+| [0090](0090-real-cost-counts-the-stock-used.md) | The real cost of a done task counts the stock it used | 2026-11-21 |

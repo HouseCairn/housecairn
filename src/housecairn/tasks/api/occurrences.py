@@ -1,7 +1,7 @@
 """API v1 of occurrences (docs/adr/0004, 0031, 0033)."""
 
 from collections.abc import Iterable
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -25,7 +25,7 @@ from housecairn.rooms.api import (
     _uuid_param,
     _validation,
 )
-from housecairn.tasks import agenda, materials, services
+from housecairn.tasks import agenda, costs, materials, services
 from housecairn.tasks.api.common import _FAR, DATE_PARAMS, _date_param
 from housecairn.tasks.models import (
     CLOSED_STATUSES,
@@ -67,6 +67,18 @@ class DrawSerializer(serializers.Serializer[Any]):
     missing = serializers.DecimalField(
         max_digits=10, decimal_places=2, help_text="`wanted` minus `drawn`: what the stock lacked."
     )
+    unit_price = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        allow_null=True,
+        help_text="The unit price of the stock item when it was taken, kept by the server; "
+        "null when it had none (it then counts for nothing). Null in `short`.",
+    )
+    value = serializers.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        help_text="`drawn` times `unit_price`, rounded to the cent; 0 without a price.",
+    )
 
 
 class UsedSerializer(serializers.Serializer[Any]):
@@ -85,6 +97,10 @@ def _draw_rows(draws: Iterable[MaterialDraw | materials.Shortage]) -> list[dict[
             "wanted": d.wanted,
             "drawn": d.drawn,
             "missing": d.missing,
+            "unit_price": d.unit_price if isinstance(d, MaterialDraw) else None,
+            "value": (d.value if isinstance(d, MaterialDraw) else Decimal(0)).quantize(
+                costs.CENT, rounding=ROUND_HALF_UP
+            ),
         }
         for d in draws
     ]
@@ -104,6 +120,16 @@ class OccurrenceSerializer(serializers.ModelSerializer[Occurrence]):
     is_overdue = serializers.SerializerMethodField()
     stock = serializers.SerializerMethodField(
         help_text="What a done occurrence took from the stock, per stock item."
+    )
+    stock_cost = serializers.SerializerMethodField(
+        help_text="The value of the stock a done occurrence used: for each stock item taken, "
+        "the quantity times its unit price when it was taken, added and rounded once to the "
+        "cent (docs/adr/0090). 0.00 when nothing of value was taken. Read only."
+    )
+    real_cost = serializers.SerializerMethodField(
+        help_text="The real cost: `stock_cost` plus `actual_cost`, the amount typed for the "
+        "rest (labour, purchases outside the stock). Null when neither says anything. "
+        "Read only; `actual_cost` stays the amount typed."
     )
     used = UsedSerializer(
         many=True,
@@ -130,6 +156,8 @@ class OccurrenceSerializer(serializers.ModelSerializer[Occurrence]):
             "completed_by_name",
             "assignee_name",
             "actual_cost",
+            "stock_cost",
+            "real_cost",
             "completion_note",
             "is_overdue",
             "stock",
@@ -165,6 +193,21 @@ class OccurrenceSerializer(serializers.ModelSerializer[Occurrence]):
         rows = _draw_rows(prefetched if prefetched is not None else materials.draws_of(occurrence))
         return list(DrawSerializer(rows, many=True).data)
 
+    def _used(self, occurrence: Occurrence) -> costs.StockUsed:
+        prefetched = getattr(occurrence, "all_draws", None)
+        if prefetched is not None:
+            return costs.from_draws(occurrence, prefetched)
+        return costs.stock_used_by(occurrence)
+
+    @extend_schema_field(serializers.DecimalField(max_digits=14, decimal_places=2))
+    def get_stock_cost(self, occurrence: Occurrence) -> str:
+        return f"{self._used(occurrence).amount:.2f}"
+
+    @extend_schema_field(serializers.DecimalField(max_digits=14, decimal_places=2, allow_null=True))
+    def get_real_cost(self, occurrence: Occurrence) -> str | None:
+        total = costs.real_cost(occurrence.actual_cost, self._used(occurrence).amount)
+        return None if total is None else f"{total:.2f}"
+
 
 class CompleteSerializer(serializers.Serializer[Any]):
     completed_on = serializers.DateField(
@@ -182,7 +225,9 @@ class PostponeSerializer(serializers.Serializer[Any]):
 
 class CostSerializer(serializers.Serializer[Any]):
     total = serializers.DecimalField(max_digits=14, decimal_places=2)
-    with_cost = serializers.IntegerField(help_text="Occurrences where a real cost was entered.")
+    with_cost = serializers.IntegerField(
+        help_text="Occurrences that have a real cost: an amount typed, or stock of value used."
+    )
     count = serializers.IntegerField(help_text="Occurrences selected.")
 
 
@@ -231,7 +276,9 @@ class OccurrenceViewSet(
                         article__deleted_at__isnull=True
                     ).select_related("article"),
                     to_attr="draw_lines",
-                )
+                ),
+                # Every live draw, an article deleted since included: its value was spent.
+                models.Prefetch("draws", queryset=MaterialDraw.objects.all(), to_attr="all_draws"),
             )
         )
         params = self.request.query_params
@@ -352,6 +399,7 @@ class OccurrenceViewSet(
         except DjangoValidationError as exc:
             raise _validation(exc) from exc
         occurrence.draw_lines = list(materials.draws_of(occurrence))  # type: ignore[attr-defined]
+        occurrence.all_draws = list(MaterialDraw.objects.filter(occurrence=occurrence))  # type: ignore[attr-defined]
         return Response(self.get_serializer(occurrence).data)
 
     def _closing(self, request: Request, closing: services.Closing) -> Response:

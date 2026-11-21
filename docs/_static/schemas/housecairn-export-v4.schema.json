@@ -1070,6 +1070,13 @@
                     "drawn": {
                       "type": "string",
                       "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "unit_price": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
                     }
                   },
                   "required": [
@@ -1078,6 +1085,7 @@
                     "drawn",
                     "id",
                     "occurrence",
+                    "unit_price",
                     "updated_at",
                     "wanted"
                   ],

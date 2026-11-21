@@ -29,8 +29,12 @@ On the page of the task, **Cost** puts what is **Planned** (the estimate each ti
 materials from the stock, the cost a year) apart from what is **Real** (paid so far); the
 budget of the upkeep says *materials from the stock* under the estimate. An item with no unit
 price counts for nothing, and the screen says how many: "2 stock items without a price are
-not counted". It is a plan, like the rest of the estimate: what was really spent is the cost
-typed when the task is done, and in your accounts.
+not counted". It is a plan, like the rest of the estimate. What was really spent is the
+**real cost** of each time the task is done: the stock it took, each item at its unit price on
+the day it was taken, plus what you type for the rest (labour, purchases outside the stock).
+With two stock items worth 151.00 in all, the task costs 151.00 done without typing anything,
+and 191.00 with 40.00 of labour typed. A unit price changed later does not change what was
+spent ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)).
 
 ### A task in a project
 

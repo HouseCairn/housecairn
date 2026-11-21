@@ -19,9 +19,11 @@ reads it, read-only members included. How the figures are worked out is in the
   against the envelope, what is left to plan, what is paid, projects and upkeep apart, and
   **Budget in Sure**, which says *Not connected*: that place is kept for a later version and
   nothing is fetched. **Set the envelope** (owners and members) leads to the projects screen.
-- **By nature** splits the year into materials, labour, rental and other. The cost typed on
-  a task that is done is shared between *Materials* and *Labour* as the estimate of the task
-  is, so it stands against its own plan; with no estimate, it counts under *Other*.
+- **By nature** splits the year into materials, labour, rental and other. The stock a task
+  took when it was done, at its unit prices of that day, counts under *Materials*. The cost
+  typed for the rest is shared between *Materials* and *Labour* as the estimate of the task
+  is, so it stands against its own plan; with no estimate, it counts under *Other*
+  ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)).
 - **By year** lists every year that has a figure, with its envelope.
 - **Last 12 months** is the upkeep done since the same day last year. Payments on projects
   carry no date, so they are not in it.
