@@ -18,8 +18,9 @@ from housecairn.stock.models import Article
 from housecairn.tasks.models import Task
 
 TITLE_MAX_LENGTH = 200
-# Open reports one person may have at the same time: a reader can write nothing else, so
-# this is what keeps a tenant from filling the screens of the people who run the home.
+# Open reports a read-only member may have at the same time: a reader can write nothing else,
+# so this is what keeps a tenant from filling the screens of the people who run the home.
+# The owner and the members who write are not limited.
 MAX_OPEN_PER_REPORTER = 20
 
 

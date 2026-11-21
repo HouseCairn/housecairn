@@ -14,7 +14,7 @@ from housecairn.homes import services as home_services
 from housecairn.homes.models import Home
 from housecairn.reports import services
 from housecairn.reports.api import ReportCreateSerializer
-from housecairn.reports.models import Report
+from housecairn.reports.models import MAX_OPEN_PER_REPORTER, Report
 from housecairn.rooms.models import Item, Room
 from housecairn.stock.models import Article
 from housecairn.tasks.models import Task
@@ -83,6 +83,17 @@ class TestReports:
         assert image.status_code == 200
         assert image["Content-Type"] == "image/jpeg"
         assert b"Test camera" not in b"".join(image.streaming_content)
+
+    def test_the_limit_of_open_reports_is_for_a_reader_only(
+        self, alice: User, alice_home: Home, reader: User
+    ) -> None:
+        for i in range(MAX_OPEN_PER_REPORTER):
+            services.create_report(reader, alice_home, title=f"n{i}")
+            services.create_report(alice, alice_home, title=f"n{i}")
+        refused = client_of(reader).post(api("list", alice_home), {"title": "x"}, format="json")
+        assert refused.status_code == 400
+        allowed = client_of(alice).post(api("list", alice_home), {"title": "x"}, format="json")
+        assert allowed.status_code == 201
 
     @pytest.mark.parametrize("field", ["room", "item", "article"])
     def test_a_place_of_another_home_does_not_exist(
