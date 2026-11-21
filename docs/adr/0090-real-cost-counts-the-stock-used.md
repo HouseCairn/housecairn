@@ -7,6 +7,8 @@
   the amount typed when a task is done)
 - Amended by: [0091](0091-a-task-done-with-nothing-typed-pays-its-plan.md) (with nothing typed,
   the rest is the plan kept when the task was done)
+- Amended by: [0092](0092-the-phone-reads-the-real-cost-the-server-keeps.md) (the phone reads
+  the unit price of a draw, read only)
 - Related: [0046](0046-stock-linked-to-tasks-and-rooms.md) (the draws of a closing),
   [0081](0081-materials-of-a-task-calculated-from-its-stock.md) (the materials planned from the
   stock), [0077](0077-sync-api-for-the-mobile-app.md) (the fields of the protocol)
@@ -73,4 +75,4 @@ stock)."
 - A task done before this version with stock and an amount typed that already held its price
   counts that stock twice: the amount typed can be corrected in **Details**.
 - The mobile app shows the real cost by the same rule: until it reads `real_cost`, it shows the
-  amount typed only. It must not send `unit_price`.
+  amount typed only. It must not send `unit_price`, which it reads since 0092.

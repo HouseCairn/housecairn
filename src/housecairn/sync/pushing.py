@@ -301,13 +301,15 @@ class Columns:
 
 def columns_of(model: type[models.Model]) -> Columns:
     spec = sync_rows.spec_of(model)
-    synced = [
-        f
-        for f in sync_rows._fields(model)
-        if f.name not in spec.file_names and not isinstance(f, models.FileField)
-    ]
-    writable = {f.attname: f for f in synced}
-    files = {f.attname for f in sync_rows._fields(model) if f.attname not in writable}
+    sent = sync_rows._fields(model)
+    files = {
+        f.attname for f in sent if f.name in spec.file_names or isinstance(f, models.FileField)
+    }
+    # A column the phone reads and never writes (docs/adr/0092) is the server's, as one it is
+    # not sent: `forbidden` in a push.
+    writable = {
+        f.attname: f for f in sent if f.attname not in files and f.attname not in spec.read_only
+    }
     owned = set()
     for f in model._meta.concrete_fields:
         if f.attname not in writable and f.attname not in files:

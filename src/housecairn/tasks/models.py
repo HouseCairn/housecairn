@@ -345,7 +345,7 @@ class Occurrence(HomeOwnedModel):
     # What the plan of the task said when it was marked done, kept for its real cost when no
     # amount is typed (docs/adr/0091): the labour planned, and the material budget typed when
     # the stock does not work the materials out (0081). The server writes them, never a
-    # phone: they are not synced. Empty on an occurrence that is not done.
+    # phone, which reads them (0092). Empty on an occurrence that is not done.
     planned_labour = models.DecimalField(
         _("labour planned when done"),
         max_digits=12,
@@ -407,7 +407,7 @@ class MaterialDraw(HomeOwnedModel):
 
     `unit_price` is the unit price of the article when the stock was taken, kept so that a
     price changed later does not change the real cost of what was done (docs/adr/0090); empty
-    when the article had none. The server writes it, never a phone: it is not synced.
+    when the article had none. The server writes it, never a phone, which reads it (0092).
     """
 
     occurrence = models.ForeignKey(Occurrence, on_delete=models.CASCADE, related_name="draws")

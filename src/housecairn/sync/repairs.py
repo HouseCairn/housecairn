@@ -28,7 +28,8 @@ applied, in the same transaction, the server runs on the merged state:
 - the unit price a draw is taken at, the server's own field (docs/adr/0090): the article's
   when a phone's draw is new or comes back, kept as it is by any other write;
 - the plan an occurrence keeps, the server's own fields as well (docs/adr/0091): the plan of
-  its task when a push makes it done, none when a push makes it not done.
+  its task when a push makes it done, none when a push makes it not done. The phone reads
+  both, so each value set is a change of the server in the feed (docs/adr/0092).
 
 An operation whose row a repair then changed gets the result `repaired`.
 """
@@ -543,8 +544,20 @@ class Session:
                 planned = costs.NO_PLAN
             else:
                 continue
-            Occurrence.all_objects.filter(pk=row.pk).update(
-                planned_labour=planned.labour, planned_material=planned.material
+            kept = {"planned_labour": planned.labour, "planned_material": planned.material}
+            changed = {name: value for name, value in kept.items() if getattr(row, name) != value}
+            if not changed:
+                continue
+            Occurrence.all_objects.filter(pk=row.pk).update(**changed)
+            # The phone reads the plan (docs/adr/0092): a change of the server, after the
+            # push's own, which is not a repair (the operation keeps its result).
+            changes.record_change(
+                self.home.pk,
+                OCCURRENCE,
+                row.pk,
+                changes.PUT,
+                {name: sync_rows.encode(Occurrence, name, v) for name, v in changed.items()},
+                updated_at=row.updated_at,
             )
 
     def _draw(self, row: Occurrence) -> None:

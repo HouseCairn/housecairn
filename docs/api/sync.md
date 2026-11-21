@@ -55,6 +55,38 @@ yet is kept and shown as it is, never refused:
   `other` (with `unit_other`), or empty. There is no conversion between units: a quantity is
   in the unit of its item.
 
+### The real cost
+
+The real cost of a done task is worked out from fields the server sets and the phone only
+reads ([ADR 0092](../adr/0092-the-phone-reads-the-real-cost-the-server-keeps.md)). They are in
+the changes and the snapshot as any other field, written with the server's clock; a push that
+sets one is `forbidden`.
+
+| Field | Value | Set by the server |
+| --- | --- | --- |
+| `tasks.materialdraw.unit_price` | An amount (`"45.50"`), or `null` when the article had no price | When the draw is made or comes back (`restore`): the unit price of the article then ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). |
+| `tasks.occurrence.planned_labour` | An amount, or `null` | When the occurrence becomes `done`: the labour budget of its task; `null` when it is no longer done ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)). |
+| `tasks.occurrence.planned_material` | An amount, or `null` | As `planned_labour`, with the material budget of its task, `null` when the stock works the materials out (an article with a price among them) or for a task of a project. |
+
+The rule, the one the web reads, for an occurrence whose `status` is `done` and that is not
+deleted:
+
+1. **The stock used** is the sum of `drawn` times `unit_price` over its draws that are not
+   deleted, rounded once to the cent, half up. A draw whose `unit_price` is `null` counts for
+   nothing; the web says how many there are.
+2. **The rest** is `actual_cost` when it is not `null` (`"0.00"` included: an amount typed),
+   else `planned_labour` plus `planned_material` (a `null` one counts 0) when one of them is not
+   `null`, else nothing.
+3. **The real cost** is the stock used plus the rest. With no rest and a stock used of 0, the
+   occurrence is *done without a cost*: no amount, not 0.
+
+An occurrence that is not done has no real cost. A field the server never set reads as `null`.
+The values the server held before it sent these fields (the times done before) come once in the
+feed, as changes of the server after the head of the home, when the server is updated: an app
+already in step reads them in its next page of changes, without starting again from the
+snapshot. An app that does not know these fields keeps them as fields it does not know, as the
+protocol says, and never sends them.
+
 ## The homes
 
 `GET /api/v1/sync/homes/`
@@ -276,15 +308,16 @@ its own with the server's clock, which the feed then gives:
 
 The server also computes what is derived: `visible_from` of the occurrences, the months of the
 tasks on a predefined season when `hemisphere` changes, and the effect of each stock movement on
-the stock, in the order of the clocks (an inventory makes the stock its count). It keeps the
-unit price a draw was taken at, which is not a field of the protocol: the price of the article
-when a pushed draw is new or comes back (`restore`), unchanged by any other write
-([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)); a push that sets `unit_price` on a
-draw is `forbidden`. It keeps as well the plan of an occurrence, `planned_labour` and
-`planned_material`, not fields of the protocol either: the plan of its task when a push makes it
+the stock, in the order of the clocks (an inventory makes the stock its count). It sets the
+unit price a draw was taken at: the price of the article when a pushed draw is new or comes
+back (`restore`), unchanged by any other write
+([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). It sets as well the plan of an
+occurrence, `planned_labour` and `planned_material`: the plan of its task when a push makes it
 done, nothing when a push makes it not done, unchanged by any other write
-([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)); a push that sets
-them is `forbidden`. It runs once what
+([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)). The phone reads these
+three fields and never writes them ([The real cost](#the-real-cost)): a push that sets one is
+`forbidden`, and each value the server sets is a change of its own, with the server's clock,
+which the feed gives after the operations of the push. It runs once what
 the web runs on a closing: an audit entry for each occurrence that becomes done or skipped, in
 the name of the account of the phone; and for one that becomes done, the draws of its materials
 that the push did not carry (a phone sends a closing in one push, with its draws and exits). An

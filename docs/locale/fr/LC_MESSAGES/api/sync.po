@@ -51,6 +51,60 @@ msgstr "`rooms.item.warranty_duration_unit` : `month` ou `year` (avec `warranty_
 msgid "`stock.article.unit`: `piece`, `litre`, `millilitre`, `metre`, `kilogram`, `roll`, `box`, `other` (with `unit_other`), or empty. There is no conversion between units: a quantity is in the unit of its item."
 msgstr "`stock.article.unit` : `piece`, `litre`, `millilitre`, `metre`, `kilogram`, `roll`, `box`, `other` (avec `unit_other`), ou vide. Il n'y a pas de conversion entre unités : une quantité est dans l'unité de son article."
 
+msgid "The real cost"
+msgstr "Le coût réel"
+
+msgid "The real cost of a done task is worked out from fields the server sets and the phone only reads ([ADR 0092](../adr/0092-the-phone-reads-the-real-cost-the-server-keeps.md)). They are in the changes and the snapshot as any other field, written with the server's clock; a push that sets one is `forbidden`."
+msgstr "Le coût réel d'une tâche faite se calcule à partir de champs que le serveur pose et que le téléphone lit seulement ([ADR 0092](../adr/0092-the-phone-reads-the-real-cost-the-server-keeps.md)). Ils sont dans les modifications et l'instantané comme tout autre champ, écrits avec l'horloge du serveur ; un envoi qui en pose un est `forbidden`."
+
+msgid "Field"
+msgstr "Champ"
+
+msgid "Value"
+msgstr "Valeur"
+
+msgid "Set by the server"
+msgstr "Posé par le serveur"
+
+msgid "`tasks.materialdraw.unit_price`"
+msgstr "`tasks.materialdraw.unit_price`"
+
+msgid "An amount (`\"45.50\"`), or `null` when the article had no price"
+msgstr "Un montant (`\"45.50\"`), ou `null` quand l'article n'avait pas de prix"
+
+msgid "When the draw is made or comes back (`restore`): the unit price of the article then ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md))."
+msgstr "Quand le tirage est fait ou revient (`restore`) : le prix unitaire de l'article à ce moment ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md))."
+
+msgid "`tasks.occurrence.planned_labour`"
+msgstr "`tasks.occurrence.planned_labour`"
+
+msgid "An amount, or `null`"
+msgstr "Un montant, ou `null`"
+
+msgid "When the occurrence becomes `done`: the labour budget of its task; `null` when it is no longer done ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md))."
+msgstr "Quand l'occurrence devient `done` : le budget de main-d'œuvre de sa tâche ; `null` quand elle n'est plus faite ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md))."
+
+msgid "`tasks.occurrence.planned_material`"
+msgstr "`tasks.occurrence.planned_material`"
+
+msgid "As `planned_labour`, with the material budget of its task, `null` when the stock works the materials out (an article with a price among them) or for a task of a project."
+msgstr "Comme `planned_labour`, avec le budget matériel de sa tâche ; `null` quand le stock calcule le matériel (un article avec un prix parmi eux) ou pour une tâche de projet."
+
+msgid "The rule, the one the web reads, for an occurrence whose `status` is `done` and that is not deleted:"
+msgstr "La règle, celle que lit le web, pour une occurrence dont le `status` est `done` et qui n'est pas supprimée :"
+
+msgid "**The stock used** is the sum of `drawn` times `unit_price` over its draws that are not deleted, rounded once to the cent, half up. A draw whose `unit_price` is `null` counts for nothing; the web says how many there are."
+msgstr "**Le stock utilisé** est la somme de `drawn` fois `unit_price` sur ses tirages non supprimés, arrondie une seule fois au centime, au plus proche (0,5 vers le haut). Un tirage dont le `unit_price` est `null` ne compte pour rien ; le web dit combien il y en a."
+
+msgid "**The rest** is `actual_cost` when it is not `null` (`\"0.00\"` included: an amount typed), else `planned_labour` plus `planned_material` (a `null` one counts 0) when one of them is not `null`, else nothing."
+msgstr "**Le reste** est `actual_cost` quand il n'est pas `null` (`\"0.00\"` compris : un montant saisi), sinon `planned_labour` plus `planned_material` (celui qui est `null` compte 0) quand l'un des deux n'est pas `null`, sinon rien."
+
+msgid "**The real cost** is the stock used plus the rest. With no rest and a stock used of 0, the occurrence is *done without a cost*: no amount, not 0."
+msgstr "**Le coût réel** est le stock utilisé plus le reste. Sans reste et avec un stock utilisé de 0, l'occurrence est *faite sans coût* : pas de montant, pas 0."
+
+msgid "An occurrence that is not done has no real cost. A field the server never set reads as `null`. The values the server held before it sent these fields (the times done before) come once in the feed, as changes of the server after the head of the home, when the server is updated: an app already in step reads them in its next page of changes, without starting again from the snapshot. An app that does not know these fields keeps them as fields it does not know, as the protocol says, and never sends them."
+msgstr "Une occurrence qui n'est pas faite n'a pas de coût réel. Un champ que le serveur n'a jamais posé vaut `null`. Les valeurs que le serveur avait avant d'envoyer ces champs (les fois faites avant) arrivent une fois dans le flux, comme des modifications du serveur après la tête du logement, à la mise à jour du serveur : une application déjà à jour les lit dans sa prochaine page de modifications, sans repartir de l'instantané. Une application qui ne connaît pas ces champs les garde comme des champs qu'elle ne connaît pas, comme le dit le protocole, et ne les envoie jamais."
+
 msgid "The homes"
 msgstr "Les logements"
 
@@ -181,8 +235,8 @@ msgstr "**Une annulation dont l'occurrence suivante a été modifiée ailleurs**
 msgid "**The date of a successor**: a `put` that sets `follows_id` and `due_on`, the successor of a closing, gets the date the rule of the task gives, counted from `completed_on`, or, for a skip, from the day of the clock of its `status` in the time zone of the instance."
 msgstr "**La date de l'occurrence suivante** : un `put` qui pose `follows_id` et `due_on`, l'occurrence suivante d'une clôture, reçoit la date que donne la règle de la tâche, comptée depuis `completed_on`, ou, pour un « ignorer », depuis le jour de l'horloge de son `status` dans le fuseau horaire de l'instance."
 
-msgid "The server also computes what is derived: `visible_from` of the occurrences, the months of the tasks on a predefined season when `hemisphere` changes, and the effect of each stock movement on the stock, in the order of the clocks (an inventory makes the stock its count). It keeps the unit price a draw was taken at, which is not a field of the protocol: the price of the article when a pushed draw is new or comes back (`restore`), unchanged by any other write ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)); a push that sets `unit_price` on a draw is `forbidden`. It keeps as well the plan of an occurrence, `planned_labour` and `planned_material`, not fields of the protocol either: the plan of its task when a push makes it done, nothing when a push makes it not done, unchanged by any other write ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)); a push that sets them is `forbidden`. It runs once what the web runs on a closing: an audit entry for each occurrence that becomes done or skipped, in the name of the account of the phone; and for one that becomes done, the draws of its materials that the push did not carry (a phone sends a closing in one push, with its draws and exits). An undo pushed is data only: the server writes nothing more for it. Other rules of the data (two material lines of one article, two occurrences that follow the same one, a draw above what it wanted) have no repair: the push is `400` with `malformed`."
-msgstr "Le serveur calcule aussi ce qui est dérivé : `visible_from` des occurrences, les mois des tâches sur une saison prédéfinie quand `hemisphere` change, et l'effet de chaque mouvement de stock sur le stock, dans l'ordre des horloges (un inventaire fait du stock son comptage). Il garde le prix unitaire auquel un tirage a été pris, qui n'est pas un champ du protocole : le prix de l'article quand un tirage envoyé est nouveau ou revient (`restore`), inchangé par toute autre écriture ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)) ; un envoi qui pose `unit_price` sur un tirage est `forbidden`. Il garde aussi le prévu d'une occurrence, `planned_labour` et `planned_material`, qui ne sont pas non plus des champs du protocole : le prévu de sa tâche quand un envoi la rend faite, rien quand un envoi la rend non faite, inchangé par toute autre écriture ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)) ; un envoi qui les pose est `forbidden`. Il exécute une fois ce que le web exécute à une clôture : une entrée du journal d'activité pour chaque occurrence qui devient faite ou ignorée, au nom du compte du téléphone ; et, pour une occurrence qui devient faite, les tirages de ses matériels que l'envoi ne portait pas (un téléphone envoie une clôture en un seul envoi, avec ses tirages et ses sorties). Une annulation envoyée n'est que des données : le serveur n'écrit rien de plus pour elle. Les autres règles des données (deux lignes de matériel pour un même article, deux occurrences qui suivent la même, un tirage au-delà de ce qu'il voulait) n'ont pas de réparation : l'envoi est `400` avec `malformed`."
+msgid "The server also computes what is derived: `visible_from` of the occurrences, the months of the tasks on a predefined season when `hemisphere` changes, and the effect of each stock movement on the stock, in the order of the clocks (an inventory makes the stock its count). It sets the unit price a draw was taken at: the price of the article when a pushed draw is new or comes back (`restore`), unchanged by any other write ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). It sets as well the plan of an occurrence, `planned_labour` and `planned_material`: the plan of its task when a push makes it done, nothing when a push makes it not done, unchanged by any other write ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)). The phone reads these three fields and never writes them ([The real cost](#the-real-cost)): a push that sets one is `forbidden`, and each value the server sets is a change of its own, with the server's clock, which the feed gives after the operations of the push. It runs once what the web runs on a closing: an audit entry for each occurrence that becomes done or skipped, in the name of the account of the phone; and for one that becomes done, the draws of its materials that the push did not carry (a phone sends a closing in one push, with its draws and exits). An undo pushed is data only: the server writes nothing more for it. Other rules of the data (two material lines of one article, two occurrences that follow the same one, a draw above what it wanted) have no repair: the push is `400` with `malformed`."
+msgstr "Le serveur calcule aussi ce qui est dérivé : `visible_from` des occurrences, les mois des tâches sur une saison prédéfinie quand `hemisphere` change, et l'effet de chaque mouvement de stock sur le stock, dans l'ordre des horloges (un inventaire fait du stock son comptage). Il pose le prix unitaire auquel un tirage a été pris : le prix de l'article quand un tirage envoyé est nouveau ou revient (`restore`), inchangé par toute autre écriture ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). Il pose aussi le prévu d'une occurrence, `planned_labour` et `planned_material` : le prévu de sa tâche quand un envoi la rend faite, rien quand un envoi la rend non faite, inchangé par toute autre écriture ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)). Le téléphone lit ces trois champs et ne les écrit jamais ([Le coût réel](#the-real-cost)) : un envoi qui en pose un est `forbidden`, et chaque valeur que le serveur pose est une modification à part, avec l'horloge du serveur, que le flux donne après les opérations de l'envoi. Il exécute une fois ce que le web exécute à une clôture : une entrée du journal d'activité pour chaque occurrence qui devient faite ou ignorée, au nom du compte du téléphone ; et, pour une occurrence qui devient faite, les tirages de ses matériels que l'envoi ne portait pas (un téléphone envoie une clôture en un seul envoi, avec ses tirages et ses sorties). Une annulation envoyée n'est que des données : le serveur n'écrit rien de plus pour elle. Les autres règles des données (deux lignes de matériel pour un même article, deux occurrences qui suivent la même, un tirage au-delà de ce qu'il voulait) n'ont pas de réparation : l'envoi est `400` avec `malformed`."
 
 msgid "Each operation gets one result, with its index `i`:"
 msgstr "Chaque opération reçoit un résultat, avec son index `i` :"

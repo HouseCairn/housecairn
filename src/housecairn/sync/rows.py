@@ -67,9 +67,14 @@ class Spec:
     - `write_clock`: instants that read as the clock of the write that sets them
       (`homes.home.archived_at`); empty stays empty.
     - `virtual`: fields that have no column, computed from the instance (a file reference).
+    - `read_only`: columns sent to the phone that it never writes: the server sets them (the
+      unit price of a draw, the plan an occurrence keeps, docs/adr/0092). A push that sets
+      one is `forbidden`; every write of one is recorded, a value the server sets during a
+      push included (`apply_stamped`).
     """
 
     skip: frozenset[str] = frozenset()
+    read_only: frozenset[str] = frozenset()
     write_clock: frozenset[str] = frozenset()
     virtual: Callable[[Any], dict[str, Any]] | None = None
     # Bookkeeping columns a model sends all the same (`created_at` of the stock and reports).
@@ -476,12 +481,15 @@ def apply_stamped(
     and before the row is written, with the row as stored (None: new) and the columns that won.
     It returns columns written with them that no change records: a value the server derives
     (the effect of a stock movement), or a value held for the time of the push, which the
-    repair rules settle before the push ends (`sync.repairs`).
+    repair rules settle before the push ends (`sync.repairs`). A `read_only` column it sets
+    (the unit price of a draw) is the exception: the phone reads it, so its new value is
+    recorded as a change of the server, after the phone's.
     """
     with transaction.atomic():
         stored = model._base_manager.select_for_update().filter(pk=pk).first()
         if kind != changes.PUT and stored is None:
             raise ValueError("A deletion or a restoration needs its row.")
+        recorded_updated_at = getattr(stored, "updated_at", None)
         recorded = changes.record_change(
             home_id,
             entity_of(model),
@@ -490,13 +498,21 @@ def apply_stamped(
             fields if kind == changes.PUT else None,
             stamp=stamp,
             known=known,
-            updated_at=getattr(stored, "updated_at", None),
+            updated_at=recorded_updated_at,
         )
         if recorded.change is None:
             return recorded
         won = recorded.change.fields
         columns = {name: values[name] for name in won if name in values}
         held = {} if settle is None else settle(stored, columns, kind)
+        read_only = spec_of(model).read_only
+        # The values the server sets on the row that the phone reads (docs/adr/0092): recorded
+        # as the server's own change once the row is written, so the feed gives them.
+        set_by_server = {
+            name: value
+            for name, value in held.items()
+            if name in read_only and getattr(stored, name, None) != value
+        }
         row: Any = stored
         if kind in (changes.DELETE, changes.RESTORE):
             for name, value in held.items():
@@ -515,6 +531,15 @@ def apply_stamped(
                 for name, value in columns.items():
                     setattr(stored, name, value)
                 stored.save(update_fields=[*columns, "updated_at"])
+        if set_by_server:
+            changes.record_change(
+                home_id,
+                entity_of(model),
+                pk,
+                changes.PUT,
+                {name: encode(model, name, value) for name, value in set_by_server.items()},
+                updated_at=recorded_updated_at,
+            )
         return recorded
 
 
