@@ -14,7 +14,7 @@ services:
     # Use a released version (X.Y.Z), ideally pinned by digest:
     #   ghcr.io/housecairn/housecairn:X.Y.Z@sha256:<digest>
     # `edge` follows the main branch and is for testing only.
-    image: ghcr.io/housecairn/housecairn:0.5.1@sha256:639a02627e6a0042b7b82612fef96481e8fe7f238406e744548a4ec8d53c32c6
+    image: ghcr.io/housecairn/housecairn:0.5.2@sha256:db7d377a4eaff737244f5cb62d2c8147a909e542662ee0dcc5d49c23e34583fe
     restart: unless-stopped
     env_file: deploy/production.env
     ports:
