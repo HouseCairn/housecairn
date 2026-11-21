@@ -127,9 +127,28 @@ class OccurrenceSerializer(serializers.ModelSerializer[Occurrence]):
         "cent (docs/adr/0090). 0.00 when nothing of value was taken. Read only."
     )
     real_cost = serializers.SerializerMethodField(
-        help_text="The real cost: `stock_cost` plus `actual_cost`, the amount typed for the "
-        "rest (labour, purchases outside the stock). Null when neither says anything. "
-        "Read only; `actual_cost` stays the amount typed."
+        help_text="The real cost: `stock_cost` plus the rest (labour, purchases outside the "
+        "stock), which is `actual_cost`, the amount typed, when there is one (0.00 included), "
+        "else `planned_labour` plus `planned_material` (docs/adr/0091). Null when none of them "
+        "says anything. Read only; `actual_cost` stays the amount typed."
+    )
+    planned_labour = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+        help_text="The labour budget of the task when the occurrence was marked done, kept by "
+        "the server; counted in `real_cost` when no amount is typed. Null when it had none, "
+        "when the occurrence is not done, and for a task of a project.",
+    )
+    planned_material = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+        help_text="The material budget of the task when the occurrence was marked done, kept "
+        "by the server, only when the stock did not work the materials out (no stock item with "
+        "a unit price); counted in `real_cost` when no amount is typed. Null otherwise.",
     )
     used = UsedSerializer(
         many=True,
@@ -157,6 +176,8 @@ class OccurrenceSerializer(serializers.ModelSerializer[Occurrence]):
             "assignee_name",
             "actual_cost",
             "stock_cost",
+            "planned_labour",
+            "planned_material",
             "real_cost",
             "completion_note",
             "is_overdue",
@@ -205,7 +226,9 @@ class OccurrenceSerializer(serializers.ModelSerializer[Occurrence]):
 
     @extend_schema_field(serializers.DecimalField(max_digits=14, decimal_places=2, allow_null=True))
     def get_real_cost(self, occurrence: Occurrence) -> str | None:
-        total = costs.real_cost(occurrence.actual_cost, self._used(occurrence).amount)
+        total = costs.real_cost(
+            occurrence.actual_cost, self._used(occurrence).amount, costs.planned_of(occurrence)
+        )
         return None if total is None else f"{total:.2f}"
 
 
@@ -226,7 +249,8 @@ class PostponeSerializer(serializers.Serializer[Any]):
 class CostSerializer(serializers.Serializer[Any]):
     total = serializers.DecimalField(max_digits=14, decimal_places=2)
     with_cost = serializers.IntegerField(
-        help_text="Occurrences that have a real cost: an amount typed, or stock of value used."
+        help_text="Occurrences that have a real cost: an amount typed, a plan kept, or stock of "
+        "value used."
     )
     count = serializers.IntegerField(help_text="Occurrences selected.")
 

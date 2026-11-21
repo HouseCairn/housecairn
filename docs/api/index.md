@@ -127,7 +127,10 @@ web interface: every request only sees the homes of its user
   occurrence is `real_cost`, read only: `stock_cost`, the stock it took at the unit prices of
   when it was taken (each line of `stock` gives its `unit_price` and `value`), plus
   `actual_cost`, the amount typed, which `PATCH` still sets alone
-  ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)).
+  ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). With `actual_cost` null, the
+  rest is the plan the occurrence kept when it was marked done, `planned_labour` plus
+  `planned_material`, read only; `actual_cost` of `0.00` is an amount and counts as zero
+  ([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)).
 - **QR labels and reports** ([ADR 0047](../adr/0047-qr-labels.md)):
   `/api/v1/homes/<home id>/labels/` and `.../reports/`. `POST .../labels/` with `kind`
   (`room`, `item` or `article`) and `target` returns the active label of the object (201

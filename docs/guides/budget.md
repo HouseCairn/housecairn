@@ -34,7 +34,13 @@ not counted". It is a plan, like the rest of the estimate. What was really spent
 the day it was taken, plus what you type for the rest (labour, purchases outside the stock).
 With two stock items worth 151.00 in all, the task costs 151.00 done without typing anything,
 and 191.00 with 40.00 of labour typed. A unit price changed later does not change what was
-spent ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)).
+spent ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). With nothing typed, the
+task has paid what it planned when it was marked done: with 80.00 of labour planned on top of
+that stock, it costs 231.00. A material budget typed counts the same way, unless stock items
+with a unit price work the materials out: then the stock is the materials, counted once. Type
+the amount really paid in **Details** when it differs, 0 included; a budget changed later
+does not change a time already done
+([ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)).
 
 ### A task in a project
 
@@ -50,7 +56,9 @@ plans 266. Add a labour line of 500 for a 300 task: the project plans 500, not 8
 labour line of 100 and a labour task of 250, it plans 250, the 100 of the line and 150 more
 from the task. A quote accepted on the line stays committed on it. **Budget by project**
 shows, for each project, **Planned by its tasks**: what its tasks plan in all. An abandoned
-project plans nothing, from its lines or its tasks.
+project plans nothing, from its lines or its tasks. What a project paid is what its budget
+lines say: a task of a project done with nothing typed does not count its plan as paid, which
+would count it a second time.
 
 ## Planned, committed, paid, used, gap
 

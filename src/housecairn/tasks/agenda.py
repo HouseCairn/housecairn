@@ -298,10 +298,11 @@ def history(home: Home, selection: HistoryFilter) -> models.QuerySet[Occurrence]
 
 @dataclass(frozen=True)
 class Cost:
-    """The real cost of a selection, over the occurrences that have one (docs/adr/0090).
+    """The real cost of a selection, over the occurrences that have one (docs/adr/0090, 0091).
 
-    The real cost of each is the stock it used plus the amount typed (`tasks.costs`);
-    `with_cost` counts those where either says something. Added in `Decimal`, not by SQL.
+    The real cost of each is the stock it used plus the amount typed, or the plan it kept when
+    nothing is typed (`tasks.costs`); `with_cost` counts those where any says something.
+    Added in `Decimal`, not by SQL.
     """
 
     total: Decimal
@@ -310,9 +311,14 @@ class Cost:
 
 
 def cost_of(rows: models.QuerySet[Occurrence]) -> Cost:
-    found = list(rows.order_by().values_list("id", "actual_cost"))
+    found = list(
+        rows.order_by().values_list("id", "actual_cost", "planned_labour", "planned_material")
+    )
     used = costs.stock_used(rows.order_by().values("id"))
-    real = [costs.real_cost(typed, used.get(pk, costs.NOTHING).amount) for pk, typed in found]
+    real = [
+        costs.real_cost(typed, used.get(pk, costs.NOTHING).amount, costs.Planned(labour, material))
+        for pk, typed, labour, material in found
+    ]
     known = [cost for cost in real if cost is not None]
     total = sum(known, Decimal(0)).quantize(costs.CENT)
     return Cost(total, len(known), len(found))

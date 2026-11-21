@@ -115,7 +115,7 @@
           <div class="row">
             <span class="row-body">
               <span class="row-title">{{ done.get_status_display }}{% if done.completed_on %} · {{ done.completed_on|day }}{% endif %}</span>
-              {% if done.cost.total is not None %}<span class="row-text" data-real-cost>{{ done.cost.total|money:home.currency }}{% if done.cost.stock.amount %} · {% blocktranslate with amount=done.cost.stock.amount|money:home.currency %}of which stock used {{ amount }}{% endblocktranslate %}{% endif %}</span>{% endif %}
+              {% if done.cost.total is not None %}<span class="row-text" data-real-cost>{{ done.cost.total|money:home.currency }}{% if done.cost.stock.amount %} · {% blocktranslate with amount=done.cost.stock.amount|money:home.currency %}of which stock used {{ amount }}{% endblocktranslate %}{% endif %}{% if done.cost.from_plan.known %} · <span data-from-plan>{% translate "as planned, nothing typed" %}</span>{% endif %}</span>{% endif %}
               {% if done.completion_note %}<span class="history-note">{{ done.completion_note }}</span>{% endif %}
             </span>
             {% if can_write and done.status == "done" %}

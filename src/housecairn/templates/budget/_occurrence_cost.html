@@ -1,5 +1,8 @@
-{% load i18n money %}{# Next to the real cost: what the task was estimated at, and the stock it used (docs/adr/0090). #}
+{% load i18n money %}{# Next to the real cost: what the task was estimated at, the stock it used (docs/adr/0090) and the plan it kept, counted when nothing is typed (0091). #}
 {% if estimate is not None %}<p class="small">{% blocktranslate with amount=estimate|money:home.currency %}Estimated at {{ amount }} each time.{% endblocktranslate %}</p>{% endif %}
 {% if stock %}<p data-stock-used>{% blocktranslate with amount=stock.amount|money:home.currency %}Stock used: {{ amount }}{% endblocktranslate %}</p>
 <p class="small">{% translate "The stock taken, at the unit prices of when it was taken, is in the real cost already." %}</p>
 {% if stock.unpriced %}<p class="small" data-stock-unpriced>{% blocktranslate count counter=stock.unpriced %}{{ counter }} stock item had no unit price when it was taken: it counts for nothing.{% plural %}{{ counter }} stock items had no unit price when they were taken: they count for nothing.{% endblocktranslate %}</p>{% endif %}{% endif %}
+{% if planned %}{% if planned.labour is not None %}<p data-planned-labour>{% blocktranslate with amount=planned.labour|money:home.currency %}Labour planned: {{ amount }}{% endblocktranslate %}</p>{% endif %}
+{% if planned.material is not None %}<p data-planned-material>{% blocktranslate with amount=planned.material|money:home.currency %}Materials planned: {{ amount }}{% endblocktranslate %}</p>{% endif %}
+<p class="small">{% if stock %}{% translate "With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them; the stock used stays counted." %}{% else %}{% translate "With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them." %}{% endif %}</p>{% endif %}

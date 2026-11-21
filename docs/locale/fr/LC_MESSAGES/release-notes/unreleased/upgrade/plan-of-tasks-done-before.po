@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**The tasks done before this version count today's budgets.** Nothing kept the budget of a task on the day it was done until now, so the migration gives every time a task was done before this version the labour and material budgets its task has at the update (the material budget only when no stock item with a unit price works the materials out, and none for a task of a project). It counts only where no cost was typed: an approximation, which changes the real cost of those tasks, the History and the Budget of the past years. A task done for less, or for nothing, gets its real amount in **Details**, 0 included. An archive written before this version restores its tasks done without that plan. Back on 0.5.2, the new columns are not read and the real cost is the amount typed again."
+msgstr "**Les tâches faites avant cette version comptent les budgets d'aujourd'hui.** Jusqu'ici, rien ne gardait le budget d'une tâche le jour où elle a été faite : la migration donne donc à chaque fois qu'une tâche a été faite avant cette version les budgets de main-d'œuvre et de matériel que sa tâche a au moment de la mise à jour (le budget matériel seulement quand aucun article à prix unitaire ne calcule le matériel, et aucun pour une tâche de projet). Il ne compte que là où aucun coût n'a été saisi : c'est une approximation, qui change le coût réel de ces tâches, l'historique et le budget des années passées. Une tâche faite pour moins, ou pour rien, reçoit son montant réel dans **Détails**, 0 compris. Une archive écrite avant cette version restaure ses tâches faites sans ce prévu. De retour en 0.5.2, les nouvelles colonnes ne sont pas lues et le coût réel redevient le montant saisi."
+

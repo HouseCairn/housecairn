@@ -1,11 +1,16 @@
-"""The real cost of a done occurrence (docs/adr/0090): the one rule, read everywhere.
+"""The real cost of a done occurrence (docs/adr/0090, 0091): the one rule, read everywhere.
 
-The real cost is the value of the stock the occurrence used plus the amount typed for the rest
-(labour, purchases outside the stock). The value of the stock is, for each live draw of the
-occurrence, the quantity taken times the unit price of the article when it was taken
+The real cost is the value of the stock the occurrence used plus the rest (labour, purchases
+outside the stock). The value of the stock is, for each live draw of the occurrence, the
+quantity taken times the unit price of the article when it was taken
 (`MaterialDraw.unit_price`), added and rounded once to the cent, half up. A draw whose
 article had no price counts for nothing and is counted apart (`unpriced`), so the screen
 says so. An undo ends the draws, and their value with them.
+
+The rest is the amount typed (`actual_cost`) when there is one, zero included; with nothing
+typed, it is what the plan of the task said when it was marked done, kept on the occurrence
+(`Planned`, ADR 0091): the labour planned, and the material budget typed unless the stock
+works the materials out (ADR 0081), so that the materials are never counted twice.
 
 The sums are made in Python, in `Decimal`, never by SQL `SUM`, which SQLite computes in
 floating point. The task page, the Budget, the History, the files and the API all read the
@@ -20,7 +25,7 @@ from uuid import UUID
 
 from django.db import models
 
-from housecairn.tasks.models import MaterialDraw, Occurrence, Status
+from housecairn.tasks.models import MaterialDraw, Occurrence, Status, Task
 
 ZERO = Decimal("0.00")
 CENT = Decimal("0.01")
@@ -102,38 +107,107 @@ def stock_used_by(occurrence: Occurrence) -> StockUsed:
     return stock_used([occurrence.pk]).get(occurrence.pk, NOTHING)
 
 
-def real_cost(typed: Decimal | None, stock: Decimal) -> Decimal | None:
-    """The real cost: the stock used plus the amount typed; None when neither says anything.
+@dataclass(frozen=True)
+class Planned:
+    """What the plan of a task said when an occurrence of it was marked done (ADR 0091).
 
-    A done occurrence with no amount typed and no stock of value is "done without a cost",
-    as before; with stock of value, its cost is known without typing anything.
+    `labour` is the labour planned; `material` the material budget typed, only when the stock
+    does not work the materials out (with a stock item that has a unit price, the materials
+    planned are the stock, which the draws count already: ADR 0081). None is "nothing
+    planned", which is not a plan of zero.
     """
-    if typed is None and not stock:
+
+    labour: Decimal | None = None
+    material: Decimal | None = None
+
+    @property
+    def known(self) -> bool:
+        return self.labour is not None or self.material is not None
+
+    @property
+    def amount(self) -> Decimal:
+        return (self.labour or ZERO) + (self.material or ZERO)
+
+
+NO_PLAN = Planned()
+
+
+def planned_of(occurrence: Occurrence) -> Planned:
+    """The plan kept on an occurrence when it was marked done; never the task's of now."""
+    return Planned(occurrence.planned_labour, occurrence.planned_material)
+
+
+def plan_when_done(task: Task) -> Planned:
+    """What the plan of `task` says now, for an occurrence being marked done.
+
+    A task of a project has none: its money is in the budget lines of the project (ADR 0062),
+    which say what was paid; counting its plan as paid as well would count it twice.
+    """
+    # Imported here: the budget reads this module.
+    from housecairn.budget import services as budget
+    from housecairn.projects.models import ProjectTask
+
+    if ProjectTask.objects.filter(task=task, project__deleted_at__isnull=True).exists():
+        return NO_PLAN
+    from_stock = budget.stock_plan_of(task).priced > 0
+    return Planned(task.labour_budget, None if from_stock else task.material_budget)
+
+
+def keep_plan(occurrence: Occurrence, planned: Planned) -> None:
+    """Set the plan an occurrence keeps (not saved): at its closing, or none at its undo."""
+    occurrence.planned_labour = planned.labour
+    occurrence.planned_material = planned.material
+
+
+def rest(typed: Decimal | None, planned: Planned = NO_PLAN) -> Decimal | None:
+    """What is not in the stock: the amount typed if any (0 is an amount), else the plan."""
+    if typed is not None:
+        return typed
+    return planned.amount if planned.known else None
+
+
+def real_cost(typed: Decimal | None, stock: Decimal, planned: Planned = NO_PLAN) -> Decimal | None:
+    """The real cost: the stock used plus the rest; None when nothing says anything.
+
+    A done occurrence with no amount typed, no plan kept and no stock of value is "done
+    without a cost", as before; with stock of value or a plan, its cost is known without
+    typing anything.
+    """
+    other = rest(typed, planned)
+    if other is None and not stock:
         return None
-    return (typed or ZERO) + stock
+    return (other or ZERO) + stock
 
 
 @dataclass(frozen=True)
 class OccurrenceCost:
-    """The real cost of one occurrence, its two parts apart."""
+    """The real cost of one occurrence, its parts apart."""
 
     typed: Decimal | None
     stock: StockUsed
+    planned: Planned = NO_PLAN
+
+    @property
+    def from_plan(self) -> Planned:
+        """The plan counted as paid: the one kept, when nothing is typed; else none."""
+        return self.planned if self.typed is None else NO_PLAN
 
     @property
     def total(self) -> Decimal | None:
-        return real_cost(self.typed, self.stock.amount)
+        return real_cost(self.typed, self.stock.amount, self.planned)
 
 
 def cost_of(occurrence: Occurrence) -> OccurrenceCost:
-    return OccurrenceCost(occurrence.actual_cost, stock_used_by(occurrence))
+    return OccurrenceCost(occurrence.actual_cost, stock_used_by(occurrence), planned_of(occurrence))
 
 
 def costs_of(occurrences: Iterable[Occurrence]) -> dict[UUID, OccurrenceCost]:
     """The real cost of each occurrence, in one query for the stock."""
     rows = list(occurrences)
     used = stock_used(o.pk for o in rows)
-    return {o.pk: OccurrenceCost(o.actual_cost, used.get(o.pk, NOTHING)) for o in rows}
+    return {
+        o.pk: OccurrenceCost(o.actual_cost, used.get(o.pk, NOTHING), planned_of(o)) for o in rows
+    }
 
 
 def attach(occurrences: Iterable[Occurrence]) -> list[Occurrence]:

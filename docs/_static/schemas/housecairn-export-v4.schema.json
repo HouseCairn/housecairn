@@ -1008,6 +1008,20 @@
                       ],
                       "pattern": "^-?\\d+(\\.\\d+)?$"
                     },
+                    "planned_labour": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
+                    "planned_material": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^-?\\d+(\\.\\d+)?$"
+                    },
                     "completion_note": {
                       "type": "string"
                     },
@@ -1028,6 +1042,8 @@
                     "due_on",
                     "follows",
                     "id",
+                    "planned_labour",
+                    "planned_material",
                     "postponed_from",
                     "status",
                     "status_before",

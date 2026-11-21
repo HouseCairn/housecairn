@@ -52,7 +52,7 @@ def register() -> None:
         csv_export.CsvEntity(
             "history",
             "occurrences",
-            money=("actual_cost", "stock_cost", "real_cost"),
+            money=("actual_cost", "planned_labour", "planned_material", "stock_cost", "real_cost"),
             extra=("stock_cost", "real_cost"),
             cells=history_costs,
         )

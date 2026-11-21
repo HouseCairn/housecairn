@@ -91,6 +91,7 @@ def tasks(report: services.Report) -> tuple[list[str], list[list[Any]]]:
         _("Gap"),
         _("Paid in all"),
         _("Of which stock used"),
+        _("Of which planned, with nothing typed"),
         _("Done without a cost"),
     ]
     rows = [
@@ -106,6 +107,7 @@ def tasks(report: services.Report) -> tuple[list[str], list[list[Any]]]:
             line.amounts.gap,
             line.extra["total_paid"],
             line.extra["total_stock_used"],
+            line.extra["total_from_plan"],
             line.extra["missing_costs"],
         ]
         for line in report.lines
