@@ -94,7 +94,10 @@ on the home included): `rooms`, `items`, `tasks`, `history`, `stock`,
 `contractors`, `reports`. The file is UTF-8 with a byte order mark, which
 Excel needs to read accents; the columns are the fields of the archive, people
 are named by their display name and never by their address, amounts are numbers
-with a point and the currency is a column of its own. A text that a spreadsheet
+with a point and the currency is a column of its own. `history` adds two columns after the
+fields: `stock_cost`, the stock each closing took at its unit prices of that day, and
+`real_cost`, that plus `actual_cost`, the amount typed (empty when neither says anything;
+[ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)). A text that a spreadsheet
 would run as a formula (starting with `=`, `+`, `-`, `@`, a tab or a carriage
 return) is written after a `'`, so that it stays text.
 

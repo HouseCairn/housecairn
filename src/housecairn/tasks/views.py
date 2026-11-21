@@ -46,7 +46,7 @@ from housecairn.rooms import services as room_services
 from housecairn.rooms.models import Item, Room
 from housecairn.rooms.views import HomeRoomsMixin
 from housecairn.stock import services as stock_services
-from housecairn.tasks import agenda, forms, in_place, services
+from housecairn.tasks import agenda, costs, forms, in_place, services
 from housecairn.tasks import materials as material_services
 from housecairn.tasks.files import attachment_response
 from housecairn.tasks.forms.materials import BaseMaterialFormSet, MaterialLineForm
@@ -404,7 +404,7 @@ class TaskDetailView(HomeTasksMixin, TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         task = self.get_task()
         current = services.open_occurrence_of(task)
-        closed = list(
+        closed = costs.attach(
             services.occurrences_of(self.home)
             .filter(task=task, status__in=[Status.DONE, Status.SKIPPED])
             .order_by("-completed_on", "-updated_at", "-id")[:20]
@@ -820,6 +820,7 @@ def _history(home: Home, request: HttpRequest) -> dict[str, Any]:
     )
     rows = agenda.history(home, selection)
     page = Paginator(rows, PAGE_SIZE).get_page(params.get("page"))
+    page.object_list = costs.attach(page.object_list)
     kept = [(k, v) for k, v in params.items() if k in HISTORY_FILTERS and v]
     members = list(services.members_for_forms(home))
     shown = names.labels(members)

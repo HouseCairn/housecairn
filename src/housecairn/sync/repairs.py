@@ -24,7 +24,9 @@ applied, in the same transaction, the server runs on the merged state:
   done or skipped (`occurrence.done`, `occurrence.skipped`, the account of the connection);
   for one that becomes done, the draws of its materials that the phone did not push
   (`draw:<occurrence>:<article>` neither live nor deleted); for an undo reverted, an exit of
-  each draw the undo gave back, under an id made from the draw and the clock of the undo.
+  each draw the undo gave back, under an id made from the draw and the clock of the undo;
+- the unit price a draw is taken at, the server's own field (docs/adr/0090): the article's
+  when a phone's draw is new or comes back, kept as it is by any other write.
 
 An operation whose row a repair then changed gets the result `repaired`.
 """
@@ -45,7 +47,7 @@ from housecairn.audit.models import AuditEvent
 from housecairn.homes.models import Home
 from housecairn.instance.config import instance_zone
 from housecairn.stock import services as stock_services
-from housecairn.stock.models import Movement, MovementKind
+from housecairn.stock.models import Article, Movement, MovementKind
 from housecairn.sync import changes, clock, ids
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, RowClocks
@@ -127,6 +129,8 @@ class Session:
             return functools.partial(self._settle_occurrence, pk)
         if entity == MOVEMENT:
             return self._settle_movement
+        if entity == DRAW:
+            return self._settle_draw
         return None
 
     def _settle_occurrence(
@@ -172,6 +176,25 @@ class Session:
         quantity = columns.get("quantity") or Decimal(0)
         kind_of = columns.get("kind")
         return {"delta": -quantity if kind_of == MovementKind.EXIT else quantity}
+
+    def _settle_draw(
+        self, stored: MaterialDraw | None, columns: dict[str, Any], kind: str
+    ) -> dict[str, Any]:
+        """The unit price of a draw a phone made, or brought back: the article's, now.
+
+        The server's own field (docs/adr/0090): what was taken is valued at the price of when
+        it was taken, so a later change of the price, or of the quantity used, keeps it.
+        """
+        coming_back = kind == changes.RESTORE and stored is not None and stored.deleted_at
+        if stored is not None and not coming_back:
+            return {}
+        article = columns.get("article_id", getattr(stored, "article_id", None))
+        price = (
+            Article.all_objects.filter(pk=article, home_id=self.home.pk)
+            .values_list("unit_price", flat=True)
+            .first()
+        )
+        return {"unit_price": price}
 
     def note(self, entity: str, row_id: uuid.UUID, kind: str, sent: Any, won: Any) -> None:
         """An operation whose change won some fields: `sent` its fields, `won` those that won."""
@@ -522,5 +545,6 @@ class Session:
                     article=line.article,
                     wanted=line.quantity,
                     drawn=taken,
+                    unit_price=line.article.unit_price,
                 )
             )

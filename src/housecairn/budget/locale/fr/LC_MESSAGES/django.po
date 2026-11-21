@@ -76,6 +76,9 @@ msgstr "Articles sans prix"
 msgid "Paid in all"
 msgstr "Payé au total"
 
+msgid "Of which stock used"
+msgstr "Dont stock utilisé"
+
 msgid "Done without a cost"
 msgstr "Faites sans coût"
 
@@ -114,6 +117,19 @@ msgstr "Où en est le budget"
 msgid "Estimated at %(amount)s each time."
 msgstr "Estimé à %(amount)s à chaque fois."
 
+#, python-format
+msgid "Stock used: %(amount)s"
+msgstr "Stock utilisé : %(amount)s"
+
+msgid "The stock taken, at the unit prices of when it was taken, is in the real cost already."
+msgstr "Le stock pris, aux prix unitaires du jour où il a été pris, est déjà dans le coût réel."
+
+#, python-format
+msgid "%(counter)s stock item had no unit price when it was taken: it counts for nothing."
+msgid_plural "%(counter)s stock items had no unit price when they were taken: they count for nothing."
+msgstr[0] "%(counter)s article n'avait pas de prix unitaire quand il a été pris : il ne compte pour rien."
+msgstr[1] "%(counter)s articles n'avaient pas de prix unitaire quand ils ont été pris : ils ne comptent pour rien."
+
 msgid "Budget of the room"
 msgstr "Budget de la pièce"
 
@@ -141,6 +157,15 @@ msgstr "Réel"
 
 msgid "Paid so far"
 msgstr "Payé jusqu'ici"
+
+msgid "The stock taken when the task was done counts at the unit prices of that day; the amounts typed are added to it."
+msgstr "Le stock pris quand la tâche a été faite compte aux prix unitaires de ce jour-là ; les montants saisis s'y ajoutent."
+
+#, python-format
+msgid "%(counter)s stock item was taken without a unit price: it counts for nothing in what was paid."
+msgid_plural "%(counter)s stock items were taken without a unit price: they count for nothing in what was paid."
+msgstr[0] "%(counter)s article a été pris sans prix unitaire : il ne compte pour rien dans ce qui a été payé."
+msgstr[1] "%(counter)s articles ont été pris sans prix unitaire : ils ne comptent pour rien dans ce qui a été payé."
 
 #, python-format
 msgid "%(counter)s stock item without a price is not counted: give it a unit price on its page."

@@ -206,7 +206,8 @@ def draw_for_done(actor: AnyUser, occurrence: Occurrence, *, on: datetime.date) 
         taken = stock_services.draw_for_task(
             actor, line.article, line.quantity, occurrence=occurrence, occurred_on=on
         )
-        # The id of ADR 0077 (need 2): closing again after an undo brings back its draw.
+        # The id of ADR 0077 (need 2): closing again after an undo brings back its draw, at
+        # the unit price of now (docs/adr/0090).
         changelog.create_or_revive(
             MaterialDraw(
                 id=ids.draw(occurrence.home_id, occurrence.pk, line.article_id),
@@ -215,6 +216,7 @@ def draw_for_done(actor: AnyUser, occurrence: Occurrence, *, on: datetime.date) 
                 article=line.article,
                 wanted=line.quantity,
                 drawn=taken,
+                unit_price=line.article.unit_price,
             )
         )
         if taken < line.quantity:
@@ -243,6 +245,7 @@ def adjust_draws(
 
     Less than what was taken puts the difference back; more takes it, as far as the stock
     allows. An article the closing did not take is refused. Returns what is still short.
+    The unit price of each draw stays the one of the closing (docs/adr/0090).
     """
     draws = {d.article_id: d for d in draws_of(occurrence).order_by("article_id")}
     unknown = set(used) - set(draws)

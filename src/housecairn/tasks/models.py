@@ -382,12 +382,25 @@ class MaterialDraw(HomeOwnedModel):
     done, then what was entered when completing it); `drawn` is what the stock could give
     (never more than it held). The ledger lines themselves are in `stock.Movement`, which
     point back to the occurrence. Taking the closing back ends the draw.
+
+    `unit_price` is the unit price of the article when the stock was taken, kept so that a
+    price changed later does not change the real cost of what was done (docs/adr/0090); empty
+    when the article had none. The server writes it, never a phone: it is not synced.
     """
 
     occurrence = models.ForeignKey(Occurrence, on_delete=models.CASCADE, related_name="draws")
     article = models.ForeignKey("stock.Article", on_delete=models.CASCADE, related_name="+")
     wanted = models.DecimalField(_("quantity used"), max_digits=10, decimal_places=2)
     drawn = models.DecimalField(_("quantity taken from the stock"), max_digits=10, decimal_places=2)
+    unit_price = models.DecimalField(
+        _("unit price when taken"),
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        editable=False,
+        validators=[MinValueValidator(0)],
+    )
 
     class Meta:
         verbose_name = _("stock draw")
@@ -412,6 +425,17 @@ class MaterialDraw(HomeOwnedModel):
     def missing(self) -> Decimal:
         """What the stock could not give."""
         return self.wanted - self.drawn
+
+    @property
+    def value(self) -> Decimal:
+        """What was taken, at the unit price of when it was taken; nothing without a price.
+
+        Not rounded: the real cost of an occurrence adds its draws, then rounds once
+        (`tasks.costs`).
+        """
+        if self.unit_price is None:
+            return Decimal(0)
+        return self.drawn * self.unit_price
 
 
 class TodayGroup(models.TextChoices):

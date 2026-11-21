@@ -37,6 +37,16 @@ class CompletionForm(LabelAboveMixin, forms.ModelForm[Occurrence]):
 
     def __init__(self, *args: Any, draws: Iterable[MaterialDraw] = (), **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        draws = list(draws)
+        if draws:
+            # The stock used is in the real cost already (docs/adr/0090): what is typed here
+            # is the rest, added to it, so that it is not typed twice.
+            self.fields["actual_cost"].label = gettext(
+                "Other costs (labour, purchases outside the stock)"
+            )
+            self.fields["actual_cost"].help_text = gettext(
+                "Added to the stock used, shown above: do not type the stock again."
+            )
         # One field per stock item the closing took: the quantity really used.
         for draw in draws:
             name = f"{self.USED_PREFIX}{draw.article_id}"

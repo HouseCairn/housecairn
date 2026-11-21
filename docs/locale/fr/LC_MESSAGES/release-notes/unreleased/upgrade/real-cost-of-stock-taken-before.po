@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**The stock taken before this version is valued at today's prices.** Nothing kept the unit price of the day the stock was taken until now, so the migration gives the stock taken by tasks done before this version the unit price each item has at the update: an approximation, which changes the real cost of those tasks, the History and the Budget of the past years. An item without a unit price counts for nothing. If you typed the price of the stock in the cost of a task done before, it is now counted twice: correct the amount in **Details**, where the field is now **Other costs**. An archive written before this version restores its stock without a price. Back on 0.5.2, the new column is not read and the real cost is the amount typed again."
+msgstr "**Le stock pris avant cette version est valorisé aux prix d'aujourd'hui.** Rien ne gardait jusqu'ici le prix unitaire du jour où le stock a été pris : la migration donne donc au stock pris par les tâches faites avant cette version le prix unitaire de chaque article au moment de la mise à jour. C'est une approximation, qui change le coût réel de ces tâches, l'historique et le budget des années passées. Un article sans prix unitaire ne compte pour rien. Si vous aviez saisi le prix du stock dans le coût d'une tâche faite avant, il est désormais compté deux fois : corrigez le montant dans **Détails**, où le champ s'appelle maintenant **Autres coûts**. Une archive écrite avant cette version restaure son stock sans prix. De retour en 0.5.2, la nouvelle colonne n'est pas lue et le coût réel redevient le montant saisi."

@@ -98,9 +98,19 @@ class TaskLineSerializer(LineSerializer):
         read_only=True,
         help_text="Stock items of the task with no unit price: they count for nothing.",
     )
-    total_paid = MoneyOut(source="extra.total_paid")
+    total_paid = MoneyOut(
+        source="extra.total_paid",
+        help_text="The real cost of every time done: the stock used, at its unit prices when "
+        "it was taken, plus the amounts typed.",
+    )
+    total_stock_used = MoneyOut(
+        source="extra.total_stock_used",
+        help_text="Of `total_paid`: the stock used, at its unit prices when it was taken.",
+    )
     missing_costs = serializers.IntegerField(
-        source="extra.missing_costs", read_only=True, help_text="Done this year, no cost typed."
+        source="extra.missing_costs",
+        read_only=True,
+        help_text="Done this year, with no cost typed and no stock of value used.",
     )
 
 

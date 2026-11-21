@@ -14,7 +14,10 @@
     <h3 class="cost-kind"><span class="pill">{% translate "Real" %}</span></h3>
     <dl class="facts" data-real>
       <div><dt>{% translate "Paid so far" %}</dt><dd>{{ paid|money:home.currency }}</dd></div>
+      {% if stock_used %}<div><dt>{% translate "Of which stock used" %}</dt><dd data-stock-used>{{ stock_used|money:home.currency }}</dd></div>{% endif %}
     </dl>
+    {% if stock_used %}<p class="small">{% translate "The stock taken when the task was done counts at the unit prices of that day; the amounts typed are added to it." %}</p>{% endif %}
+    {% if unpriced_draws %}<p class="small" data-stock-unpriced>{% blocktranslate count counter=unpriced_draws %}{{ counter }} stock item was taken without a unit price: it counts for nothing in what was paid.{% plural %}{{ counter }} stock items were taken without a unit price: they count for nothing in what was paid.{% endblocktranslate %}</p>{% endif %}
     {% if row.stock.unpriced %}<p class="small">{% blocktranslate count counter=row.stock.unpriced %}{{ counter }} stock item without a price is not counted: give it a unit price on its page.{% plural %}{{ counter }} stock items without a price are not counted: give them a unit price on their page.{% endblocktranslate %}</p>{% endif %}
     {% if missing %}<p class="small">{% blocktranslate count counter=missing %}{{ counter }} time done without a cost: add it in the details of what was done.{% plural %}{{ counter }} times done without a cost: add them in the details of what was done.{% endblocktranslate %}</p>{% endif %}
   </section>

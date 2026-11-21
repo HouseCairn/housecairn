@@ -13,7 +13,7 @@ Each app adds its tables to `ENTITIES` (`register`); the routes take any name li
 import csv
 import io
 import json
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from typing import Any
 
@@ -32,11 +32,18 @@ BOM = "\ufeff"
 
 @dataclass(frozen=True)
 class CsvEntity:
-    """A CSV file: the rows of one section of the archive, `money` its amounts."""
+    """A CSV file: the rows of one section of the archive, `money` its amounts.
+
+    `extra` adds columns worked out from the rows, after their fields: their names, and a
+    function that gives the cells of every row by its identifier, in one go (the real cost of
+    the history, docs/adr/0090).
+    """
 
     name: str
     section: str
     money: tuple[str, ...] = ()
+    extra: tuple[str, ...] = ()
+    cells: Callable[[list[models.Model]], dict[Any, list[str]]] | None = None
 
 
 ENTITIES: dict[str, CsvEntity] = {}
@@ -84,7 +91,7 @@ def rows(home: Home, entity: CsvEntity) -> Iterator[list[str]]:
     exports.refuse_example(home)
     section = _section(entity.section)
     columns = _columns(section)
-    header = [f.name for f in columns]
+    header = [*(f.name for f in columns), *entity.extra]
     if entity.money:
         header.append("currency")
     yield header
@@ -94,8 +101,11 @@ def rows(home: Home, entity: CsvEntity) -> Iterator[list[str]]:
     people = get_user_model().objects.in_bulk(
         {getattr(row, name) for row in found for name in references} - {None}
     )
+    extra = entity.cells(list(found)) if entity.cells is not None else {}
     for row in found:
         cells = [_cell(f, row, people) for f in columns]
+        if entity.extra:
+            cells.extend(extra.get(row.pk, [""] * len(entity.extra)))
         if entity.money:
             cells.append(home.currency)
         yield cells
@@ -120,7 +130,7 @@ for _entity in (
     CsvEntity("rooms", "rooms"),
     CsvEntity("items", "items"),
     CsvEntity("tasks", "tasks", money=("labour_budget", "material_budget")),
-    CsvEntity("history", "occurrences", money=("actual_cost",)),
+    # "history" is registered by `tasks.exports`, with the columns of the real cost.
     CsvEntity("stock", "stock_items"),
     CsvEntity("contractors", "contractors"),
     CsvEntity("reports", "reports"),

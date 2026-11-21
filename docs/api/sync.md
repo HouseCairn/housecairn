@@ -276,7 +276,11 @@ its own with the server's clock, which the feed then gives:
 
 The server also computes what is derived: `visible_from` of the occurrences, the months of the
 tasks on a predefined season when `hemisphere` changes, and the effect of each stock movement on
-the stock, in the order of the clocks (an inventory makes the stock its count). It runs once what
+the stock, in the order of the clocks (an inventory makes the stock its count). It keeps the
+unit price a draw was taken at, which is not a field of the protocol: the price of the article
+when a pushed draw is new or comes back (`restore`), unchanged by any other write
+([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)); a push that sets `unit_price` on a
+draw is `forbidden`. It runs once what
 the web runs on a closing: an audit entry for each occurrence that becomes done or skipped, in
 the name of the account of the phone; and for one that becomes done, the draws of its materials
 that the push did not carry (a phone sends a closing in one push, with its draws and exits). An
@@ -316,7 +320,7 @@ The codes of a rejected operation:
 
 | Code | When |
 | --- | --- |
-| `forbidden` | The account is a read-only member of the home; or the operation sets `archived_at` on the home and the account is not an owner (the whole operation is rejected, its other fields too); or it writes a field the server keeps for itself (`required_provider`, `visible_from`, a thumbnail); or it deletes or restores the home itself, which is erased on the web only. |
+| `forbidden` | The account is a read-only member of the home; or the operation sets `archived_at` on the home and the account is not an owner (the whole operation is rejected, its other fields too); or it writes a field the server keeps for itself (`required_provider`, `visible_from`, a thumbnail, the `unit_price` of a draw); or it deletes or restores the home itself, which is erased on the web only. |
 | `unknown_type` | The entity type is not one the server keeps (`family.member` and `family.settings` included). |
 | `invalid_reference` | A reference names a row that is not in this home, or a person who is not a member; or the id of a link row does not name its two rows. |
 | `wrong_home` | The operation names another home than the one of the route. |
