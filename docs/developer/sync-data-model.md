@@ -65,7 +65,11 @@ send `required_provider`, a rule of the instance), fields without a column (a ph
 file as `image`, a reference with the size, type and dimensions of the stored picture, and no
 thumbnail; an attachment and a file of a project send theirs as `file`, see `sync.files`), and
 fields that read as the clock of their own write (`homes.home.archived_at`: an
-archive made on the web is the clock of that write, and an empty value stays empty).
+archive made on the web is the clock of that write, and an empty value stays empty), and
+columns sent but never written by a phone (`read_only`: the unit price of a draw and the plan
+an occurrence keeps, [ADR 0092](../adr/0092-the-phone-reads-the-real-cost-the-server-keeps.md)).
+A push that sets a `read_only` column is `forbidden`; a value of one the server sets during a
+push is recorded as a change of the server after the phone's.
 
 A write made on the web gets a clock from the server's hybrid clock and the device id of the
 server. A write that comes from a phone passes its own `stamp` (clock and device id).

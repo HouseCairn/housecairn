@@ -1,5 +1,5 @@
 """What of an attachment, a stock draw and an occurrence the sync API sends (docs/adr/0077,
-0079, 0090, 0091)."""
+0079, 0090, 0091, 0092)."""
 
 from typing import Any
 
@@ -27,7 +27,11 @@ def register() -> None:
     )
     # The unit price a draw was taken at is the server's (docs/adr/0090): a phone that pushes
     # it is refused (`forbidden`), and the server sets it when the draw is made or comes back.
-    rows.register(MaterialDraw, rows.Spec(skip=frozenset({"unit_price"})))
+    # The phone reads it, for the real cost (docs/adr/0092).
+    rows.register(MaterialDraw, rows.Spec(read_only=frozenset({"unit_price"})))
     # So is the plan an occurrence keeps when it is marked done (docs/adr/0091): set by the
-    # server when it becomes done, on the web or by a push, and emptied when it is not.
-    rows.register(Occurrence, rows.Spec(skip=frozenset({"planned_labour", "planned_material"})))
+    # server when it becomes done, on the web or by a push, and emptied when it is not; read
+    # by the phone as well (docs/adr/0092).
+    rows.register(
+        Occurrence, rows.Spec(read_only=frozenset({"planned_labour", "planned_material"}))
+    )

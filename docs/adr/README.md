@@ -89,3 +89,4 @@ later record supersedes it.
 | [0089](0089-an-archived-home-is-read-only.md) | An archived home is read only, on the web as in the mobile app | 2026-11-20 |
 | [0090](0090-real-cost-counts-the-stock-used.md) | The real cost of a done task counts the stock it used | 2026-11-21 |
 | [0091](0091-a-task-done-with-nothing-typed-pays-its-plan.md) | A task done with nothing typed has paid what it planned | 2026-11-21 |
+| [0092](0092-the-phone-reads-the-real-cost-the-server-keeps.md) | The phone reads the real cost the server keeps | 2026-11-21 |

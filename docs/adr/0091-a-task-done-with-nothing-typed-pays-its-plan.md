@@ -6,6 +6,8 @@
 - Date: 2026-11-21
 - Amends: [0090](0090-real-cost-counts-the-stock-used.md) (the real cost was the stock used
   plus the amount typed only)
+- Amended by: [0092](0092-the-phone-reads-the-real-cost-the-server-keeps.md) (the phone reads
+  the plan of an occurrence, read only)
 - Related: [0081](0081-materials-of-a-task-calculated-from-its-stock.md) (the materials planned
   from the stock), [0062](0062-unit-price-of-stock-items.md) (the money of a task of a project),
   [0077](0077-sync-api-for-the-mobile-app.md) (the fields of the protocol)
