@@ -20,6 +20,26 @@ The notes of each version are also published with it on the project's
 ```{release-fragments} upgrade
 ```
 
+## 0.5.2
+
+HouseCairn is still alpha software. This version makes an archived home read only everywhere, on the screens, through the API and from Home Assistant, as the mobile app already kept it, and adds a **Materials** section to the page of an item, to link the stock items it uses. Read the upgrade notes before updating: no migration runs and no setting is new, but the homes already archived become read only.
+
+### New
+
+- **An archived home is read only.** Its pages still open, with the banner **Archived home: read only**, but nothing in it can be changed, by anyone, owners included, from the screens, the API, Home Assistant or the mobile app, until an owner brings it back with **Bring this home back**, in that banner or on the page of the home. It can still be exported or deleted, and you can still leave it, remove a member or revoke an invitation; inviting someone, changing a role, transferring ownership or requiring a sign-in provider waits until the home is back, and so does an invitation sent before. The mobile app already worked this way; nothing is deleted ([ADR 0089](adr/0089-an-archived-home-is-read-only.md), [Home](screens/home.md#archive-a-home)).
+
+- **Materials on the page of an item.** The page of an item has a **Materials** section that lists the stock items that fit it, with the quantity in stock and the unit price when there is one. Members and owners can link stock items to it (**Link a stock item**), add a new stock item already linked (**New stock item**) or take a link away (**Remove**), without going through the stock item; read-only members see the list only. The link is the same as before, the **Compatible items** of the stock item, edited from either side ([Item](screens/item.md)).
+
+### Upgrade notes
+
+- **No migration and no new setting.** This version adds no migration, no setting and no dependency, and the export format stays version 4.
+
+- **The homes already archived become read only.** A home archived before the update is read only as soon as 0.5.2 starts: its pages carry the banner and offer no change but the exceptions above, and the API answers a change to it with `403` and `"code": "home_archived"`, a report or an event sent by Home Assistant included ([API](api/index.md)). A script or an integration that still wrote to an archived home gets that refusal from now on: bring the home back first. An invitation to an archived home that was pending stays pending: its page says it will work again once the home is brought back, and it does, within its expiry ([Invitation](screens/invitation.md)).
+
+- **A new code of the sync API, `home_archived`.** A push to an archived home rejects each operation with `home_archived` (a read-only member keeps `forbidden`), and the upload of a file to it answers `403` `home_archived`; only a `put` of the home that sets `archived_at` alone, by an owner, is taken, and brings the home back ([Sync API](api/sync.md#pushing-changes)). The versions of the mobile app already released do not know this code and keep such an operation aside, as they do any refusal they do not know; since they already keep an archived home read only, it can only be a change made on the phone before the home was archived elsewhere.
+
+- **Going back to 0.5.1.** With no migration in this version, 0.5.1 starts on the same database and needs no restore; [back up](administration/backup.md) before updating all the same, as each update asks ([Update](administration/update.md)). Back on 0.5.1, an archived home can be changed again from the screens, the API and Home Assistant, and a pending invitation to it can be accepted. The links made from the **Materials** of an item stay, as the **Compatible items** of their stock items.
+
 ## 0.5.1
 
 HouseCairn is still alpha software. This version adds an interactive guide on an example home that never leaves the instance, filters in tabs and search as you type on the lists, a shortcut to the iOS app beta and finishing touches on the screens. It also fixes the return to the mobile app after its sign-in, and gives the mobile app the photos of reports and of labels and, for a read-only member, only their own reports. Read the upgrade notes before updating: three migrations run, and no setting is new.
