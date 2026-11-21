@@ -26,7 +26,9 @@ applied, in the same transaction, the server runs on the merged state:
   (`draw:<occurrence>:<article>` neither live nor deleted); for an undo reverted, an exit of
   each draw the undo gave back, under an id made from the draw and the clock of the undo;
 - the unit price a draw is taken at, the server's own field (docs/adr/0090): the article's
-  when a phone's draw is new or comes back, kept as it is by any other write.
+  when a phone's draw is new or comes back, kept as it is by any other write;
+- the plan an occurrence keeps, the server's own fields as well (docs/adr/0091): the plan of
+  its task when a push makes it done, none when a push makes it not done.
 
 An operation whose row a repair then changed gets the result `repaired`.
 """
@@ -51,7 +53,7 @@ from housecairn.stock.models import Article, Movement, MovementKind
 from housecairn.sync import changes, clock, ids
 from housecairn.sync import rows as sync_rows
 from housecairn.sync.models import Change, RowClocks
-from housecairn.tasks import recurrence
+from housecairn.tasks import costs, recurrence
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import (
     CLOSED_STATUSES,
@@ -218,6 +220,7 @@ class Session:
         self._visible_from()
         self._movement_effects()
         self._effects()
+        self._kept_plans()
         for result, op in zip(results, ops, strict=True):
             if result.get("status") == "applied" and (op.entity, op.row_id) in self.repaired:
                 result["status"] = REPAIRED
@@ -515,6 +518,33 @@ class Session:
                 occurrence=closed,
                 movement_id=movement,
                 occurred_on=closed.completed_on or task_services.today(),
+            )
+
+    def _kept_plans(self) -> None:
+        """The plan of the task on each occurrence the push made done; none on one it reopened.
+
+        The server's own fields (docs/adr/0091), as `complete` and `undo` set them on the web:
+        kept when the occurrence becomes done, so that a budget changed later does not rewrite
+        it, and left as they are by any other write of a done occurrence.
+        """
+        rows = (
+            Occurrence.all_objects.filter(pk__in=self._occurrences(), home_id=self.home.pk)
+            .select_related("task")
+            .order_by("pk")
+        )
+        for row in rows:
+            if row.deleted_at is not None:
+                continue
+            if row.status == Status.DONE:
+                if self.start.get(row.pk) == Status.DONE:
+                    continue  # done before the push: its plan is the one of its closing
+                planned = costs.plan_when_done(row.task)
+            elif costs.planned_of(row).known:
+                planned = costs.NO_PLAN
+            else:
+                continue
+            Occurrence.all_objects.filter(pk=row.pk).update(
+                planned_labour=planned.labour, planned_material=planned.material
             )
 
     def _draw(self, row: Occurrence) -> None:

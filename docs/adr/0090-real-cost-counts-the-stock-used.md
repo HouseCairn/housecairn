@@ -5,6 +5,8 @@
 - Date: 2026-11-21
 - Amends: [0062](0062-unit-price-of-stock-items.md) ("It is a plan": the real cost was only
   the amount typed when a task is done)
+- Amended by: [0091](0091-a-task-done-with-nothing-typed-pays-its-plan.md) (with nothing typed,
+  the rest is the plan kept when the task was done)
 - Related: [0046](0046-stock-linked-to-tasks-and-rooms.md) (the draws of a closing),
   [0081](0081-materials-of-a-task-calculated-from-its-stock.md) (the materials planned from the
   stock), [0077](0077-sync-api-for-the-mobile-app.md) (the fields of the protocol)

@@ -140,15 +140,18 @@ class TaskFigures:
     count: int  # done, open and projected
     material: Decimal  # planned
     labour: Decimal  # planned
-    paid: Decimal  # the real cost of what was done: the stock used and the amounts typed
-    missing: int  # done, with no cost typed and no stock of value: paid as zero
+    paid: Decimal  # the real cost of what was done: the stock used and the rest (ADR 0091)
+    missing: int  # done, with no cost typed, no plan kept and no stock of value: paid as zero
     projected: int = 0  # of `count`: the times the repetition will still bring (no row yet)
     stock: Decimal = ZERO  # of `paid`: the stock used, at its prices when taken (ADR 0090)
+    # Of `paid`: the plan kept by the times done with nothing typed (ADR 0091), by nature.
+    plan_labour: Decimal = ZERO
+    plan_material: Decimal = ZERO
 
     @property
     def typed(self) -> Decimal:
         """Of `paid`: the amounts typed, for what is not in the stock."""
-        return self.paid - self.stock
+        return self.paid - self.stock - self.plan_labour - self.plan_material
 
     @property
     def amounts(self) -> Amounts:
@@ -164,8 +167,9 @@ class TaskRow:
     material: Decimal
     labour: Decimal
     has_estimate: bool
-    # Each time done: its day, the amount typed, the stock it used (docs/adr/0090).
-    done: tuple[tuple[datetime.date | None, Decimal | None, Decimal], ...]
+    # Each time done: its day, the amount typed, the stock it used (docs/adr/0090), the plan it
+    # kept (0091).
+    done: tuple[tuple[datetime.date | None, Decimal | None, Decimal, costs.Planned], ...]
     open: tuple[datetime.date | None, ...]
     today: datetime.date
     # The stock items of the task, at their unit prices; apart from `material`, which is
@@ -248,11 +252,15 @@ class TaskRow:
         plan (none paid yet), and an open occurrence with no date is counted in the current
         year (docs/adr/0073). The window and the year are the same period.
         """
-        done = [(typed, stock) for day, typed, stock in self.done if window(day)]
+        done = [
+            costs.OccurrenceCost(typed, costs.StockUsed(stock), planned)
+            for day, typed, stock, planned in self.done
+            if window(day)
+        ]
         coming = [day for day in self.open if self._open_in(day, window, year)] if open_too else []
         projected = self.projected(year) if year is not None and open_too else 0
         count = len(done) + len(coming) + projected
-        real = [costs.real_cost(typed, stock) for typed, stock in done]
+        real = [cost.total for cost in done]
         return TaskFigures(
             count,
             self.material_planned * count,
@@ -260,7 +268,9 @@ class TaskRow:
             sum((cost for cost in real if cost is not None), ZERO),
             sum(1 for cost in real if cost is None),
             projected,
-            sum((stock for _typed, stock in done), ZERO),
+            sum((cost.stock.amount for cost in done), ZERO),
+            sum((cost.from_plan.labour or ZERO for cost in done), ZERO),
+            sum((cost.from_plan.material or ZERO for cost in done), ZERO),
         )
 
     @property
@@ -304,7 +314,7 @@ class Ledger:
         """Every year with a figure: of a project, a dated occurrence or an envelope."""
         found = {self.today.year, *self.envelopes, *(p.year for p in self.projects)}
         for row in self.tasks:
-            found.update(day.year for day, _typed, _stock in row.done if day)
+            found.update(day.year for day, _typed, _stock, _planned in row.done if day)
             found.update(day.year for day in map(row.counted_on, row.open) if day)
         return sorted(found, reverse=True)
 
@@ -334,7 +344,9 @@ def _day(cost_day: datetime.date | None, due: datetime.date | None) -> datetime.
     return cost_day or due
 
 
-Found = tuple[str, Any, Any, Any, Decimal]
+Found = tuple[str, Any, Any, Any, Decimal, costs.Planned]
+# The columns of an occurrence the figures read, after its id (and its task for a home).
+_COLUMNS = ("status", "due_on", "completed_on", "actual_cost", "planned_labour", "planned_material")
 
 
 def _task_row(
@@ -344,14 +356,15 @@ def _task_row(
     today: datetime.date,
     stock: StockPlan,
 ) -> TaskRow:
-    """A task with its occurrences: (status, due, completed, cost typed, stock used) of each."""
+    """A task with its occurrences: (status, due, completed, cost typed, stock used, plan kept)
+    of each."""
     occurrences = list(found)
     done = tuple(
-        (_day(completed, due), cost, used)
-        for status, due, completed, cost, used in occurrences
+        (_day(completed, due), cost, used, planned)
+        for status, due, completed, cost, used, planned in occurrences
         if status == "done"
     )
-    coming = tuple(due for status, due, _completed, _cost, _used in occurrences if status != "done")
+    coming = tuple(due for status, due, *_rest in occurrences if status != "done")
     return TaskRow(
         task,
         room,
@@ -376,13 +389,20 @@ def task_row(task: Task, today: datetime.date | None = None) -> TaskRow | None:
         return None
     rows = list(
         Occurrence.objects.filter(task=task, status__in=[*_OPEN, Status.DONE]).values_list(
-            "id", "status", "due_on", "completed_on", "actual_cost"
+            "id", *_COLUMNS
         )
     )
     used = costs.stock_used(pk for pk, *_rest in rows)
     found = [
-        (status, due, completed, cost, used.get(pk, costs.NOTHING).amount)
-        for pk, status, due, completed, cost in rows
+        (
+            status,
+            due,
+            completed,
+            cost,
+            used.get(pk, costs.NOTHING).amount,
+            costs.Planned(labour, material),
+        )
+        for pk, status, due, completed, cost, labour, material in rows
     ]
     return _task_row(task, None, found, today or task_services.today(), stock_plan_of(task))
 
@@ -408,11 +428,12 @@ def load(home: Home, today: datetime.date | None = None) -> Ledger:
     tasks = list(Task.objects.filter(home=home).order_by("created_at", "id"))
     occurrences: dict[UUID, list[Found]] = defaultdict(list)
     used = costs.stock_used_in(home.pk)
-    for pk, task_id, status, due, completed, cost in Occurrence.objects.filter(
+    for pk, task_id, status, due, completed, cost, labour, material in Occurrence.objects.filter(
         home=home, status__in=[*_OPEN, Status.DONE]
-    ).values_list("id", "task_id", "status", "due_on", "completed_on", "actual_cost"):
+    ).values_list("id", "task_id", *_COLUMNS):
         stock_used = used.get(pk, costs.NOTHING).amount
-        occurrences[task_id].append((status, due, completed, cost, stock_used))
+        kept = costs.Planned(labour, material)
+        occurrences[task_id].append((status, due, completed, cost, stock_used, kept))
     stock_lines: dict[UUID, list[tuple[Decimal, Decimal | None]]] = defaultdict(list)
     for task_id, quantity, price in _stock_lines(home=home):
         stock_lines[task_id].append((quantity, price))
@@ -426,7 +447,7 @@ def load(home: Home, today: datetime.date | None = None) -> Ledger:
             quote_days[project_id].append(issued)
     task_days: dict[UUID, list[datetime.date]] = defaultdict(list)
     for task_id, project_id in in_project.items():
-        for status, due, completed, _cost, _used in occurrences.get(task_id, ()):
+        for status, due, completed, *_rest in occurrences.get(task_id, ()):
             day = _day(completed, due) if status == Status.DONE else due
             if day:
                 task_days[project_id].append(day)
@@ -646,6 +667,7 @@ def by_task(ledger: Ledger, year: int) -> Report:
                     "unpriced_materials": row.stock.unpriced,
                     "total_paid": total.paid,
                     "total_stock_used": total.stock,
+                    "total_from_plan": total.plan_labour + total.plan_material,
                     "missing_costs": this_year.missing,
                 },
             )
@@ -680,10 +702,12 @@ def real_cost_split(
 def by_nature(ledger: Ledger, year: int) -> list[Line]:
     """Materials, labour, rental, other.
 
-    The stock a done task used is materials (docs/adr/0090). The amount typed for the rest is
-    shared between materials and labour as the estimate of the task is, so that it stands
-    against its own plan. A task with no estimate has no such proportion: the amount typed is
-    counted under Other.
+    The stock a done task used is materials (docs/adr/0090). A time done with nothing typed
+    counts the plan it kept, each part under its own nature: the labour planned under labour,
+    the material budget typed under materials (0091). The amount typed for the rest is shared
+    between materials and labour as the estimate of the task is, so that it stands against
+    its own plan. A task with no estimate has no such proportion: the amount typed is counted
+    under Other.
     """
     found: dict[str, Amounts] = {nature: Amounts() for nature in BudgetNature.values}
     for row in projects_in(ledger, year):
@@ -695,9 +719,9 @@ def by_nature(ledger: Ledger, year: int) -> list[Line]:
         in_materials, in_labour = real_cost_split(figures, task.material_planned, task.labour)
         shared = in_materials + in_labour
         found[BudgetNature.MATERIAL] += Amounts(
-            figures.material, ZERO, figures.stock + in_materials
+            figures.material, ZERO, figures.stock + figures.plan_material + in_materials
         )
-        found[BudgetNature.LABOUR] += Amounts(figures.labour, ZERO, in_labour)
+        found[BudgetNature.LABOUR] += Amounts(figures.labour, ZERO, figures.plan_labour + in_labour)
         found[BudgetNature.OTHER] += Amounts(ZERO, ZERO, figures.typed - shared)
     return [Line(None, nature, found[nature]) for nature in BudgetNature.values]
 

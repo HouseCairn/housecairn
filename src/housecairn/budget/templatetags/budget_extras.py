@@ -39,6 +39,7 @@ def task_cost(task: Task, home: Any) -> dict[str, Any]:
         "home": home,
         "paid": total.paid,
         "stock_used": total.stock,
+        "from_plan": total.plan_labour + total.plan_material,
         "unpriced_draws": costs.unpriced_draws_of(task.pk),
         "missing": total.missing,
     }
@@ -46,8 +47,9 @@ def task_cost(task: Task, home: Any) -> dict[str, Any]:
 
 @register.inclusion_tag("budget/_occurrence_cost.html")
 def occurrence_cost(occurrence: Occurrence, home: Any) -> dict[str, Any]:
-    """On the page of what was done: the estimate, and the stock used, next to the field of
-    the real cost (docs/adr/0090), so that the stock is not typed again."""
+    """On the page of what was done: the estimate, the stock used and the plan kept, next to
+    the field of the real cost (docs/adr/0090, 0091), so that what is counted already is not
+    typed again."""
     task = occurrence.task
     plan = services.stock_plan_of(task)
     parts = [task.labour_budget, task.material_budget]
@@ -57,10 +59,13 @@ def occurrence_cost(occurrence: Occurrence, home: Any) -> dict[str, Any]:
         else services.material_of(task.material_budget, plan) + (task.labour_budget or ZERO)
     )
     drew = occurrence.status == Status.DONE and occurrence.draws.exists()
+    # What the real cost counts with nothing typed: the plan kept at the closing (0091).
+    planned = costs.planned_of(occurrence)
     return {
         "estimate": estimate,
         "home": home,
         "stock": costs.stock_used_by(occurrence) if drew else None,
+        "planned": planned if planned.known else None,
     }
 
 

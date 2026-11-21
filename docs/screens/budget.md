@@ -20,10 +20,14 @@ reads it, read-only members included. How the figures are worked out is in the
   **Budget in Sure**, which says *Not connected*: that place is kept for a later version and
   nothing is fetched. **Set the envelope** (owners and members) leads to the projects screen.
 - **By nature** splits the year into materials, labour, rental and other. The stock a task
-  took when it was done, at its unit prices of that day, counts under *Materials*. The cost
-  typed for the rest is shared between *Materials* and *Labour* as the estimate of the task
-  is, so it stands against its own plan; with no estimate, it counts under *Other*
-  ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md)).
+  took when it was done, at its unit prices of that day, counts under *Materials*. A task
+  done with nothing typed has paid what it planned when it was marked done: its labour budget
+  under *Labour*, its material budget under *Materials* (unless its stock items work the
+  materials out, which are then counted once, as stock). A cost typed replaces that plan, and
+  is shared between *Materials* and *Labour* as the estimate of the task is, so it stands
+  against its own plan; with no estimate, it counts under *Other*
+  ([ADR 0090](../adr/0090-real-cost-counts-the-stock-used.md),
+  [ADR 0091](../adr/0091-a-task-done-with-nothing-typed-pays-its-plan.md)).
 - **By year** lists every year that has a figure, with its envelope.
 - **Last 12 months** is the upkeep done since the same day last year. Payments on projects
   carry no date, so they are not in it.

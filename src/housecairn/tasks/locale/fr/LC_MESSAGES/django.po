@@ -172,8 +172,14 @@ msgstr "Note"
 msgid "Other costs (labour, purchases outside the stock)"
 msgstr "Autres coûts (main-d'œuvre, achats hors stock)"
 
+msgid "Leave it empty to count the planned amounts shown above; an amount typed replaces them and is added to the stock used. Do not type the stock again."
+msgstr "Laissez-le vide pour compter les montants prévus affichés plus haut ; un montant saisi les remplace et s'ajoute au stock utilisé. Ne saisissez pas le stock une seconde fois."
+
 msgid "Added to the stock used, shown above: do not type the stock again."
 msgstr "S'ajoute au stock utilisé, affiché plus haut : ne saisissez pas le stock une seconde fois."
+
+msgid "Leave it empty to count the planned amounts shown above; an amount typed, 0 included, replaces them."
+msgstr "Laissez-le vide pour compter les montants prévus affichés plus haut ; un montant saisi, 0 compris, les remplace."
 
 #, python-format
 msgid "Used: %(name)s"
@@ -561,6 +567,12 @@ msgstr "fait le"
 
 msgid "actual cost"
 msgstr "coût réel"
+
+msgid "labour planned when done"
+msgstr "main-d'œuvre prévue à la réalisation"
+
+msgid "materials planned when done"
+msgstr "matériel prévu à la réalisation"
 
 msgid "occurrence"
 msgstr "occurrence"
@@ -1230,6 +1242,9 @@ msgstr "Historique"
 #, python-format
 msgid "of which stock used %(amount)s"
 msgstr "dont stock utilisé %(amount)s"
+
+msgid "as planned, nothing typed"
+msgstr "comme prévu, rien de saisi"
 
 msgid "Add a task"
 msgstr "Ajouter une tâche"

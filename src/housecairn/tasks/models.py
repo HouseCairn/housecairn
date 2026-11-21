@@ -342,6 +342,28 @@ class Occurrence(HomeOwnedModel):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     actual_cost = _money(_("actual cost"))
+    # What the plan of the task said when it was marked done, kept for its real cost when no
+    # amount is typed (docs/adr/0091): the labour planned, and the material budget typed when
+    # the stock does not work the materials out (0081). The server writes them, never a
+    # phone: they are not synced. Empty on an occurrence that is not done.
+    planned_labour = models.DecimalField(
+        _("labour planned when done"),
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        editable=False,
+        validators=[MinValueValidator(0)],
+    )
+    planned_material = models.DecimalField(
+        _("materials planned when done"),
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        editable=False,
+        validators=[MinValueValidator(0)],
+    )
     completion_note = notes_field(_("note"))
     # The occurrence whose closing created this one.
     follows = models.OneToOneField(

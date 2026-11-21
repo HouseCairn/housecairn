@@ -101,16 +101,21 @@ class TaskLineSerializer(LineSerializer):
     total_paid = MoneyOut(
         source="extra.total_paid",
         help_text="The real cost of every time done: the stock used, at its unit prices when "
-        "it was taken, plus the amounts typed.",
+        "it was taken, plus the amount typed, or with nothing typed the plan kept when it was "
+        "done (labour planned, material budget typed when the stock does not work it out).",
     )
     total_stock_used = MoneyOut(
         source="extra.total_stock_used",
         help_text="Of `total_paid`: the stock used, at its unit prices when it was taken.",
     )
+    total_from_plan = MoneyOut(
+        source="extra.total_from_plan",
+        help_text="Of `total_paid`: the plan kept by the times done with no amount typed.",
+    )
     missing_costs = serializers.IntegerField(
         source="extra.missing_costs",
         read_only=True,
-        help_text="Done this year, with no cost typed and no stock of value used.",
+        help_text="Done this year, with no cost typed, no plan kept and no stock of value used.",
     )
 
 

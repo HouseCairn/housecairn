@@ -79,6 +79,9 @@ msgstr "Payé au total"
 msgid "Of which stock used"
 msgstr "Dont stock utilisé"
 
+msgid "Of which planned, with nothing typed"
+msgstr "Dont prévu, sans montant saisi"
+
 msgid "Done without a cost"
 msgstr "Faites sans coût"
 
@@ -130,6 +133,20 @@ msgid_plural "%(counter)s stock items had no unit price when they were taken: th
 msgstr[0] "%(counter)s article n'avait pas de prix unitaire quand il a été pris : il ne compte pour rien."
 msgstr[1] "%(counter)s articles n'avaient pas de prix unitaire quand ils ont été pris : ils ne comptent pour rien."
 
+#, python-format
+msgid "Labour planned: %(amount)s"
+msgstr "Main-d'œuvre prévue : %(amount)s"
+
+#, python-format
+msgid "Materials planned: %(amount)s"
+msgstr "Matériel prévu : %(amount)s"
+
+msgid "With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them; the stock used stays counted."
+msgstr "Sans montant saisi, les montants prévus comptent comme payés, tels que la tâche les prévoyait quand elle a été marquée faite. Un montant saisi les remplace ; le stock utilisé reste compté."
+
+msgid "With no amount typed, the planned amounts count as paid, as the task planned them when it was marked done. An amount typed replaces them."
+msgstr "Sans montant saisi, les montants prévus comptent comme payés, tels que la tâche les prévoyait quand elle a été marquée faite. Un montant saisi les remplace."
+
 msgid "Budget of the room"
 msgstr "Budget de la pièce"
 
@@ -157,6 +174,9 @@ msgstr "Réel"
 
 msgid "Paid so far"
 msgstr "Payé jusqu'ici"
+
+msgid "A time done with no amount typed counts what the task planned when it was marked done: its labour, and its materials when the stock does not work them out."
+msgstr "Chaque réalisation sans montant saisi compte ce que la tâche prévoyait quand elle a été marquée faite : sa main-d'œuvre, et son matériel quand le stock ne le calcule pas."
 
 msgid "The stock taken when the task was done counts at the unit prices of that day; the amounts typed are added to it."
 msgstr "Le stock pris quand la tâche a été faite compte aux prix unitaires de ce jour-là ; les montants saisis s'y ajoutent."
@@ -268,8 +288,8 @@ msgstr "Par nature, %(year)s"
 msgid "Planned, committed and paid, by nature"
 msgstr "Prévu, engagé et payé, par nature"
 
-msgid "The cost typed on a done task is shared between Materials and Labour as its estimate is; a task with no estimate has no such share, and its cost is counted under Other."
-msgstr "Le coût saisi sur une tâche faite est réparti entre Matériel et Main-d'œuvre comme son estimation ; une tâche sans estimation n'a pas cette répartition, et son coût est compté dans Autre."
+msgid "The stock a done task used is counted under Materials. With no amount typed, its labour planned is counted under Labour and its material budget under Materials. An amount typed is shared between Materials and Labour as its estimate is; a task with no estimate has no such share, and the amount is counted under Other."
+msgstr "Le stock utilisé par une tâche faite est compté dans Matériel. Sans montant saisi, sa main-d'œuvre prévue est comptée dans Main-d'œuvre et son budget matériel dans Matériel. Un montant saisi est réparti entre Matériel et Main-d'œuvre comme son estimation ; une tâche sans estimation n'a pas cette répartition, et le montant est compté dans Autre."
 
 msgid "By year"
 msgstr "Par année"

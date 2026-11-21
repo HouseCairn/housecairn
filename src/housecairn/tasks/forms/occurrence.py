@@ -10,7 +10,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from housecairn.core.forms import LabelAboveMixin, MoneyField, QuantityField
-from housecairn.tasks import files
+from housecairn.tasks import costs, files
 from housecairn.tasks.forms.fields import (
     _DATE,
     MultipleFileField,
@@ -38,14 +38,27 @@ class CompletionForm(LabelAboveMixin, forms.ModelForm[Occurrence]):
     def __init__(self, *args: Any, draws: Iterable[MaterialDraw] = (), **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         draws = list(draws)
+        # With nothing typed, the plan kept at the closing counts (docs/adr/0091): what is
+        # typed here replaces it; an empty field and 0 are not the same.
+        planned = costs.planned_of(self.instance).known
         if draws:
             # The stock used is in the real cost already (docs/adr/0090): what is typed here
             # is the rest, added to it, so that it is not typed twice.
             self.fields["actual_cost"].label = gettext(
                 "Other costs (labour, purchases outside the stock)"
             )
+            self.fields["actual_cost"].help_text = (
+                gettext(
+                    "Leave it empty to count the planned amounts shown above; an amount typed "
+                    "replaces them and is added to the stock used. Do not type the stock again."
+                )
+                if planned
+                else gettext("Added to the stock used, shown above: do not type the stock again.")
+            )
+        elif planned:
             self.fields["actual_cost"].help_text = gettext(
-                "Added to the stock used, shown above: do not type the stock again."
+                "Leave it empty to count the planned amounts shown above; an amount typed, 0 "
+                "included, replaces them."
             )
         # One field per stock item the closing took: the quantity really used.
         for draw in draws:

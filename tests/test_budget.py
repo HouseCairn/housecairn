@@ -27,8 +27,9 @@ from housecairn.projects.forms import MoneyField as ProjectsMoneyField
 from housecairn.projects.models import BudgetLine, Project
 from housecairn.projects.services import Amounts
 from housecairn.rooms.models import Room
+from housecairn.stock import services as stock_services
 from housecairn.tasks import forms as task_forms
-from housecairn.tasks import recurrence
+from housecairn.tasks import materials, recurrence
 from housecairn.tasks import services as task_services
 from housecairn.tasks.models import Occurrence, Task
 
@@ -528,11 +529,26 @@ class TestWindowsOfTime:
     def test_a_task_done_without_a_cost_is_planned_and_flagged_not_hidden(
         self, alice: User, alice_home: Home
     ) -> None:
+        """Its materials are its stock item (ADR 0081), which the stock did not hold: nothing
+        was typed, taken or planned beyond the stock, so nothing was paid (ADR 0091)."""
         task = make_task(alice, alice_home, material_budget=D("40"))
+        guard = stock_services.create_article(
+            alice, alice_home, name="Gutter guard", unit="piece", unit_price=D("40")
+        )
+        materials.add_material(alice, task, guard, D("1"))
         finish(alice, task, on=TODAY)
         line = services.by_task(services.load(alice_home, TODAY), 2026).lines[0]
         assert line.extra["missing_costs"] == 1
         assert line.amounts.paid == D("0")
+
+    def test_a_task_done_with_nothing_typed_has_paid_its_plan(
+        self, alice: User, alice_home: Home
+    ) -> None:
+        task = make_task(alice, alice_home, material_budget=D("40"))
+        finish(alice, task, on=TODAY)
+        line = services.by_task(services.load(alice_home, TODAY), 2026).lines[0]
+        assert line.extra["missing_costs"] == 0
+        assert (line.amounts.paid, line.extra["total_from_plan"]) == (D("40.00"), D("40.00"))
 
     def test_years_with_figures_are_listed_newest_first(
         self, alice: User, alice_home: Home

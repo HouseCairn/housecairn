@@ -35,7 +35,7 @@ from housecairn.rooms.models import Item, Room
 from housecairn.rooms.services import _read_upload
 from housecairn.sync import ids
 from housecairn.sync import rows as changelog
-from housecairn.tasks import durations, files, materials, recurrence
+from housecairn.tasks import costs, durations, files, materials, recurrence
 from housecairn.tasks.models import (
     MAX_ATTACHMENTS_PER_TASK,
     OPEN_STATUSES,
@@ -593,6 +593,9 @@ def _close(
     locked.completed_by = actor if isinstance(actor, User) else None
     if status == Status.DONE:
         locked.completed_on = closed_on
+        # The plan of the task, kept for the real cost of this time (docs/adr/0091): a
+        # budget changed afterwards does not rewrite what was done.
+        costs.keep_plan(locked, costs.plan_when_done(locked.task))
     for field, value in extra.items():
         setattr(locked, field, value)
     locked.full_clean()
@@ -684,6 +687,7 @@ def undo(actor: AnyUser, occurrence: Occurrence) -> Occurrence:
     locked.completed_on = None
     locked.completed_by = None
     locked.actual_cost = None
+    costs.keep_plan(locked, costs.NO_PLAN)
     locked.completion_note = ""
     locked.save()
     changelog.record_saved(locked, before)
