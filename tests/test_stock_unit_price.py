@@ -1,6 +1,7 @@
 """The unit price of a stock item and the planned cost of a task (docs/adr/0062)."""
 
 import datetime
+import json
 from collections.abc import Callable, Iterator
 from decimal import Decimal
 from pathlib import Path
@@ -553,6 +554,10 @@ class TestArchive:
             for row in document["sections"]["stock_items"]:
                 del row["unit_price"]
 
+        # The field came during format 3: an archive without it is one of format 3 (or 2).
+        manifest = json.loads(files["manifest.json"])
+        manifest["version"] = 3
+        files["manifest.json"] = json.dumps(manifest).encode()
         old = rebuild(edit(files, "stock", drop))
         data_services.erase_home(alice_home)
         restore.restore_bytes(alice, old, match_people=True)
