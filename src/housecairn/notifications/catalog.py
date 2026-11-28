@@ -323,6 +323,30 @@ SERVICES: tuple[Service, ...] = (
         "self",
         "notifico",
     ),
+    _S(
+        "KakaoTalk",
+        "messaging",
+        ("kakaotalk", "kakao"),
+        "kakaotalk://0123456789abcdef0123456789abcdef/refresh-token-0123456789",
+        "elsewhere",
+        "kakaotalk",
+    ),
+    _S(
+        "Gupshup (WhatsApp)",
+        "messaging",
+        ("gupshup",),
+        f"gupshup://Housecairn:apikey0123456789@{PHONE}/{PHONE2}",
+        "elsewhere",
+        "gupshup",
+    ),
+    _S(
+        "Whapi.Cloud (WhatsApp)",
+        "messaging",
+        ("whapi",),
+        f"whapi://token-0123456789/{PHONE2}",
+        "elsewhere",
+        "whapi",
+    ),
     # Push notifications
     _S("ntfy", "push", ("ntfy", "ntfys"), "ntfys://ntfy.example.com/my-topic-0123", "self", "ntfy"),
     _S(
@@ -675,7 +699,7 @@ SERVICES: tuple[Service, ...] = (
     _S(
         "Burst SMS",
         "sms",
-        ("burstsms",),
+        ("burstsms", "kudosity"),
         f"burstsms://apikey0123:secret0123@Housecairn/{PHONE2}",
         "elsewhere",
         "burstsms",
@@ -785,6 +809,46 @@ SERVICES: tuple[Service, ...] = (
         "eu",
         "dapnet",
     ),
+    _S(
+        "CM.com",
+        "sms",
+        ("cm",),
+        f"cm://8b4a5c2e-1f3d-4a6b-9c7d-0e1f2a3b4c5d/{PHONE2}",
+        "elsewhere",
+        "cm",
+    ),
+    _S(
+        "Infobip",
+        "sms",
+        ("infobip",),
+        f"infobip://apikey0123456789@abcde1.api.infobip.com/{PHONE2}",
+        "region",
+        "infobip",
+    ),
+    _S(
+        "Kaleyra",
+        "sms",
+        ("kaleyra", "klr"),
+        f"kaleyra://sid0123456789:apikey0123456789@Housecairn/{PHONE2}",
+        "region",
+        "kaleyra",
+    ),
+    _S(
+        "SMSTunnel",
+        "sms",
+        ("smstunnel",),
+        f"smstunnel://apikey0123456789/{PHONE2}",
+        "elsewhere",
+        "smstunnel",
+    ),
+    _S(
+        "Telesign",
+        "sms",
+        ("telesign",),
+        f"telesign://customer0123:apikey0123456789@{PHONE2}",
+        "elsewhere",
+        "telesign",
+    ),
     # Email
     _S(
         "Email (SMTP)",
@@ -881,6 +945,14 @@ SERVICES: tuple[Service, ...] = (
         "sendpulse://noreply@example.com/client-0123456789/secret-0123456789/me@example.com",
         "elsewhere",
         "sendpulse",
+    ),
+    _S(
+        "Groundmail",
+        "email",
+        ("groundmail",),
+        "groundmail://apikey0123456789:from@example.com/to@example.com",
+        "elsewhere",
+        "groundmail",
     ),
     # Self-hosted
     _S(
@@ -1093,6 +1165,22 @@ SERVICES: tuple[Service, ...] = (
         "goalerts://goalert.example.com/8b4a5c2e-1f3d-4a6b-9c7d-0e1f2a3b4c5d",
         "self",
         "goalert",
+    ),
+    _S(
+        "FireHydrant",
+        "alerting",
+        ("firehydrant",),
+        "firehydrant://abcdef0123456789abcdef0123456789",
+        "elsewhere",
+        "firehydrant",
+    ),
+    _S(
+        "xMatters",
+        "alerting",
+        ("xmatters",),
+        "xmatters://apikey0123456789@example.xmatters.com/8b4a5c2e-1f3d-4a6b-9c7d-0e1f2a3b4c5d",
+        "self",
+        "xmatters",
     ),
 )
 

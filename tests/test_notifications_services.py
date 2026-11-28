@@ -103,6 +103,13 @@ EXPECTED = {
     "pagertree": ("POST", "api.pagertree.com"), "spike": ("POST", "api.spike.sh"),
     "betterstack": ("POST", "incidents.betterstack.com"),
     "goalerts": ("POST", "goalert.example.com"),
+    "kakaotalk": ("POST", "kauth.kakao.com"), "gupshup": ("POST", "api.gupshup.io"),
+    "whapi": ("POST", "gate.whapi.cloud"), "cm": ("POST", "gw.messaging.cm.com"),
+    "infobip": ("POST", "abcde1.api.infobip.com"), "kaleyra": ("POST", "api.kaleyra.io"),
+    "smstunnel": ("POST", "smstunnel.io"), "telesign": ("POST", "rest-ww.telesign.com"),
+    "groundmail": ("POST", "api.groundmail.dev"),
+    "firehydrant": ("POST", "signals.firehydrant.com"),
+    "xmatters": ("POST", "example.xmatters.com"),
 }  # fmt: skip
 
 
@@ -122,7 +129,8 @@ TYPED = [
     "matrixs", "mmosts", "rockets", "ntfys", "barks", "gotifys", "signals", "apprises",
     "nclouds", "nctalks", "synologys", "humhubs", "smseagles", "evolutions", "onebots",
     "gorushs", "parseps", "pjets", "lametrics", "embys", "jellyfins", "kodis", "enigma2s",
-    "goalerts", "zulip", "workflows", "fluxer", "notifico", "pushdeer", "betterstack",
+    "goalerts", "zulip", "workflows", "fluxer", "notifico", "pushdeer", "betterstack", "infobip",
+    "xmatters",
 ]  # fmt: skip
 # The form of the address that names the host, where the example names the provider.
 TYPED_FORMS = {

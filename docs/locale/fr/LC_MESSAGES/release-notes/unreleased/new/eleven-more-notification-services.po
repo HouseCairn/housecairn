@@ -1,0 +1,22 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Eleven more notification services.** With Apprise 2.2.0, the **Notifications** screen offers CM.com, FireHydrant, Groundmail, Gupshup, Infobip, KakaoTalk, Kaleyra, SMSTunnel, Telesign, Whapi.Cloud and xMatters, each with a fixed form like the other services. Nostr is not offered: it publishes public notes over WebSocket, not over HTTP(S) or SMTP, so it does not fit the criteria ([Notifications](../../../guides/notifications.md), [ADR 0064](../../../adr/0064-every-apprise-service-with-a-fixed-format.md))."
+msgstr "**Onze services de notification de plus.** Avec Apprise 2.2.0, l'écran **Notifications** propose CM.com, FireHydrant, Groundmail, Gupshup, Infobip, KakaoTalk, Kaleyra, SMSTunnel, Telesign, Whapi.Cloud et xMatters, chacun avec un formulaire fixe comme les autres services. Nostr n'est pas proposé : il publie des notes publiques par WebSocket, pas par HTTP(S) ni SMTP, et ne respecte donc pas les critères ([Notifications](../../../guides/notifications.md), [ADR 0064](../../../adr/0064-every-apprise-service-with-a-fixed-format.md))."
