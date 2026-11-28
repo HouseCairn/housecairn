@@ -12,7 +12,7 @@ FROM ghcr.io/astral-sh/uv:0.13.8@sha256:5cc1805e2426484abca4ad46ea783bab281fdb22
 # ---------------------------------------------------------------------------
 # Build stage: dependencies, design tokens, translations, static files.
 # ---------------------------------------------------------------------------
-FROM python:3.13.18-slim-trixie@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90 AS build
+FROM python:3.13.18-slim-trixie@sha256:168d3a5d10f2152f8e8d77b6843ac82c22a846cfefeef7afdf9aa630404e82a7 AS build
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -79,20 +79,39 @@ RUN DEBUG=true .venv/bin/python manage.py build_design_tokens \
 # ---------------------------------------------------------------------------
 # Final stage.
 # ---------------------------------------------------------------------------
-FROM python:3.13.18-slim-trixie@sha256:e48f59cdba69a3cbd9ed2cf0f348d90d45a8d350d98134cf1070bc106ee9ed90
+FROM python:3.13.18-slim-trixie@sha256:168d3a5d10f2152f8e8d77b6843ac82c22a846cfefeef7afdf9aa630404e82a7
 
 # Debian security fixes that the base image does not carry yet (docs/adr/0015,
-# amendment of 2026-11-08). The Python image is rebuilt some days after a
-# Debian security advisory; until then, a fixable high vulnerability of the
-# base image would block every pull request. Only the packages named here are
-# upgraded, from the base image's own trixie-security source, and the build
-# fails if the installed version is still below the fixed one. Remove a
-# package from this step once the pinned base image carries its fix.
+# amendments of 2026-11-08 and 2026-11-28). The Python image is rebuilt some
+# days after a Debian security advisory; until then, a fixable vulnerability of
+# the base image would be reported on every pull request, and a high one would
+# block them. Only the packages named here are upgraded, from the base image's
+# own trixie-security source, and the build fails if the installed version is
+# still below the fixed one. Remove a package from the upgrade once the pinned
+# base image carries its fix; its version floor stays.
+# - libzstd1: CVE-2026-124851 (DSA-6657-1), fixed in 1.5.7+dfsg-1+deb13u1.
+# - login.defs, passwd: CVE-2026-135901 (DSA-6661-1), fixed in
+#   1:4.17.4-2+deb13u1.
+# Floors only, for fixes the pinned base image already carries, so that a base
+# image without them fails the build on every platform:
+# - libc6, libc-bin: CVE-2026-19499, CVE-2026-5435 (high) and twelve medium
+#   and low ones, fixed in 2.41-12+deb13u5.
 # - zlib1g: CVE-2026-76844, CVE-2026-85091 (DSA-6613-1), fixed in
 #   1:1.3.dfsg+really1.3.1-1+deb13u1.
 # hadolint ignore=DL3008
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade zlib1g \
+    && apt-get install -y --no-install-recommends --only-upgrade libzstd1 login.defs passwd \
+    && dpkg-query -W -f='${Package} ${Version}\n' libc6 libc-bin libzstd1 login.defs passwd zlib1g \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libzstd1)" \
+        ge '1.5.7+dfsg-1+deb13u1' \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' login.defs)" \
+        ge '1:4.17.4-2+deb13u1' \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' passwd)" \
+        ge '1:4.17.4-2+deb13u1' \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libc6)" \
+        ge '2.41-12+deb13u5' \
+    && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' libc-bin)" \
+        ge '2.41-12+deb13u5' \
     && dpkg --compare-versions "$(dpkg-query -W -f='${Version}' zlib1g)" \
         ge '1:1.3.dfsg+really1.3.1-1+deb13u1' \
     && rm -rf /var/lib/apt/lists/*
