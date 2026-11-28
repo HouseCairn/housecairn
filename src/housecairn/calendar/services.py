@@ -148,7 +148,7 @@ def entries(
     homes: Sequence[Home],
     start: datetime.date,
     end: datetime.date,
-    filters: Filters = Filters(),  # noqa: B008 - frozen
+    filters: Filters = Filters(),
 ) -> Result:
     """Occurrences of `homes` from `start` to `end` (included), by day then by priority.
 
