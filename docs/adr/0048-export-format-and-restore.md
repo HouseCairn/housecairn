@@ -7,7 +7,9 @@
   [0060](0060-secret-key-apart-from-the-backups.md) (the backup of the instance leaves the
   secret key out),
   [0079](0079-lots-of-the-server-mode-of-the-mobile-app.md) (format 4: the archiving date of
-  the home; versions 2 and 3 are still restored)
+  the home; versions 2 and 3 are still restored),
+  [0093](0093-an-archive-of-before-takes-the-values-of-the-migrations.md) (a field added
+  without a new version is optional and takes the value of its migration)
 
 ## Context
 

@@ -9,6 +9,8 @@
   the rest is the plan kept when the task was done)
 - Amended by: [0092](0092-the-phone-reads-the-real-cost-the-server-keeps.md) (the phone reads
   the unit price of a draw, read only)
+- Amended by: [0093](0093-an-archive-of-before-takes-the-values-of-the-migrations.md) (a draw
+  of an archive of before is restored with the price the migration gives it)
 - Related: [0046](0046-stock-linked-to-tasks-and-rooms.md) (the draws of a closing),
   [0081](0081-materials-of-a-task-calculated-from-its-stock.md) (the materials planned from the
   stock), [0077](0077-sync-api-for-the-mobile-app.md) (the fields of the protocol)

@@ -1,0 +1,23 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026 Robvred
+# This file is distributed under the same license as the HouseCairn package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: HouseCairn \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+msgid "**Archives of earlier releases.** An archive made by 0.1.0 to 0.3.2 that holds an item was refused (\"items, object 1, ean\"): it restores again. A field added since an archive was made now takes, when the archive lacks it, the value the update gives the data of an instance, and the JSON Schema of version 4 no longer requires those fields, so that an archive of 0.4.0 to 0.5.2 meets it again ([Archives of earlier releases](../../../administration/data.md#archives-of-earlier-releases))."
+msgstr "**Archives des versions précédentes.** Une archive faite par les versions 0.1.0 à 0.3.2 qui contient un élément était refusée (« items, object 1, ean ») : elle se restaure de nouveau. Un champ ajouté depuis qu'une archive a été faite prend désormais, quand l'archive ne l'a pas, la valeur que la mise à jour donne aux données d'une instance, et le schéma JSON de la version 4 n'exige plus ces champs : une archive des versions 0.4.0 à 0.5.2 y est de nouveau conforme ([Archives des versions précédentes](../../../administration/data.md#archives-of-earlier-releases))."
+

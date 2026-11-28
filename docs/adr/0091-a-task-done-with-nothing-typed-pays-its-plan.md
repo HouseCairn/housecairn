@@ -8,6 +8,8 @@
   plus the amount typed only)
 - Amended by: [0092](0092-the-phone-reads-the-real-cost-the-server-keeps.md) (the phone reads
   the plan of an occurrence, read only)
+- Amended by: [0093](0093-an-archive-of-before-takes-the-values-of-the-migrations.md) (a done
+  occurrence of an archive of before is restored with the plan the migration gives it)
 - Related: [0081](0081-materials-of-a-task-calculated-from-its-stock.md) (the materials planned
   from the stock), [0062](0062-unit-price-of-stock-items.md) (the money of a task of a project),
   [0077](0077-sync-api-for-the-mobile-app.md) (the fields of the protocol)

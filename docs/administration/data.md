@@ -36,7 +36,10 @@ published with this documentation (the ones of [version 3](../_static/schemas/ho
   `rooms` has `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ...,
   `created_at` and `updated_at`. A field added by a later version is in the
   archive without a change of format; a field removed or renamed raises the
-  version.
+  version. A field added without a change of format is **optional**, at restore
+  and in the JSON Schema: the archives of that version made before it lack it
+  (see [Archives of earlier releases](#archives-of-earlier-releases)). Every
+  other field is required: a restore refuses an object that lacks one.
 - **Identifiers are the UUIDs** of the objects, never an internal number. A
   reference is the id of an object of the same archive, or `null`; a link to
   several objects (the rooms of a project) is a list of ids.
@@ -71,19 +74,49 @@ no password, no setting or single sign-on secret of the instance, nothing of
 the first setup. Each app adds its tables to the registry of the export
 (`homes.exports.register`); a test fails on a table that is in no section.
 
-Version 1 archives (a single `export.json`) cannot be restored: export the home
-again. Version 2 archives are restored: the only difference is that the provider of
-the maintenance contract of an item was a text (`contract_provider`) and is, in
-version 3, the id of a contractor (`contract_contractor`). The restore links the item to the
-contractor of the archive of that name (case and extra spaces ignored) and, when the archive
-has none, adds one, with the trade Other
-([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md)).
+### Archives of earlier releases
 
-Version 3 archives are restored too: the only difference is that version 4 adds
-`archived_at` to the `home` of `data/homes.json`, the date and time an owner archived the home
-or `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). A
-version 3 or 2 archive restores a home that is not archived; a version 4 archive of an
-archived home restores it archived, as a copy too.
+| Version | Made by | Restored |
+| --- | --- | --- |
+| 1 | before 0.1.0 | No: export the home again. |
+| 2 | 0.1.0 | Yes |
+| 3 | 0.2.0 to 0.3.2 | Yes |
+| 4 | 0.4.0 and later | Yes |
+
+Version 1 archives (a single `export.json`) cannot be restored. Version 2 archives
+are restored: the provider of the maintenance contract of an item was a text
+(`contract_provider`) and is, in version 3, the id of a contractor
+(`contract_contractor`). The restore links the item to the contractor of the archive
+of that name (case and extra spaces ignored) and, when the archive has none, adds one,
+with the trade Other ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md)); an
+item with no provider has no contractor.
+
+Version 4 adds `archived_at` to the `home` of `data/homes.json`, the date and time an
+owner archived the home or `null`
+([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). A version 3 or 2
+archive restores a home that is not archived; a version 4 archive of an archived home
+restores it archived, as a copy too.
+
+The fields added since, without a change of format, are missing from the archives
+made before them. A restore gives each the value its migration gives the rows of an
+instance that is upgraded, so that a restored archive holds what that instance would
+([ADR 0093](../adr/0093-an-archive-of-before-takes-the-values-of-the-migrations.md)):
+
+| Section | Field | Missing from | Value when missing |
+| --- | --- | --- | --- |
+| `stock_items` | `unit_price` | versions 2 and 3 made before 0.3.0 | `null` |
+| `items` | `ean`, `warranty_provider`, `warranty_provider_name` | versions 2 and 3; optional in every version (an archive of 0.4.0 or later always has them) | empty |
+| `items` | `warranty_duration_unit` | the same | `"year"` |
+| `items` | `purchased_on`, `warranty_duration`, `warranty_starts_on` | the same | `null` |
+| `photos` | `attribution` | the same | `{}` |
+| `stock_items` | `ean`; `label_attribution` | the same | empty; `{}` |
+| `stock_draws` | `unit_price` | every version, made before 0.6.0 | the unit price of its stock item, or `null` |
+| `occurrences` | `planned_labour`, `planned_material` | the same | a done occurrence: the labour budget of its task, and its material budget unless a stock item with a unit price works the materials out; `null` for a task of a project, or an occurrence that is not done |
+
+The last two are the approximation of the upgrade to 0.6.0, said in its release notes:
+the price of today and the budget of today, nothing having kept those of the day.
+`tests/test_restore_versions.py` restores a real archive of every release on an empty
+instance (`scripts/archive_fixtures.py` makes them, from the tree of each tag).
 
 ## Tables for a spreadsheet
 

@@ -10,7 +10,7 @@ from typing import Any
 
 from django.db import models
 
-from housecairn.homes import exports
+from housecairn.homes import archive_versions, exports
 
 UUID = {"type": "string", "format": "uuid"}
 ARCHIVE_PATH = {"type": "string", "pattern": r"^files/[a-z_]+/[0-9a-f-]{36}(\.[a-z0-9]+)?$"}
@@ -67,7 +67,11 @@ def _section(section: exports.Section) -> dict[str, Any]:
         "items": {
             "type": "object",
             "properties": properties,
-            "required": sorted(properties),
+            # A field added without a new version of the format: its archives of before
+            # lack it, and a restore gives it a value (`archive_versions`).
+            "required": sorted(
+                set(properties) - archive_versions.optional(exports.FORMAT_VERSION, section.name)
+            ),
             "additionalProperties": False,
         },
     }
