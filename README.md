@@ -29,9 +29,22 @@
   (English, French subtitles: <a href="https://housecairn.app/fr/video/">version française</a>)
 </p>
 
-| | |
-| --- | --- |
-| <a href="docs/assets/readme-today-desktop.png"><img src="docs/assets/readme-today-desktop.png" alt="The Today screen on a computer: two overdue tasks (change the smoke detector battery, 3 days late; clean the cooker hood filter, 1 day late), two tasks due today and the boiler service coming up, each with its room, its item and a Done button."></a><br>**Today**: what is late, what is due and what is coming, each with a Done button. | <a href="docs/assets/readme-item-phone.png"><img src="docs/assets/readme-item-phone.png" width="190" alt="An item on a phone: the gas boiler of the utility room, with its brand and model, installation date, warranty end date, a Photos section and the boiler service task."></a><br>**Every item has its page**: brand, model, warranty end date, photos and its tasks. |
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="docs/assets/readme-today-desktop.png"><img src="docs/assets/readme-today-desktop.png" width="600"
+         alt="The Today screen on a computer: two overdue tasks (change the smoke detector battery, 3 days late; clean the cooker hood filter, 1 day late), two tasks due today and the boiler service coming up, each with its room, its item and a Done button."></a>
+      <br>
+      <sub><b>Today</b>: what is late, what is due and what is coming, each with a Done button.</sub>
+    </td>
+    <td width="50%" valign="top">
+      <a href="docs/assets/readme-item-phone.png"><img src="docs/assets/readme-item-phone.png" width="190"
+         alt="An item on a phone: the gas boiler of the utility room, with its brand and model, installation date, warranty end date, a Photos section and the boiler service task."></a>
+      <br>
+      <sub><b>Every item has its page</b>: brand, model, warranty end date, photos and its tasks.</sub>
+    </td>
+  </tr>
+</table>
 
 ## The problem
 
