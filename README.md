@@ -2,14 +2,7 @@
 
 # HouseCairn
 
-**Plan your home's maintenance and renovation work, room by room.**
-
-HouseCairn keeps the list of everything your house needs, from recurring upkeep
-such as the smoke detector battery to projects such as repainting the living
-room. For each job it knows the room, the date, the supplies and the planned
-cost, and anyone in the household marks it done in one tap. It is free software
-that you host yourself, works on its own, and connects to Home Assistant if you
-use it.
+**Everything your home needs, room by room: what to do, when, with what, and for how much.**
 
 [![CI](https://github.com/HouseCairn/housecairn/actions/workflows/ci.yml/badge.svg?event=merge_group)](https://github.com/HouseCairn/housecairn/actions/workflows/ci.yml?query=event%3Amerge_group)
 [![Image](https://github.com/HouseCairn/housecairn/actions/workflows/image.yml/badge.svg?branch=main)](https://github.com/HouseCairn/housecairn/actions/workflows/image.yml?query=branch%3Amain)
@@ -36,23 +29,79 @@ use it.
   (English, French subtitles: <a href="https://housecairn.app/fr/video/">version française</a>)
 </p>
 
-<p align="center">
-  <img src="docs/assets/readme-today-desktop.png" width="600"
-       alt="The Today screen on a computer: two overdue tasks (change the smoke detector battery, 3 days late; clean the cooker hood filter, 1 day late), two tasks due today and the boiler service coming up, each with its room, its item and a Done button.">
-  <img src="docs/assets/readme-item-phone.png" width="190"
-       alt="An item on a phone: the gas boiler of the utility room, with its brand and model, installation date, warranty end date, a Photos section and the boiler service task.">
-</p>
+| | |
+| --- | --- |
+| <a href="docs/assets/readme-today-desktop.png"><img src="docs/assets/readme-today-desktop.png" alt="The Today screen on a computer: two overdue tasks (change the smoke detector battery, 3 days late; clean the cooker hood filter, 1 day late), two tasks due today and the boiler service coming up, each with its room, its item and a Done button."></a><br>**Today**: what is late, what is due and what is coming, each with a Done button. | <a href="docs/assets/readme-item-phone.png"><img src="docs/assets/readme-item-phone.png" width="190" alt="An item on a phone: the gas boiler of the utility room, with its brand and model, installation date, warranty end date, a Photos section and the boiler service task."></a><br>**Every item has its page**: brand, model, warranty end date, photos and its tasks. |
 
-For example:
+## The problem
 
-- test the smoke detector every six months, without remembering the last time;
-- clean the ventilation filter every three months, with a warning when the
-  spare filters run low;
-- book the yearly boiler service, with the boiler's model and warranty at hand;
-- repaint the living room, with its quotes and its budget, planned, committed
-  and paid.
+The dates are in your head. The warranty paper is somewhere. Nobody remembers
+when the ventilation filter was last changed, or which size it takes. The
+renovation costs more than the quotes said, and the spreadsheet meant to track
+it has not been opened since March. HouseCairn is one place for all of it, and
+everyone in the household can use it.
 
-### One example: descaling the espresso machine
+## What it does
+
+### Never forget the upkeep
+
+- **Tasks that come back**: every few days, weeks, months or years, on a fixed
+  date or counted from the last time it was done (a filter changed on 3 March,
+  every 6 months, is due again on 3 September).
+- **Seasons**: the lawn from April to October, the heating from October to April.
+- **Today**: what is late, what is due and what is coming, on one screen.
+- **Done in one tap**, with Undo, Skip this time and Postpone.
+- **Reminders** by ntfy, email, Telegram and other services, and calendar feeds
+  for the calendar you already use.
+
+### Know what it costs
+
+- **Supplies on the task**: three filters, two litres of paint. Tap **Done** and
+  the stock goes down; a **Low** mark appears before you run out.
+- **Equipment**: the boiler, the smoke detectors, the espresso machine, with
+  brand, model, warranty end date and photos.
+- **The cost of each task**: planned in advance, real once it is done.
+- **A budget for the year, by room**, and what is left of it.
+
+### Plan your renovation work
+
+- **Projects**: repaint the living room, redo the bathroom. Each has its steps,
+  which are ordinary tasks.
+- **Quotes and craftspeople**: collect the quotes, keep the contacts, accept one.
+- **Budget**: what you planned, what you committed to, what you paid, and
+  whether you are over.
+
+### All of it, room by room
+
+Everything is filed under the rooms of your home. Open the kitchen and you see
+its tasks, its equipment, its supplies and its budget. Open the bathroom and you
+see the renovation, with its quotes.
+
+### And also
+
+- **A household**: invite the others, as owner, member or read-only.
+- **Problem reports**: anyone can report what is broken, and turn it into a task.
+- **QR labels**: stick a printed label on the boiler; scanning it opens its page.
+- **Your data, out and in**: CSV import and export, and a full export of a home.
+- **Phone app**: in development, with an iOS beta open (see the repositories below).
+- **Home Assistant**: optional and experimental (see Integrations).
+
+## How it compares
+
+| | HouseCairn | A spreadsheet | A reminder or calendar app | Professional maintenance software (CMMS) |
+| --- | --- | --- | --- | --- |
+| Repeats a task counted from the last time it was done | Yes | Manual | Partly | Yes |
+| Ties a task to a room and to an item | Yes | Manual | No | Yes |
+| Supplies attached to tasks, stock lowered on Done | Yes | Manual | No | Yes |
+| Planned cost per task, and a budget for renovation projects | Yes | Manual | No | Partly |
+| Shared by a household, with roles | Yes | Partly | Partly | Yes |
+| Runs on your own server, with no tracking | Yes | Depends on the tool | Depends on the tool | Depends on the tool |
+| Made for a home, and simple to use | Yes (alpha) | Manual | Yes | No |
+
+This describes each kind of tool in general: products differ. HouseCairn is
+alpha software and has not been used in a real home for long.
+
+## One example: descaling the espresso machine
 
 <img src="docs/assets/readme-example-descaling.png" width="300" align="right"
      alt="The Descaling task of the demo home after it was done once: due again in three months, in the kitchen, on the espresso machine, 7.90 each time from the stock, 31.60 a year, and one water filter left in stock.">
@@ -68,33 +117,20 @@ bathroom renovation, with its quotes and its budget, step by step.
 
 <br clear="right">
 
+More jobs of the same kind:
+
+- test the smoke detector every six months, without remembering the last time;
+- book the yearly boiler service, with the boiler's model and warranty at hand;
+- repaint the living room, with its quotes and its budget, planned, committed
+  and paid.
+
 It is for the people who live in a house or a flat, owners or tenants, alone or
-as a household. It is not business maintenance software (CMMS), nor a home
-automation app: it works alongside Home Assistant.
+as a household. It is free software that you host yourself, and it works on its
+own. It is not business maintenance software (CMMS), nor a home automation app:
+it works alongside Home Assistant if you use it.
 
 Website: <https://housecairn.app>. Documentation, in English and French:
 <https://docs.housecairn.app>.
-
-## What it does
-
-- **Today**: overdue tasks, tasks due today and what is coming up, each marked
-  done in one tap, with Skip and Undo.
-- **Recurring maintenance**: every few days, weeks, months or years, on a fixed
-  date or counted from the last time it was done, optionally limited to a
-  season.
-- **Rooms and items**: the boiler, the smoke detectors, the windows, with brand,
-  model, warranty and photos; each room remembers its paint, floor and wall
-  coverings.
-- **Projects and budget**: a renovation with its steps, its quotes and its
-  budget lines; planned costs by room and by project, in the currency of the
-  home.
-- **Stock and QR labels**: spare filters, paint and batteries with an alert
-  threshold; a printed label on an item opens its page.
-- **A household**: invite the others with a role (owner, member, read-only),
-  sign in with a password, a passkey or single sign-on (OpenID Connect).
-- **Your data, out and in**: reminders through ntfy, email, Telegram and other
-  [Apprise](https://github.com/caronc/apprise) services, calendar feeds, CSV
-  import and export, a full export of a home, and a REST API.
 
 ## Demo
 
@@ -149,6 +185,7 @@ default.
     an integration, installed with HACS, that shows the tasks of a home as
     sensors and a to-do list, and marks a task done from Home Assistant. It
     uses a HouseCairn API token; HouseCairn never holds a Home Assistant token.
+- **Sign-in** with a password, a passkey or single sign-on (OpenID Connect).
 - **Notifications** through [Apprise](https://github.com/caronc/apprise) URLs,
   and **calendar feeds** (iCalendar) for any calendar application.
 - **REST API** (`/api/v1/`), with tokens limited to chosen homes and rights:
