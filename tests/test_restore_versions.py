@@ -208,3 +208,36 @@ def test_every_version_lacks_at_least_what_a_later_one_lacks() -> None:
         for section, fields in archive_versions.ADDED[version + 1].items():
             assert set(fields) <= archive_versions.optional(version, section)
     assert set(archive_versions.ADDED) == restore.SUPPORTED_VERSIONS
+
+
+def _hostile(tag: str, section: str, field: str, value: Any) -> bytes:
+    """The archive of `tag` with `field` of the first row of `section` set to `value`."""
+    files = entries(_archive(tag))
+    app = next(a for a, kept in exports.SECTIONS.items() if section in {s.name for s in kept})
+    document = json.loads(files[f"data/{app}.json"])
+    document["sections"][section][0][field] = value
+    files[f"data/{app}.json"] = json.dumps(document).encode()
+    return rebuild(files)
+
+
+@pytest.mark.parametrize(
+    ("section", "field", "value"),
+    [
+        # Read by the fills of a version 4 archive of 0.5.2, whose draws lack their unit
+        # price and whose occurrences lack their plan: an identifier that is not a text is
+        # refused like any value that is not valid, never a crash of the restore.
+        ("stock_items", "id", [1]),
+        ("stock_draws", "article", {"a": 1}),
+        ("occurrences", "task", [1]),
+        ("project_tasks", "task", [1]),
+        ("tasks", "id", {"x": 1}),
+        ("task_materials", "task", [1]),
+        ("task_materials", "article", {"a": 1}),
+    ],
+)
+def test_an_identifier_that_is_not_a_text_is_refused_where_fields_are_filled(
+    section: str, field: str, value: Any, owner: User, media_root: Path
+) -> None:
+    with pytest.raises(restore.ArchiveRefusedError):
+        restore.restore_bytes(owner, _hostile("v0.5.2", section, field, value))
+    assert not Home.all_objects.exists()

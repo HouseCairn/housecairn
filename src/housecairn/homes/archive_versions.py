@@ -21,39 +21,60 @@ from typing import Any
 Objects = dict[str, list[dict[str, Any]]]
 
 
+def _key(value: Any) -> str | None:
+    """An identifier the fills may look up: a text, and nothing else.
+
+    The archive is not checked yet when it is filled: any other value is left out, and the
+    row that holds it is refused when it is checked, as any value that is not valid.
+    """
+    return value if isinstance(value, str) else None
+
+
 class Rows:
     """The objects of an archive, with what the fills read of them, worked out once."""
 
     def __init__(self, objects: Objects) -> None:
         self.objects = objects
 
-    def by_id(self, section: str) -> dict[Any, dict[str, Any]]:
-        return {row.get("id"): row for row in self.objects.get(section, [])}
+    def by_id(self, section: str) -> dict[str, dict[str, Any]]:
+        keyed = ((_key(row.get("id")), row) for row in self.objects.get(section, []))
+        return {key: row for key, row in keyed if key is not None}
+
+    def get(self, section: str, value: Any) -> dict[str, Any] | None:
+        """The row of `section` whose identifier is `value`, if it is a text."""
+        key = _key(value)
+        return None if key is None else self.by_section[section].get(key)
 
     @cached_property
-    def stock_items(self) -> dict[Any, dict[str, Any]]:
+    def by_section(self) -> dict[str, dict[str, dict[str, Any]]]:
+        return {"stock_items": self.stock_items, "tasks": self.tasks}
+
+    @cached_property
+    def stock_items(self) -> dict[str, dict[str, Any]]:
         return self.by_id("stock_items")
 
     @cached_property
-    def tasks(self) -> dict[Any, dict[str, Any]]:
+    def tasks(self) -> dict[str, dict[str, Any]]:
         return self.by_id("tasks")
 
     @cached_property
-    def in_a_project(self) -> set[Any]:
+    def in_a_project(self) -> set[str]:
         """The tasks of a project; an archive holds only live rows, so a live project."""
-        return {link.get("task") for link in self.objects.get("project_tasks", [])}
+        tasks = (_key(link.get("task")) for link in self.objects.get("project_tasks", []))
+        return {task for task in tasks if task is not None}
 
     @cached_property
-    def priced_from_stock(self) -> set[Any]:
+    def priced_from_stock(self) -> set[str]:
         """The tasks whose materials the stock works out: a material of a priced stock item.
 
         Read once the stock items have their own fills: their unit price comes first.
         """
-        return {
-            link.get("task")
+        tasks = (
+            _key(link.get("task"))
             for link in self.objects.get("task_materials", [])
-            if (self.stock_items.get(link.get("article")) or {}).get("unit_price") is not None
-        }
+            if (self.get("stock_items", link.get("article")) or {}).get("unit_price") is not None
+        )
+        return {task for task in tasks if task is not None}
 
 
 # The JSON value of a missing field, from its row and the other objects of the archive.
@@ -71,7 +92,7 @@ def _constant(value: Any) -> Fill:
 
 def _draw_price(row: dict[str, Any], rows: Rows) -> Any:
     """tasks 0013: a draw of before gets the unit price its stock item has (docs/adr/0090)."""
-    article = rows.stock_items.get(row.get("article"))
+    article = rows.get("stock_items", row.get("article"))
     return None if article is None else article.get("unit_price")
 
 
@@ -85,7 +106,7 @@ def _planned(name: str) -> Fill:
 
     def fill(row: dict[str, Any], rows: Rows) -> Any:
         task_id = row.get("task")
-        task = rows.tasks.get(task_id)
+        task = rows.get("tasks", task_id)
         if row.get("status") != "done" or task is None or task_id in rows.in_a_project:
             return None  # a task the archive does not hold is refused when it is checked
         if name == "planned_labour":

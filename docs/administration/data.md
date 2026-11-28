@@ -105,7 +105,7 @@ instance that is upgraded, so that a restored archive holds what that instance w
 | Section | Field | Missing from | Value when missing |
 | --- | --- | --- | --- |
 | `stock_items` | `unit_price` | versions 2 and 3 made before 0.3.0 | `null` |
-| `items` | `ean`, `warranty_provider`, `warranty_provider_name` | versions 2 and 3, and 4 made before 0.4.0 | empty |
+| `items` | `ean`, `warranty_provider`, `warranty_provider_name` | versions 2 and 3; optional in every version (an archive of 0.4.0 or later always has them) | empty |
 | `items` | `warranty_duration_unit` | the same | `"year"` |
 | `items` | `purchased_on`, `warranty_duration`, `warranty_starts_on` | the same | `null` |
 | `photos` | `attribution` | the same | `{}` |

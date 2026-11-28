@@ -232,8 +232,8 @@ msgstr "`items`"
 msgid "`ean`, `warranty_provider`, `warranty_provider_name`"
 msgstr "`ean`, `warranty_provider`, `warranty_provider_name`"
 
-msgid "versions 2 and 3, and 4 made before 0.4.0"
-msgstr "versions 2 et 3, et 4 faite avant la 0.4.0"
+msgid "versions 2 and 3; optional in every version (an archive of 0.4.0 or later always has them)"
+msgstr "versions 2 et 3 ; facultatifs dans toutes les versions (une archive de la 0.4.0 ou d'après les a toujours)"
 
 msgid "empty"
 msgstr "vide"
