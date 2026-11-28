@@ -1,6 +1,6 @@
 [project]
 name = "housecairn"
-version = "0.5.2"
+version = "0.6.0"
 description = "Self-hosted planner for home maintenance and renovation projects."
 readme = "README.md"
 license = "AGPL-3.0-only"
