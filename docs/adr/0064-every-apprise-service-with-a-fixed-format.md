@@ -253,8 +253,8 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 ## Consequences
 
 - 148 services, 195 schemes, are accepted; 35 plugins, 60 schemes, are refused, each for a reason above.
-- Apprise 2.2.0 added eleven plugins and one scheme (`kudosity`, an alias of Burst SMS).
-  Ten of the plugins are admitted on the criteria above; Nostr is refused.
+- Apprise 2.2.0 added twelve plugins and one scheme (`kudosity`, an alias of Burst SMS).
+  Eleven of the plugins are admitted on the criteria above; Nostr is refused.
 - A service refused for want of review (Session, Delta Chat) can be admitted by a later
   record, after its review.
 - An update of Apprise that adds a plugin, or a scheme to a plugin, fails the tests until
