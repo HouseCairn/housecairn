@@ -386,3 +386,57 @@ build)` took 122 to 199 s, nearly all of it the build under QEMU (`linux/arm64`)
   help only the arm64 build, which is now rare, and its layers after
   `COPY src/` change on almost every pull request. The smoke tests stay in
   sequence: both clean up a container the other starts (`hc-smoke-postgres`).
+
+## Amendment, 2026-11-28: glibc, zstd and shadow fixes
+
+**Finding.** The daily `Image scan` of `edge` failed from 2026-11-22, and with it
+the `Container image` check of every pull request. Grype matched, with a fix
+available:
+
+- `libc6` and `libc-bin` `2.41-12+deb13u4`: CVE-2026-19499 and CVE-2026-5435
+  (high, the cause of the failure) and twelve medium and low ones, fixed in
+  `2.41-12+deb13u5` (in `trixie`, Debian 13.8);
+- `libzstd1` `1.5.7+dfsg-1`: CVE-2026-124851, fixed in `1.5.7+dfsg-1+deb13u1`
+  (DSA-6657-1, `trixie-security`);
+- `login.defs` and `passwd` `1:4.17.4-2`: CVE-2026-135901, fixed in
+  `1:4.17.4-2+deb13u1` (DSA-6661-1, `trixie-security`);
+- the Python 3.13.18 interpreter: eight CVEs, below.
+
+**Base image.** `python:3.13.18-slim-trixie` was rebuilt on 2026-11-24 (index
+`sha256:168d3a5d...`). Unlike the rebuild of 2026-11-08, its amd64 and arm64
+manifests are new, and their `/var/lib/dpkg/status` has `libc6` and `libc-bin`
+`2.41-12+deb13u5` and `zlib1g` `1:1.3.dfsg+really1.3.1-1+deb13u1`, but still the
+vulnerable `libzstd1`, `login.defs` and `passwd`. Both `FROM` lines now pin that
+digest. No Dependabot pull request had proposed it by 2026-11-28.
+
+**Changes.**
+
+- The upgrade step of the final stage no longer upgrades `zlib1g`, which the
+  base image now carries, and upgrades `libzstd1`, `login.defs` and `passwd`
+  from `trixie-security` instead, each with its version floor.
+- The step keeps a version floor for every package it guards, upgraded or not:
+  `libc6`, `libc-bin` and `zlib1g` too. A floor costs nothing when the base image
+  carries the fix, and fails the build, on every platform, if a later base image
+  does not. The previous rule (a package leaves the step once the base image
+  carries its fix) now applies to the upgrade only. The step prints the
+  installed versions, so the build log of each platform shows them.
+- `tests/test_image.py` lists the guarded packages with their floors and which
+  of them are upgraded, and checks the Dockerfile against that list.
+
+**Python.** No Python release newer than 3.13.18 exists in the 3.13 line
+(python.org and the Docker Hub tags, 2026-11-28), and the project stays on 3.13
+(section "Move to Python 3.13"). Grype matches the interpreter binary by its
+CPE, against the CPython CNA records, which give one range per CVE: every
+version below the first release of the newest line that has the fix (3.16.0,
+3.16.0a2 or 3.15.0a6). They say nothing of the 3.13 line, so no 3.13 release can
+leave those ranges. The facts on 2026-11-28, from the CPython pull requests:
+
+- CVE-2026-103995, CVE-2026-115559, CVE-2026-115791, CVE-2026-116566,
+  CVE-2026-16052, CVE-2026-124249 and CVE-2026-19552: the backport to 3.13 is an
+  open, unmerged pull request; no 3.13 release has the fix yet.
+- CVE-2025-15367 (POP3): fixed in 3.15.0a6; there is no backport to 3.13, only
+  open ones to 3.12.
+
+These eight remain reported, medium and below; they do not fail the check, and
+nothing ignores them. A 3.13.x release that carries the backports will still be
+matched by Grype until the CNA records list fixed 3.13 versions.

@@ -91,6 +91,38 @@ def test_base_image_security_upgrades_have_a_floor() -> None:
         assert re.search(floor, final), package
 
 
+# Debian packages whose security fixes the final stage requires (docs/adr/0015,
+# amendments of 2026-11-08 and 2026-11-28): minimum version, and whether the
+# pinned base image lacks the fix, so the step upgrades it. A floor only goes
+# up; change it here and in the Dockerfile together.
+WATCHED_PACKAGES = {
+    "libc6": ("2.41-12+deb13u5", False),
+    "libc-bin": ("2.41-12+deb13u5", False),
+    "zlib1g": ("1:1.3.dfsg+really1.3.1-1+deb13u1", False),
+    "libzstd1": ("1.5.7+dfsg-1+deb13u1", True),
+    "login.defs": ("1:4.17.4-2+deb13u1", True),
+    "passwd": ("1:4.17.4-2+deb13u1", True),
+}
+
+
+def test_watched_debian_packages_have_their_fixed_version_as_floor() -> None:
+    final = (REPO / "Dockerfile").read_text().rsplit("\nFROM ", 1)[1]
+    floors = dict(
+        re.findall(r"dpkg-query -W -f='\$\{Version\}' ([\w.+-]+)\)\"\s*\\\n\s*ge '([^']+)'", final)
+    )
+    upgraded = set(
+        " ".join(re.findall(r"--only-upgrade\s+([\w.+-]+(?:[ \t]+[\w.+-]+)*)", final)).split()
+    )
+    assert floors == {name: floor for name, (floor, _) in WATCHED_PACKAGES.items()}
+    assert upgraded == {name for name, (_, upgrade) in WATCHED_PACKAGES.items() if upgrade}
+
+
+def test_both_python_stages_use_the_same_base_image() -> None:
+    images = re.findall(r"^FROM\s+(python:\S+)", (REPO / "Dockerfile").read_text(), re.MULTILINE)
+    assert len(images) == 2
+    assert images[0] == images[1]
+
+
 def test_published_image_scan_uses_the_same_grype_and_no_default_permissions() -> None:
     workflows = REPO / ".github" / "workflows"
     image = (workflows / "image.yml").read_text()
