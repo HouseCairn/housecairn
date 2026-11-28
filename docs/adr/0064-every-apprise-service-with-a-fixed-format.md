@@ -7,8 +7,9 @@
 ## Context
 
 ADR 0043 accepted eleven services. People use many more (Microsoft Teams, Rocket.Chat,
-Zulip, Pushbullet, Bark, the SMS gateways of their operator), and Apprise 2.1.0, the
-version of `uv.lock`, has 171 plugins and 240 schemes. A channel makes the server send a
+Zulip, Pushbullet, Bark, the SMS gateways of their operator), and Apprise 2.2.0, the
+version of `uv.lock`, has 183 plugins and 255 schemes (2.1.0, which this record first
+reviewed, had 171 and 240). A channel makes the server send a
 request to an address a person typed, so a service is only added after reading its plugin:
 the method, the host, the path, the format of the body, the headers, and the options of
 the address that change the request.
@@ -55,7 +56,7 @@ Apprise with a new plugin fails that test until the plugin is reviewed here.
 **The Kodi plugin** keeps the version of its protocol in an attribute named `protocol`: the
 check that the scheme parsed is the one typed now reads the schemes of the class.
 
-### Inventory of Apprise 2.1.0
+### Inventory of Apprise 2.2.0
 
 "Requests" gives the methods the plugin uses and whether the host is fixed (the API of the
 provider, or one of its regions) or typed (the server of the person, under the guard).
@@ -97,6 +98,9 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 | `kook` | KOOK | admitted | POST, host fixed |
 | `qq` | QQ (Qmsg) | admitted | POST, host fixed |
 | `zalo` | Zalo | admitted | POST, host fixed |
+| `kakaotalk`, `kakao` | KakaoTalk | admitted | POST (token, then message), host fixed |
+| `gupshup` | Gupshup (WhatsApp) | admitted | POST, host fixed (the `template` option picks one of two fixed paths) |
+| `whapi` | Whapi.Cloud (WhatsApp) | admitted | POST, host fixed |
 | `notifico`, `notificos` | Notifico (IRC) | admitted | GET, host typed |
 | `ntfy`, `ntfys` | ntfy | admitted | POST, host typed |
 | `pover` | Pushover | admitted | POST, host fixed |
@@ -147,7 +151,7 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 | `clickatell` | Clickatell | admitted | GET, host fixed |
 | `bulksms` | BulkSMS | admitted | POST, host fixed |
 | `bulkvs` | BulkVS | admitted | POST, host fixed |
-| `burstsms` | Burst SMS | admitted | POST, host fixed |
+| `burstsms`, `kudosity` | Burst SMS (Kudosity) | admitted | POST, host fixed |
 | `d7sms` | D7 Networks | admitted | POST, host fixed |
 | `httpsms` | httpSMS | admitted | POST, host fixed |
 | `atalk` | Africa's Talking | admitted | POST, host fixed |
@@ -160,6 +164,11 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 | `ringc` | RingCentral | admitted | POST, host fixed |
 | `smsc` | SMSC | admitted | POST, host fixed |
 | `voipms` | VoIP.ms | admitted | GET, host fixed |
+| `cm` | CM.com | admitted | POST, host fixed |
+| `infobip` | Infobip | admitted | POST, host typed (the account host, under the guard) |
+| `kaleyra`, `klr` | Kaleyra | admitted | POST, host fixed by the region (one of three, checked by the plugin) |
+| `smstunnel` | SMSTunnel | admitted | POST, host fixed |
+| `telesign` | Telesign | admitted | POST, host fixed |
 | `sns` | Amazon SNS | admitted | POST, host fixed |
 | `dapnet` | DAPNET (amateur radio pager) | admitted | POST, host fixed |
 | `mailto`, `mailtos` | Email (SMTP) | admitted | SMTP, host typed |
@@ -174,6 +183,7 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 | `mailersend` | MailerSend | admitted | POST, host fixed |
 | `smtp2go` | SMTP2GO | admitted | POST, host fixed |
 | `sendpulse` | SendPulse | admitted | POST, host fixed |
+| `groundmail` | Groundmail | admitted | POST, host fixed |
 | `gotify`, `gotifys` | Gotify | admitted | POST, host typed |
 | `signal`, `signals` | Signal (signal-cli REST API) | admitted | POST, host typed |
 | `apprise`, `apprises` | Apprise API | admitted | POST, host typed |
@@ -202,6 +212,8 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 | `spike` | Spike.sh | admitted | POST, host fixed |
 | `betterstack` | Better Stack | admitted | POST, host typed |
 | `goalert`, `goalerts` | GoAlert | admitted | POST, host typed |
+| `firehydrant` | FireHydrant | admitted | POST, host fixed |
+| `xmatters` | xMatters | admitted | POST, host typed |
 | `amqp`, `amqps` | AMQP | refused | not HTTP(S) or SMTP: its own protocol over a raw socket (AMQP) |
 | `aprs` | Aprs | refused | not HTTP(S) or SMTP: its own protocol over a raw socket (APRS-IS) |
 | `blink1` | blink(1) | refused | acts on the server itself, not on a service (a USB light of the server) |
@@ -223,6 +235,7 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 | `mastodon`, `mastodons`, `toot`, `toots` | Mastodon | refused | publishes a public post by default: the reminders would be public |
 | `misskey`, `misskeys` | Misskey | refused | publishes a public post by default: the reminders would be public |
 | `mqtt`, `mqtts` | MQTT Notification | refused | not HTTP(S) or SMTP: its own protocol over a raw socket (MQTT) |
+| `nostr` | Nostr | refused | publishes a public note to relays over WebSocket (`wss://`): not HTTP(S) or SMTP, and the reminders would be public |
 | `notica`, `noticas` | Notica | refused | its self-hosted form posts to a path chosen whole by the address |
 | `opsgenie` | Opsgenie | refused | an option (`action=`) chooses the method (DELETE) and the path of the request |
 | `pinglet`, `pinglets` | Pinglet | refused | posts to a path chosen whole by the address (prefix, namespace, topic) |
@@ -239,7 +252,9 @@ marked typed here, and those forms go through the guard of ADR 0059 like the oth
 
 ## Consequences
 
-- 137 services, 181 schemes, are accepted; 34 plugins, 59 schemes, are refused, each for a reason above.
+- 148 services, 195 schemes, are accepted; 35 plugins, 60 schemes, are refused, each for a reason above.
+- Apprise 2.2.0 added eleven plugins and one scheme (`kudosity`, an alias of Burst SMS).
+  Ten of the plugins are admitted on the criteria above; Nostr is refused.
 - A service refused for want of review (Session, Delta Chat) can be admitted by a later
   record, after its review.
 - An update of Apprise that adds a plugin, or a scheme to a plugin, fails the tests until

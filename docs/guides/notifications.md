@@ -60,31 +60,33 @@ The [Notifications](../screens/notifications.md) screen lists every service acce
 family, with an example address and a link to its page in the Apprise documentation:
 
 - **Messaging**: DingTalk, Discord, Feishu, Flock, Fluxer, Google Chat, GroupMe, Guilded,
-  KOOK, Lark, LINE, Matrix, Mattermost, Microsoft Teams (through a Power Automate
-  workflow), Notifico (IRC), QQ, Revolt, Rocket.Chat, Ryver, Slack, Stackfield, Telegram,
-  Threema Gateway, Twist, Viber, Webex, WeChat Work, WeCom bot, WhatsApp Business, Zalo,
-  Zoho Cliq, Zoom Team Chat, Zulip.
+  Gupshup (WhatsApp), KakaoTalk, KOOK, Lark, LINE, Matrix, Mattermost, Microsoft Teams
+  (through a Power Automate workflow), Notifico (IRC), QQ, Revolt, Rocket.Chat, Ryver,
+  Slack, Stackfield, Telegram, Threema Gateway, Twist, Viber, Webex, WeChat Work, WeCom
+  bot, Whapi.Cloud (WhatsApp), WhatsApp Business, Zalo, Zoho Cliq, Zoom Team Chat, Zulip.
 - **Push notifications**: Bark, Chanify, Dot., IFTTT, Join, Kumulos, Lauther, LFG Alarm,
   Notifiarr, ntfy, OneSignal, Pingram, Prowl, Pushbullet, PushDeer, Pushed, PushMe,
   Pushover, PushPlus, Pushsafer, PushWard, Pushy, ServerChan, Signalgrid, Simplepush, Spug
   Push, Streamlabs, Techulus Push, Trigv, WPush, WxPusher, YouLMK.
 - **Text messages (SMS)**: 46elks, 800.com, Africa's Talking, Amazon SNS, BulkSMS, BulkVS,
-  Burst SMS, Clickatell, ClickSend, D7 Networks, DAPNET, Exotel, Free Mobile, httpSMS,
-  Kavenegar, MessageBird, Mobile Message, MSG91, Notifyre, Octopush, Plivo, RingCentral,
-  SerwerSMS, seven, SFR, Sinch, SMS Manager, SMSC, Telnyx, Twilio, VoIP.ms, Vonage.
-- **Email**: your own mail server (SMTP), Amazon SES, Brevo, MailerSend, Mailgun,
-  Microsoft 365, Postmark, Resend, SendGrid, SendPulse, SMTP2GO, SparkPost.
+  Burst SMS, Clickatell, ClickSend, CM.com, D7 Networks, DAPNET, Exotel, Free Mobile,
+  httpSMS, Infobip, Kaleyra, Kavenegar, MessageBird, Mobile Message, MSG91, Notifyre,
+  Octopush, Plivo, RingCentral, SerwerSMS, seven, SFR, Sinch, SMS Manager, SMSC,
+  SMSTunnel, Telesign, Telnyx, Twilio, VoIP.ms, Vonage.
+- **Email**: your own mail server (SMTP), Amazon SES, Brevo, Groundmail, MailerSend,
+  Mailgun, Microsoft 365, Postmark, Resend, SendGrid, SendPulse, SMTP2GO, SparkPost.
 - **Self-hosted**: Apprise API, Emby, Enigma2, Evolution API, Gorush, Gotify, HumHub,
   Jellyfin, Kodi, LaMetric Time, Nextcloud, Nextcloud Talk, OneBot, Parse Platform,
   Pushjet, Signal (signal-cli REST API), SMSEagle, Synology Chat.
-- **On-call and alerting**: Better Stack, GoAlert, ilert, incident.io, PagerDuty,
-  PagerTree, SIGNL4, Spike.sh, Splunk On-Call, Squadcast.
+- **On-call and alerting**: Better Stack, FireHydrant, GoAlert, ilert, incident.io,
+  PagerDuty, PagerTree, SIGNL4, Spike.sh, Splunk On-Call, Squadcast, xMatters.
 
 **Where your reminders go.** A self-hosted service, or one whose address names its server
 (ntfy, Matrix, Mattermost...), sends to that server. Microsoft Teams workflows, Fluxer,
 Notifico, PushDeer and Better Stack send to their provider unless the address names a server
-of your own. Amazon SNS and SES, Exotel, Mailgun, Pingram, Sinch, SparkPost, PagerDuty and
-Squadcast send to the region that the address chooses. Stackfield, Pushsafer, Free
+of your own, and xMatters sends to the server that the address names. Amazon SNS and SES,
+Exotel, Infobip, Kaleyra, Mailgun, Pingram, Sinch, SparkPost, PagerDuty and Squadcast send
+to the region that the address chooses. Stackfield, Pushsafer, Free
 Mobile, SFR, Octopush, seven, 46elks, SerwerSMS, SMS Manager, DAPNET, Brevo and ilert are
 providers in the European Union. Every other service sends your reminders to its provider,
 outside the European Union or without saying where. The screen says the same for each
