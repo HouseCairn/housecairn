@@ -96,7 +96,7 @@ see the renovation, with its quotes.
 | Planned cost per task, and a budget for renovation projects | Yes | Manual | No | Partly |
 | Shared by a household, with roles | Yes | Partly | Partly | Yes |
 | Runs on your own server, with no tracking | Yes | Depends on the tool | Depends on the tool | Depends on the tool |
-| Made for a home, and simple to use | Yes (alpha) | Manual | Yes | No |
+| Made for a home, and simple to use | Yes (alpha) | Partly | Yes | No |
 
 This describes each kind of tool in general: products differ. HouseCairn is
 alpha software and has not been used in a real home for long.
