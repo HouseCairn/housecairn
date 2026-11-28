@@ -60,7 +60,8 @@ everyone in the household can use it.
   the stock goes down; a **Low** mark appears before you run out.
 - **Equipment**: the boiler, the smoke detectors, the espresso machine, with
   brand, model, warranty end date and photos.
-- **The cost of each task**: planned in advance, real once it is done.
+- **The cost of each task**: planned in advance, real once it is done, in the
+  currency of your home.
 - **A budget for the year, by room**, and what is left of it.
 
 ### Plan your renovation work
@@ -75,7 +76,8 @@ everyone in the household can use it.
 
 Everything is filed under the rooms of your home. Open the kitchen and you see
 its tasks, its equipment, its supplies and its budget. Open the bathroom and you
-see the renovation, with its quotes.
+see the renovation, with its quotes. Each room also remembers its paint
+(colour, brand, reference), its floor and wall coverings.
 
 ### And also
 
