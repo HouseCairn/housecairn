@@ -70,8 +70,8 @@ msgstr "Un rappel du format."
 msgid "Its [JSON Schema](../_static/schemas/housecairn-export-v4.schema.json) is published with this documentation (the ones of [version 3](../_static/schemas/housecairn-export-v3.schema.json) and [version 2](../_static/schemas/housecairn-export-v2.schema.json) stay). The rules that hold for every section:"
 msgstr "Son [schéma JSON](../_static/schemas/housecairn-export-v4.schema.json) est publié avec cette documentation (ceux de la [version 3](../_static/schemas/housecairn-export-v3.schema.json) et de la [version 2](../_static/schemas/housecairn-export-v2.schema.json) restent publiés). Les règles valables pour toutes les sections :"
 
-msgid "**Every field of the table**, by its name in the code: an object of `rooms` has `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ..., `created_at` and `updated_at`. A field added by a later version is in the archive without a change of format; a field removed or renamed raises the version."
-msgstr "**Tous les champs de la table**, sous leur nom dans le code : un objet de `rooms` a `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ..., `created_at` et `updated_at`. Un champ ajouté par une version ultérieure figure dans l'archive sans changement de format ; un champ supprimé ou renommé fait monter la version."
+msgid "**Every field of the table**, by its name in the code: an object of `rooms` has `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ..., `created_at` and `updated_at`. A field added by a later version is in the archive without a change of format; a field removed or renamed raises the version. A field added without a change of format is **optional**, at restore and in the JSON Schema: the archives of that version made before it lack it (see [Archives of earlier releases](#archives-of-earlier-releases)). Every other field is required: a restore refuses an object that lacks one."
+msgstr "**Tous les champs de la table**, sous leur nom dans le code : un objet de `rooms` a `id`, `name`, `kind`, `position`, `notes`, `paint_colour`, ..., `created_at` et `updated_at`. Un champ ajouté par une version ultérieure figure dans l'archive sans changement de format ; un champ supprimé ou renommé fait monter la version. Un champ ajouté sans changement de format est **facultatif**, à la restauration comme dans le schéma JSON : les archives de cette version faites avant lui ne l'ont pas (voir [Archives des versions précédentes](#archives-of-earlier-releases)). Tout autre champ est obligatoire : une restauration refuse un objet qui ne l'a pas."
 
 msgid "**Identifiers are the UUIDs** of the objects, never an internal number. A reference is the id of an object of the same archive, or `null`; a link to several objects (the rooms of a project) is a list of ids."
 msgstr "**Les identifiants sont les UUID** des objets, jamais un numéro interne. Une référence est l'identifiant d'un objet de la même archive, ou `null` ; un lien vers plusieurs objets (les pièces d'un projet) est une liste d'identifiants."
@@ -151,11 +151,142 @@ msgstr "`reports`, avec leur photo."
 msgid "The archive never holds a secret: no API token (not even its digest), no link of an invitation or of a calendar feed, no address of a notification channel, no password, no setting or single sign-on secret of the instance, nothing of the first setup. Each app adds its tables to the registry of the export (`homes.exports.register`); a test fails on a table that is in no section."
 msgstr "L'archive ne contient jamais de secret : aucun jeton d'API (pas même son empreinte), aucun lien d'invitation ou de flux d'agenda, aucune adresse de canal de notification, aucun mot de passe, aucun réglage ni secret d'authentification unique de l'instance, rien de la première installation. Chaque application ajoute ses tables au registre de l'export (`homes.exports.register`) ; un test échoue sur une table qui n'est dans aucune section."
 
-msgid "Version 1 archives (a single `export.json`) cannot be restored: export the home again. Version 2 archives are restored: the only difference is that the provider of the maintenance contract of an item was a text (`contract_provider`) and is, in version 3, the id of a contractor (`contract_contractor`). The restore links the item to the contractor of the archive of that name (case and extra spaces ignored) and, when the archive has none, adds one, with the trade Other ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md))."
-msgstr "Les archives de version 1 (un seul `export.json`) ne peuvent pas être restaurées : exportez de nouveau le logement. Les archives de version 2 sont restaurées : la seule différence est que le prestataire du contrat d'entretien d'un élément était un texte (`contract_provider`) et est, en version 3, l'identifiant d'un intervenant (`contract_contractor`). La restauration relie l'élément à l'intervenant de l'archive de ce nom (casse et espaces superflus ignorés) et, si l'archive n'en a pas, en ajoute un, avec le métier Autre ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md))."
+msgid "Archives of earlier releases"
+msgstr "Archives des versions précédentes"
 
-msgid "Version 3 archives are restored too: the only difference is that version 4 adds `archived_at` to the `home` of `data/homes.json`, the date and time an owner archived the home or `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). A version 3 or 2 archive restores a home that is not archived; a version 4 archive of an archived home restores it archived, as a copy too."
-msgstr "Les archives de version 3 sont restaurées aussi : la seule différence est que la version 4 ajoute `archived_at` au `home` de `data/homes.json`, la date et l'heure à laquelle un propriétaire a archivé le logement, ou `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). Une archive de version 3 ou 2 restaure un logement non archivé ; une archive de version 4 d'un logement archivé le restaure archivé, y compris comme copie."
+msgid "Version"
+msgstr "Version"
+
+msgid "Made by"
+msgstr "Faite par"
+
+msgid "Restored"
+msgstr "Restaurée"
+
+msgid "1"
+msgstr "1"
+
+msgid "before 0.1.0"
+msgstr "avant la 0.1.0"
+
+msgid "No: export the home again."
+msgstr "Non : exportez de nouveau le logement."
+
+msgid "2"
+msgstr "2"
+
+msgid "0.1.0"
+msgstr "0.1.0"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "3"
+msgstr "3"
+
+msgid "0.2.0 to 0.3.2"
+msgstr "0.2.0 à 0.3.2"
+
+msgid "4"
+msgstr "4"
+
+msgid "0.4.0 and later"
+msgstr "0.4.0 et suivantes"
+
+msgid "Version 1 archives (a single `export.json`) cannot be restored. Version 2 archives are restored: the provider of the maintenance contract of an item was a text (`contract_provider`) and is, in version 3, the id of a contractor (`contract_contractor`). The restore links the item to the contractor of the archive of that name (case and extra spaces ignored) and, when the archive has none, adds one, with the trade Other ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md)); an item with no provider has no contractor."
+msgstr "Les archives de version 1 (un seul `export.json`) ne peuvent pas être restaurées. Les archives de version 2 sont restaurées : le prestataire du contrat d'entretien d'un élément était un texte (`contract_provider`) et est, en version 3, l'identifiant d'un intervenant (`contract_contractor`). La restauration relie l'élément à l'intervenant de l'archive de ce nom (casse et espaces superflus ignorés) et, si l'archive n'en a pas, en ajoute un, avec le métier Autre ([ADR 0058](../adr/0058-contract-provider-is-a-contractor.md)) ; un élément sans prestataire n'a pas d'intervenant."
+
+msgid "Version 4 adds `archived_at` to the `home` of `data/homes.json`, the date and time an owner archived the home or `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). A version 3 or 2 archive restores a home that is not archived; a version 4 archive of an archived home restores it archived, as a copy too."
+msgstr "La version 4 ajoute `archived_at` au `home` de `data/homes.json`, la date et l'heure à laquelle un propriétaire a archivé le logement, ou `null` ([ADR 0079](../adr/0079-lots-of-the-server-mode-of-the-mobile-app.md)). Une archive de version 3 ou 2 restaure un logement non archivé ; une archive de version 4 d'un logement archivé le restaure archivé, y compris comme copie."
+
+msgid "The fields added since, without a change of format, are missing from the archives made before them. A restore gives each the value its migration gives the rows of an instance that is upgraded, so that a restored archive holds what that instance would ([ADR 0093](../adr/0093-an-archive-of-before-takes-the-values-of-the-migrations.md)):"
+msgstr "Les champs ajoutés depuis, sans changement de format, manquent aux archives faites avant eux. La restauration donne à chacun la valeur que sa migration donne aux lignes d'une instance mise à jour, pour qu'une archive restaurée contienne ce que contiendrait cette instance ([ADR 0093](../adr/0093-an-archive-of-before-takes-the-values-of-the-migrations.md)) :"
+
+msgid "Section"
+msgstr "Section"
+
+msgid "Field"
+msgstr "Champ"
+
+msgid "Missing from"
+msgstr "Absent de"
+
+msgid "Value when missing"
+msgstr "Valeur s'il manque"
+
+msgid "`stock_items`"
+msgstr "`stock_items`"
+
+msgid "`unit_price`"
+msgstr "`unit_price`"
+
+msgid "versions 2 and 3 made before 0.3.0"
+msgstr "versions 2 et 3 faites avant la 0.3.0"
+
+msgid "`null`"
+msgstr "`null`"
+
+msgid "`items`"
+msgstr "`items`"
+
+msgid "`ean`, `warranty_provider`, `warranty_provider_name`"
+msgstr "`ean`, `warranty_provider`, `warranty_provider_name`"
+
+msgid "versions 2 and 3, and 4 made before 0.4.0"
+msgstr "versions 2 et 3, et 4 faite avant la 0.4.0"
+
+msgid "empty"
+msgstr "vide"
+
+msgid "`warranty_duration_unit`"
+msgstr "`warranty_duration_unit`"
+
+msgid "the same"
+msgstr "les mêmes"
+
+msgid "`\"year\"`"
+msgstr "`\"year\"`"
+
+msgid "`purchased_on`, `warranty_duration`, `warranty_starts_on`"
+msgstr "`purchased_on`, `warranty_duration`, `warranty_starts_on`"
+
+msgid "`photos`"
+msgstr "`photos`"
+
+msgid "`attribution`"
+msgstr "`attribution`"
+
+#, python-brace-format
+msgid "`{}`"
+msgstr "`{}`"
+
+msgid "`ean`; `label_attribution`"
+msgstr "`ean` ; `label_attribution`"
+
+#, python-brace-format
+msgid "empty; `{}`"
+msgstr "vide ; `{}`"
+
+msgid "`stock_draws`"
+msgstr "`stock_draws`"
+
+msgid "every version, made before 0.6.0"
+msgstr "toutes les versions, faites avant la 0.6.0"
+
+msgid "the unit price of its stock item, or `null`"
+msgstr "le prix unitaire de son article, ou `null`"
+
+msgid "`occurrences`"
+msgstr "`occurrences`"
+
+msgid "`planned_labour`, `planned_material`"
+msgstr "`planned_labour`, `planned_material`"
+
+msgid "a done occurrence: the labour budget of its task, and its material budget unless a stock item with a unit price works the materials out; `null` for a task of a project, or an occurrence that is not done"
+msgstr "une occurrence faite : le budget de main-d'œuvre de sa tâche, et son budget matériel sauf si un article à prix unitaire calcule le matériel ; `null` pour une tâche de projet, ou une occurrence qui n'est pas faite"
+
+msgid "The last two are the approximation of the upgrade to 0.6.0, said in its release notes: the price of today and the budget of today, nothing having kept those of the day. `tests/test_restore_versions.py` restores a real archive of every release on an empty instance (`scripts/archive_fixtures.py` makes them, from the tree of each tag)."
+msgstr "Les deux dernières sont l'approximation de la mise à jour vers la 0.6.0, dite dans ses notes de version : le prix d'aujourd'hui et le budget d'aujourd'hui, rien n'ayant gardé ceux du jour. `tests/test_restore_versions.py` restaure une vraie archive de chaque version sur une instance vide (`scripts/archive_fixtures.py` les fabrique, depuis l'arbre de chaque tag)."
 
 msgid "Tables for a spreadsheet"
 msgstr "Tableaux pour un tableur"

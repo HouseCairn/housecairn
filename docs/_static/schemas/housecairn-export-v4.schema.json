@@ -517,7 +517,6 @@
                     "contract_number",
                     "contract_url",
                     "created_at",
-                    "ean",
                     "id",
                     "installed_on",
                     "kind",
@@ -525,16 +524,10 @@
                     "model",
                     "name",
                     "notes",
-                    "purchased_on",
                     "room",
                     "serial_number",
                     "updated_at",
-                    "warranty_duration",
-                    "warranty_duration_unit",
-                    "warranty_ends_on",
-                    "warranty_provider",
-                    "warranty_provider_name",
-                    "warranty_starts_on"
+                    "warranty_ends_on"
                   ],
                   "additionalProperties": false
                 }
@@ -612,7 +605,6 @@
                     "attribution": {}
                   },
                   "required": [
-                    "attribution",
                     "caption",
                     "category",
                     "content_type",
@@ -1042,8 +1034,6 @@
                     "due_on",
                     "follows",
                     "id",
-                    "planned_labour",
-                    "planned_material",
                     "postponed_from",
                     "status",
                     "status_before",
@@ -1101,7 +1091,6 @@
                     "drawn",
                     "id",
                     "occurrence",
-                    "unit_price",
                     "updated_at",
                     "wanted"
                   ],
@@ -1317,10 +1306,8 @@
                     "compatible_items",
                     "created_at",
                     "dimensions",
-                    "ean",
                     "id",
                     "label",
-                    "label_attribution",
                     "label_content_type",
                     "manufacturer_reference",
                     "name",

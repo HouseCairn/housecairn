@@ -9,9 +9,11 @@ written before every check has passed:
    back no larger than its header says;
 2. the manifest: the format and a version this instance knows, and the SHA-256 digest
    and size of every other entry, which must all be listed and all match;
-3. each object: every field parsed by its type and checked by the validators of its
-   model, every reference to an object that the archive itself holds (never to a row of
-   another home), and no identifier already used on this instance;
+3. each object: every field present, those its version of the format may lack given the
+   value of the migration that added them (`archive_versions`), every field parsed by its
+   type and checked by the validators of its model, every reference to an object that the
+   archive itself holds (never to a row of another home), and no identifier already used
+   on this instance;
 4. each file: decoded again, its type the one the row says, as at upload.
 
 Then the home, its rows and its files are written in one transaction; a file already
@@ -48,7 +50,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from housecairn.core.text import without_control_characters
-from housecairn.homes import exports, quotas, services
+from housecairn.homes import archive_versions, exports, quotas, services
 from housecairn.homes.exports import FileSpec, Section
 from housecairn.homes.models import Home, Membership, Role
 from housecairn.sync import clock
@@ -555,7 +557,10 @@ def _prepare(
             files: dict[str, str] = {}
             stamps: dict[str, Any] = {}
             for f in section.fields():
-                raw = row.get(f.name)
+                if f.name not in row:
+                    # What its version may lack is filled already (`archive_versions`).
+                    raise _bad(section.name, index, f.name)
+                raw = row[f.name]
                 if f.name in file_specs:
                     if raw is None:
                         continue
@@ -607,7 +612,7 @@ def _prepare(
                 values[f.attname] = value
             m2m: dict[str, list[uuid.UUID]] = {}
             for relation in section.many_to_many():
-                raw_list = row.get(relation.name, [])
+                raw_list = row.get(relation.name)
                 if not isinstance(raw_list, list):
                     raise _bad(section.name, index, relation.name)
                 try:
@@ -906,6 +911,7 @@ def restore_home(
     objects = _objects(archive)
     if archive.manifest["version"] == 2:
         _upgrade_v2(objects)
+    archive_versions.fill_missing(archive.manifest["version"], objects)
     prepared = _prepare(home, objects, people, archive, as_copy=as_copy)
     _check_free(home_id, prepared)
     size = sum(
