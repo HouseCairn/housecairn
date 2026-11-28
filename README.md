@@ -51,8 +51,8 @@ everyone in the household can use it.
 - **Seasons**: the lawn from April to October, the heating from October to April.
 - **Today**: what is late, what is due and what is coming, on one screen.
 - **Done in one tap**, with Undo, Skip this time and Postpone.
-- **Reminders** by ntfy, email, Telegram and other services, and calendar feeds
-  for the calendar you already use.
+- **Reminders** on your phone, by email, Telegram or another messaging app, and
+  calendar feeds for the calendar you already use.
 
 ### Know what it costs
 
